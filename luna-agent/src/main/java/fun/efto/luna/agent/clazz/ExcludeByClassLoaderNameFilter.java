@@ -12,7 +12,7 @@ import java.util.List;
  * @since ：2025/10/2 14:13
  */
 public class ExcludeByClassLoaderNameFilter implements ExcludeClassFilter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExcludeByClassLoaderNameFilter.class)
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExcludeByClassLoaderNameFilter.class);
     private final List<String> ignoreClassLoaderNames;
 
     public ExcludeByClassLoaderNameFilter(String... ignoreClassLoaderNames) {

@@ -9,7 +9,7 @@ import fun.efto.luna.core.analyzer.ClassAnalyzer;
  */
 public class AsmClassAnalyzer implements ClassAnalyzer {
     @Override
-    public ClassAnalysisResult analyze(String className, byte[] bytecode) {
+    public ClassAnalysisResult analyze(byte[] bytecode) {
         return null;
     }
 }

@@ -5,8 +5,8 @@
       <div style="padding: 10px; border-bottom: 1px solid #363637;">
         <el-input
           v-model="searchText"
-          clearable
           placeholder="搜索类名或包名"
+          clearable
           @input="handleSearch"
         >
           <template #prefix>
@@ -16,10 +16,29 @@
       </div>
       
       <div style="padding: 10px; border-bottom: 1px solid #363637; display: flex; justify-content: space-between; align-items: center;">
-        <el-button-group>
-          <el-button size="small" @click="expandAll">全部展开</el-button>
-          <el-button size="small" @click="collapseAll">全部折叠</el-button>
-        </el-button-group>
+        <div style="display: flex; gap: 5px;">
+          <el-tooltip content="刷新数据" placement="top">
+            <el-button :loading="loading" circle class="toolbar-button" size="small" @click="refreshData">
+              <template #default>
+                <i :class="loading ? 'el-icon-loading' : 'el-icon-refresh'"></i>
+              </template>
+            </el-button>
+          </el-tooltip>
+          <el-tooltip content="全部展开" placement="top">
+            <el-button circle class="toolbar-button" size="small" @click="expandAll">
+              <template #default>
+                <i class="el-icon-folder-opened"></i>
+              </template>
+            </el-button>
+          </el-tooltip>
+          <el-tooltip content="全部折叠" placement="top">
+            <el-button circle class="toolbar-button" size="small" @click="collapseAll">
+              <template #default>
+                <i class="el-icon-folder"></i>
+              </template>
+            </el-button>
+          </el-tooltip>
+        </div>
         <div style="display: flex; align-items: center; color: #a3a6ad; font-size: 12px;">
           <span>类加载器: {{ loaderCount }}</span>
           <span style="margin-left: 10px;">类总数: {{ totalClassCount }}</span>
@@ -29,14 +48,14 @@
       <el-tree
         ref="classTree"
         :data="treeData"
-        :default-expanded-keys="expandedKeys"
         :expand-on-click-node="false"
-        :filter-node-method="filterNode"
         :props="treeProps"
+        :default-expanded-keys="expandedKeys"
+        :filter-node-method="filterNode"
         class="class-tree"
         highlight-current
-        node-key="id"
         @node-click="handleNodeClick"
+        node-key="id"
       >
         <template #default="{ node, data }">
           <span class="custom-tree-node">
@@ -80,13 +99,23 @@ export default {
       selectedClass: null,
       rawClassData: {}, // 保存原始数据用于搜索
       loaderCount: 0,
-      totalClassCount: 0
+      totalClassCount: 0,
+      loading: false
     }
   },
   mounted() {
     this.loadClassTree()
   },
   methods: {
+    async refreshData() {
+      this.loading = true
+      try {
+        await this.loadClassTree()
+      } finally {
+        this.loading = false
+      }
+    },
+    
     async loadClassTree() {
       try {
         const data = await getClassList()
@@ -163,29 +192,75 @@ export default {
     convertPackageTreeToNodes(packageTree, parentPath) {
       const nodes = []
       
+      // 分离包和类
+      const packages = []
+      const classes = []
+      
       for (const [name, content] of Object.entries(packageTree)) {
-        const currentPath = parentPath ? `${parentPath}.${name}` : name
-        
         if (content.isClass) {
-          // 类节点
-          nodes.push({
-            id: `class-${content.className}`,
-            label: name,
-            isClass: true,
-            className: content.className
+          classes.push({
+            name: name,
+            content: content
           })
         } else {
-          // 包节点
-          const children = this.convertPackageTreeToNodes(content, currentPath)
+          packages.push({
+            name: name,
+            content: content
+          })
+        }
+      }
+      
+      // 递归处理包节点
+      for (const pkg of packages) {
+        const currentPath = parentPath ? `${parentPath}.${pkg.name}` : pkg.name
+        const children = this.convertPackageTreeToNodes(pkg.content, currentPath)
+        
+        // 如果包下没有类，尝试合并层级
+        if (children.length === 0) {
+          // 包下没有子节点，跳过
+          continue
+        } else if (children.length === 1 && !children[0].isClass) {
+          // 如果只有一个子包，合并层级
+          const child = children[0]
+          nodes.push({
+            id: child.id,
+            label: `${pkg.name}.${child.label}`,
+            isClass: false,
+            packageName: child.packageName,
+            children: child.children
+          })
+        } else {
+          // 正常添加包节点
           nodes.push({
             id: `package-${currentPath}`,
-            label: name,
+            label: pkg.name,
             isClass: false,
             packageName: currentPath,
             children: children
           })
         }
       }
+      
+      // 添加类节点
+      for (const cls of classes) {
+        nodes.push({
+          id: `class-${cls.content.className}`,
+          label: cls.name,
+          isClass: true,
+          className: cls.content.className
+        })
+      }
+      
+      // 排序：包在前，类在后
+      nodes.sort((a, b) => {
+        if (a.isClass && !b.isClass) {
+          return 1 // 类排在后面
+        }
+        if (!a.isClass && b.isClass) {
+          return -1 // 包排在前面
+        }
+        return a.label.localeCompare(b.label) // 同类型按字母排序
+      })
       
       return nodes
     },
@@ -261,6 +336,33 @@ export default {
   border-radius: 4px;
 }
 
+.toolbar-button {
+  background-color: #262727;
+  border-color: #363637;
+  color: #cfd3dc;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-button:hover {
+  background-color: #363737;
+  border-color: #464747;
+  color: #e5eaf3;
+}
+
+.toolbar-button:active {
+  background-color: #1a1b1b;
+  border-color: #262727;
+}
+
+.toolbar-button i {
+  font-size: 14px;
+}
+
 :deep(.el-tree) {
   background-color: #1d1e1f;
   color: #e5eaf3;
@@ -279,15 +381,7 @@ export default {
   box-shadow: 0 0 0 1px #363637 inset;
 }
 
-:deep(.el-button) {
-  background-color: #262727;
-  border-color: #363637;
-  color: #cfd3dc;
-}
-
-:deep(.el-button:hover) {
-  background-color: #363737;
-  border-color: #464747;
-  color: #e5eaf3;
+:deep(.el-button [class*="el-icon"] + span) {
+  margin-left: 0;
 }
 </style>

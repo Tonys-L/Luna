@@ -2,14 +2,9 @@
   <div id="app" class="dark" style="height: 100vh;">
     <el-config-provider namespace="el">
       <el-container style="height: 100%;">
-        <el-header style="background-color: #1d1e1f; color: white; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #363637;">
+        <el-header style="background-color: #1d1e1f; color: white; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #363637; padding: 0 20px;">
           <h1>Luna</h1>
-          <div style="display: flex; align-items: center; gap: 15px;">
-            <el-tag v-if="classCount > 0" effect="dark" type="primary">
-              已加载类: {{ classCount }}
-            </el-tag>
-            <el-button :loading="loading" size="small" type="primary" @click="refreshData">刷新数据</el-button>
-          </div>
+          <div></div>
         </el-header>
         
         <el-main style="padding: 0; background-color: #141414;">

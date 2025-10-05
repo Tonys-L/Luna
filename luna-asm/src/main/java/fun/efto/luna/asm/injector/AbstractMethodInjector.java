@@ -4,7 +4,6 @@ import fun.efto.luna.asm.AsmInjectionContext;
 import fun.efto.luna.core.Constants;
 import fun.efto.luna.core.InjectionContext;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
-import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.injector.BytecodeInjector;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -23,21 +22,24 @@ public abstract class AbstractMethodInjector implements BytecodeInjector {
 
     @Override
     public byte[] inject(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
+        // 创建ASM注入上下文
+        AsmInjectionContext asmContext = new AsmInjectionContext(injectionContext, bytecode);
+        
         ClassReader cr = new ClassReader(bytecode);
         ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-        AsmInjectionContext context = new AsmInjectionContext(injectionContext, bytecode);
+        asmContext.setClassVisitor(cw);
+        
         ClassVisitor cv = new ClassVisitor(Constants.AMS_API_VERSION, cw) {
             @Override
             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-
                 MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
-                context.setMethodVisitor(mv);
-                context.setClassVisitor(this);
-                MethodTarget target = (MethodTarget) injectionContext.getInjectionTarget();
-                // 匹配目标方法
-                if (target.getMethodName().equals(name) && target.getMethodDescriptor().equals(descriptor)) {
-                    return createMethodVisitor(context, bytecodeAssembler);
-                }
+                
+                // 在这里可以添加方法匹配逻辑
+                // 例如：检查方法名和描述符是否匹配注入目标
+                // if (shouldInjectIntoMethod(name, descriptor)) {
+                //     return createMethodVisitor(mv, bytecodeAssembler, asmContext);
+                // }
+                
                 return mv;
             }
         };
@@ -47,7 +49,5 @@ public abstract class AbstractMethodInjector implements BytecodeInjector {
         return cw.toByteArray();
     }
 
-    protected abstract MethodVisitor createMethodVisitor(AsmInjectionContext context, BytecodeAssembler bytecodeAssembler);
-
-
+    protected abstract MethodVisitor createMethodVisitor(MethodVisitor mv, BytecodeAssembler bytecodeAssembler, AsmInjectionContext asmContext);
 }

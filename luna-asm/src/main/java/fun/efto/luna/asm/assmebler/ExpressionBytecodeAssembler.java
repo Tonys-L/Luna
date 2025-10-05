@@ -1,7 +1,6 @@
 package fun.efto.luna.asm.assmebler;
 
-import fun.efto.luna.core.InjectionContext;
-import fun.efto.luna.core.bytecode.BytecodeAssembler;
+import fun.efto.luna.asm.AsmInjectionContext;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -9,12 +8,12 @@ import org.objectweb.asm.Opcodes;
  * @author ：Tony.L(286269159@qq.com)
  * @since ：2025/10/3 18:04
  */
-public class ExpressionBytecodeAssembler implements BytecodeAssembler {
+public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
 
     @Override
-    public void assemble(InjectionContext injectionContext, byte[] bytecode) {
-        MethodVisitor mv = (MethodVisitor) injectionContext.getAttribute("mv");
-        String content = injectionContext.getInjectableCode().getContent();
+    protected void doAssemble(AsmInjectionContext asmContext, byte[] bytecode) {
+        MethodVisitor mv = asmContext.getMethodVisitor();
+        String content = asmContext.getInjectableCode().getContent();
         String[] split = content.split(":");
         if (split.length != 2) {
             throw new IllegalArgumentException("invalid expression " + content);

@@ -1,0 +1,72 @@
+GET {{url}}/test?data=现在时间：
+Content-Type: application/json
+
+> {%
+    for (let clientKey in client) {
+        client.log(clientKey)
+    }
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+%}
+
+
+###
+
+GET {{agent-url}}/api/logs?class=com.example.app.TestController&method=test&desc=(Ljava/lang/String;)Ljava/lang/String;
+
+
+###
+
+GET {{agent-url}}/api/inject?class=com.example.app.TestLog&method=testLog&desc=(Ljava/lang/String;)V&
+    injectionType=BEFORE_METHOD&codeType=EXPRESSION&code=log:输出日志
+
+###
+
+GET {{agent-url}}/api/decompile?class=java.lang.String
+
+###
+GET {{agent-url}}/api/classes
+
+###
+GET {{agent-url}}/api/inject?class=com.example.app.TestController&method=test&
+    desc=(Ljava/lang/String;)Ljava/lang/String;&injectionType=AFTER_METHOD&codeType=EXPRESSION&code=log:controll---输出日志
+
+###
+POST {{agent-url}}/api/inject
+Content-Type: application/json
+
+{
+  "target": {
+    "class": "com.example.app.TestController",
+    "method": "test",
+    "desc": "(Ljava/lang/String;)Ljava/lang/String",
+    "injectionType": "AFTER_METHOD"
+  },
+  "code": {
+    "codeType": "EXPRESSION",
+    "code": "log:controll---输出日志"
+  }
+}
+
+###
+POST {{agent-url}}/api/inject
+Content-Type: application/json
+
+{
+  "class": "com.example.app.TestController",
+  "method": "test",
+  "desc": "(Ljava/lang/String;)Ljava/lang/String",
+  "injectionType": "AFTER_METHOD",
+  "codeType": "EXPRESSION",
+  "code": "log:controll---输出日志"
+}
+
+###
+
+GET {{agent-url}}/api/analysis?class=com.example.app.TestController
+
+###
+GET {{agent-url}}/api/analysis?class=java.lang.String
+

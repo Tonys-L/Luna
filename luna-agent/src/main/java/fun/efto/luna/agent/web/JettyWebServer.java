@@ -60,7 +60,7 @@ public class JettyWebServer {
         // 配置静态资源处理器
         ResourceHandler resourceHandler = new ResourceHandler();
         resourceHandler.setDirectoriesListed(false);
-        resourceHandler.setWelcomeFiles(new String[]{"class_tree_viewer.html"});
+        resourceHandler.setWelcomeFiles(new String[]{"index.html"});
 
         // 设置静态资源基础路径为JAR包内的资源
         URL staticResourceUrl = this.getClass().getClassLoader().getResource("static");

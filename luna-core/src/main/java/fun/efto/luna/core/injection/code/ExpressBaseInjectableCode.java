@@ -12,20 +12,16 @@ public class ExpressBaseInjectableCode implements InjectableCode {
     private String expressionType;
     private String expressionValue;
 
+    public ExpressBaseInjectableCode() {
+    }
+
     public ExpressBaseInjectableCode(String content) {
-        this.content = content;
-        String[] parts = content.split(":");
-        if (parts.length > 0) {
-            this.expressionType = parts[0];
-        }
-        if (parts.length > 1) {
-            this.expressionValue = parts[1];
-        }
+        setContent(content);
     }
 
     @Override
     public CodeType getType() {
-        return ExpressionCodeType.EXPRESSION;
+        return CodeType.valueOf(ExpressionCodeType.EXPRESSION);
     }
 
     @Override
@@ -44,5 +40,16 @@ public class ExpressBaseInjectableCode implements InjectableCode {
 
     public String getExpressionValue() {
         return expressionValue;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+        String[] parts = content.split(":");
+        if (parts.length > 0) {
+            this.expressionType = parts[0];
+        }
+        if (parts.length > 1) {
+            this.expressionValue = parts[1];
+        }
     }
 }

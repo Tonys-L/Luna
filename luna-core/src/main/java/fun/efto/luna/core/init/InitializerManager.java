@@ -11,14 +11,14 @@ import java.util.ServiceLoader;
  * @author ：Tony.L(286269159@qq.com)
  * @since ：2025/10/4 17:32
  */
-public class InitializerManager {
+public final class InitializerManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(InitializerManager.class);
     private static final InitializerManager INSTANCE = new InitializerManager();
     private final List<Initializer> initializers = new ArrayList<>();
 
     private InitializerManager() {
-        loadInitializers();
         initializers.add(new DefaultInitializer());
+        loadInitializers();
     }
 
     public static InitializerManager getInstance() {

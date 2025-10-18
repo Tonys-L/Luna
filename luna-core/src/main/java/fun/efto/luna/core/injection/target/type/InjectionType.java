@@ -1,5 +1,6 @@
 package fun.efto.luna.core.injection.target.type;
 
+import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.type.BaseType;
 import fun.efto.luna.core.type.RegisterableType;
 
@@ -12,16 +13,23 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class InjectionType extends RegisterableType<InjectionType> {
     private static final Map<String, RegisterableType<InjectionType>> REGISTRY = new ConcurrentHashMap<>();
-    public InjectionType(String name, String description) {
+    private final Class<? extends InjectionTarget> targetClass;
+
+    public InjectionType(String name, String description, Class<? extends InjectionTarget> targetClass) {
         super(name, description);
+        this.targetClass = targetClass;
+    }
+
+    public static InjectionType createByType(String name, String description, Class<? extends InjectionType> targetClass) {
+        return BaseType.create(name, description, targetClass);
     }
 
     public static InjectionType valueOf(String name) {
         return (InjectionType) REGISTRY.get(name);
     }
 
-    public static InjectionType create(String name, String description) {
-        return BaseType.create(name, description, InjectionType.class);
+    public Class<? extends InjectionTarget> getTargetClass() {
+        return targetClass;
     }
 
     @Override

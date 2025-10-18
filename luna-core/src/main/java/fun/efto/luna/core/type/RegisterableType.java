@@ -22,4 +22,5 @@ public abstract class RegisterableType<T extends RegisterableType<T>> extends Ba
         getRegistry().put(this.getName(), this);
         return (T) this;
     }
+
 }

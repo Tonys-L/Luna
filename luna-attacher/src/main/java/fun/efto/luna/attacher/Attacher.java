@@ -1,20 +1,28 @@
 package fun.efto.luna.attacher;
 
-/*import com.sun.tools.attach.AttachNotSupportedException;
+
+import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
-import com.sun.tools.attach.VirtualMachineDescriptor;*/
+import com.sun.tools.attach.VirtualMachineDescriptor;
+import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author ：Tony.L(286269159@qq.com)
  * @since ：2025/10/3 19:19
  */
 public class Attacher {
-   /* public static void main(String[] args) throws IOException, AttachNotSupportedException {
+    private static Logger logger; //LoggerFactory.getLogger(Attacher.class.getName());
+
+    public static void main(String[] args) throws IOException, AttachNotSupportedException, ClassNotFoundException {
         if (args.length < 1) {
             System.err.println("请提供 agent jar 路径作为参数");
             System.exit(1);
         }
-        String agentPath = args[0];
+        String agentPath = "D:\\project\\my\\Luna\\luna-agent\\target\\luna-agent-1.0-SNAPSHOT.jar";//args[0];
+        System.out.println("Agent jar: " + agentPath);
         VirtualMachineDescriptor current = waitUserInput();
 
 
@@ -36,8 +44,9 @@ public class Attacher {
         } catch (Exception e) {
             System.err.println("加载代理失败: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            vm.detach();
         }
-        vm.detach();
     }
 
     private static VirtualMachineDescriptor waitUserInput() {
@@ -69,7 +78,7 @@ public class Attacher {
 
     private static List<VirtualMachineDescriptor> refreshJavaProcessList() {
         List<VirtualMachineDescriptor> list = VirtualMachine.list();
-
+        List<VirtualMachineDescriptor> validList = new ArrayList<>();
         int i = 0;
         for (VirtualMachineDescriptor virtualMachineDescriptor : list) {
             String name = virtualMachineDescriptor.displayName();
@@ -77,8 +86,9 @@ public class Attacher {
                 continue;
             }
             String[] nameArr = name.split(" ");
+            validList.add(virtualMachineDescriptor);
             System.out.println(++i + ":" + virtualMachineDescriptor.id() + "  " + nameArr[0]);
         }
-        return list;
-    }*/
+        return validList;
+    }
 }

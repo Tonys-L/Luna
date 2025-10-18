@@ -6,7 +6,9 @@ import fun.efto.luna.core.analyzer.AnalyzerRegistry;
 import fun.efto.luna.core.analyzer.AnalyzerType;
 import fun.efto.luna.core.bytecode.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.init.Initializer;
+import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.code.type.ExpressionCodeType;
+import fun.efto.luna.core.injection.target.type.InjectionType;
 import fun.efto.luna.core.injection.target.type.LineNumberInjectionType;
 import fun.efto.luna.core.injection.target.type.MethodInjectionType;
 import fun.efto.luna.core.injector.BytecodeInjectorRegistry;
@@ -19,16 +21,16 @@ public class AsmInitializer implements Initializer {
     @Override
     public void initialize() {
         BytecodeInjectorRegistry injectorRegistry = BytecodeInjectorRegistry.getInstance();
-        injectorRegistry.register(MethodInjectionType.ENTER_METHOD, new EnterMethodInjector());
-        injectorRegistry.register(MethodInjectionType.EXIT_METHOD, new ExitMethodInjector());
-        injectorRegistry.register(MethodInjectionType.AROUND_METHOD, new AroundMethodInjector());
-        injectorRegistry.register(LineNumberInjectionType.BEFORE_LINE, new BeforeLineInjector());
-        injectorRegistry.register(LineNumberInjectionType.AFTER_LINE, new AfterLineInjector());
+        injectorRegistry.register(InjectionType.valueOf(MethodInjectionType.ENTER_METHOD), new EnterMethodInjector());
+        injectorRegistry.register(InjectionType.valueOf(MethodInjectionType.EXIT_METHOD), new ExitMethodInjector());
+        injectorRegistry.register(InjectionType.valueOf(MethodInjectionType.AROUND_METHOD), new AroundMethodInjector());
+        injectorRegistry.register(InjectionType.valueOf(LineNumberInjectionType.BEFORE_LINE), new BeforeLineInjector());
+        injectorRegistry.register(InjectionType.valueOf(LineNumberInjectionType.AFTER_LINE), new AfterLineInjector());
 
         BytecodeAssemblerRegistry assemblerRegistry = BytecodeAssemblerRegistry.getInstance();
-        assemblerRegistry.register(ExpressionCodeType.EXPRESSION, new ExpressionBytecodeAssembler());
+        assemblerRegistry.register(CodeType.valueOf(ExpressionCodeType.EXPRESSION), new ExpressionBytecodeAssembler());
 
         AnalyzerRegistry analyzerRegistry = AnalyzerRegistry.getInstance();
-        analyzerRegistry.register(new AnalyzerType("ASM", "ASM字节码分析器"), new AsmClassAnalyzer());
+        analyzerRegistry.register(new AnalyzerType("ASM", "ASM字节码分析器").register(), new AsmClassAnalyzer());
     }
 }

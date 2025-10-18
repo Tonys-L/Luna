@@ -80,7 +80,6 @@
 
 <script>
 import ClassDetail from '../components/ClassDetail.vue'
-import {getClassInfo, getClassList} from '../utils/api'
 
 export default {
   name: 'ClassTreeViewer',
@@ -118,7 +117,11 @@ export default {
     
     async loadClassTree() {
       try {
-        const data = await getClassList()
+        const response = await fetch('/api/classes')
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const data = await response.json()
         this.rawClassData = data
         this.treeData = this.buildTreeData(data)
         
@@ -130,7 +133,7 @@ export default {
         this.$emit('class-count-update', this.totalClassCount)
       } catch (error) {
         console.error('加载类树失败:', error)
-        this.$message.error('加载类树失败')
+        this.$message.error('加载类树失败: ' + error.message)
       }
     },
     
@@ -273,11 +276,15 @@ export default {
     
     async loadClassInfo(className) {
       try {
-        const classInfo = await getClassInfo(className)
+        const response = await fetch(`/api/analysis?class=${encodeURIComponent(className)}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const classInfo = await response.json()
         this.selectedClass = classInfo
       } catch (error) {
         console.error('加载类信息失败:', error)
-        this.$message.error('加载类信息失败')
+        this.$message.error('加载类信息失败: ' + error.message)
       }
     },
     

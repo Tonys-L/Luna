@@ -77,96 +77,6 @@ const mockClassInfo = {
   }
 };
 
-// 模拟反编译代码数据
-const mockDecompiledCode = {
-  "com.example.MyController": `package com.example;
-
-import com.example.model.User;
-import com.example.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-@RestController
-@RequestMapping("/api/users")
-public class MyController {
-    
-    private static final Logger logger = LoggerFactory.getLogger(MyController.class);
-    
-    @Autowired
-    private UserService userService;
-    
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable String id) {
-        logger.info("Getting user with id: {}", id);
-        return userService.findById(id);
-    }
-    
-    @PostMapping
-    public User createUser(@RequestBody User user) {
-        logger.info("Creating user: {}", user.getName());
-        return userService.save(user);
-    }
-}`,
-  "com.example.service.UserService": `package com.example.service;
-
-import com.example.model.User;
-import com.example.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-@Service
-public class UserService implements UserServiceInterface {
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Override
-    public User findById(String id) {
-        return userRepository.findById(id);
-    }
-    
-    @Override
-    public User save(User user) {
-        return userRepository.save(user);
-    }
-}`,
-  "java.lang.String": `package java.lang;
-
-import java.io.Serializable;
-import java.util.Comparator;
-
-public final class String
-    implements Serializable, Comparable<String>, CharSequence {
-    
-    private final char[] value;
-    private int hash;
-    
-    public String() {
-        this.value = new char[0];
-    }
-    
-    public String(String original) {
-        this.value = original.value;
-        this.hash = original.hash;
-    }
-    
-    public int length() {
-        return value.length;
-    }
-    
-    public char charAt(int index) {
-        if ((index < 0) || (index >= value.length)) {
-            throw new StringIndexOutOfBoundsException(index);
-        }
-        return value[index];
-    }
-    
-    // ... 其他方法
-}`
-};
-
 /**
  * 获取类列表
  * @returns {Promise<Object>} 类列表数据
@@ -207,14 +117,26 @@ export async function getClassInfo(className) {
  * @returns {Promise<string>} 反编译代码
  */
 export async function getDecompiledCode(className) {
-  // 模拟网络延迟
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // 如果找不到对应反编译代码，返回一个默认提示
-  if (!mockDecompiledCode[className]) {
-    return `// 无法获取类 ${className} 的反编译代码
-// 该类可能是系统类或无法访问的类`;
+  try {
+    // 调用真实的后端API接口 /api/decompile?class=className
+    const response = await fetch(`/api/decompile?class=${encodeURIComponent(className)}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    // 获取响应JSON数据
+    const result = await response.json();
+    
+    // 如果返回了错误信息，直接返回错误
+    if (result.error) {
+      return `// 反编译失败: ${result.error}\n// 类名: ${className}`;
+    }
+    
+    // 返回反编译代码
+    return result.decompiled || "// 未获取到反编译代码";
+  } catch (error) {
+    console.error('获取反编译代码失败:', error);
+    return `// 获取反编译代码失败: ${error.message}\n// 类名: ${className}`;
   }
-  
-  return mockDecompiledCode[className];
 }

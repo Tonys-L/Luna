@@ -1,13 +1,26 @@
 <template>
-  <div id="app" class="dark" style="height: 100vh;">
+  <div id="app" class="dark">
     <el-config-provider namespace="el">
-      <el-container style="height: 100%;">
-        <el-header style="background-color: #1d1e1f; color: white; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #363637; padding: 0 20px;">
-          <h1>Luna</h1>
-          <div></div>
+      <el-container class="app-container">
+        <el-header class="app-header">
+          <div class="header-content">
+            <h1>Luna</h1>
+            <div class="header-actions">
+              <el-button 
+                :loading="loading" 
+                class="refresh-button"
+                size="small"
+                @click="refreshData"
+              >
+                <i :class="loading ? 'el-icon-loading' : 'el-icon-refresh'"></i>
+                刷新
+              </el-button>
+              <span v-if="classCount > 0" class="class-count">类总数: {{ classCount }}</span>
+            </div>
+          </div>
         </el-header>
         
-        <el-main style="padding: 0; background-color: #141414;">
+        <el-main class="app-main">
           <ClassTreeViewer @class-count-update="updateClassCount" @refresh-data="handleRefreshData" />
         </el-main>
       </el-container>
@@ -58,6 +71,54 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #e5eaf3;
   height: 100vh;
+  background-color: #141414;
+}
+
+.app-container {
+  height: 100vh;
+}
+
+.app-header {
+  background-color: #1d1e1f;
+  color: white;
+  border-bottom: 1px solid #363637;
+  padding: 0;
+  height: auto;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 60px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.refresh-button {
+  background-color: #262727;
+  border-color: #363637;
+  color: #cfd3dc;
+}
+
+.refresh-button:hover {
+  background-color: #363737;
+  border-color: #464747;
+  color: #e5eaf3;
+}
+
+.class-count {
+  color: #a3a6ad;
+  font-size: 14px;
+}
+
+.app-main {
+  padding: 0;
   background-color: #141414;
 }
 

@@ -8,6 +8,7 @@ import fun.efto.luna.core.analyzer.AnalyzerRegistry;
 import fun.efto.luna.core.analyzer.AnalyzerType;
 import fun.efto.luna.core.analyzer.ClassAnalysisResult;
 import fun.efto.luna.core.analyzer.ClassAnalyzer;
+import fun.efto.luna.core.decompile.DecompilerFactory;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
@@ -85,7 +86,7 @@ public class LunaApiServlet extends HttpServlet {
         }
 
         try {
-            String decompiledCode = "";//CFRUtil.decompile(className);
+            String decompiledCode = DecompilerFactory.getDecompiler().decompile(className);
             response.getWriter().write("{\"decompiled\":\"" +
                     decompiledCode.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "") + "\"}");
         } catch (Exception e) {

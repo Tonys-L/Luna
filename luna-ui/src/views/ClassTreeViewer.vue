@@ -1,78 +1,85 @@
 <template>
-  <el-container style="height: 100%;">
+  <el-container class="main-container">
     <!-- 左侧类树 -->
-    <el-aside class="class-tree-aside" style="border-right: 1px solid #363637; height: 100%; background-color: #1d1e1f;" width="400px">
-      <div style="padding: 10px; border-bottom: 1px solid #363637;">
+    <el-aside :class="{ 'collapsed': isTreeCollapsed }" class="class-tree-aside">
+      <div class="tree-header">
         <el-input
           v-model="searchText"
           placeholder="搜索类名或包名"
           clearable
           @input="handleSearch"
+          class="search-input"
         >
           <template #prefix>
             <i class="el-icon-search"></i>
           </template>
         </el-input>
+        
+        <div class="toolbar">
+          <div class="toolbar-buttons">
+            <el-tooltip content="刷新数据" placement="top">
+              <el-button :loading="loading" circle class="toolbar-button" size="small" @click="refreshData">
+                <template #default>
+                  <i :class="loading ? 'el-icon-loading' : 'el-icon-refresh'"></i>
+                </template>
+              </el-button>
+            </el-tooltip>
+            <el-tooltip content="全部展开" placement="top">
+              <el-button circle class="toolbar-button" size="small" @click="expandAll">
+                <template #default>
+                  <i class="el-icon-folder-opened"></i>
+                </template>
+              </el-button>
+            </el-tooltip>
+            <el-tooltip content="全部折叠" placement="top">
+              <el-button circle class="toolbar-button" size="small" @click="collapseAll">
+                <template #default>
+                  <i class="el-icon-folder"></i>
+                </template>
+              </el-button>
+            </el-tooltip>
+          </div>
+          <div class="stats">
+            <span>类加载器: {{ loaderCount }}</span>
+            <span>类总数: {{ totalClassCount }}</span>
+          </div>
+        </div>
       </div>
       
-      <div style="padding: 10px; border-bottom: 1px solid #363637; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; gap: 5px;">
-          <el-tooltip content="刷新数据" placement="top">
-            <el-button :loading="loading" circle class="toolbar-button" size="small" @click="refreshData">
-              <template #default>
-                <i :class="loading ? 'el-icon-loading' : 'el-icon-refresh'"></i>
-              </template>
-            </el-button>
-          </el-tooltip>
-          <el-tooltip content="全部展开" placement="top">
-            <el-button circle class="toolbar-button" size="small" @click="expandAll">
-              <template #default>
-                <i class="el-icon-folder-opened"></i>
-              </template>
-            </el-button>
-          </el-tooltip>
-          <el-tooltip content="全部折叠" placement="top">
-            <el-button circle class="toolbar-button" size="small" @click="collapseAll">
-              <template #default>
-                <i class="el-icon-folder"></i>
-              </template>
-            </el-button>
-          </el-tooltip>
-        </div>
-        <div style="display: flex; align-items: center; color: #a3a6ad; font-size: 12px;">
-          <span>类加载器: {{ loaderCount }}</span>
-          <span style="margin-left: 10px;">类总数: {{ totalClassCount }}</span>
-        </div>
-      </div>
-      
-      <el-tree
-        ref="classTree"
-        :data="treeData"
-        :expand-on-click-node="false"
-        :props="treeProps"
-        :default-expanded-keys="expandedKeys"
-        :filter-node-method="filterNode"
-        class="class-tree"
-        highlight-current
-        @node-click="handleNodeClick"
-        node-key="id"
-      >
-        <template #default="{ node, data }">
-          <span class="custom-tree-node">
-            <span>
-              <i 
-                :class="data.isClass ? 'el-icon-document' : 'el-icon-folder'"
-                :style="{ color: data.isClass ? '#409EFF' : '#E6A23C' }"
-              ></i>
-              <span style="margin-left: 5px;">{{ node.label }}</span>
+      <div class="tree-content">
+        <el-tree
+          ref="classTree"
+          :data="treeData"
+          :default-expanded-keys="expandedKeys"
+          :expand-on-click-node="false"
+          :filter-node-method="filterNode"
+          :props="treeProps"
+          class="class-tree"
+          highlight-current
+          node-key="id"
+          @node-click="handleNodeClick"
+        >
+          <template #default="{ node, data }">
+            <span class="custom-tree-node">
+              <span>
+                <i 
+                  :class="data.isClass ? 'el-icon-document' : 'el-icon-folder'"
+                  :style="{ color: data.isClass ? '#409EFF' : '#E6A23C' }"
+                ></i>
+                <span class="node-label">{{ node.label }}</span>
+              </span>
             </span>
-          </span>
-        </template>
-      </el-tree>
+          </template>
+        </el-tree>
+      </div>
+      
+      <div class="collapse-toggle" @click="toggleTreeCollapse">
+        <i :class="isTreeCollapsed ? 'el-icon-arrow-right' : 'el-icon-arrow-left'"></i>
+      </div>
     </el-aside>
     
     <!-- 右侧类详情 -->
-    <el-main style="background-color: #141414; padding: 0;">
+    <el-main class="detail-main">
       <ClassDetail :class-info="selectedClass" />
     </el-main>
   </el-container>
@@ -99,7 +106,8 @@ export default {
       rawClassData: {}, // 保存原始数据用于搜索
       loaderCount: 0,
       totalClassCount: 0,
-      loading: false
+      loading: false,
+      isTreeCollapsed: false
     }
   },
   mounted() {
@@ -312,19 +320,74 @@ export default {
     
     collapseAll() {
       this.expandedKeys = []
+    },
+    
+    toggleTreeCollapse() {
+      this.isTreeCollapsed = !this.isTreeCollapsed;
     }
   }
 }
 </script>
 
 <style scoped>
+.main-container {
+  height: 100vh;
+  padding: 0;
+}
+
 .class-tree-aside {
+  height: 100%;
   background-color: #1d1e1f;
   border-right: 1px solid #363637;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  width: 400px;
+  position: relative;
+}
+
+.class-tree-aside.collapsed {
+  width: 40px;
+}
+
+.tree-header {
+  padding: 10px;
+  border-bottom: 1px solid #363637;
+  flex-shrink: 0;
+}
+
+.search-input {
+  margin-bottom: 10px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.toolbar-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: #a3a6ad;
+  text-align: right;
+}
+
+.tree-content {
+  flex: 1;
+  overflow: auto;
+  padding: 10px;
 }
 
 .class-tree {
-  padding: 10px;
   background-color: #1d1e1f;
 }
 
@@ -336,11 +399,19 @@ export default {
   font-size: 14px;
   padding-right: 8px;
   color: #e5eaf3;
+  width: 100%;
 }
 
 .custom-tree-node:hover {
   background-color: #262727;
   border-radius: 4px;
+}
+
+.node-label {
+  margin-left: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .toolbar-button {
@@ -368,6 +439,34 @@ export default {
 
 .toolbar-button i {
   font-size: 14px;
+}
+
+.detail-main {
+  background-color: #141414;
+  padding: 0;
+  overflow: auto;
+}
+
+.collapse-toggle {
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 40px;
+  background-color: #262727;
+  border: 1px solid #363637;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+}
+
+.collapse-toggle:hover {
+  background-color: #363737;
 }
 
 :deep(.el-tree) {

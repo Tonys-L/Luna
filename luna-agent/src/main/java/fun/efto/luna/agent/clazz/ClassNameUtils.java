@@ -19,4 +19,5 @@ public final class ClassNameUtils {
     public static String getInternalName(Class<?> clazz) {
         return toInternalName(clazz.getName());
     }
+
 }

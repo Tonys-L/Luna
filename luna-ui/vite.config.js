@@ -9,13 +9,15 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:8421',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        changeOrigin: true
       }
     }
   },
   build: {
     outDir: 'dist',
     assetsDir: 'assets'
+  },
+  optimizeDeps: {
+    include: ['monaco-editor']
   }
 })

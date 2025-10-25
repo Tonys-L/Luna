@@ -55,6 +55,7 @@ export async function getDecompiledCode(className) {
  */
 export async function getClassTree() {
   try {
+    const data = await get('/api/classes');
     return data;
   } catch (error) {
     console.error('获取类树数据失败:', error);

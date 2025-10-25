@@ -87,6 +87,8 @@
 
 <script>
 import ClassDetail from '../components/ClassDetail.vue'
+// 引入封装的API方法
+import {getClassAnalysis, getClassTree} from '../utils/api';
 
 export default {
   name: 'ClassTreeViewer',
@@ -125,11 +127,8 @@ export default {
     
     async loadClassTree() {
       try {
-        const response = await fetch('/api/classes')
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        const data = await response.json()
+        // 使用封装的API方法获取类树数据
+        const data = await getClassTree();
         this.rawClassData = data
         this.treeData = this.buildTreeData(data)
         
@@ -284,11 +283,8 @@ export default {
     
     async loadClassInfo(className) {
       try {
-        const response = await fetch(`/api/analysis?class=${encodeURIComponent(className)}`)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        const classInfo = await response.json()
+        // 使用封装的API方法获取类分析信息
+        const classInfo = await getClassAnalysis(className);
         this.selectedClass = classInfo
       } catch (error) {
         console.error('加载类信息失败:', error)

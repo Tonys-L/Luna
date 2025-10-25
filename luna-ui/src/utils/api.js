@@ -1,4 +1,4 @@
-import {get} from './request';
+import {get, post} from './request';
 
 /**
  * 获取类列表
@@ -38,10 +38,12 @@ export async function getDecompiledCode(className) {
   try {
     const result = await get(`/api/decompile`, { class: className });
     
+    // 如果返回了错误信息，直接返回错误
     if (result.error) {
       return `// 反编译失败: ${result.error}\n// 类名: ${className}`;
     }
     
+    // 返回反编译代码
     return result.decompiled || "// 未获取到反编译代码";
   } catch (error) {
     console.error('获取反编译代码失败:', error);
@@ -74,6 +76,21 @@ export async function getClassAnalysis(className) {
     return classInfo;
   } catch (error) {
     console.error('获取类分析信息失败:', error);
+    throw error;
+  }
+}
+
+/**
+ * 为方法注入日志代码
+ * @param {Object} injectionData 注入数据
+ * @returns {Promise<Object>} 注入结果
+ */
+export async function injectMethodLog(injectionData) {
+  try {
+    const result = await post('/api/inject', injectionData);
+    return result;
+  } catch (error) {
+    console.error('方法注入失败:', error);
     throw error;
   }
 }

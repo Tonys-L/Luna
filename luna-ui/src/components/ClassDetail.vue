@@ -66,6 +66,11 @@
               </div>
             </template>
           </el-table-column>
+          <el-table-column label="操作" min-width="120">
+            <template #default="scope">
+              <el-button size="small" @click="showInjectDialog(scope.row)">注入日志</el-button>
+            </template>
+          </el-table-column>
         </el-table>
       </el-tab-pane>
       
@@ -96,6 +101,32 @@
         </div>
       </el-tab-pane>
     </el-tabs>
+    
+    <!-- 方法注入对话框 -->
+    <el-dialog v-model="injectDialogVisible" title="注入日志" width="500px">
+      <el-form :model="injectForm" label-width="80px">
+        <el-form-item label="注入位置">
+          <el-select v-model="injectForm.injectionType" placeholder="请选择注入位置">
+            <el-option label="方法执行前" value="ENTER_METHOD"></el-option>
+            <el-option label="方法执行后" value="EXIT_METHOD"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="日志内容">
+          <el-input 
+            v-model="injectForm.logContent" 
+            :rows="4"
+            placeholder="请输入日志内容"
+            type="textarea"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="injectDialogVisible = false">取消</el-button>
+          <el-button :loading="injecting" type="primary" @click="handleInjectLog">确定</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
   <div v-else class="no-selection">
     <el-empty description="请选择一个类查看详细信息">
@@ -107,7 +138,7 @@
 </template>
 
 <script>
-import {getDecompiledCode} from '../utils/api'
+import {getDecompiledCode, injectMethodLog} from '../utils/api'
 import {CodeEditor} from 'monaco-editor-vue3'
 
 export default {
@@ -137,7 +168,15 @@ export default {
         wordWrap: 'on',
         wrappingIndent: 'indent',
         fixedOverflowWidgets: true
-      }
+      },
+      // 注入相关数据
+      injectDialogVisible: false,
+      injecting: false,
+      injectForm: {
+        injectionType: 'ENTER_METHOD',
+        logContent: ''
+      },
+      currentMethod: null
     }
   },
   methods: {
@@ -158,6 +197,44 @@ export default {
     handleEditorChange(value) {
       // 编辑器内容变化时的处理函数（只读模式下不会触发）
       console.log('Editor content changed:', value)
+    },
+    // 显示注入对话框
+    showInjectDialog(method) {
+      this.currentMethod = method
+      this.injectForm.logContent = `执行方法: ${this.classInfo.className}.${method.name}`
+      this.injectDialogVisible = true
+    },
+    // 处理日志注入
+    async handleInjectLog() {
+      if (!this.classInfo || !this.currentMethod) return
+      
+      this.injecting = true
+      try {
+        // 构造注入数据
+        const injectionData = {
+          class: this.classInfo.className,
+          method: this.currentMethod.name,
+          injectionType: this.injectForm.injectionType,
+          codeType: 'EXPRESSION',
+          code: `LOG:${this.injectForm.logContent}`,
+          desc: this.currentMethod.descriptor
+        }
+        
+        // 调用注入API
+        const result = await injectMethodLog(injectionData)
+        
+        if (result.success) {
+          this.$message.success('日志注入成功')
+          this.injectDialogVisible = false
+        } else {
+          this.$message.error(result.error || '注入失败')
+        }
+      } catch (error) {
+        console.error('方法注入失败:', error)
+        this.$message.error('方法注入失败: ' + error.message)
+      } finally {
+        this.injecting = false
+      }
     }
   }
 }
@@ -385,5 +462,9 @@ export default {
 
 :deep(.el-table__body-wrapper) {
   overflow: auto;
+}
+
+.dialog-footer {
+  text-align: right;
 }
 </style>

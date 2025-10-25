@@ -6,16 +6,7 @@
           <div class="header-content">
             <h1>Luna</h1>
             <div class="header-actions">
-              <el-button 
-                :loading="loading" 
-                class="refresh-button"
-                size="small"
-                @click="refreshData"
-              >
-                <i :class="loading ? 'el-icon-loading' : 'el-icon-refresh'"></i>
-                刷新
-              </el-button>
-              <span v-if="classCount > 0" class="class-count">类总数: {{ classCount }}</span>
+              
             </div>
           </div>
         </el-header>

@@ -331,8 +331,10 @@ export default {
 
 <style scoped>
 .main-container {
-  height: 100vh;
+  height: 100%;
   padding: 0;
+  overflow: hidden;
+  display: flex;
 }
 
 .class-tree-aside {
@@ -344,6 +346,8 @@ export default {
   transition: width 0.3s ease;
   width: 400px;
   position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .class-tree-aside.collapsed {
@@ -444,7 +448,11 @@ export default {
 .detail-main {
   background-color: #141414;
   padding: 0;
-  overflow: auto;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .collapse-toggle {

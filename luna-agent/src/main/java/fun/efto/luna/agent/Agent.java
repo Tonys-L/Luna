@@ -60,11 +60,7 @@ public class Agent {
         try {
             InitializerManager.getInstance().initializeAll();
             InjectionExecutor injectionExecutor = InjectionExecutor.init(inst);
-            ClassScanner classScanner = ClassScanner.getInstance(inst, new CompositeExcludeClassFilter(new ExcludeAgentClassFilter(), new ExcludeArrayClassFilter(),
-                    new ExcludeByClassLoaderNameFilter("jdk.internal.reflect.DelegatingClassLoader",
-                            "sun.reflect.DelegatingClassLoader",
-                            "sun.reflect.misc.MethodUtil",
-                            "fun.efto.luna.agent.classloader.LunaAgentClassLoader")));
+            ClassScanner classScanner = ClassScanner.getInstance(inst, createExcludeClassFilter());
             JettyWebServer jettyWebServer = new JettyWebServer(8421, JettyConfiguration.createDevelopment(), injectionExecutor, classScanner);
 
             jettyWebServer.start();
@@ -83,6 +79,16 @@ public class Agent {
             System.err.println("[Luna] Failed to start agent: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private static CompositeExcludeClassFilter createExcludeClassFilter() {
+        return new CompositeExcludeClassFilter(new ExcludeAgentClassFilter(),
+                new ExcludeArrayClassFilter(),
+                new ExcludeByClassLoaderNameFilter("jdk.internal.reflect.DelegatingClassLoader",
+                        "sun.reflect.DelegatingClassLoader",
+                        "sun.reflect.misc.MethodUtil",
+                        "fun.efto.luna.agent.classloader.LunaAgentClassLoader"),
+                new ExcludeGeneratedClassFilter());
     }
 
     /**

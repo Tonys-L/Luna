@@ -1,4 +1,4 @@
-package fun.efto.luna.agent.clazz;
+package fun.efto.luna.core.util;
 
 /**
  * @author ：Tony.L(286269159@qq.com)

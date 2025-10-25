@@ -11,7 +11,7 @@
           <div class="info-item"><strong>父类:</strong> {{ classInfo.superClass || '无' }}</div>
         </el-col>
         <el-col :span="12">
-          <div class="info-item"><strong>访问标志:</strong> {{ classInfo.accessFlags }}</div>
+          <div class="info-item"><strong>访问标志:</strong> {{ classInfo.readableAccessFlags || classInfo.accessFlags }}</div>
         </el-col>
       </el-row>
       <div class="interfaces-section">
@@ -31,18 +31,26 @@
     
     <el-tabs class="detail-tabs" type="border-card">
       <el-tab-pane label="字段">
-        <el-table :data="classInfo.fields" class="data-table" size="small">
+        <el-table :data="classInfo.convertedFields || classInfo.fields" class="data-table" size="small">
+          <el-table-column label="访问标志" min-width="150">
+            <template #default="scope">
+              {{ `(${scope.row.accessFlags}) ${scope.row.readableAccessFlags}` }}
+            </template>
+          </el-table-column>
           <el-table-column label="字段名" min-width="150" prop="name"></el-table-column>
           <el-table-column label="描述符" min-width="200" prop="descriptor"></el-table-column>
-          <el-table-column label="访问标志" prop="accessFlags" width="120"></el-table-column>
         </el-table>
       </el-tab-pane>
       
       <el-tab-pane label="方法">
-        <el-table :data="classInfo.methods" class="data-table" size="small">
+        <el-table :data="classInfo.convertedMethods || classInfo.methods" class="data-table" size="small">
+          <el-table-column label="访问标志" min-width="150">
+            <template #default="scope">
+              {{ `(${scope.row.accessFlags}) ${scope.row.readableAccessFlags}` }}
+            </template>
+          </el-table-column>
           <el-table-column label="方法名" min-width="150" prop="name"></el-table-column>
           <el-table-column label="描述符" min-width="200" prop="descriptor"></el-table-column>
-          <el-table-column label="访问标志" prop="accessFlags" width="120"></el-table-column>
           <el-table-column label="参数" min-width="200">
             <template #default="scope">
               <div class="parameter-tags">
@@ -130,15 +138,6 @@ export default {
         wrappingIndent: 'indent',
         fixedOverflowWidgets: true
       }
-    }
-  },
-  watch: {
-    classInfo: {
-      handler() {
-        // 当选中的类改变时，重置反编译代码
-        this.decompiledCode = ''
-      },
-      deep: true
     }
   },
   methods: {
@@ -237,6 +236,7 @@ export default {
 
 .data-table {
   width: 100%;
+  height: 100%;
 }
 
 .parameter-tags {
@@ -316,6 +316,7 @@ export default {
   border: 1px solid #363637;
   color: #e5eaf3;
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 :deep(.el-card__header) {
@@ -330,10 +331,12 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 :deep(.el-tabs__header) {
   margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 :deep(.el-tabs__item) {
@@ -354,6 +357,7 @@ export default {
 
 :deep(.el-table) {
   background-color: #1d1e1f;
+  height: 100%;
 }
 
 :deep(.el-table__header) {
@@ -372,5 +376,14 @@ export default {
 
 :deep(.el-table__row:hover) {
   background-color: #262727;
+}
+
+/* 隐藏表格内的滚动条 */
+:deep(.el-table__body-wrapper::-webkit-scrollbar) {
+  display: none;
+}
+
+:deep(.el-table__body-wrapper) {
+  overflow: auto;
 }
 </style>

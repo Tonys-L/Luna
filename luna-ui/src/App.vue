@@ -72,10 +72,12 @@ export default {
   color: #e5eaf3;
   height: 100vh;
   background-color: #141414;
+  overflow: hidden;
 }
 
 .app-container {
   height: 100vh;
+  overflow: hidden;
 }
 
 .app-header {
@@ -84,6 +86,7 @@ export default {
   border-bottom: 1px solid #363637;
   padding: 0;
   height: auto;
+  flex-shrink: 0;
 }
 
 .header-content {
@@ -120,6 +123,21 @@ export default {
 .app-main {
   padding: 0;
   background-color: #141414;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* 隐藏滚动条 */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* 确保整个页面没有滚动条 */
+html, body {
+  overflow: hidden;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* 暗黑主题覆盖 */

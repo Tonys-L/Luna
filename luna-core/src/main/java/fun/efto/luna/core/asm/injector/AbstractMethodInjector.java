@@ -1,8 +1,8 @@
-package fun.efto.luna.asm.injector;
+package fun.efto.luna.core.asm.injector;
 
-import fun.efto.luna.asm.AsmInjectionContext;
-import fun.efto.luna.asm.Constants;
 import fun.efto.luna.core.InjectionContext;
+import fun.efto.luna.core.asm.AsmInjectionContext;
+import fun.efto.luna.core.asm.Constants;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.injector.BytecodeInjector;

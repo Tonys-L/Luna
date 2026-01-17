@@ -1,4 +1,4 @@
-package fun.efto.luna.asm;
+package fun.efto.luna.core.asm;
 
 import fun.efto.luna.core.InjectionContext;
 import org.objectweb.asm.ClassVisitor;

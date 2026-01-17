@@ -16,10 +16,6 @@
             <artifactId>luna-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>fun.efto</groupId>
-            <artifactId>luna-asm</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
         </dependency>
@@ -134,6 +130,19 @@
                                 <relocation>
                                     <pattern>org.apache.logging.slf4j</pattern>
                                     <shadedPattern>fun.efto.luna.shadow.log4j2.slf4j</shadedPattern>
+                                </relocation>
+                                <!-- 重定位 Jetty, Fastjson, Servlet -->
+                                <relocation>
+                                    <pattern>org.eclipse.jetty</pattern>
+                                    <shadedPattern>fun.efto.luna.shadow.jetty</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.alibaba.fastjson</pattern>
+                                    <shadedPattern>fun.efto.luna.shadow.fastjson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>javax.servlet</pattern>
+                                    <shadedPattern>fun.efto.luna.shadow.servlet</shadedPattern>
                                 </relocation>
                                 <!-- 重定位其他可能冲突的库 -->
                                 <relocation>

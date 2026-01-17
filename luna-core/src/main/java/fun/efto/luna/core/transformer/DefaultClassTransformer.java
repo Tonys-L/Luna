@@ -18,25 +18,25 @@ import java.util.Optional;
 public class DefaultClassTransformer implements ClassTransformer {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultClassTransformer.class);
 
+    private static TransformerResult buildErrorResult(byte[] bytecode, String errorMessage) {
+        return new TransformerResult(
+                bytecode,
+                false,
+                errorMessage
+        );
+    }
+
     @Override
     public TransformerResult transform(InjectionPoint injectionPoint, String className, byte[] bytecode) {
         try {
             Optional<BytecodeInjector> injectorOptional = BytecodeInjectorRegistry.getInstance().get(injectionPoint.getInjectionType());
-            Optional<BytecodeAssembler> assemblerOptional = BytecodeAssemblerRegistry.getInstance().get(injectionPoint.getCodeType());
             if (!injectorOptional.isPresent()) {
-                return new TransformerResult(
-                        bytecode,
-                        false,
-                        "未找到对应的字节码注入器: " + injectionPoint.getInjectionType()
-                );
+                return buildErrorResult(bytecode, "未找到对应的字节码注入器: " + injectionPoint.getInjectionType());
             }
 
+            Optional<BytecodeAssembler> assemblerOptional = BytecodeAssemblerRegistry.getInstance().get(injectionPoint.getCodeType());
             if (!assemblerOptional.isPresent()) {
-                return new TransformerResult(
-                        bytecode,
-                        false,
-                        "未找到对应的字节码组装器: " + injectionPoint.getCodeType()
-                );
+                return buildErrorResult(bytecode, "未找到对应的字节码组装器: " + injectionPoint.getCodeType());
             }
 
             BytecodeInjector injector = injectorOptional.get();
@@ -49,11 +49,7 @@ public class DefaultClassTransformer implements ClassTransformer {
             );
         } catch (Exception e) {
             LOGGER.error("[{}]转换失败", className, e);
-            return new TransformerResult(
-                    bytecode,
-                    false,
-                    "转换失败: " + className + ", error: " + e.getMessage()
-            );
+            return buildErrorResult(bytecode, "转换失败: " + className + ", error: " + e.getMessage());
         }
     }
 }

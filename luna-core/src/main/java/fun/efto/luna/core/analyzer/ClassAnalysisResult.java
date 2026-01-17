@@ -81,12 +81,15 @@ public class ClassAnalysisResult {
         private final String descriptor;
         private final int accessFlags;
         private final List<ParameterInfo> parameters;
+        private final List<LocalVariableInfo> localVariables;
 
-        public MethodInfo(String name, String descriptor, int accessFlags, List<ParameterInfo> parameters) {
+        public MethodInfo(String name, String descriptor, int accessFlags,
+                          List<ParameterInfo> parameters, List<LocalVariableInfo> localVariables) {
             this.name = name;
             this.descriptor = descriptor;
             this.accessFlags = accessFlags;
             this.parameters = new ArrayList<>(parameters);
+            this.localVariables = new ArrayList<>(localVariables);
         }
 
         public String getName() {
@@ -103,6 +106,10 @@ public class ClassAnalysisResult {
 
         public List<ParameterInfo> getParameters() {
             return new ArrayList<>(parameters);
+        }
+
+        public List<LocalVariableInfo> getLocalVariables() {
+            return new ArrayList<>(localVariables);
         }
     }
 
@@ -121,6 +128,45 @@ public class ClassAnalysisResult {
 
         public String getDescriptor() {
             return descriptor;
+        }
+    }
+
+    /**
+     * 局部变量信息，用于智能提示
+     */
+    public static class LocalVariableInfo {
+        private final String name;
+        private final String descriptor;
+        private final int slot;
+        private final int startLine;
+        private final int endLine;
+
+        public LocalVariableInfo(String name, String descriptor, int slot, int startLine, int endLine) {
+            this.name = name;
+            this.descriptor = descriptor;
+            this.slot = slot;
+            this.startLine = startLine;
+            this.endLine = endLine;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDescriptor() {
+            return descriptor;
+        }
+
+        public int getSlot() {
+            return slot;
+        }
+
+        public int getStartLine() {
+            return startLine;
+        }
+
+        public int getEndLine() {
+            return endLine;
         }
     }
 }

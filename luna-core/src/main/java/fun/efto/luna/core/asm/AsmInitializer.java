@@ -1,10 +1,10 @@
-package fun.efto.luna.asm;
+package fun.efto.luna.core.asm;
 
-import fun.efto.luna.asm.analyzer.AsmClassAnalyzer;
-import fun.efto.luna.asm.assmebler.ExpressionBytecodeAssembler;
-import fun.efto.luna.asm.injector.*;
 import fun.efto.luna.core.analyzer.AnalyzerRegistry;
 import fun.efto.luna.core.analyzer.AnalyzerType;
+import fun.efto.luna.core.asm.analyzer.AsmClassAnalyzer;
+import fun.efto.luna.core.asm.assmebler.ExpressionBytecodeAssembler;
+import fun.efto.luna.core.asm.injector.*;
 import fun.efto.luna.core.bytecode.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.init.Initializer;
 import fun.efto.luna.core.injection.code.type.CodeType;

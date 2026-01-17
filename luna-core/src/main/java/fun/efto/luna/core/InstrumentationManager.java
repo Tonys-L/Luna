@@ -6,7 +6,7 @@ import java.lang.instrument.Instrumentation;
  * @author ：Tony.L(286269159@qq.com)
  * @since ：2025/10/2 23:11
  */
-class InstrumentationManager {
+public class InstrumentationManager {
     private static volatile InstrumentationManager instance;
     private final Instrumentation inst;
 
@@ -26,10 +26,11 @@ class InstrumentationManager {
     }
 
     public static InstrumentationManager getInstance() {
-        if (instance == null) {
+        InstrumentationManager result = instance;
+        if (result == null) {
             throw new IllegalStateException("未初始化");
         }
-        return instance;
+        return result;
     }
 
     public Instrumentation getInstrumentation() {
@@ -40,11 +41,9 @@ class InstrumentationManager {
         return inst.getAllLoadedClasses();
     }
 
-
     public void retransformClasses(Class<?>... classes) throws java.lang.instrument.UnmodifiableClassException {
         inst.retransformClasses(classes);
     }
-
 
     public void addTransformer(java.lang.instrument.ClassFileTransformer transformer, boolean canRetransform) {
         inst.addTransformer(transformer, canRetransform);

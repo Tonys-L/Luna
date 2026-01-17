@@ -1,6 +1,6 @@
-package fun.efto.luna.asm.assmebler;
+package fun.efto.luna.core.asm.assmebler;
 
-import fun.efto.luna.asm.AsmInjectionContext;
+import fun.efto.luna.core.asm.AsmInjectionContext;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 

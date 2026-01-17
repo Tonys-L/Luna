@@ -1,4 +1,4 @@
-package fun.efto.luna.asm.analyzer;
+package fun.efto.luna.core.asm.analyzer;
 
 import fun.efto.luna.core.analyzer.AbstractAnalyzer;
 import fun.efto.luna.core.analyzer.ClassAnalysisResult;
@@ -30,8 +30,7 @@ public class AsmClassAnalyzer extends AbstractAnalyzer {
                 visitor.getMethods(),
                 visitor.getSuperClass(),
                 visitor.getInterfaces(),
-                visitor.getAccessFlags()
-        );
+                visitor.getAccessFlags());
     }
 
     /**
@@ -51,7 +50,8 @@ public class AsmClassAnalyzer extends AbstractAnalyzer {
         }
 
         @Override
-        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        public void visit(int version, int access, String name, String signature, String superName,
+                          String[] interfaces) {
             this.className = ClassNameUtils.toFqn(name);
             this.superClass = superName != null ? ClassNameUtils.toFqn(superName) : null;
             this.accessFlags = access;
@@ -72,7 +72,8 @@ public class AsmClassAnalyzer extends AbstractAnalyzer {
         }
 
         @Override
-        public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
+                                         String[] exceptions) {
             MethodAnalysisVisitor methodVisitor = new MethodAnalysisVisitor(access, name, descriptor);
             methods.add(methodVisitor.getMethodInfo());
             return methodVisitor;
@@ -106,13 +107,18 @@ public class AsmClassAnalyzer extends AbstractAnalyzer {
 
     /**
      * 方法分析访问器
-     * 用于访问和收集方法的参数信息
+     * 用于访问和收集方法的参数及局部变量信息
      */
     private static class MethodAnalysisVisitor extends MethodVisitor {
         private final int access;
         private final String name;
         private final String descriptor;
         private final List<ClassAnalysisResult.ParameterInfo> parameters = new ArrayList<>();
+        private final List<ClassAnalysisResult.LocalVariableInfo> localVariables = new ArrayList<>();
+
+        // 用于映射 Label 到行号
+        private final java.util.Map<Label, Integer> labelToLine = new java.util.HashMap<>();
+        private int currentLine = -1;
 
         public MethodAnalysisVisitor(int access, String name, String descriptor) {
             super(Opcodes.ASM9);
@@ -122,6 +128,27 @@ public class AsmClassAnalyzer extends AbstractAnalyzer {
 
             // 解析方法参数
             parseParameters(descriptor);
+        }
+
+        @Override
+        public void visitLineNumber(int line, Label start) {
+            currentLine = line;
+            labelToLine.put(start, line);
+            super.visitLineNumber(line, start);
+        }
+
+        @Override
+        public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end,
+                                       int index) {
+            int startLine = labelToLine.getOrDefault(start, -1);
+            int endLine = labelToLine.getOrDefault(end, -1);
+
+            // 如果在行号表里没找到，尝试用当前行号（粗略估计）
+            if (startLine == -1)
+                startLine = currentLine;
+
+            localVariables.add(new ClassAnalysisResult.LocalVariableInfo(name, descriptor, index, startLine, endLine));
+            super.visitLocalVariable(name, descriptor, signature, start, end, index);
         }
 
         private void parseParameters(String descriptor) {
@@ -205,7 +232,7 @@ public class AsmClassAnalyzer extends AbstractAnalyzer {
         }
 
         public ClassAnalysisResult.MethodInfo getMethodInfo() {
-            return new ClassAnalysisResult.MethodInfo(name, descriptor, access, parameters);
+            return new ClassAnalysisResult.MethodInfo(name, descriptor, access, parameters, localVariables);
         }
     }
 }

@@ -28,7 +28,6 @@
         <module>luna-attacher</module>
         <module>luna-core</module>
         <module>luna-ui</module>
-        <module>luna-asm</module>
     </modules>
     <properties>
         <revision>1.0-SNAPSHOT</revision>
@@ -38,11 +37,11 @@
         <!-- version -->
         <slf4j.version>1.7.36</slf4j.version>
         <logback.version>1.2.11</logback.version>
-        <log4j2.version>2.3.2</log4j2.version>
+        <log4j2.version>2.20.0</log4j2.version>
         <asm.version>9.4</asm.version>
         <cfr.version>0.152</cfr.version>
         <jetty.version>9.4.53.v20231009</jetty.version>
-        <fastjson.version>2.0.31</fastjson.version>
+        <fastjson.version>2.0.40</fastjson.version>
         <junit.version>5.10.0</junit.version>
 
         <!-- Plugins -->
@@ -60,12 +59,6 @@
                 <artifactId>luna-core</artifactId>
                 <version>${revision}</version>
             </dependency>
-            <dependency>
-                <groupId>fun.efto</groupId>
-                <artifactId>luna-asm</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>

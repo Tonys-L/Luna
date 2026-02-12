@@ -22,11 +22,12 @@ public final class AnalyzerRegistry implements Registry<AnalyzerType, ClassAnaly
     }
 
     public Optional<ClassAnalyzer> getAnalyzer(String typeName) {
-        AnalyzerType type = AnalyzerType.valueOf(typeName);
-        if (type != null) {
+        try {
+            AnalyzerType type = AnalyzerType.valueOf(typeName);
             return get(type);
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     @Override

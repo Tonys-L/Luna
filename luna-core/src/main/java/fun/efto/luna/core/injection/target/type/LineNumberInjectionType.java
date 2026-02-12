@@ -7,13 +7,17 @@ import fun.efto.luna.core.injection.target.LineNumberTarget;
  * @since ：2025/10/4 4:34
  */
 public class LineNumberInjectionType extends InjectionType {
-    public static final String BEFORE_LINE = "BEFORE_LINE";
-    public static final String BEFORE_LINE_DESCRIPTION = "在行前注入";
 
-    public static final String AFTER_LINE = "AFTER_LINE";
-    public static final String AFTER_LINE_DESCRIPTION = "在行后注入";
+    public static final LineNumberInjectionType BEFORE = new LineNumberInjectionType("BEFORE_LINE", "在行前注入").register();
+    public static final LineNumberInjectionType AFTER = new LineNumberInjectionType("AFTER_LINE", "在行后注入").register();
 
     public LineNumberInjectionType(String name, String description) {
         super(name, description, LineNumberTarget.class);
+    }
+
+    @Override
+    public LineNumberInjectionType register() {
+        super.register();
+        return this;
     }
 }

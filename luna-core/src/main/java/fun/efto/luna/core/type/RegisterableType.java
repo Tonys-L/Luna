@@ -1,26 +1,28 @@
 package fun.efto.luna.core.type;
 
 import fun.efto.luna.core.Registry;
-
-import java.util.Map;
+import fun.efto.luna.core.TypeRegistry;
 
 /**
  * @author ：Tony.L(286269159@qq.com)
- * @since ：2025/10/4 3:45
+ * @since ：2026/01/25
  */
-public abstract class RegisterableType<T extends RegisterableType<T>> extends BaseType implements Registry<String, RegisterableType<T>> {
-    protected RegisterableType(String name, String description) {
+public abstract class RegisterableType<T extends BaseType> extends BaseType {
+
+    public RegisterableType(String name, String description) {
         super(name, description);
     }
 
-    protected static <T extends RegisterableType<T>> T getTypeByName(String name, Map<String, T> registry) {
-        return registry.get(name);
+    protected static <T extends BaseType> T valueOf(Registry<String, T> registry, String name) {
+        return registry.get(name)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown type: " + name));
     }
+
+    protected abstract TypeRegistry<T> getRegistry();
 
     @SuppressWarnings("unchecked")
     public T register() {
-        getRegistry().put(this.getName(), this);
+        getRegistry().register((T) this);
         return (T) this;
     }
-
 }

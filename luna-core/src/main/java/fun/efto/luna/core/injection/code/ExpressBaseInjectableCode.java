@@ -21,7 +21,7 @@ public class ExpressBaseInjectableCode implements InjectableCode {
 
     @Override
     public CodeType getType() {
-        return CodeType.valueOf(ExpressionCodeType.EXPRESSION);
+        return ExpressionCodeType.EXPRESSION;
     }
 
     @Override

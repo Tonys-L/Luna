@@ -3,6 +3,7 @@ package fun.efto.luna.agent.web;
 import com.alibaba.fastjson.JSON;
 import fun.efto.luna.agent.clazz.ClassScanner;
 import fun.efto.luna.agent.clazz.LoadedClass;
+import fun.efto.luna.agent.web.vo.InjectionCommand;
 import fun.efto.luna.core.InjectionExecutor;
 import fun.efto.luna.core.analyzer.AnalyzerRegistry;
 import fun.efto.luna.core.analyzer.AnalyzerType;
@@ -64,7 +65,8 @@ public class LunaApiServlet extends HttpServlet {
 
     private void handleAnalysis(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String className = request.getParameter("class");
-        Optional<ClassAnalyzer> classAnalyzer = AnalyzerRegistry.getInstance().get(AnalyzerType.valueOf("ASM"));
+        Optional<ClassAnalyzer> classAnalyzer = AnalyzerRegistry.getInstance()
+                .get(AnalyzerType.valueOf("ASM"));
         if (classAnalyzer.isPresent()) {
             try {
                 byte[] bytes = loadClassBytes(className);
@@ -131,7 +133,8 @@ public class LunaApiServlet extends HttpServlet {
         response.getWriter().write(jsonString);
     }
 
-    private void handleInject(HttpServletRequest request, HttpServletResponse response, InjectionExecutor injectionExecutor) throws IOException {
+    private void handleInject(HttpServletRequest request, HttpServletResponse response,
+                              InjectionExecutor injectionExecutor) throws IOException {
         // 从请求体中读取数据
         StringBuilder sb = new StringBuilder();
         String line;
@@ -143,25 +146,20 @@ public class LunaApiServlet extends HttpServlet {
 
         // 解析JSON数据
         String jsonString = sb.toString();
-        Map<String, Object> requestData = JSON.parseObject(jsonString, Map.class);
+        InjectionCommand cmd = JSON.parseObject(jsonString, InjectionCommand.class);
 
-        String clazz = (String) requestData.get("class");
-        String method = (String) requestData.get("method");
-        String injectionType = (String) requestData.get("injectionType");
-        String desc = (String) requestData.get("desc");
-        String codeType = (String) requestData.get("codeType");
-        String message = (String) requestData.get("code");
-
-        if (clazz == null || method == null || injectionType == null || codeType == null || message == null) {
+        if (cmd == null || !cmd.isValid()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\":\"缺少必要参数\"}");
             return;
         }
 
         try {
-            InjectionType type = InjectionType.valueOf(injectionType);
+            InjectionType type = InjectionType.valueOf(cmd.getInjectionType());
+            CodeType codeType = CodeType.valueOf(cmd.getCodeType());
+
             InjectionTarget target = JSON.parseObject(jsonString, type.getTargetClass());
-            InjectableCode code = JSON.parseObject(jsonString, CodeType.valueOf(codeType).getCodeClass());
+            InjectableCode code = JSON.parseObject(jsonString, codeType.getCodeClass());
 
             InjectionPoint injectionPoint = new InjectionPoint(target, code);
             injectionExecutor.execute(injectionPoint);

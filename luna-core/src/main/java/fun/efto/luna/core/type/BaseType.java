@@ -1,8 +1,5 @@
 package fun.efto.luna.core.type;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * @author ：Tony.L(286269159@qq.com)
  * @since ：2025/10/3 18:03
@@ -14,18 +11,6 @@ public class BaseType {
     public BaseType(String name, String description) {
         this.name = name;
         this.description = description;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected static <T extends BaseType> T create(String name, String description, Class<T> clazz) {
-        Constructor<T> constructor = null;
-        try {
-            constructor = clazz.getConstructor(String.class, String.class);
-            return constructor.newInstance(name, description);
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
-                 IllegalAccessException e) {
-            throw new IllegalArgumentException("Failed to create instance of " + clazz.getName(), e);
-        }
     }
 
     public String getName() {

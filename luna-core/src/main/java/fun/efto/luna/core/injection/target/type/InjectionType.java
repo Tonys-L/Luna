@@ -1,18 +1,15 @@
 package fun.efto.luna.core.injection.target.type;
 
+import fun.efto.luna.core.TypeRegistry;
 import fun.efto.luna.core.injection.target.InjectionTarget;
-import fun.efto.luna.core.type.BaseType;
 import fun.efto.luna.core.type.RegisterableType;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author ：Tony.L(286269159@qq.com)
  * @since ：2025/10/2 20:42
  */
 public class InjectionType extends RegisterableType<InjectionType> {
-    private static final Map<String, RegisterableType<InjectionType>> REGISTRY = new ConcurrentHashMap<>();
+    private static final TypeRegistry<InjectionType> REGISTRY = new TypeRegistry<>();
     private final Class<? extends InjectionTarget> targetClass;
 
     public InjectionType(String name, String description, Class<? extends InjectionTarget> targetClass) {
@@ -20,12 +17,8 @@ public class InjectionType extends RegisterableType<InjectionType> {
         this.targetClass = targetClass;
     }
 
-    public static InjectionType createByType(String name, String description, Class<? extends InjectionType> targetClass) {
-        return BaseType.create(name, description, targetClass);
-    }
-
     public static InjectionType valueOf(String name) {
-        return (InjectionType) REGISTRY.get(name);
+        return valueOf(REGISTRY, name);
     }
 
     public Class<? extends InjectionTarget> getTargetClass() {
@@ -33,7 +26,7 @@ public class InjectionType extends RegisterableType<InjectionType> {
     }
 
     @Override
-    public Map<String, RegisterableType<InjectionType>> getRegistry() {
+    protected TypeRegistry<InjectionType> getRegistry() {
         return REGISTRY;
     }
 

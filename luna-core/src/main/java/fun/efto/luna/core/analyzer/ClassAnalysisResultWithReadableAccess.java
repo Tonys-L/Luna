@@ -20,22 +20,23 @@ public class ClassAnalysisResultWithReadableAccess extends ClassAnalysisResult {
     public ClassAnalysisResultWithReadableAccess(String className, List<FieldInfo> fields, List<MethodInfo> methods,
                                                  String superClass, List<String> interfaces, int accessFlags) {
         super(className, fields, methods, superClass, interfaces, accessFlags);
-        
+
         this.readableAccessFlags = AccessFlagsConverter.convertClassAccessFlags(accessFlags);
-        
+
         // 转换字段信息
         this.convertedFields = new ArrayList<>();
         for (FieldInfo field : fields) {
             this.convertedFields.add(new FieldInfoWithReadableAccess(field.getName(), field.getDescriptor(),
-                field.getAccessFlags(), AccessFlagsConverter.convertFieldAccessFlags(field.getAccessFlags())));
+                    field.getAccessFlags(), AccessFlagsConverter.convertFieldAccessFlags(field.getAccessFlags())));
         }
-        
+
         // 转换方法信息
         this.convertedMethods = new ArrayList<>();
         for (MethodInfo method : methods) {
             this.convertedMethods.add(new MethodInfoWithReadableAccess(method.getName(), method.getDescriptor(),
-                method.getAccessFlags(), method.getParameters(), 
-                AccessFlagsConverter.convertMethodAccessFlags(method.getAccessFlags())));
+                    method.getAccessFlags(), method.getParameters(),
+                    AccessFlagsConverter.convertMethodAccessFlags(method.getAccessFlags()),
+                    method.getLocalVariables()));
         }
     }
 
@@ -74,8 +75,8 @@ public class ClassAnalysisResultWithReadableAccess extends ClassAnalysisResult {
         private final String readableAccessFlags;
 
         public MethodInfoWithReadableAccess(String name, String descriptor, int accessFlags,
-                                            List<ParameterInfo> parameters, String readableAccessFlags) {
-            super(name, descriptor, accessFlags, parameters);
+                                            List<ParameterInfo> parameters, String readableAccessFlags, List<LocalVariableInfo> localVariableInfos) {
+            super(name, descriptor, accessFlags, parameters, localVariableInfos);
             this.readableAccessFlags = readableAccessFlags;
         }
 

@@ -31,7 +31,7 @@ public class Attacher {
             Properties systemProperties = vm.getSystemProperties();
             System.out.println("JVM系统属性:" + systemProperties);
             System.out.println("加载 Agent");
-            vm.loadAgent(agentPath); // 调用 agentmain 方法
+            vm.loadAgent(agentPath);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
                     vm.detach();
@@ -39,8 +39,15 @@ public class Attacher {
                 }
             }));
             System.out.println("加载成功，按回车键退出...");
-            new Scanner(System.in).nextLine(); // 等待用户输入
+            new Scanner(System.in).nextLine();
             vm.detach();
+        } catch (IOException e) {
+            String errorMessage = e.getMessage();
+            if (errorMessage.contains("Non-numeric")) {
+                System.err.println("当前jdk版本低于目标jdk版本");
+                System.out.println("加载成功，按回车键退出...");
+                new Scanner(System.in).nextLine();
+            }
         } catch (Exception e) {
             System.err.println("加载代理失败: " + e.getMessage());
             e.printStackTrace();

@@ -35,16 +35,12 @@ POST {{agent-url}}/api/inject
 Content-Type: application/json
 
 {
-  "target": {
-    "class": "com.example.app.TestController",
-    "method": "test",
-    "desc": "(Ljava/lang/String;)Ljava/lang/String",
-    "injectionType": "AFTER_METHOD"
-  },
-  "code": {
-    "codeType": "EXPRESSION",
-    "code": "log:controll---输出日志"
-  }
+  "clazz": "com.example.app.TestController",
+  "method": "test",
+  "desc": "(Ljava/lang/String;)Ljava/lang/String",
+  "injectionType": "EXIT_METHOD",
+  "codeType": "EXPRESSION",
+  "code": "log:controll---输出日志"
 }
 
 ###

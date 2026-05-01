@@ -1,6 +1,6 @@
 import { get, post, put, del } from './request'
 
-const API_BASE = 'http://localhost:8421'
+const API_BASE = 'http://localhost:8421/api'
 
 function apiUrl(path) {
   return `${API_BASE}${path}`
@@ -51,7 +51,7 @@ export async function injectMethodLog(injectionData) {
 
 export async function getRules() {
   try {
-    const data = await get(apiUrl('/api/rules'))
+    const data = await get(apiUrl('/rules'))
     return data || []
   } catch (error) {
     console.error('获取规则列表失败:', error)
@@ -61,7 +61,7 @@ export async function getRules() {
 
 export async function addRule(rule) {
   try {
-    const data = await post(apiUrl('/api/rules'), rule)
+    const data = await post(apiUrl('/rules'), rule)
     return data
   } catch (error) {
     console.error('添加规则失败:', error)
@@ -71,7 +71,7 @@ export async function addRule(rule) {
 
 export async function updateRule(id, rule) {
   try {
-    const data = await put(apiUrl(`/api/rules/${id}`), rule)
+    const data = await put(apiUrl(`/rules/${id}`), rule)
     return data
   } catch (error) {
     console.error('更新规则失败:', error)
@@ -81,7 +81,7 @@ export async function updateRule(id, rule) {
 
 export async function deleteRule(id) {
   try {
-    const data = await del(apiUrl(`/api/rules/${id}`))
+    const data = await del(apiUrl(`/rules/${id}`))
     return data
   } catch (error) {
     console.error('删除规则失败:', error)

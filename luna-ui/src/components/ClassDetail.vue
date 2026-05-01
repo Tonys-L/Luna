@@ -309,7 +309,7 @@ export default {
       this.injecting = true
       try {
         const injectionData = {
-          class: this.classInfo.className,
+          clazz: this.classInfo.className,
           method: this.currentMethod.name,
           injectionType: this.injectForm.injectionType,
           codeType: 'EXPRESSION',

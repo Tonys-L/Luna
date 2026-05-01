@@ -137,34 +137,12 @@ export default {
     },
     async loadRules() {
       try {
-        this.rules = [
-          {
-            id: 1,
-            targetClass: "com.example.User",
-            targetMethod: "getName",
-            injectionType: "METHOD_ENTER",
-            expression: "true",
-            logContent: "Entering method: getName"
-          },
-          {
-            id: 2,
-            targetClass: "com.example.User",
-            targetMethod: "setName",
-            injectionType: "METHOD_EXIT",
-            expression: "name != null",
-            logContent: "Exiting method: setName with name: ${name}"
-          },
-          {
-            id: 3,
-            targetClass: "com.example.service.UserService",
-            targetMethod: "saveUser",
-            injectionType: "METHOD_AROUND",
-            expression: "user != null",
-            logContent: "Processing user: ${user.getName()}"
-          }
-        ]
+        const { getRules } = await import('../utils/api')
+        this.rules = await getRules()
       } catch (error) {
         console.error('加载规则失败:', error)
+        this.$message.error('加载规则失败: ' + error.message)
+        this.rules = []
       }
     },
     addRule() {
@@ -190,25 +168,27 @@ export default {
     },
     async saveRule() {
       try {
+        const { addRule, updateRule } = await import('../utils/api')
         if (this.form.id) {
-          const index = this.rules.findIndex(r => r.id === this.form.id)
-          if (index !== -1) {
-            this.rules[index] = { ...this.form }
-          }
+          await updateRule(this.form.id, this.form)
         } else {
-          this.form.id = Date.now()
-          this.rules.push({ ...this.form })
+          await addRule(this.form)
         }
         this.dialogVisible = false
+        await this.loadRules()
       } catch (error) {
         console.error('保存规则失败:', error)
+        this.$message.error('保存规则失败: ' + error.message)
       }
     },
     async deleteRule(id) {
       try {
-        this.rules = this.rules.filter(r => r.id !== id)
+        const { deleteRule } = await import('../utils/api')
+        await deleteRule(id)
+        await this.loadRules()
       } catch (error) {
         console.error('删除规则失败:', error)
+        this.$message.error('删除规则失败: ' + error.message)
       }
     }
   }

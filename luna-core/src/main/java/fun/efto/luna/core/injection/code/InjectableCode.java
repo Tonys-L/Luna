@@ -3,13 +3,21 @@ package fun.efto.luna.core.injection.code;
 import fun.efto.luna.core.injection.code.type.CodeType;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
- * @since ：2025/10/4 2:51
+ * 可注入代码接口
+ * @author ：Tony.L(<286269159@qq.com>)
+ * @since ：2026/03/29 02:30
  */
 public interface InjectableCode {
-    CodeType getType();
 
-    String getContent();
+    /**
+     * 获取代码内容
+     * @return 代码内容
+     */
+    String getCode();
 
-    boolean isValid();
+    /**
+     * 获取代码类型
+     * @return 代码类型
+     */
+    CodeType getCodeType();
 }

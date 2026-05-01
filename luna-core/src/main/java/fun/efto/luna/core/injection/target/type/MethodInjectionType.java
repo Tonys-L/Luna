@@ -1,23 +1,23 @@
 package fun.efto.luna.core.injection.target.type;
 
-import fun.efto.luna.core.injection.target.MethodTarget;
-
 /**
- * @author ：Tony.L(286269159@qq.com)
- * @since ：2025/10/4 4:34
+ * 方法级注入类型
+ * @author ：Tony.L(<286269159@qq.com>)
+ * @since ：2026/03/29 02:30
  */
 public class MethodInjectionType extends InjectionType {
-    public static final MethodInjectionType ENTER = new MethodInjectionType("ENTER_METHOD", "方法进入前注入").register();
-    public static final MethodInjectionType EXIT = new MethodInjectionType("EXIT_METHOD", "方法退出后注入").register();
-    public static final MethodInjectionType AROUND = new MethodInjectionType("AROUND_METHOD", "方法环绕注入").register();
 
-    public MethodInjectionType(String name, String description) {
-        super(name, description, MethodTarget.class);
+    public static final MethodInjectionType ENTER = new MethodInjectionType();
+    public static final MethodInjectionType EXIT = new MethodInjectionType();
+    public static final MethodInjectionType AROUND = new MethodInjectionType();
+
+    @Override
+    public String getName() {
+        return "method";
     }
 
     @Override
-    public MethodInjectionType register() {
-        super.register();
-        return this;
+    public String getDescription() {
+        return "方法级注入";
     }
 }

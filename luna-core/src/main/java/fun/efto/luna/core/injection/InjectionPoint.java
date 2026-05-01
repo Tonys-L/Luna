@@ -31,6 +31,6 @@ public class InjectionPoint {
     }
 
     public CodeType getCodeType() {
-        return code.getType();
+        return code.getCodeType();
     }
 }

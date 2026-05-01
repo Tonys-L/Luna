@@ -13,7 +13,7 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
     @Override
     protected void doAssemble(AsmInjectionContext asmContext, byte[] bytecode) {
         MethodVisitor mv = asmContext.getMethodVisitor();
-        String content = asmContext.getInjectableCode().getContent();
+        String content = asmContext.getInjectableCode().getCode();
         String[] split = content.split(":");
         if (split.length != 2) {
             throw new IllegalArgumentException("invalid expression " + content);

@@ -3,6 +3,7 @@ package fun.efto.luna.core.transformer;
 import fun.efto.luna.core.InjectionContext;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.bytecode.BytecodeAssemblerRegistry;
+import fun.efto.luna.core.cache.BytecodeCache;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injector.BytecodeInjector;
 import fun.efto.luna.core.injector.BytecodeInjectorRegistry;
@@ -29,6 +30,16 @@ public class DefaultClassTransformer implements ClassTransformer {
     @Override
     public TransformerResult transform(InjectionPoint injectionPoint, String className, byte[] bytecode) {
         try {
+            // 尝试从缓存获取转换后的字节码
+            byte[] cachedBytecode = BytecodeCache.getInstance().getCachedBytecode(className);
+            if (cachedBytecode != null) {
+                return new TransformerResult(
+                        cachedBytecode,
+                        true,
+                        "从缓存加载转换结果: " + className
+                );
+            }
+
             Optional<BytecodeInjector> injectorOptional = BytecodeInjectorRegistry.getInstance().get(injectionPoint.getInjectionType());
             if (!injectorOptional.isPresent()) {
                 return buildErrorResult(bytecode, "未找到对应的字节码注入器: " + injectionPoint.getInjectionType());
@@ -41,6 +52,9 @@ public class DefaultClassTransformer implements ClassTransformer {
 
             BytecodeInjector injector = injectorOptional.get();
             byte[] transformedBytecode = injector.inject(new InjectionContext(injectionPoint), bytecode, assemblerOptional.get());
+
+            // 缓存转换后的字节码
+            BytecodeCache.getInstance().cacheBytecode(className, transformedBytecode);
 
             return new TransformerResult(
                     transformedBytecode,

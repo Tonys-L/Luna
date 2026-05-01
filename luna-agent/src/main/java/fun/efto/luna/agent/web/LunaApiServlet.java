@@ -14,7 +14,10 @@ import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.InjectionTarget;
+import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.injection.target.type.InjectionType;
+import fun.efto.luna.core.rule.InjectionRule;
+import fun.efto.luna.core.rule.RuleManager;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -57,6 +60,8 @@ public class LunaApiServlet extends HttpServlet {
             handleDecompile(request, response);
         } else if (pathInfo != null && pathInfo.startsWith("/analysis")) {
             handleAnalysis(request, response);
+        } else if (pathInfo != null && pathInfo.startsWith("/api/rules")) {
+            handleRules(request, response);
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write("{\"error\":\"接口不存在\"}");
@@ -109,6 +114,8 @@ public class LunaApiServlet extends HttpServlet {
             handleCreateLog(request, response);
         } else if (pathInfo != null && pathInfo.startsWith("/inject")) {
             handleInject(request, response, injectionExecutor);
+        } else if (pathInfo != null && pathInfo.startsWith("/api/rules")) {
+            handleRules(request, response);
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write("{\"error\":\"接口不存在\"}");
@@ -155,11 +162,24 @@ public class LunaApiServlet extends HttpServlet {
         }
 
         try {
-            InjectionType type = InjectionType.valueOf(cmd.getInjectionType());
-            CodeType codeType = CodeType.valueOf(cmd.getCodeType());
-
-            InjectionTarget target = JSON.parseObject(jsonString, type.getTargetClass());
-            InjectableCode code = JSON.parseObject(jsonString, codeType.getCodeClass());
+            // 创建注入目标
+            MethodTarget target = new MethodTarget();
+            target.setTargetClass(cmd.getClazz());
+            target.setMethodName(cmd.getMethod());
+            target.setMethodDescriptor(cmd.getDesc());
+            
+            // 创建可注入代码
+            InjectableCode code = new InjectableCode() {
+                @Override
+                public String getCode() {
+                    return cmd.getCode();
+                }
+                
+                @Override
+                public CodeType getCodeType() {
+                    return CodeType.valueOf(cmd.getCodeType());
+                }
+            };
 
             InjectionPoint injectionPoint = new InjectionPoint(target, code);
             injectionExecutor.execute(injectionPoint);
@@ -174,6 +194,75 @@ public class LunaApiServlet extends HttpServlet {
             throws IOException {
         // 简化实现
         response.getWriter().write("{\"success\":true,\"id\":\"test\"}");
+    }
+
+    private void handleRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String method = request.getMethod();
+        String pathInfo = request.getPathInfo();
+        
+        switch (method) {
+            case "GET":
+                if (pathInfo.equals("/api/rules")) {
+                    // 获取规则列表
+                    response.getWriter().write(JSON.toJSONString(RuleManager.getInstance().getRules()));
+                } else if (pathInfo.matches("/api/rules/\\d+")) {
+                    // 获取单个规则
+                    long id = Long.parseLong(pathInfo.substring(10));
+                    InjectionRule rule = RuleManager.getInstance().getRule(id);
+                    if (rule != null) {
+                        response.getWriter().write(JSON.toJSONString(rule));
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        response.getWriter().write("{\"error\":\"规则不存在\"}");
+                    }
+                }
+                break;
+            case "POST":
+                // 添加规则
+                StringBuilder sb = new StringBuilder();
+                String line;
+                try (BufferedReader reader = request.getReader()) {
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
+                }
+                InjectionRule newRule = JSON.parseObject(sb.toString(), InjectionRule.class);
+                long id = RuleManager.getInstance().addRule(newRule);
+                response.getWriter().write("{\"success\":true,\"id\":\"" + id + "\"}");
+                break;
+            case "PUT":
+                // 更新规则
+                if (pathInfo.matches("/api/rules/\\d+")) {
+                    id = Long.parseLong(pathInfo.substring(10));
+                    sb = new StringBuilder();
+                    try (BufferedReader reader = request.getReader()) {
+                        while ((line = reader.readLine()) != null) {
+                            sb.append(line);
+                        }
+                    }
+                    InjectionRule updatedRule = JSON.parseObject(sb.toString(), InjectionRule.class);
+                    RuleManager.getInstance().updateRule(id, updatedRule);
+                    response.getWriter().write("{\"success\":true}");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().write("{\"error\":\"缺少规则ID\"}");
+                }
+                break;
+            case "DELETE":
+                // 删除规则
+                if (pathInfo.matches("/api/rules/\\d+")) {
+                    id = Long.parseLong(pathInfo.substring(10));
+                    RuleManager.getInstance().deleteRule(id);
+                    response.getWriter().write("{\"success\":true}");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().write("{\"error\":\"缺少规则ID\"}");
+                }
+                break;
+            default:
+                response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                response.getWriter().write("{\"error\":\"不支持的请求方法\"}");
+        }
     }
 
     private byte[] loadClassBytes(String className) throws IOException {

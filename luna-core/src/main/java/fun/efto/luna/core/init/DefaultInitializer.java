@@ -6,7 +6,7 @@ import fun.efto.luna.core.asm.analyzer.AsmClassAnalyzer;
 import fun.efto.luna.core.asm.assmebler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.asm.injector.*;
 import fun.efto.luna.core.bytecode.BytecodeAssemblerRegistry;
-import fun.efto.luna.core.injection.code.type.ExpressionCodeType;
+import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.type.LineNumberInjectionType;
 import fun.efto.luna.core.injection.target.type.MethodInjectionType;
 import fun.efto.luna.core.injector.BytecodeInjectorRegistry;
@@ -26,7 +26,7 @@ public class DefaultInitializer implements Initializer {
         injectorRegistry.register(LineNumberInjectionType.AFTER, new AfterLineInjector());
 
         BytecodeAssemblerRegistry assemblerRegistry = BytecodeAssemblerRegistry.getInstance();
-        assemblerRegistry.register(ExpressionCodeType.EXPRESSION, new ExpressionBytecodeAssembler());
+        assemblerRegistry.register(CodeType.EXPRESSION, new ExpressionBytecodeAssembler());
 
         AnalyzerRegistry analyzerRegistry = AnalyzerRegistry.getInstance();
         analyzerRegistry.register(new AnalyzerType("ASM", "ASM字节码分析器").register(), new AsmClassAnalyzer());

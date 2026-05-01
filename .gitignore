@@ -3,6 +3,14 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+node_modules/
+dist/
+.flattened-pom.xml
+dependency-reduced-pom.xml
+*.class
+luna-rules.json
+luna.properties
+
 ### IntelliJ IDEA ###
 .idea/
 .idea/modules.xml
@@ -18,3 +26,12 @@ target/
 
 ### Mac OS ###
 .DS_Store
+
+### Trae ###
+.trae/
+
+### Temp ###
+TASKS/
+*.bak
+mock-server.js
+test_frontend.py

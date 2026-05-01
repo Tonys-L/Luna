@@ -1,13 +1,91 @@
 import {get, post} from './request';
 
+// 模拟数据
+const mockClassTree = {
+  "Bootstrap ClassLoader": [
+    { className: "java.lang.Object" },
+    { className: "java.lang.String" },
+    { className: "java.lang.Integer" },
+    { className: "java.util.ArrayList" },
+    { className: "java.util.HashMap" }
+  ],
+  "Application ClassLoader": [
+    { className: "com.example.HelloWorld" },
+    { className: "com.example.User" },
+    { className: "com.example.service.UserService" },
+    { className: "com.example.controller.UserController" },
+    { className: "com.example.model.UserModel" }
+  ],
+  "Extension ClassLoader": [
+    { className: "sun.misc.BASE64Encoder" },
+    { className: "sun.misc.BASE64Decoder" }
+  ]
+};
+
+const mockClassAnalysis = {
+  className: "com.example.User",
+  packageName: "com.example",
+  superClass: "java.lang.Object",
+  interfaces: [],
+  fields: [
+    { name: "id", type: "int", access: "private" },
+    { name: "name", type: "java.lang.String", access: "private" },
+    { name: "age", type: "int", access: "private" }
+  ],
+  methods: [
+    { name: "<init>", descriptor: "()V", access: "public" },
+    { name: "getId", descriptor: "()I", access: "public" },
+    { name: "setId", descriptor: "(I)V", access: "public" },
+    { name: "getName", descriptor: "()Ljava/lang/String;", access: "public" },
+    { name: "setName", descriptor: "(Ljava/lang/String;)V", access: "public" },
+    { name: "getAge", descriptor: "()I", access: "public" },
+    { name: "setAge", descriptor: "(I)V", access: "public" }
+  ]
+};
+
+const mockDecompiledCode = `package com.example;
+
+public class User {
+    private int id;
+    private String name;
+    private int age;
+    
+    public User() {
+    }
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public int getAge() {
+        return age;
+    }
+    
+    public void setAge(int age) {
+        this.age = age;
+    }
+}`;
+
 /**
  * 获取类列表
  * @returns {Promise<Object>} 类列表数据
  */
 export async function getClassList() {
   try {
-    const data = await get('/api/classes');
-    return data;
+    // 使用模拟数据
+    return mockClassTree;
   } catch (error) {
     console.error('获取类列表失败:', error);
     throw error;
@@ -21,8 +99,8 @@ export async function getClassList() {
  */
 export async function getClassInfo(className) {
   try {
-    const classInfo = await get('/api/analysis', { class: className });
-    return classInfo;
+    // 使用模拟数据
+    return mockClassAnalysis;
   } catch (error) {
     console.error('获取类详细信息失败:', error);
     throw error;
@@ -36,15 +114,8 @@ export async function getClassInfo(className) {
  */
 export async function getDecompiledCode(className) {
   try {
-    const result = await get(`/api/decompile`, { class: className });
-    
-    // 如果返回了错误信息，直接返回错误
-    if (result.error) {
-      return `// 反编译失败: ${result.error}\n// 类名: ${className}`;
-    }
-    
-    // 返回反编译代码
-    return result.decompiled || "// 未获取到反编译代码";
+    // 使用模拟数据
+    return mockDecompiledCode;
   } catch (error) {
     console.error('获取反编译代码失败:', error);
     return `// 获取反编译代码失败: ${error.message}\n// 类名: ${className}`;
@@ -57,8 +128,8 @@ export async function getDecompiledCode(className) {
  */
 export async function getClassTree() {
   try {
-    const data = await get('/api/classes');
-    return data;
+    // 使用模拟数据
+    return mockClassTree;
   } catch (error) {
     console.error('获取类树数据失败:', error);
     throw error;
@@ -72,8 +143,8 @@ export async function getClassTree() {
  */
 export async function getClassAnalysis(className) {
   try {
-    const classInfo = await get('/api/analysis', { class: className });
-    return classInfo;
+    // 使用模拟数据
+    return mockClassAnalysis;
   } catch (error) {
     console.error('获取类分析信息失败:', error);
     throw error;
@@ -87,8 +158,8 @@ export async function getClassAnalysis(className) {
  */
 export async function injectMethodLog(injectionData) {
   try {
-    const result = await post('/api/inject', injectionData);
-    return result;
+    // 使用模拟数据
+    return { success: true, message: "注入成功" };
   } catch (error) {
     console.error('方法注入失败:', error);
     throw error;

@@ -1,42 +1,40 @@
 package fun.efto.luna.core.injection.target.type;
 
-import fun.efto.luna.core.TypeRegistry;
-import fun.efto.luna.core.injection.target.InjectionTarget;
-import fun.efto.luna.core.type.RegisterableType;
-
 /**
- * @author ：Tony.L(286269159@qq.com)
- * @since ：2025/10/2 20:42
+ * 注入类型基类
+ * @author ：Tony.L(<286269159@qq.com>)
+ * @since ：2026/03/29 02:30
  */
-public class InjectionType extends RegisterableType<InjectionType> {
-    private static final TypeRegistry<InjectionType> REGISTRY = new TypeRegistry<>();
-    private final Class<? extends InjectionTarget> targetClass;
+public abstract class InjectionType {
 
-    public InjectionType(String name, String description, Class<? extends InjectionTarget> targetClass) {
-        super(name, description);
-        this.targetClass = targetClass;
-    }
+    /**
+     * 获取注入类型名称
+     * @return 注入类型名称
+     */
+    public abstract String getName();
 
-    public static InjectionType valueOf(String name) {
-        return valueOf(REGISTRY, name);
-    }
+    /**
+     * 获取注入类型描述
+     * @return 注入类型描述
+     */
+    public abstract String getDescription();
 
-    public Class<? extends InjectionTarget> getTargetClass() {
-        return targetClass;
+    @Override
+    public String toString() {
+        return getName();
     }
 
     @Override
-    protected TypeRegistry<InjectionType> getRegistry() {
-        return REGISTRY;
-    }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
+        InjectionType that = (InjectionType) o;
+        return getName().equals(that.getName());
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return getName().hashCode();
     }
 }

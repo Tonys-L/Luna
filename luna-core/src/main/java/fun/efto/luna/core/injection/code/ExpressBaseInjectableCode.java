@@ -1,9 +1,9 @@
 package fun.efto.luna.core.injection.code;
 
 import fun.efto.luna.core.injection.code.type.CodeType;
-import fun.efto.luna.core.injection.code.type.ExpressionCodeType;
 
 /**
+ * 表达式基础可注入代码
  * @author ：Tony.L(286269159@qq.com)
  * @since ：2025/10/4 4:25
  */
@@ -20,18 +20,13 @@ public class ExpressBaseInjectableCode implements InjectableCode {
     }
 
     @Override
-    public CodeType getType() {
-        return ExpressionCodeType.EXPRESSION;
+    public CodeType getCodeType() {
+        return CodeType.EXPRESSION;
     }
 
     @Override
-    public String getContent() {
+    public String getCode() {
         return content;
-    }
-
-    @Override
-    public boolean isValid() {
-        return true;
     }
 
     public String getExpressionType() {

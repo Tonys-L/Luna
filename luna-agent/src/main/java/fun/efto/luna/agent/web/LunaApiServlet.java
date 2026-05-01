@@ -16,6 +16,7 @@ import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.injection.target.type.InjectionType;
+import fun.efto.luna.core.injection.target.type.MethodInjectionType;
 import fun.efto.luna.core.rule.InjectionRule;
 import fun.efto.luna.core.rule.RuleManager;
 
@@ -162,11 +163,8 @@ public class LunaApiServlet extends HttpServlet {
         }
 
         try {
-            // 创建注入目标
-            MethodTarget target = new MethodTarget();
-            target.setTargetClass(cmd.getClazz());
-            target.setMethodName(cmd.getMethod());
-            target.setMethodDescriptor(cmd.getDesc());
+            MethodInjectionType injectionType = resolveInjectionType(cmd.getInjectionType());
+            MethodTarget target = new MethodTarget(injectionType, cmd.getClazz(), cmd.getMethod(), cmd.getDesc());
             
             // 创建可注入代码
             InjectableCode code = new InjectableCode() {
@@ -262,6 +260,25 @@ public class LunaApiServlet extends HttpServlet {
             default:
                 response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
                 response.getWriter().write("{\"error\":\"不支持的请求方法\"}");
+        }
+    }
+
+    private MethodInjectionType resolveInjectionType(String injectionType) {
+        if (injectionType == null || injectionType.isEmpty()) {
+            return MethodInjectionType.ENTER;
+        }
+        switch (injectionType.toUpperCase()) {
+            case "METHOD_ENTER":
+            case "ENTER":
+                return MethodInjectionType.ENTER;
+            case "METHOD_EXIT":
+            case "EXIT":
+                return MethodInjectionType.EXIT;
+            case "METHOD_AROUND":
+            case "AROUND":
+                return MethodInjectionType.AROUND;
+            default:
+                return MethodInjectionType.ENTER;
         }
     }
 

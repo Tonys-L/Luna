@@ -313,7 +313,7 @@ export default {
           method: this.currentMethod.name,
           injectionType: this.injectForm.injectionType,
           codeType: 'EXPRESSION',
-          code: `LOG:${this.injectForm.logContent}`,
+          code: `log:${this.injectForm.logContent}`,
           desc: this.currentMethod.descriptor
         }
 

@@ -22,8 +22,8 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-:: Set project root
-set "PROJECT_ROOT=%~dp0.."
+:: Set project root (scripts/ -> example/ -> Luna root)
+set "PROJECT_ROOT=%~dp0..\.."
 set "AGENT_JAR=%PROJECT_ROOT%\luna-agent\target\luna-agent-1.0-SNAPSHOT.jar"
 set "DEMO_JAR=%PROJECT_ROOT%\example\luna-demo-app\target\luna-demo-app-1.0-SNAPSHOT.jar"
 set "ATTACHER_JAR=%PROJECT_ROOT%\luna-attacher\target\luna-attacher-1.0-SNAPSHOT.jar"

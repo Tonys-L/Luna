@@ -17,9 +17,9 @@ if ! command -v mvn &> /dev/null; then
     exit 1
 fi
 
-# Set project root
+# Set project root (scripts/ -> example/ -> Luna root)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 AGENT_JAR="$PROJECT_ROOT/luna-agent/target/luna-agent-1.0-SNAPSHOT.jar"
 DEMO_JAR="$PROJECT_ROOT/example/luna-demo-app/target/luna-demo-app-1.0-SNAPSHOT.jar"
 
@@ -41,7 +41,8 @@ echo "========================================"
 echo "  Agent:  $AGENT_JAR"
 echo "  App:    $DEMO_JAR"
 echo "  UI:     http://localhost:8421"
-echo "========================================echo ""
+echo "========================================"
+echo ""
 
 # Try to open browser
 if command -v open &> /dev/null; then

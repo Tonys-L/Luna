@@ -9,6 +9,8 @@ import fun.efto.luna.core.injection.target.type.LineNumberInjectionType;
 public class LineNumberTarget extends BaseTarget {
     private int lineNumber;
     private int lineNumberOffset;
+    private String methodName;
+    private String methodDescriptor;
 
     public LineNumberTarget() {
 
@@ -18,6 +20,14 @@ public class LineNumberTarget extends BaseTarget {
         super(type, targetClass);
         this.lineNumber = lineNumber;
         this.lineNumberOffset = lineNumberOffset;
+    }
+
+    public LineNumberTarget(LineNumberInjectionType type, String targetClass, int lineNumber, int lineNumberOffset, String methodName, String methodDescriptor) {
+        super(type, targetClass);
+        this.lineNumber = lineNumber;
+        this.lineNumberOffset = lineNumberOffset;
+        this.methodName = methodName;
+        this.methodDescriptor = methodDescriptor;
     }
 
     public int getLineNumber() {
@@ -34,5 +44,21 @@ public class LineNumberTarget extends BaseTarget {
 
     public void setLineNumberOffset(int lineNumberOffset) {
         this.lineNumberOffset = lineNumberOffset;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getMethodDescriptor() {
+        return methodDescriptor;
+    }
+
+    public void setMethodDescriptor(String methodDescriptor) {
+        this.methodDescriptor = methodDescriptor;
     }
 }

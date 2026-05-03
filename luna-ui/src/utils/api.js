@@ -98,3 +98,13 @@ export async function getStatus() {
     return { status: 'offline' }
   }
 }
+
+export async function getLineNumbers(className) {
+  try {
+    const data = await get(apiUrl('/line-numbers'), { class: className })
+    return data || {}
+  } catch (error) {
+    console.error('获取行号表失败:', error)
+    return {}
+  }
+}

@@ -20,6 +20,7 @@ public class UserService {
         long id = idGenerator.getAndIncrement();
         User user = new User(id, name, age, name.toLowerCase() + "@example.com");
         userStore.put(id, user);
+        System.out.println("[UserService] User count: " + userStore.size());
         System.out.println("[UserService] Created user: " + user);
         return user;
     }

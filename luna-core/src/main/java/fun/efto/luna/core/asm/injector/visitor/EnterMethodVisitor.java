@@ -20,7 +20,7 @@ public class EnterMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitCode() {
-        bytecodeAssembler.assemble(context, context.getBytecode());
         super.visitCode();
+        bytecodeAssembler.assemble(context, context.getBytecode());
     }
 }

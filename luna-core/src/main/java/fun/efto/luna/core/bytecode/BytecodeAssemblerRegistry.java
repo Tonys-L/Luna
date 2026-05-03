@@ -1,6 +1,7 @@
 package fun.efto.luna.core.bytecode;
 
 import fun.efto.luna.core.Registry;
+import fun.efto.luna.core.asm.assmebler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.injection.code.type.CodeType;
 
 import java.util.Map;
@@ -11,10 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since ：2025/10/4 15:59
  */
 public final class BytecodeAssemblerRegistry implements Registry<CodeType, BytecodeAssembler> {
-    private static final BytecodeAssemblerRegistry INSTANCE = new BytecodeAssemblerRegistry();
     private static final Map<CodeType, BytecodeAssembler> ASSEMBLER_REGISTRY = new ConcurrentHashMap<>();
+    private static final BytecodeAssemblerRegistry INSTANCE = new BytecodeAssemblerRegistry();
 
     private BytecodeAssemblerRegistry() {
+        ASSEMBLER_REGISTRY.put(CodeType.EXPRESSION, new ExpressionBytecodeAssembler());
     }
 
     public static BytecodeAssemblerRegistry getInstance() {
@@ -24,5 +26,11 @@ public final class BytecodeAssemblerRegistry implements Registry<CodeType, Bytec
     @Override
     public Map<CodeType, BytecodeAssembler> getRegistry() {
         return ASSEMBLER_REGISTRY;
+    }
+
+    @Override
+    public BytecodeAssembler register(CodeType type, BytecodeAssembler assembler) {
+        ASSEMBLER_REGISTRY.put(type, assembler);
+        return assembler;
     }
 }

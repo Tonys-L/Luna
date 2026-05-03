@@ -11,6 +11,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.instrument.Instrumentation;
 import java.net.URL;
 
 /**
@@ -29,14 +30,17 @@ public class JettyWebServer {
     private volatile boolean running = false;
     private InjectionExecutor injectionExecutor;
     private ClassScanner classScanner;
+    private Instrumentation instrumentation;
 
     public JettyWebServer(int port, JettyConfiguration configuration,
                           InjectionExecutor injectionExecutor,
-                          ClassScanner classScanner) {
+                          ClassScanner classScanner,
+                          Instrumentation instrumentation) {
         this.port = port;
         this.configuration = configuration;
         this.injectionExecutor = injectionExecutor;
         this.classScanner = classScanner;
+        this.instrumentation = instrumentation;
         this.server = createServer();
     }
 
@@ -76,7 +80,8 @@ public class JettyWebServer {
         context.setContextPath("/");
 
         // 添加REST API Servlet
-        context.addServlet(new ServletHolder(new LunaApiServlet(injectionExecutor, classScanner)), "/api/*");
+        context.addServlet(new ServletHolder(new LunaApiServlet(injectionExecutor, classScanner, instrumentation)), "/api/*");
+        context.addServlet(new ServletHolder(new LunaTestServlet(classScanner, instrumentation)), "/api/test/*");
 
         // 创建处理器列表，将静态资源处理器和上下文处理器组合
         HandlerList handlers = new HandlerList();

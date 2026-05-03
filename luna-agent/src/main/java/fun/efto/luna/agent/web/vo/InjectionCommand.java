@@ -11,6 +11,7 @@ public class InjectionCommand {
     private String desc;
     private String codeType;
     private String code;
+    private Integer lineNumber;
 
     public String getClazz() {
         return clazz;
@@ -62,5 +63,13 @@ public class InjectionCommand {
 
     public boolean isValid() {
         return clazz != null && method != null && injectionType != null && codeType != null && code != null;
+    }
+
+    public Integer getLineNumber() {
+        return lineNumber;
+    }
+
+    public void setLineNumber(Integer lineNumber) {
+        this.lineNumber = lineNumber;
     }
 }

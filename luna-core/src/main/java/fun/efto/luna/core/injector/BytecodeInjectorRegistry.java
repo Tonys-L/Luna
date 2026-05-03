@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since ：2025/10/2 21:16
  */
 public final class BytecodeInjectorRegistry implements Registry<InjectionType, BytecodeInjector> {
-    private static final BytecodeInjectorRegistry INSTANCE = new BytecodeInjectorRegistry();
     private static final Map<InjectionType, BytecodeInjector> INJECTOR_REGISTRY = new ConcurrentHashMap<>();
+    private static final BytecodeInjectorRegistry INSTANCE = new BytecodeInjectorRegistry();
 
     private BytecodeInjectorRegistry() {
         // 注册方法级注入器

@@ -34,10 +34,11 @@
     "inject": "INJECT",
     "inject_log": "INJECT LOG",
     "injection_type": "INJECTION TYPE",
+    "code_type": "CODE TYPE",
     "before_method": "BEFORE METHOD",
     "after_method": "AFTER METHOD",
     "log_content": "LOG CONTENT",
-    "enter_log_content": "ENTER LOG CONTENT",
+    "enter_log_content": "e.g. name=$1, age=$2",
     "cancel": "CANCEL",
     "save": "SAVE",
     "injecting": "INJECTING..."

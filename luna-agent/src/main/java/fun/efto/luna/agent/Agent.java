@@ -42,9 +42,7 @@ public class Agent {
     private static void executeWithAgentClassLoader(String args, Instrumentation inst) {
         try {
             initializeAgentEnvironment();
-            // 使用自定义类加载器加载指定类
             Class<?> agentMainClass = lunaAgentClassLoader.loadClass("fun.efto.luna.agent.Agent");
-            // 获取对应的方法
             Method method = agentMainClass.getDeclaredMethod("startAgent", String.class, Instrumentation.class);
             method.setAccessible(true);
             method.invoke(null, args, inst);
@@ -58,12 +56,14 @@ public class Agent {
     private static void startAgent(String args, Instrumentation inst) {
         initLogger();
         try {
+            logger.info("Initializing Luna agent components...");
             InitializerManager.getInstance().initializeAll();
             InjectionExecutor injectionExecutor = InjectionExecutor.init(inst);
             ClassScanner classScanner = ClassScanner.getInstance(inst, createExcludeClassFilter());
-            JettyWebServer jettyWebServer = new JettyWebServer(8421, JettyConfiguration.createDevelopment(), injectionExecutor, classScanner);
+            JettyWebServer jettyWebServer = new JettyWebServer(8421, JettyConfiguration.createDevelopment(), injectionExecutor, classScanner, inst);
 
             jettyWebServer.start();
+            logger.info("Luna agent started successfully, web server on port 8421");
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
@@ -75,9 +75,11 @@ public class Agent {
                 }
             }));
         } catch (Exception e) {
-            logger.error("Failed to start Luna agent", e);
             System.err.println("[Luna] Failed to start agent: " + e.getMessage());
             e.printStackTrace();
+            if (logger != null) {
+                logger.error("Failed to start Luna agent", e);
+            }
         }
     }
 

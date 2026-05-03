@@ -1,5 +1,6 @@
 package fun.efto.luna.core.asm.analyzer;
 
+import fun.efto.luna.core.asm.Constants;
 import fun.efto.luna.core.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.analyzer.ClassAnalysisResult;
 import fun.efto.luna.core.analyzer.ClassAnalysisResult.FieldInfo;
@@ -57,7 +58,7 @@ public class AsmClassAnalyzer implements ClassAnalyzer {
         private final List<MethodInfo> methods = new ArrayList<>();
 
         AnalysisVisitor() {
-            super(Opcodes.ASM9);
+            super(Constants.AMS_API_VERSION);
         }
 
         @Override

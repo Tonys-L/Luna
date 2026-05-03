@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author ：Tony.L(286269159@qq.com)
@@ -13,23 +16,62 @@ import java.security.ProtectionDomain;
  */
 public class ClassFileTransformerAdapter implements ClassFileTransformer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassFileTransformerAdapter.class);
-    private final InjectionPoint injectionPoint;
+    private final String targetClass;
+    private final List<InjectionPoint> injectionPoints;
     private final ClassTransformer classTransformer;
+    private final List<InjectionResult> results = new CopyOnWriteArrayList<>();
 
     public ClassFileTransformerAdapter(InjectionPoint injectionPoint, ClassTransformer classTransformer) {
-        this.injectionPoint = injectionPoint;
+        this.targetClass = injectionPoint.getTarget().getTargetClass();
+        this.injectionPoints = java.util.Collections.singletonList(injectionPoint);
+        this.classTransformer = classTransformer;
+    }
+
+    public ClassFileTransformerAdapter(String targetClass, List<InjectionPoint> injectionPoints, ClassTransformer classTransformer) {
+        this.targetClass = targetClass;
+        this.injectionPoints = injectionPoints;
         this.classTransformer = classTransformer;
     }
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-        TransformerResult result = classTransformer.transform(injectionPoint, className, classfileBuffer);
-
-        if (result.isTransformed()) {
-            return result.getBytecode();
-        } else {
-            LOGGER.error("[{}]转换失败:{}", className, result.getMessage());
+        String javaClassName = className != null ? className.replace('/', '.') : "";
+        if (!javaClassName.equals(targetClass)) {
+            return null;
         }
-        return classfileBuffer;
+
+        LOGGER.info("Class matched, starting transformation for: {} with {} injection point(s)", javaClassName, injectionPoints.size());
+
+        byte[] currentBytecode = classfileBuffer;
+        boolean anyTransformed = false;
+
+        for (InjectionPoint injectionPoint : injectionPoints) {
+            TransformerResult result = classTransformer.transform(injectionPoint, javaClassName, currentBytecode);
+            String injType = injectionPoint.getInjectionType().toString();
+            String methodName = injectionPoint.getTarget().getMethodName();
+
+            if (result.isTransformed()) {
+                currentBytecode = result.getBytecode();
+                anyTransformed = true;
+                results.add(new InjectionResult(true, "注入成功", injType, methodName));
+                LOGGER.info("Injection applied: {} -> {}, bytecode size={}",
+                        injType, methodName, currentBytecode.length);
+            } else {
+                results.add(new InjectionResult(false, result.getMessage(), injType, methodName));
+                LOGGER.warn("Injection failed: {} -> {}, reason: {}",
+                        injType, methodName, result.getMessage());
+            }
+        }
+
+        if (anyTransformed) {
+            LOGGER.info("Transformation succeeded for: {}, final bytecode size={}", javaClassName, currentBytecode.length);
+            return currentBytecode;
+        }
+
+        return null;
+    }
+
+    public List<InjectionResult> getResults() {
+        return new ArrayList<>(results);
     }
 }

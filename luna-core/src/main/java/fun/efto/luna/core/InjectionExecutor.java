@@ -1,13 +1,17 @@
 package fun.efto.luna.core;
 
 import fun.efto.luna.core.injection.InjectionPoint;
+import fun.efto.luna.core.injection.InjectionPointRegistry;
 import fun.efto.luna.core.transformer.ClassFileTransformerAdapter;
 import fun.efto.luna.core.transformer.ClassTransformer;
 import fun.efto.luna.core.transformer.DefaultClassTransformer;
+import fun.efto.luna.core.transformer.InjectionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.Instrumentation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author ：Tony.L(286269159@qq.com)
@@ -46,28 +50,55 @@ public class InjectionExecutor {
         return instance;
     }
 
-    public void execute(InjectionPoint injectionPoint) {
+    public List<InjectionResult> execute(InjectionPoint injectionPoint) {
+        String targetClass = injectionPoint.getTarget().getTargetClass();
+
+        InjectionPointRegistry.getInstance().register(injectionPoint);
+
+        List<InjectionPoint> allInjectionPoints = InjectionPointRegistry.getInstance().getInjectionPoints(targetClass);
+        LOGGER.info("Retransforming class: {} with {} injection point(s)", targetClass, allInjectionPoints.size());
+
         ClassTransformer classTransformer = new DefaultClassTransformer();
         ClassFileTransformerAdapter adapter = new ClassFileTransformerAdapter(
-                injectionPoint, classTransformer
+                targetClass, allInjectionPoints, classTransformer
         );
 
         instManager.addTransformer(adapter, true);
 
         try {
             Class<?>[] allLoadedClasses = instManager.getAllLoadedClasses();
+            boolean found = false;
             for (Class<?> clazz : allLoadedClasses) {
-                if (clazz.getName().equals(injectionPoint.getTarget().getTargetClass())) {
+                if (clazz.getName().equals(targetClass)) {
+                    found = true;
+                    LOGGER.info("Found class: {} loader={}", clazz.getName(), clazz.getClassLoader());
                     try {
-                        LOGGER.info("Retransforming class: {}", clazz.getName());
                         instManager.retransformClasses(clazz);
+                        LOGGER.info("Retransform completed for: {}", clazz.getName());
                     } catch (Exception e) {
                         LOGGER.error("Failed to retransform class {}", clazz.getName(), e);
+                        List<InjectionResult> errorResults = new ArrayList<>();
+                        for (InjectionPoint ip : allInjectionPoints) {
+                            errorResults.add(new InjectionResult(false, "retransform失败: " + e.getMessage(),
+                                    ip.getInjectionType().toString(), ip.getTarget().getMethodName()));
+                        }
+                        return errorResults;
                     }
                 }
+            }
+            if (!found) {
+                LOGGER.warn("Class NOT found in loaded classes: {}", targetClass);
+                List<InjectionResult> notFoundResults = new ArrayList<>();
+                for (InjectionPoint ip : allInjectionPoints) {
+                    notFoundResults.add(new InjectionResult(false, "类未加载: " + targetClass,
+                            ip.getInjectionType().toString(), ip.getTarget().getMethodName()));
+                }
+                return notFoundResults;
             }
         } finally {
             instManager.removeTransformer(adapter);
         }
+
+        return adapter.getResults();
     }
 }

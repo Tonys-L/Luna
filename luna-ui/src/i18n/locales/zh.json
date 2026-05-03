@@ -34,10 +34,11 @@
     "inject": "注入",
     "inject_log": "注入日志",
     "injection_type": "注入类型",
+    "code_type": "代码类型",
     "before_method": "方法前",
     "after_method": "方法后",
     "log_content": "日志内容",
-    "enter_log_content": "输入日志内容",
+    "enter_log_content": "输入日志内容，如: name=$1, age=$2",
     "cancel": "取消",
     "save": "保存",
     "injecting": "注入中..."

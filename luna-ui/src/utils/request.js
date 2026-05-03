@@ -30,9 +30,26 @@ async function request(url, options = {}) {
   try {
     const response = await fetch(url, config);
     
-    // 检查响应状态
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let errorMsg = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          errorMsg = errorData.error;
+        } else if (errorData.message) {
+          errorMsg = errorData.message;
+        }
+      } catch (e) {
+        try {
+          const errorText = await response.text();
+          if (errorText) errorMsg = errorText;
+        } catch (e2) {
+          // ignore
+        }
+      }
+      const error = new Error(errorMsg);
+      error.status = response.status;
+      throw error;
     }
     
     // 尝试解析JSON

@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since ：2025/10/4 15:59
  */
 public final class AnalyzerRegistry implements Registry<AnalyzerType, ClassAnalyzer> {
-    private static final AnalyzerRegistry INSTANCE = new AnalyzerRegistry();
     private static final Map<AnalyzerType, ClassAnalyzer> ANALYZER_REGISTRY = new ConcurrentHashMap<>();
+    private static final AnalyzerRegistry INSTANCE = new AnalyzerRegistry();
 
     private AnalyzerRegistry() {
     }

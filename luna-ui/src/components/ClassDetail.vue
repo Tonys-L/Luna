@@ -155,6 +155,8 @@
                 class="code-editor"
                 language="java"
                 @change="handleEditorChange"
+                @editorWillMount="onEditorWillMount"
+                @mount="onEditorMount"
               />
             </div>
             <div v-else-if="loadingDecompiled" class="loading-placeholder">
@@ -201,6 +203,32 @@
             >
               <option value="ENTER_METHOD">{{ t('detail.before_method') }}</option>
               <option value="EXIT_METHOD">{{ t('detail.after_method') }}</option>
+              <option value="AROUND_METHOD">方法环绕 (Around)</option>
+              <option value="LINE_BEFORE">行号前 (Before Line)</option>
+              <option value="LINE_AFTER">行号后 (After Line)</option>
+            </select>
+          </div>
+          <div class="form-group" v-if="injectForm.injectionType === 'LINE_BEFORE' || injectForm.injectionType === 'LINE_AFTER'">
+            <label class="form-label">行号 (Line Number)</label>
+            <input 
+              v-model.number="injectForm.lineNumber" 
+              class="form-input"
+              type="number"
+              min="1"
+              placeholder="输入源码行号"
+            />
+            <div class="form-hint">
+              <i class="fas fa-info-circle"></i>
+              <span>点击反编译源码的行号可自动填入</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ t('detail.code_type') }}</label>
+            <select 
+              v-model="injectForm.codeType" 
+              class="form-select"
+            >
+              <option value="EXPRESSION">表达式 (Expression)</option>
             </select>
           </div>
           <div class="form-group">
@@ -211,6 +239,10 @@
               :placeholder="t('detail.enter_log_content')"
               rows="4"
             ></textarea>
+            <div class="form-hint">
+              <i class="fas fa-info-circle"></i>
+              <span>使用 $1, $2, $3... 引用方法参数，例如: name=$1, age=$2</span>
+            </div>
           </div>
         </div>
         <div class="dialog-footer">
@@ -231,7 +263,7 @@
 
 <script>
 import { useI18n } from 'vue-i18n'
-import {getDecompiledCode, injectMethodLog} from '../utils/api'
+import {getDecompiledCode, injectMethodLog, getLineNumbers} from '../utils/api'
 import {CodeEditor} from 'monaco-editor-vue3'
 
 export default {
@@ -265,15 +297,20 @@ export default {
         theme: 'vs-dark',
         wordWrap: 'on',
         wrappingIndent: 'indent',
-        fixedOverflowWidgets: true
+        fixedOverflowWidgets: true,
+        glyphMargin: true
       },
       injectDialogVisible: false,
       injecting: false,
       injectForm: {
         injectionType: 'ENTER_METHOD',
-        logContent: ''
+        codeType: 'EXPRESSION',
+        logContent: '',
+        lineNumber: null
       },
-      currentMethod: null
+      currentMethod: null,
+      monacoEditor: null,
+      lineNumberMap: {}
     }
   },
   methods: {
@@ -282,8 +319,18 @@ export default {
 
       this.loadingDecompiled = true
       try {
-        const code = await getDecompiledCode(this.classInfo.className)
+        const [code, lineNumbers] = await Promise.all([
+          getDecompiledCode(this.classInfo.className),
+          getLineNumbers(this.classInfo.className)
+        ])
         this.decompiledCode = code
+        this.lineNumberMap = lineNumbers
+        // 如果编辑器已挂载，更新源码行号装饰
+        if (this.monacoEditor) {
+          this.$nextTick(() => {
+            this.updateSourceLineDecorations()
+          })
+        }
       } catch (error) {
         console.error('加载反编译代码失败:', error)
         this.$message.error('加载反编译代码失败')
@@ -293,6 +340,147 @@ export default {
     },
     handleEditorChange(value) {
       console.log('Editor content changed:', value)
+    },
+    onEditorWillMount(monaco) {
+      // 保存 monaco 引用，供 updateSourceLineDecorations 使用
+      this.monacoInstance = monaco
+
+      monaco.editor.addCommand({
+        id: 'luna.injectBeforeLine',
+        run: (editor) => {
+          const position = editor.getPosition()
+          if (position) {
+            this.showLineInjectDialog(position.lineNumber, 'LINE_BEFORE')
+          }
+        }
+      })
+      monaco.editor.addCommand({
+        id: 'luna.injectAfterLine',
+        run: (editor) => {
+          const position = editor.getPosition()
+          if (position) {
+            this.showLineInjectDialog(position.lineNumber, 'LINE_AFTER')
+          }
+        }
+      })
+    },
+    onEditorMount(editor) {
+      this.monacoEditor = editor
+
+      // 如果已有行号数据，更新源码行号装饰
+      if (this.lineNumberMap && Object.keys(this.lineNumberMap).length > 0) {
+        this.updateSourceLineDecorations()
+      }
+
+      editor.addAction({
+        id: 'luna-inject-before-line',
+        label: '在此行前注入 (Before Line)',
+        keybindings: [],
+        contextMenuGroupId: 'luna-injection',
+        contextMenuOrder: 1,
+        run: (ed) => {
+          const position = ed.getPosition()
+          if (position) {
+            this.showLineInjectDialog(position.lineNumber, 'LINE_BEFORE')
+          }
+        }
+      })
+
+      editor.addAction({
+        id: 'luna-inject-after-line',
+        label: '在此行后注入 (After Line)',
+        keybindings: [],
+        contextMenuGroupId: 'luna-injection',
+        contextMenuOrder: 2,
+        run: (ed) => {
+          const position = ed.getPosition()
+          if (position) {
+            this.showLineInjectDialog(position.lineNumber, 'LINE_AFTER')
+          }
+        }
+      })
+
+      editor.onMouseDown((e) => {
+        if (
+          e.target &&
+          e.target.type &&
+          (e.target.type === 2 || e.target.type === 3)
+        ) {
+          const lineNumber = e.target.position ? e.target.position.lineNumber : e.target.detail ? e.target.detail.lineNumber : null
+          if (lineNumber) {
+            this.showLineInjectDialog(lineNumber, 'LINE_BEFORE')
+          }
+        }
+      })
+    },
+    updateSourceLineDecorations() {
+      if (!this.monacoEditor || !this.decompiledCode || !this.lineNumberMap) return
+
+      const model = this.monacoEditor.getModel()
+      if (!model) return
+
+      const monacoRef = this.monacoInstance
+      if (!monacoRef) return
+
+      const decorations = []
+      const lines = this.decompiledCode.split('\n')
+
+      // 遍历行号表，为每个方法找到反编译代码中的位置
+      for (const [methodKey, lineNumbers] of Object.entries(this.lineNumberMap)) {
+        if (!Array.isArray(lineNumbers) || lineNumbers.length === 0) continue
+
+        // 从 methodKey 中提取方法名（格式: "methodName(Ljava/lang/String;I)V"）
+        const methodName = methodKey.split('(')[0]
+
+        // 在反编译代码中搜索方法签名
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i]
+          if (line.includes(methodName) && line.includes('(')) {
+            const minLine = Math.min(...lineNumbers)
+            const maxLine = Math.max(...lineNumbers)
+            decorations.push({
+              range: new monacoRef.Range(i + 1, 1, i + 1, 1),
+              options: {
+                glyphMarginClassName: 'source-line-glyph',
+                glyphMarginHoverMessage: {
+                  value: `**${methodName}** 源码行: ${minLine}-${maxLine} ([${lineNumbers.join(', ')}])`
+                },
+                stickiness: monacoRef.editor.TraversalStickiness.NeverGrowsWhenTypingAtEdges
+              }
+            })
+            break
+          }
+        }
+      }
+
+      this.monacoEditor.deltaDecorations([], decorations)
+    },
+    showLineInjectDialog(lineNumber, injectionType) {
+      const methods = this.classInfo.convertedMethods || this.classInfo.methods || []
+      const currentLineMethod = this.findMethodByLine(lineNumber)
+      if (currentLineMethod) {
+        this.currentMethod = currentLineMethod
+      } else if (methods.length > 0 && !this.currentMethod) {
+        this.currentMethod = methods[0]
+      }
+      this.injectForm.injectionType = injectionType
+      this.injectForm.lineNumber = lineNumber
+      this.injectForm.logContent = `${injectionType === 'LINE_BEFORE' ? '行前' : '行后'}注入 Line ${lineNumber}`
+      this.injectDialogVisible = true
+    },
+    findMethodByLine(lineNumber) {
+      if (!this.decompiledCode || !this.classInfo) return null
+      const methods = this.classInfo.convertedMethods || this.classInfo.methods || []
+      const lines = this.decompiledCode.split('\n')
+      for (const method of methods) {
+        const methodName = method.name
+        for (let i = Math.max(0, lineNumber - 5); i < Math.min(lines.length, lineNumber + 5); i++) {
+          if (lines[i] && lines[i].includes(methodName) && lines[i].includes('(')) {
+            return method
+          }
+        }
+      }
+      return null
     },
     showInjectDialog(method) {
       this.currentMethod = method
@@ -312,9 +500,18 @@ export default {
           clazz: this.classInfo.className,
           method: this.currentMethod.name,
           injectionType: this.injectForm.injectionType,
-          codeType: 'EXPRESSION',
+          codeType: this.injectForm.codeType,
           code: `log:${this.injectForm.logContent}`,
           desc: this.currentMethod.descriptor
+        }
+
+        if (this.injectForm.injectionType === 'LINE_BEFORE' || this.injectForm.injectionType === 'LINE_AFTER') {
+          if (!this.injectForm.lineNumber || this.injectForm.lineNumber < 1) {
+            this.$message.error('请输入有效的行号')
+            this.injecting = false
+            return
+          }
+          injectionData.lineNumber = this.injectForm.lineNumber
         }
 
         const result = await injectMethodLog(injectionData)
@@ -327,7 +524,7 @@ export default {
         }
       } catch (error) {
         console.error('方法注入失败:', error)
-        this.$message.error('方法注入失败: ' + error.message)
+        this.$message.error(error.message || '注入失败')
       } finally {
         this.injecting = false
       }
@@ -746,6 +943,20 @@ export default {
   border-color: var(--border-focus);
 }
 
+.form-input {
+  width: 100%;
+  padding: 6px 8px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
 /* 表单文本域 */
 .form-textarea {
   width: 100%;
@@ -760,6 +971,20 @@ export default {
 .form-textarea:focus {
   outline: none;
   border-color: var(--border-focus);
+}
+
+.form-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary, #888);
+}
+
+.form-hint i {
+  font-size: 11px;
+  color: var(--accent-color, #6366f1);
 }
 
 /* 对话框底部 */
@@ -836,5 +1061,18 @@ export default {
 .no-data {
   color: var(--text-tertiary);
   font-size: 11px;
+}
+</style>
+
+<!-- 非 scoped 样式，用于 Monaco Editor 的 glyph margin 装饰 -->
+<style>
+.source-line-glyph {
+  background-color: #4caf50;
+  border-radius: 50%;
+  margin-left: 4px;
+  width: 8px !important;
+  height: 8px !important;
+  margin-top: 5px;
+  cursor: pointer;
 }
 </style>

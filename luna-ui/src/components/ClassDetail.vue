@@ -209,17 +209,27 @@
             </select>
           </div>
           <div class="form-group" v-if="injectForm.injectionType === 'LINE_BEFORE' || injectForm.injectionType === 'LINE_AFTER'">
-            <label class="form-label">行号 (Line Number)</label>
-            <input 
+            <label class="form-label">源码行号 (Source Line Number)</label>
+            <select 
               v-model.number="injectForm.lineNumber" 
-              class="form-input"
-              type="number"
-              min="1"
-              placeholder="输入源码行号"
-            />
-            <div class="form-hint">
+              class="form-select"
+            >
+              <option :value="null" disabled>请选择源码行号</option>
+              <option 
+                v-for="line in availableSourceLines" 
+                :key="line" 
+                :value="line"
+              >
+                Line {{ line }}
+              </option>
+            </select>
+            <div class="form-hint" v-if="availableSourceLines.length === 0">
+              <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
+              <span>未找到该方法的源码行号表，请先加载反编译代码</span>
+            </div>
+            <div class="form-hint" v-else>
               <i class="fas fa-info-circle"></i>
-              <span>点击反编译源码的行号可自动填入</span>
+              <span>选择字节码中实际存在的源码行号 (共 {{ availableSourceLines.length }} 行)</span>
             </div>
           </div>
           <div class="form-group">
@@ -274,6 +284,27 @@ export default {
   setup() {
     const { t } = useI18n()
     return { t }
+  },
+  computed: {
+    availableSourceLines() {
+      if (!this.currentMethod || !this.lineNumberMap) return []
+      const methodName = this.currentMethod.name
+      const methodDesc = this.currentMethod.descriptor
+      for (const [methodKey, lineNumbers] of Object.entries(this.lineNumberMap)) {
+        const keyName = methodKey.split('(')[0]
+        const keyDesc = '(' + methodKey.split('(').slice(1).join('(')
+        if (keyName === methodName && (!methodDesc || keyDesc === methodDesc)) {
+          return Array.isArray(lineNumbers) ? [...lineNumbers].sort((a, b) => a - b) : []
+        }
+      }
+      for (const [methodKey, lineNumbers] of Object.entries(this.lineNumberMap)) {
+        const keyName = methodKey.split('(')[0]
+        if (keyName === methodName) {
+          return Array.isArray(lineNumbers) ? [...lineNumbers].sort((a, b) => a - b) : []
+        }
+      }
+      return []
+    }
   },
   props: {
     classInfo: {
@@ -455,17 +486,17 @@ export default {
 
       this.monacoEditor.deltaDecorations([], decorations)
     },
-    showLineInjectDialog(lineNumber, injectionType) {
+    showLineInjectDialog(editorLineNumber, injectionType) {
       const methods = this.classInfo.convertedMethods || this.classInfo.methods || []
-      const currentLineMethod = this.findMethodByLine(lineNumber)
+      const currentLineMethod = this.findMethodByLine(editorLineNumber)
       if (currentLineMethod) {
         this.currentMethod = currentLineMethod
       } else if (methods.length > 0 && !this.currentMethod) {
         this.currentMethod = methods[0]
       }
       this.injectForm.injectionType = injectionType
-      this.injectForm.lineNumber = lineNumber
-      this.injectForm.logContent = `${injectionType === 'LINE_BEFORE' ? '行前' : '行后'}注入 Line ${lineNumber}`
+      this.injectForm.lineNumber = null
+      this.injectForm.logContent = `${injectionType === 'LINE_BEFORE' ? '行前' : '行后'}注入`
       this.injectDialogVisible = true
     },
     findMethodByLine(lineNumber) {
@@ -507,7 +538,7 @@ export default {
 
         if (this.injectForm.injectionType === 'LINE_BEFORE' || this.injectForm.injectionType === 'LINE_AFTER') {
           if (!this.injectForm.lineNumber || this.injectForm.lineNumber < 1) {
-            this.$message.error('请输入有效的行号')
+            this.$message.error('请选择源码行号')
             this.injecting = false
             return
           }

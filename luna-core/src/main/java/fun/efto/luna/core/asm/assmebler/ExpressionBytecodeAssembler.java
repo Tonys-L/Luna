@@ -42,15 +42,14 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         }
 
         String[] split = content.split(":", 2);
-        if (split.length != 2) {
-            throw new IllegalArgumentException("invalid expression " + content);
-        }
-
         String type = split[0];
-        String expression = split[1];
+        String expression = split.length > 1 ? split[1] : "";
         switch (type) {
             case "log":
                 generateLogBytecode(mv, expression, asmContext, condition != null);
+                break;
+            case "snapshot":
+                generateSnapshotBytecode(mv, asmContext, condition != null);
                 break;
             default:
                 throw new IllegalArgumentException("unsupported expression " + content);
@@ -60,10 +59,9 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
     private void generateLogBytecode(MethodVisitor mv, String expression, AsmInjectionContext asmContext, boolean hasCondition) {
         String methodDesc = asmContext.getInjectionPoint().getTarget().getMethodDescriptor();
         if (methodDesc == null || methodDesc.isEmpty()) {
-            mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
             String prefix = resolveLogPrefix(asmContext);
             mv.visitLdcInsn(prefix + expression);
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/spy/LunaSpy", "onLog", "(Ljava/lang/String;)V", false);
             return;
         }
         boolean isStatic = isStaticMethod(asmContext);
@@ -75,45 +73,7 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         
         org.objectweb.asm.Label endLabel = new org.objectweb.asm.Label();
         if (hasCondition) {
-            // 解析条件表达式中可能使用到的变量，由于我们在解析 expression 时只解析了日志内容中的变量
-            // 为了绑定上下文，我们需要将条件字符串和日志字符串合并来解析所有引用的变量
-            String injectionId = asmContext.getInjectionPoint().getId();
-            
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/expression/context/EvaluationContext", "getThreadLocal", "()Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
-            
-            int maxSlot = isStatic ? 0 : 1;
-            for (ParameterInfo p : params) maxSlot = Math.max(maxSlot, p.getSlot() + p.getType().getSize());
-            if (asmContext.getLocalVariables() != null) {
-                for (LocalVarInfo lv : asmContext.getLocalVariables()) {
-                    maxSlot = Math.max(maxSlot, lv.getSlot() + Type.getType(lv.getDescriptor()).getSize());
-                }
-            }
-            int contextVarIndex = maxSlot + 1;
-            
-            mv.visitVarInsn(Opcodes.ASTORE, contextVarIndex);
-            
-            // 为了简单起见，我们绑定所有参数和局部变量到上下文
-            for (int i = 0; i < params.size(); i++) {
-                mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);
-                mv.visitLdcInsn("param[" + (i + 1) + "]"); // Luna 参数引用从 1 开始
-                loadParameterAsObject(mv, params.get(i));
-                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "fun/efto/luna/core/expression/context/EvaluationContext", "bind", "(Ljava/lang/String;Ljava/lang/Object;)Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
-                mv.visitInsn(Opcodes.POP);
-            }
-            if (asmContext.getLocalVariables() != null) {
-                for (LocalVarInfo lv : asmContext.getLocalVariables()) {
-                    mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);
-                    mv.visitLdcInsn(lv.getName());
-                    loadTypedAsObject(mv, Type.getType(lv.getDescriptor()), lv.getSlot());
-                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "fun/efto/luna/core/expression/context/EvaluationContext", "bind", "(Ljava/lang/String;Ljava/lang/Object;)Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
-                    mv.visitInsn(Opcodes.POP);
-                }
-            }
-            
-            mv.visitLdcInsn(injectionId);
-            mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/expression/ConditionRegistry", "test", "(Ljava/lang/String;Lfun/efto/luna/core/expression/context/EvaluationContext;)Z", false);
-            mv.visitJumpInsn(Opcodes.IFEQ, endLabel);
+            generateConditionCheck(mv, asmContext, params, isStatic, endLabel);
         }
 
         String prefix = resolveLogPrefix(asmContext);
@@ -142,8 +102,7 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
                 .count();
 
         mv.visitLdcInsn(formatStr.toString());
-
-        mv.visitInsn(Opcodes.ICONST_0 + refCount);
+        pushInt(mv, refCount);
         mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
 
         int arrayIndex = 0;
@@ -169,6 +128,106 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         }
     }
 
+    private void generateSnapshotBytecode(MethodVisitor mv, AsmInjectionContext asmContext, boolean hasCondition) {
+        String methodDesc = asmContext.getInjectionPoint().getTarget().getMethodDescriptor();
+        boolean isStatic = isStaticMethod(asmContext);
+        List<ParameterInfo> params = parseMethodParams(methodDesc, isStatic);
+        List<LocalVarInfo> localVars = asmContext.getLocalVariables();
+        
+        org.objectweb.asm.Label endLabel = new org.objectweb.asm.Label();
+        if (hasCondition) {
+            generateConditionCheck(mv, asmContext, params, isStatic, endLabel);
+        }
+
+        int totalVars = params.size() + (localVars != null ? localVars.size() : 0);
+        String pointId = asmContext.getInjectionPoint().getId();
+        
+        // 压入 pointId
+        mv.visitLdcInsn(pointId);
+        
+        // 1. 创建 Object[] values = new Object[totalVars]
+        pushInt(mv, totalVars);
+        mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
+        
+        int arrayIndex = 0;
+        for (ParameterInfo param : params) {
+            int currentArrayIndex = arrayIndex++;
+            emitArrayStore(mv, currentArrayIndex, () -> loadParameterAsObject(mv, param));
+        }
+        if (localVars != null) {
+            for (LocalVarInfo lv : localVars) {
+                int currentArrayIndex = arrayIndex++;
+                emitArrayStore(mv, currentArrayIndex, () -> loadLocalVariableAsObject(mv, lv));
+            }
+        }
+        
+        // 2. 创建 String[] names = new String[totalVars]
+        pushInt(mv, totalVars);
+        mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
+        
+        arrayIndex = 0;
+        for (int i = 0; i < params.size(); i++) {
+            mv.visitInsn(Opcodes.DUP);
+            pushInt(mv, arrayIndex++);
+            mv.visitLdcInsn("param[" + (i + 1) + "]");
+            mv.visitInsn(Opcodes.AASTORE);
+        }
+        if (localVars != null) {
+            for (LocalVarInfo lv : localVars) {
+                mv.visitInsn(Opcodes.DUP);
+                pushInt(mv, arrayIndex++);
+                mv.visitLdcInsn(lv.getName());
+                mv.visitInsn(Opcodes.AASTORE);
+            }
+        }
+        
+        // 调用 LunaSpy.onSnapshot
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/spy/LunaSpy", "onSnapshot", "(Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;)V", false);
+        
+        if (hasCondition) {
+            mv.visitLabel(endLabel);
+        }
+    }
+
+    private void generateConditionCheck(MethodVisitor mv, AsmInjectionContext asmContext, List<ParameterInfo> params, boolean isStatic, org.objectweb.asm.Label endLabel) {
+        String injectionId = asmContext.getInjectionPoint().getId();
+        
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/expression/context/EvaluationContext", "getThreadLocal", "()Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
+        
+        int maxSlot = isStatic ? 0 : 1;
+        for (ParameterInfo p : params) maxSlot = Math.max(maxSlot, p.getSlot() + p.getType().getSize());
+        if (asmContext.getLocalVariables() != null) {
+            for (LocalVarInfo lv : asmContext.getLocalVariables()) {
+                maxSlot = Math.max(maxSlot, lv.getSlot() + Type.getType(lv.getDescriptor()).getSize());
+            }
+        }
+        int contextVarIndex = maxSlot + 1;
+        
+        mv.visitVarInsn(Opcodes.ASTORE, contextVarIndex);
+        
+        for (int i = 0; i < params.size(); i++) {
+            mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);
+            mv.visitLdcInsn("param[" + (i + 1) + "]"); 
+            loadParameterAsObject(mv, params.get(i));
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "fun/efto/luna/core/expression/context/EvaluationContext", "bind", "(Ljava/lang/String;Ljava/lang/Object;)Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
+            mv.visitInsn(Opcodes.POP);
+        }
+        if (asmContext.getLocalVariables() != null) {
+            for (LocalVarInfo lv : asmContext.getLocalVariables()) {
+                mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);
+                mv.visitLdcInsn(lv.getName());
+                loadTypedAsObject(mv, Type.getType(lv.getDescriptor()), lv.getSlot());
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "fun/efto/luna/core/expression/context/EvaluationContext", "bind", "(Ljava/lang/String;Ljava/lang/Object;)Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
+                mv.visitInsn(Opcodes.POP);
+            }
+        }
+        
+        mv.visitLdcInsn(injectionId);
+        mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/expression/ConditionRegistry", "test", "(Ljava/lang/String;Lfun/efto/luna/core/expression/context/EvaluationContext;)Z", false);
+        mv.visitJumpInsn(Opcodes.IFEQ, endLabel);
+    }
+
     private void emitArrayStore(MethodVisitor mv, int index, Runnable valueLoader) {
         mv.visitInsn(Opcodes.DUP);
         if (index <= 5) {
@@ -185,6 +244,11 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
     }
 
     private void loadLocalVariableAsObject(MethodVisitor mv, LocalVariableInfo localVar) {
+        Type type = Type.getType(localVar.getDescriptor());
+        loadTypedAsObject(mv, type, localVar.getSlot());
+    }
+
+    private void loadLocalVariableAsObject(MethodVisitor mv, LocalVarInfo localVar) {
         Type type = Type.getType(localVar.getDescriptor());
         loadTypedAsObject(mv, type, localVar.getSlot());
     }
@@ -363,6 +427,17 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
 
         public int getSlot() {
             return slot;
+        }
+    }
+    private void pushInt(MethodVisitor mv, int value) {
+        if (value >= 0 && value <= 5) {
+            mv.visitInsn(Opcodes.ICONST_0 + value);
+        } else if (value >= -128 && value <= 127) {
+            mv.visitIntInsn(Opcodes.BIPUSH, value);
+        } else if (value >= -32768 && value <= 32767) {
+            mv.visitIntInsn(Opcodes.SIPUSH, value);
+        } else {
+            mv.visitLdcInsn(value);
         }
     }
 }

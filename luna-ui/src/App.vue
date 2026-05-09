@@ -35,6 +35,20 @@
                 <span class="nav-label">日志监控</span>
               </button>
               <button 
+                :class="['nav-item', { active: activeTab === 'dashboard' }]"
+                @click="activeTab = 'dashboard'"
+              >
+                <i class="fas fa-tachometer-alt nav-icon"></i>
+                <span class="nav-label">监控大盘</span>
+              </button>
+              <button 
+                :class="['nav-item', { active: activeTab === 'thread-analyzer' }]"
+                @click="activeTab = 'thread-analyzer'"
+              >
+                <i class="fas fa-microchip nav-icon"></i>
+                <span class="nav-label">线程分析</span>
+              </button>
+              <button 
                 :class="['nav-item', { active: activeTab === 'configuration' }]"
                 @click="activeTab = 'configuration'"
               >
@@ -57,6 +71,8 @@
         <main class="app-main">
           <ClassTreeViewer v-if="activeTab === 'class-tree'" @class-count-update="updateClassCount" @refresh-data="handleRefreshData" />
           <LogViewer v-else-if="activeTab === 'log'" />
+          <Dashboard v-else-if="activeTab === 'dashboard'" />
+          <ThreadAnalyzer v-else-if="activeTab === 'thread-analyzer'" />
           <ConfigurationViewer v-else-if="activeTab === 'configuration'" />
         </main>
         
@@ -85,13 +101,17 @@ import { useI18n } from 'vue-i18n'
 import ClassTreeViewer from './views/ClassTreeViewer.vue'
 import ConfigurationViewer from './views/ConfigurationViewer.vue'
 import LogViewer from './views/LogViewer.vue'
+import Dashboard from './views/Dashboard.vue'
+import ThreadAnalyzer from './views/ThreadAnalyzer.vue'
 
 export default {
   name: 'App',
   components: {
     ClassTreeViewer,
     ConfigurationViewer,
-    LogViewer
+    LogViewer,
+    Dashboard,
+    ThreadAnalyzer
   },
   setup() {
     const { t, locale } = useI18n()
@@ -194,7 +214,7 @@ html, body {
 .app-header {
   background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  height: 35px;
+  height: 40px;
   flex-shrink: 0;
 }
 
@@ -246,10 +266,9 @@ html, body {
 /* 导航选项卡 */
 .main-nav {
   display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-  margin-left: auto;
-  margin-right: auto;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
 }
 
 .nav-item {

@@ -72,6 +72,7 @@ public class JettyWebServer {
         dispatcher.registerController(new InjectionController(injectionExecutor, classResourceHelper));
         dispatcher.registerController(new RuleController());
         dispatcher.registerController(new TestController(classScanner, classResourceHelper));
+        dispatcher.registerController(new fun.efto.luna.agent.web.controller.MetricsController());
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");

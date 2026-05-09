@@ -22,7 +22,7 @@ public class ExcludeByClassLoaderNameFilter implements ExcludeClassFilter {
     @Override
     public boolean filter(String fqn, ClassLoader classLoader, ProtectionDomain protectionDomain) {
         if (classLoader == null) {
-            LOGGER.error("classloader is null:{} ", fqn);
+            // Bootstrap ClassLoader
             return true;
         }
         return ignoreClassLoaderNames.contains(classLoader.getClass().getName());

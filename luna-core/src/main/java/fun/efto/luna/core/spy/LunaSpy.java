@@ -27,7 +27,26 @@ public class LunaSpy {
         if (message == null || message.isEmpty()) {
             return;
         }
+        // 临时增加控制台输出，用于排查跨 ClassLoader 连通性
+        System.out.println("[Luna-Spy-Debug] onLog: " + message);
         // 非阻塞投递
         LOG_BUFFER.offer(message);
+    }
+
+    /**
+     * 接收注入字节码执行的条件快照调用
+     *
+     * @param pointId 注入点 ID
+     * @param localVars 局部变量值数组
+     * @param varNames 局部变量名数组
+     */
+    public static void onSnapshot(String pointId, Object[] localVars, String[] varNames) {
+        try {
+            // 调用 StackFrameCapture 获取当前栈和局部变量 JSON
+            String snapshotJson = fun.efto.luna.core.snapshot.StackFrameCapture.capture(pointId, localVars, varNames);
+            LOG_BUFFER.offer(snapshotJson);
+        } catch (Throwable t) {
+            // 极度防御：Agent 不得影响业务执行
+        }
     }
 }

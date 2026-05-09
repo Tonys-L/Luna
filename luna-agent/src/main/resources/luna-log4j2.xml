@@ -4,10 +4,23 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="[Luna] %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
+        <!-- 添加文件日志，路径为当前目录下 luna-agent.log -->
+        <RollingFile name="File" fileName="luna-agent.log" filePattern="luna-agent.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="[Luna] %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
     </Appenders>
     <Loggers>
         <Logger name="fun.efto.luna" level="INFO" additivity="false">
             <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
         </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="File"/>
+        </Root>
     </Loggers>
 </Configuration>

@@ -127,9 +127,9 @@ public class InjectionController {
             data.put("results", resultsArray);
             data.put("injectionPointId", injectionPoint.getId());
             return allSuccess ? ApiResult.ok(data) : failWith("注入失败", data, 500);
-        } catch (Exception e) {
-            return ApiResult.fail("注入失败: " + e.getMessage(),
-                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (Throwable t) {
+            LOGGER.error("注入过程发生严重错误", t);
+            return ApiResult.fail("注入失败: " + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()), 500);
         }
     }
 
@@ -336,7 +336,8 @@ public class InjectionController {
         InjectionTarget target;
         if (injectionType instanceof LineNumberInjectionType) {
             int lineNumber = cmd.getLineNumber() != null ? cmd.getLineNumber() : 0;
-            target = new LineNumberTarget((LineNumberInjectionType) injectionType,
+            LineNumberInjectionType typeWithLine = ((LineNumberInjectionType) injectionType).withLineNumber(lineNumber);
+            target = new LineNumberTarget(typeWithLine,
                     cmd.getClazz(), lineNumber, 0, cmd.getMethod(), cmd.getDesc());
         } else {
             target = new MethodTarget((MethodInjectionType) injectionType,
@@ -346,7 +347,13 @@ public class InjectionController {
             @Override
             public String getCode() { return cmd.getCode(); }
             @Override
-            public CodeType getCodeType() { return CodeType.valueOf(cmd.getCodeType()); }
+            public CodeType getCodeType() {
+                try {
+                    return CodeType.valueOf(cmd.getCodeType().toUpperCase());
+                } catch (Exception e) {
+                    return CodeType.EXPRESSION;
+                }
+            }
         };
         return new InjectionPoint(target, code);
     }

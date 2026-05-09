@@ -26,23 +26,46 @@
         v-for="(log, index) in logs" 
         :key="index" 
         class="log-line"
+        :class="{ 'snapshot-line': log.type === 'SNAPSHOT' }"
       >
-        <span class="log-content">{{ log }}</span>
+        <template v-if="log.type === 'SNAPSHOT'">
+          <span class="log-tag tag-debug">DEBUG</span>
+          <span class="log-content snapshot-link" @click="openDebugger(log.data)">
+            <i class="fas fa-bug"></i> 触发虚拟断点快照: {{ log.data.pointId }} (点击查看详情)
+          </span>
+        </template>
+        <template v-else>
+          <span class="log-content">{{ log.text }}</span>
+        </template>
       </div>
     </div>
+
+    <!-- 调试面板 -->
+    <DebuggerPanel 
+      :visible="debuggerVisible"
+      :snapshot="currentSnapshot"
+      @close="debuggerVisible = false"
+    />
   </div>
 </template>
 
 <script>
+import DebuggerPanel from '../components/DebuggerPanel.vue'
+
 export default {
   name: 'LogViewer',
+  components: {
+    DebuggerPanel
+  },
   data() {
     return {
       logs: [],
       autoScroll: true,
       maxLogs: 1000, // 最大保留日志行数
       ws: null,
-      status: 'disconnected' // connected, disconnected, connecting
+      status: 'disconnected', // connected, disconnected, connecting
+      debuggerVisible: false,
+      currentSnapshot: {}
     }
   },
   computed: {
@@ -98,6 +121,7 @@ export default {
         }
         
         this.ws.onmessage = (event) => {
+          console.log('[Luna] Received WS message:', event.data)
           this.appendLog(event.data)
         }
         
@@ -118,11 +142,30 @@ export default {
       }
     },
     appendLog(message) {
-      this.logs.push(message)
+      console.log('[Luna] Appending log:', message)
+      let logObj = { type: 'TEXT', text: message }
+      
+      // 尝试解析为快照数据
+      if (message.startsWith('{') && message.includes('"type":"SNAPSHOT"')) {
+        try {
+          const data = JSON.parse(message)
+          if (data.type === 'SNAPSHOT') {
+            logObj = { type: 'SNAPSHOT', data: data }
+          }
+        } catch (e) {
+          // 如果不是合法的 JSON，按普通文本处理
+        }
+      }
+
+      this.logs.push(logObj)
       if (this.logs.length > this.maxLogs) {
         this.logs.shift()
       }
       this.scrollToBottom()
+    },
+    openDebugger(snapshot) {
+      this.currentSnapshot = snapshot
+      this.debuggerVisible = true
     },
     clearLogs() {
       this.logs = []
@@ -266,9 +309,46 @@ export default {
   padding: 2px 0;
   word-break: break-all;
   white-space: pre-wrap;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .log-line:hover {
   background-color: rgba(255, 255, 255, 0.05);
+}
+
+.log-tag {
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tag-debug {
+  background-color: #f14c4c;
+  color: white;
+}
+
+.snapshot-line {
+  background-color: rgba(241, 76, 76, 0.05);
+}
+
+.snapshot-link {
+  color: #4fc1ff;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.snapshot-link:hover {
+  color: #9cdcfe;
+}
+
+.snapshot-link i {
+  font-size: 11px;
+  margin-right: 4px;
 }
 </style>

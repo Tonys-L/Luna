@@ -92,6 +92,9 @@ public class LogDispatcher {
                 String logMessage = LunaSpy.LOG_BUFFER.poll();
                 
                 if (logMessage != null) {
+                    // 将注入的日志也输出到 Agent 的本地日志流中（通常是控制台或文件）
+                    LOGGER.info("[Diagnostic] {}", logMessage);
+                    
                     if (!sessions.isEmpty()) {
                         broadcast(logMessage);
                     }

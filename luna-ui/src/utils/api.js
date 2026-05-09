@@ -142,3 +142,23 @@ export async function removeInjection(id) {
     throw error
   }
 }
+
+export async function getJvmMetrics() {
+  try {
+    const data = await get(apiUrl('/metrics/jvm'))
+    return data
+  } catch (error) {
+    console.error('获取 JVM 指标失败:', error)
+    throw error
+  }
+}
+
+export async function getThreadDump() {
+  try {
+    const data = await get(apiUrl('/metrics/threads'))
+    return data
+  } catch (error) {
+    console.error('获取线程堆栈失败:', error)
+    throw error
+  }
+}

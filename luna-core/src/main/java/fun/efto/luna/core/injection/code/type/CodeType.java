@@ -15,7 +15,12 @@ public enum CodeType {
     /**
      * 表达式代码
      */
-    EXPRESSION("expression", "表达式代码");
+    EXPRESSION("expression", "表达式代码"),
+
+    /**
+     * 快照代码 (虚拟断点)
+     */
+    SNAPSHOT("snapshot", "快照代码");
 
     private final String name;
     private final String description;

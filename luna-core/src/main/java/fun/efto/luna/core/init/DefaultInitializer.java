@@ -27,6 +27,7 @@ public class DefaultInitializer implements Initializer {
 
         BytecodeAssemblerRegistry assemblerRegistry = BytecodeAssemblerRegistry.getInstance();
         assemblerRegistry.register(CodeType.EXPRESSION, new ExpressionBytecodeAssembler());
+        assemblerRegistry.register(CodeType.SNAPSHOT, new ExpressionBytecodeAssembler());
 
         AnalyzerRegistry analyzerRegistry = AnalyzerRegistry.getInstance();
         analyzerRegistry.register(new AnalyzerType("ASM", "ASM字节码分析器").register(), new AsmClassAnalyzer());

@@ -56,6 +56,12 @@ public class Agent {
     private static void startAgent(String args, Instrumentation inst) {
         initLogger();
         try {
+            // 获取 agent jar 文件路径并添加到 bootstrap classloader，确保 Spy 类全局可见且共享
+            String agentJarPath = Agent.class.getProtectionDomain()
+                    .getCodeSource().getLocation().toURI().getPath();
+            logger.info("Appending agent jar to bootstrap classloader: {}", agentJarPath);
+            inst.appendToBootstrapClassLoaderSearch(new java.util.jar.JarFile(agentJarPath));
+
             logger.info("Initializing Luna agent components...");
             InitializerManager.getInstance().initializeAll();
             InjectionExecutor injectionExecutor = InjectionExecutor.init(inst);

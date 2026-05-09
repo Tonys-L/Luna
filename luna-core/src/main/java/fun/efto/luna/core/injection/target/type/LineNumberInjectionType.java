@@ -44,14 +44,12 @@ public class LineNumberInjectionType extends InjectionType {
         if (o == null || getClass() != o.getClass()) return false;
 
         LineNumberInjectionType that = (LineNumberInjectionType) o;
-        return name.equals(that.name) && lineNumber == that.lineNumber;
+        return name.equals(that.name);
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + lineNumber;
-        return result;
+        return name.hashCode();
     }
 
     @Override

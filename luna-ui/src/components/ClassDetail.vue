@@ -304,6 +304,7 @@
               class="form-select"
             >
               <option value="EXPRESSION">表达式 (Expression)</option>
+              <option value="SNAPSHOT">捕获快照 (Snapshot)</option>
             </select>
           </div>
           <div class="form-group">
@@ -319,7 +320,7 @@
               <span>满足条件时才会执行注入。支持使用 $1, $2 或者 param[0], $varName 等引用变量。</span>
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group" v-if="injectForm.codeType === 'EXPRESSION'">
             <label class="form-label">{{ t('detail.log_content') }}</label>
             <textarea 
               v-model="injectForm.logContent" 
@@ -974,7 +975,9 @@ export default {
           method: this.currentMethod.name,
           injectionType: this.injectForm.injectionType,
           codeType: this.injectForm.codeType,
-          code: this.injectForm.condition ? `\${${this.injectForm.condition}}::log:${this.injectForm.logContent}` : `log:${this.injectForm.logContent}`,
+          code: this.injectForm.codeType === 'SNAPSHOT' 
+            ? (this.injectForm.condition ? `\${${this.injectForm.condition}}::snapshot:` : `snapshot:`)
+            : (this.injectForm.condition ? `\${${this.injectForm.condition}}::log:${this.injectForm.logContent}` : `log:${this.injectForm.logContent}`),
           desc: this.currentMethod.descriptor
         }
 

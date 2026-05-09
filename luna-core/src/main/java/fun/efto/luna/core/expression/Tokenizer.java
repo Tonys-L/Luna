@@ -52,18 +52,36 @@ public class Tokenizer {
                     tokens.add(new Token(Token.Type.IDENTIFIER, identifier));
                 }
             } else if (Character.isDigit(current)) {
-                // 数字
+                // 数字（支持整数和浮点数）
                 int start = position;
                 while (position < expression.length() && Character.isDigit(expression.charAt(position))) {
                     position++;
                 }
+                // 检查小数点
+                if (position < expression.length() && expression.charAt(position) == '.'
+                        && position + 1 < expression.length() && Character.isDigit(expression.charAt(position + 1))) {
+                    position++; // 跳过小数点
+                    while (position < expression.length() && Character.isDigit(expression.charAt(position))) {
+                        position++;
+                    }
+                }
                 String number = expression.substring(start, position);
                 tokens.add(new Token(Token.Type.NUMBER, number));
             } else if (current == '"') {
-                // 字符串
+                // 双引号字符串
                 position++;
                 int start = position;
                 while (position < expression.length() && expression.charAt(position) != '"') {
+                    position++;
+                }
+                String string = expression.substring(start, position);
+                tokens.add(new Token(Token.Type.STRING, string));
+                position++;
+            } else if (current == '\'') {
+                // 单引号字符串
+                position++;
+                int start = position;
+                while (position < expression.length() && expression.charAt(position) != '\'') {
                     position++;
                 }
                 String string = expression.substring(start, position);

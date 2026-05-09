@@ -129,16 +129,17 @@ public class ExpressionParser {
      * 解析 primary 表达式
      */
     private ExpressionNode parsePrimary() {
+        ExpressionNode node = null;
         if (match(Token.Type.NUMBER)) {
             Token token = getCurrentToken();
             consume();
             try {
                 int value = Integer.parseInt(token.getValue());
-                return new ConstantNode(value, Integer.class);
+                node = new ConstantNode(value, Integer.class);
             } catch (NumberFormatException e) {
                 try {
                     double value = Double.parseDouble(token.getValue());
-                    return new ConstantNode(value, Double.class);
+                    node = new ConstantNode(value, Double.class);
                 } catch (NumberFormatException ex) {
                     throw new IllegalArgumentException("Invalid number: " + token.getValue());
                 }
@@ -146,12 +147,12 @@ public class ExpressionParser {
         } else if (match(Token.Type.STRING)) {
             Token token = getCurrentToken();
             consume();
-            return new ConstantNode(token.getValue(), String.class);
+            node = new ConstantNode(token.getValue(), String.class);
         } else if (match(Token.Type.BOOLEAN)) {
             Token token = getCurrentToken();
             consume();
             boolean value = Boolean.parseBoolean(token.getValue());
-            return new ConstantNode(value, Boolean.class);
+            node = new ConstantNode(value, Boolean.class);
         } else if (match(Token.Type.IDENTIFIER)) {
             Token token = getCurrentToken();
             consume();
@@ -168,20 +169,47 @@ public class ExpressionParser {
                     }
                 }
                 consume();
-                return new FunctionCallNode(token.getValue(), arguments);
+                node = new FunctionCallNode(token.getValue(), arguments);
+            } else if (match(Token.Type.LEFT_BRACKET)) {
+                // 处理数组下标形式的变量，如 param[0]
+                consume();
+                Token indexToken = getCurrentToken();
+                if (!match(Token.Type.NUMBER)) {
+                    throw new IllegalArgumentException("Expected number index after [");
+                }
+                consume();
+                if (!match(Token.Type.RIGHT_BRACKET)) {
+                    throw new IllegalArgumentException("Expected ]");
+                }
+                consume();
+                node = new VariableNode(token.getValue() + "[" + indexToken.getValue() + "]");
+            } else {
+                // 否则是变量引用
+                node = new VariableNode(token.getValue());
             }
-            // 否则是变量引用
-            return new VariableNode(token.getValue());
         } else if (match(Token.Type.LEFT_PAREN)) {
             consume();
-            ExpressionNode expression = parse();
+            node = parse();
             if (!match(Token.Type.RIGHT_PAREN)) {
                 throw new IllegalArgumentException("Expected )");
             }
             consume();
-            return expression;
+        } else {
+            throw new IllegalArgumentException("Unexpected token: " + getCurrentToken());
         }
-        throw new IllegalArgumentException("Unexpected token: " + getCurrentToken());
+
+        // 处理后缀属性访问（如 .name）
+        while (match(Token.Type.DOT)) {
+            consume();
+            Token propToken = getCurrentToken();
+            if (!match(Token.Type.IDENTIFIER)) {
+                throw new IllegalArgumentException("Expected property name after .");
+            }
+            consume();
+            node = new fun.efto.luna.core.expression.ast.PropertyAccessNode(node, propToken.getValue());
+        }
+
+        return node;
     }
 
     /**

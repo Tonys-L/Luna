@@ -202,8 +202,12 @@
             <span class="injection-detail-value">{{ selectedInjectionMarker.lineNumber }}</span>
           </div>
           <div class="injection-detail-row">
-            <span class="injection-detail-label">Code:</span>
-            <code class="injection-detail-code">{{ selectedInjectionMarker.code }}</code>
+            <span class="injection-detail-label">Condition:</span>
+            <code class="injection-detail-code">{{ parseInjectionCondition(selectedInjectionMarker.code) || '无条件 (Always)' }}</code>
+          </div>
+          <div class="injection-detail-row">
+            <span class="injection-detail-label">Log:</span>
+            <code class="injection-detail-code">{{ parseInjectionLog(selectedInjectionMarker.code) }}</code>
           </div>
           <div class="injection-detail-row">
             <span class="injection-detail-label">Time:</span>
@@ -301,6 +305,19 @@
             >
               <option value="EXPRESSION">表达式 (Expression)</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">条件表达式 (Condition Expression)</label>
+            <input 
+              v-model="injectForm.condition" 
+              type="text" 
+              class="form-input"
+              placeholder="例如: param[0] != null 或者 age >= 18 (留空表示无条件)"
+            />
+            <div class="form-hint">
+              <i class="fas fa-info-circle"></i>
+              <span>满足条件时才会执行注入。支持使用 $1, $2 或者 param[0], $varName 等引用变量。</span>
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">{{ t('detail.log_content') }}</label>
@@ -445,6 +462,7 @@ export default {
         injectionType: 'ENTER_METHOD',
         codeType: 'EXPRESSION',
         logContent: '',
+        condition: '',
         lineNumber: null
       },
       currentMethod: null,
@@ -703,6 +721,7 @@ export default {
         this.injectForm.lineNumber = null
       }
       this.injectForm.logContent = `${injectionType === 'LINE_BEFORE' ? '行前' : '行后'}注入`
+      this.injectForm.condition = ''
       this.injectDialogVisible = true
     },
     findMethodByLine(lineNumber) {
@@ -729,6 +748,7 @@ export default {
     showInjectDialog(method) {
       this.currentMethod = method
       this.injectForm.logContent = `执行方法: ${this.classInfo.className}.${method.name}`
+      this.injectForm.condition = ''
       this.localVariables = []
       this.injectDialogVisible = true
     },
@@ -882,7 +902,7 @@ export default {
             className: lineBgClassName,
             glyphMarginClassName: glyphClassName,
             glyphMarginHoverMessage: {
-              value: `**[${typeLabel}]** ${marker.code}\n\nInjection time: ${new Date(marker.timestamp).toLocaleTimeString()}`
+              value: `**[${typeLabel}]**\n- **Condition:** ${this.parseInjectionCondition(marker.code) || '无条件 (Always)'}\n- **Log:** ${this.parseInjectionLog(marker.code)}\n\nInjection time: ${new Date(marker.timestamp).toLocaleTimeString()}`
             }
           }
         })
@@ -914,6 +934,17 @@ export default {
       }
       return labels[type] || type
     },
+    parseInjectionCondition(code) {
+      if (!code) return ''
+      const match = code.match(/^\$\{(.+?)\}::/)
+      return match ? match[1] : ''
+    },
+    parseInjectionLog(code) {
+      if (!code) return ''
+      const match = code.match(/^\$\{(.+?)\}::(.*)/)
+      if (match) return match[2]
+      return code.startsWith('log:') ? code.substring(4) : code
+    },
     async removeInjectionPoint(marker) {
       if (!marker || !marker.id) {
         this.$message.error('No injection point ID')
@@ -943,7 +974,7 @@ export default {
           method: this.currentMethod.name,
           injectionType: this.injectForm.injectionType,
           codeType: this.injectForm.codeType,
-          code: `log:${this.injectForm.logContent}`,
+          code: this.injectForm.condition ? `\${${this.injectForm.condition}}::log:${this.injectForm.logContent}` : `log:${this.injectForm.logContent}`,
           desc: this.currentMethod.descriptor
         }
 

@@ -76,6 +76,9 @@ public class JettyWebServer {
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         context.addServlet(new ServletHolder(dispatcher), "/api/*");
+        
+        // 注册 WebSocket Servlet
+        context.addServlet(new ServletHolder(new fun.efto.luna.agent.web.ws.LogWebSocketServlet()), "/ws/log");
 
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new org.eclipse.jetty.server.Handler[]{resourceHandler, context});
@@ -95,10 +98,13 @@ public class JettyWebServer {
         try {
             server.start();
             running = true;
+            
+            // 启动日志分发器
+            fun.efto.luna.agent.web.ws.LogDispatcher.getInstance().start();
 
             LOGGER.info("Luna Web服务器启动成功:");
             LOGGER.info("  - HTTP服务: http://{}:{}", configuration.getHost(), port);
-            LOGGER.info("  - 管理界面: http://{}:{}", configuration.getHost(), port);
+            LOGGER.info("  - WebSocket服务: ws://{}:{}/ws/log", configuration.getHost(), port);
 
         } catch (Exception e) {
             running = false;
@@ -112,6 +118,9 @@ public class JettyWebServer {
         }
 
         try {
+            // 停止日志分发器
+            fun.efto.luna.agent.web.ws.LogDispatcher.getInstance().stop();
+            
             server.stop();
             server.destroy();
             running = false;

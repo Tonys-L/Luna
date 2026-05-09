@@ -28,6 +28,13 @@
                 <span class="nav-label">{{ t('nav.class_tree') }}</span>
               </button>
               <button 
+                :class="['nav-item', { active: activeTab === 'log' }]"
+                @click="activeTab = 'log'"
+              >
+                <i class="fas fa-terminal nav-icon"></i>
+                <span class="nav-label">日志监控</span>
+              </button>
+              <button 
                 :class="['nav-item', { active: activeTab === 'configuration' }]"
                 @click="activeTab = 'configuration'"
               >
@@ -49,6 +56,7 @@
         <!-- 主内容区域 -->
         <main class="app-main">
           <ClassTreeViewer v-if="activeTab === 'class-tree'" @class-count-update="updateClassCount" @refresh-data="handleRefreshData" />
+          <LogViewer v-else-if="activeTab === 'log'" />
           <ConfigurationViewer v-else-if="activeTab === 'configuration'" />
         </main>
         
@@ -76,12 +84,14 @@
 import { useI18n } from 'vue-i18n'
 import ClassTreeViewer from './views/ClassTreeViewer.vue'
 import ConfigurationViewer from './views/ConfigurationViewer.vue'
+import LogViewer from './views/LogViewer.vue'
 
 export default {
   name: 'App',
   components: {
     ClassTreeViewer,
-    ConfigurationViewer
+    ConfigurationViewer,
+    LogViewer
   },
   setup() {
     const { t, locale } = useI18n()

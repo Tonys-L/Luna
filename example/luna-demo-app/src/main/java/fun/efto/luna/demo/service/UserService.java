@@ -18,6 +18,17 @@ public class UserService {
 
     public User createUser(String name, int age) {
         long id = idGenerator.getAndIncrement();
+        int count =0;
+        for (int i = 0; i < 100; i++) {
+            int a = 0;
+            int b = 0;
+            if(i%2==0){
+                int c = a+b;
+                count++;
+            }else{
+                int d = a-b;
+            }
+        }
         User user = new User(id, name, age, name.toLowerCase() + "@example.com");
         userStore.put(id, user);
         System.out.println("[UserService] User count: " + userStore.size());

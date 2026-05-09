@@ -20,6 +20,10 @@
             <artifactId>asm</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-tree</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.benf</groupId>
             <artifactId>cfr</artifactId>
         </dependency>

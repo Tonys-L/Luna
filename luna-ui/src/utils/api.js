@@ -1,6 +1,6 @@
 import { get, post, put, del } from './request'
 
-const API_BASE = 'http://localhost:8421/api'
+const API_BASE = '/api'
 
 function apiUrl(path) {
   return `${API_BASE}${path}`
@@ -29,13 +29,13 @@ export async function getClassAnalysis(className) {
 export async function getDecompiledCode(className) {
   try {
     const data = await get(apiUrl('/decompile'), { class: className })
-    if (data && data.decompiled) {
-      return data.decompiled.replace(/\\n/g, '\n').replace(/\\"/g, '"')
+    if (data && data.decompiled !== undefined) {
+      return data.decompiled
     }
-    return data || ''
+    return ''
   } catch (error) {
     console.error('获取反编译代码失败:', error)
-    return `// 获取反编译代码失败: ${error.message}\n// 类名: ${className}`
+    return `// Failed to decompile: ${error.message}\n// Class: ${className}`
   }
 }
 
@@ -106,5 +106,39 @@ export async function getLineNumbers(className) {
   } catch (error) {
     console.error('获取行号表失败:', error)
     return {}
+  }
+}
+
+export async function getLocalVariables(className, methodName, methodDesc, lineNumber) {
+  try {
+    const params = { class: className, method: methodName, line: lineNumber }
+    if (methodDesc) {
+      params.desc = methodDesc
+    }
+    const data = await get(apiUrl('/local-variables'), params)
+    return data || { variables: [] }
+  } catch (error) {
+    console.error('获取局部变量表失败:', error)
+    return { variables: [] }
+  }
+}
+
+export async function getInjectionList(className) {
+  try {
+    const data = await get(apiUrl('/inject/list'), { class: className })
+    return data || { injections: [] }
+  } catch (error) {
+    console.error('获取注入点列表失败:', error)
+    return { injections: [] }
+  }
+}
+
+export async function removeInjection(id) {
+  try {
+    const data = await post(apiUrl('/inject/remove'), { id })
+    return data
+  } catch (error) {
+    console.error('删除注入点失败:', error)
+    throw error
   }
 }

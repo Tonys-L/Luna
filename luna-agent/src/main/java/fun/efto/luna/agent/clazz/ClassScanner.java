@@ -10,23 +10,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
- * @since ：2025/10/2 15:07
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since  : 2025/10/2 15:07
  */
 public final class ClassScanner {
     private static volatile ClassScanner instance;
     private final ExcludeClassFilter excludeClassFilter;
     private final Set<String> loadedClassName = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final AtomicBoolean canUpdateCache = new AtomicBoolean(true);
-    private Instrumentation inst;
-    private Map<String, Set<LoadedClass>> internalCache = new ConcurrentHashMap<>();
+    private volatile Map<String, Set<LoadedClass>> internalCache = new ConcurrentHashMap<>();
+    private final Instrumentation inst;
 
     private ClassScanner(Instrumentation inst, ExcludeClassFilter excludeClassFilter) {
         this.inst = inst;
-        this.excludeClassFilter = new CompositeExcludeClassFilter(excludeClassFilter, new ExcludeLoadedClassFilter(loadedClassName));
+        this.excludeClassFilter = excludeClassFilter;
         scan();
         inst.addTransformer(new ClassLoadMonitor(this));
     }
@@ -43,54 +41,63 @@ public final class ClassScanner {
     }
 
     private void initCache() {
-        internalCache = new ConcurrentHashMap<>();
-        loadedClassName.clear();
+        Map<String, Set<LoadedClass>> newCache = new ConcurrentHashMap<>();
+        Set<String> newLoadedNames = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
         Class<?>[] allLoadedClasses = inst.getAllLoadedClasses();
         for (Class<?> clazz : allLoadedClasses) {
-            addToCache(clazz);
+            if (Objects.nonNull(clazz)) {
+                String className = clazz.getName();
+                addToCache(className, clazz.getClassLoader(), clazz.getProtectionDomain(), newCache, newLoadedNames);
+            }
         }
+
+        this.internalCache = newCache;
+        this.loadedClassName.clear();
+        this.loadedClassName.addAll(newLoadedNames);
     }
 
-
-    private void addToCache(Class<?> clazz) {
-        if (Objects.nonNull(clazz)) {
-            String className = clazz.getName();
-            addToCache(className, clazz.getClassLoader(), clazz.getProtectionDomain());
+    private void addToCache(String className, ClassLoader classLoader, ProtectionDomain protectionDomain,
+                            Map<String, Set<LoadedClass>> cache, Set<String> nameSet) {
+        if (Objects.isNull(className) || className.isEmpty()) {
+            return;
         }
+        if (excludeClassFilter.filter(className, classLoader, protectionDomain)) {
+            return;
+        }
+        if (!nameSet.add(className)) {
+            return;
+        }
+        String classLoaderName = determineClassLoaderName(classLoader);
+        cache.computeIfAbsent(classLoaderName, k -> ConcurrentHashMap.newKeySet())
+                .add(new LoadedClass(className));
     }
 
-    private void addToCache(String className, ClassLoader classLoader, ProtectionDomain protectionDomain) {
-        if (Objects.nonNull(className) && !className.isEmpty() && !excludeClassFilter.filter(className, classLoader, protectionDomain)) {
-            String classLoaderName = determineClassLoaderName(classLoader);
-            internalCache.computeIfAbsent(classLoaderName, k -> ConcurrentHashMap.newKeySet())
-                    .add(new LoadedClass(className));
-            loadedClassName.add(className);
+    void onClassLoaded(String className, ClassLoader classLoader, ProtectionDomain protectionDomain) {
+        if (Objects.isNull(className) || className.isEmpty()) {
+            return;
         }
-
+        if (excludeClassFilter.filter(className, classLoader, protectionDomain)) {
+            return;
+        }
+        if (!loadedClassName.add(className)) {
+            return;
+        }
+        String classLoaderName = determineClassLoaderName(classLoader);
+        internalCache.computeIfAbsent(classLoaderName, k -> ConcurrentHashMap.newKeySet())
+                .add(new LoadedClass(className));
     }
 
     private String determineClassLoaderName(ClassLoader classLoader) {
-        String name;
         if (classLoader == null) {
-            name = "Bootstrap";
-        } else {
-            name = classLoader.getClass().getName();
-            if (name.isEmpty()) {
-                name = "unknown";
-            }
+            return "Bootstrap";
         }
-        return name;
+        String name = classLoader.getClass().getName();
+        return name.isEmpty() ? "unknown" : name;
     }
 
     public Map<String, Set<LoadedClass>> scan() {
-        if (!canUpdateCache.compareAndSet(true, false)) {
-            throw new IllegalStateException("Scanning is already in progress");
-        }
-        try {
-            initCache();
-        } finally {
-            canUpdateCache.set(true);
-        }
+        initCache();
         return Collections.unmodifiableMap(internalCache);
     }
 
@@ -106,34 +113,13 @@ public final class ClassScanner {
         }
 
         @Override
-        public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-            if (!classScanner.canUpdateCache.compareAndSet(true, false)) {
-                return classfileBuffer;
-            }
-            try {
-                if (className != null) {
-                    String fqn = ClassNameUtils.toFqn(className);
-                    classScanner.addToCache(fqn, loader, protectionDomain);
-                }
-            } finally {
-                classScanner.canUpdateCache.set(true);
+        public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+                                ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+            if (className != null) {
+                String fqn = ClassNameUtils.toFqn(className);
+                classScanner.onClassLoaded(fqn, loader, protectionDomain);
             }
             return classfileBuffer;
         }
     }
-
-    private static class ExcludeLoadedClassFilter implements ExcludeClassFilter {
-
-        private final Set<String> loadedClassName;
-
-        public ExcludeLoadedClassFilter(Set<String> loadedClassName) {
-            this.loadedClassName = loadedClassName;
-        }
-
-        @Override
-        public boolean filter(String fqn, ClassLoader classLoader, ProtectionDomain protectionDomain) {
-            return loadedClassName.contains(fqn);
-        }
-    }
 }
-

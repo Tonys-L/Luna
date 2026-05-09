@@ -56,4 +56,36 @@ public class InjectionPointRegistry {
         List<InjectionPoint> points = registry.get(className);
         return points != null && !points.isEmpty();
     }
+
+    public InjectionPoint getById(String id) {
+        for (List<InjectionPoint> points : registry.values()) {
+            for (InjectionPoint point : points) {
+                if (point.getId().equals(id)) {
+                    return point;
+                }
+            }
+        }
+        return null;
+    }
+
+    public String removeById(String id) {
+        for (Map.Entry<String, List<InjectionPoint>> entry : registry.entrySet()) {
+            List<InjectionPoint> points = entry.getValue();
+            for (InjectionPoint point : points) {
+                if (point.getId().equals(id)) {
+                    points.remove(point);
+                    if (points.isEmpty()) {
+                        registry.remove(entry.getKey());
+                    }
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<InjectionPoint> getAllInjectionPoints(String className) {
+        List<InjectionPoint> points = registry.get(className);
+        return points != null ? new ArrayList<>(points) : new ArrayList<>();
+    }
 }

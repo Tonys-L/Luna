@@ -55,7 +55,7 @@ async function request(url, options = {}) {
     // 尝试解析JSON
     try {
       const data = await response.json();
-      return data;
+      return unwrapApiResult(data);
     } catch (jsonError) {
       // 如果不是JSON响应，返回文本
       const text = await response.text();
@@ -123,3 +123,15 @@ export function del(url) {
 
 // 导出基础请求方法
 export { request };
+
+function unwrapApiResult(data) {
+  if (data && typeof data === 'object' && 'success' in data && 'data' in data) {
+    if (!data.success) {
+      const error = new Error(data.error || '请求失败');
+      error.status = data.status || 400;
+      throw error;
+    }
+    return data.data;
+  }
+  return data;
+}

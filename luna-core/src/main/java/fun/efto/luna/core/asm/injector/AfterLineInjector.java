@@ -3,22 +3,24 @@ package fun.efto.luna.core.asm.injector;
 import fun.efto.luna.core.InjectionContext;
 import fun.efto.luna.core.asm.AsmInjectionContext;
 import fun.efto.luna.core.asm.ClassLoaderAwareClassWriter;
-import fun.efto.luna.core.asm.Constants;
-import fun.efto.luna.core.asm.injector.visitor.LineNumberVisitor;
+import fun.efto.luna.core.asm.LocalVariableScanner;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
 import fun.efto.luna.core.injector.BytecodeInjector;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.LineNumberNode;
+import org.objectweb.asm.tree.MethodNode;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
- * @since ：2025/10/4 18:00
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since  : 2025/10/4 18:00
  */
 public class AfterLineInjector implements BytecodeInjector {
 
@@ -26,55 +28,73 @@ public class AfterLineInjector implements BytecodeInjector {
     public byte[] inject(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
         AsmInjectionContext asmContext = new AsmInjectionContext(injectionContext, bytecode);
 
-        ClassReader cr = new ClassReader(bytecode);
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        ClassWriter cw = new ClassLoaderAwareClassWriter(cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES, loader);
-        asmContext.setClassVisitor(cw);
+        LineNumberTarget target = (LineNumberTarget) asmContext.getInjectionTarget();
+        List<AsmInjectionContext.LocalVarInfo> visibleVars = LocalVariableScanner.scanVisibleLocalVariables(
+                bytecode, target.getMethodName(), target.getMethodDescriptor(), target.getLineNumber());
+        asmContext.setLocalVariables(visibleVars);
 
-        final List<LineNumberVisitor> visitors = new ArrayList<>();
+        ClassNode cn = new ClassNode();
+        new ClassReader(bytecode).accept(cn, ClassReader.EXPAND_FRAMES);
 
-        ClassVisitor cv = new ClassVisitor(Constants.AMS_API_VERSION, cw) {
-            @Override
-            public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-                MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
-                asmContext.setMethodVisitor(mv);
+        boolean injected = false;
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals(target.getMethodName())) continue;
+            if (target.getMethodDescriptor() != null && !target.getMethodDescriptor().isEmpty()
+                    && !mn.desc.equals(target.getMethodDescriptor())) continue;
 
-                if (shouldInjectIntoMethod(name, descriptor, asmContext)) {
-                    LineNumberVisitor visitor = new LineNumberVisitor(Constants.AMS_API_VERSION, asmContext, bytecodeAssembler, false);
-                    visitors.add(visitor);
-                    return visitor;
+            asmContext.setMethodAccess(mn.access);
+
+            AbstractInsnNode insn = mn.instructions.getFirst();
+            while (insn != null) {
+                if (insn instanceof LineNumberNode) {
+                    LineNumberNode lnn = (LineNumberNode) insn;
+                    if (lnn.line == target.getLineNumber()) {
+                        AbstractInsnNode insertAfter = findLastInsnOfLine(mn, lnn);
+                        InsnList injectedCode = TreeApiBytecodeHelper.assemble(asmContext, bytecode, bytecodeAssembler);
+                        mn.instructions.insert(insertAfter, injectedCode);
+                        injected = true;
+                        break;
+                    }
                 }
-                return mv;
+                insn = insn.getNext();
             }
-        };
-
-        cr.accept(cv, ClassReader.EXPAND_FRAMES);
-
-        boolean anyInjected = visitors.stream().anyMatch(LineNumberVisitor::isInjected);
-        if (!anyInjected) {
-            LineNumberTarget target = (LineNumberTarget) asmContext.getInjectionTarget();
-            throw new RuntimeException("行号 " + target.getLineNumber() + " 在方法 " + target.getMethodName() + " 中不存在");
+            if (injected) break;
         }
 
+        if (!injected) {
+            throw new RuntimeException("line " + target.getLineNumber() + " not found in method " + target.getMethodName());
+        }
+
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        ClassWriter cw = new ClassLoaderAwareClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES, loader);
+        cn.accept(cw);
         return cw.toByteArray();
     }
 
-    private boolean shouldInjectIntoMethod(String name, String descriptor, AsmInjectionContext asmContext) {
-        if (asmContext.getInjectionTarget() instanceof LineNumberTarget) {
-            LineNumberTarget target = (LineNumberTarget) asmContext.getInjectionTarget();
-            String targetMethodName = target.getMethodName();
-            if (targetMethodName != null && !targetMethodName.isEmpty()) {
-                if (!name.equals(targetMethodName)) {
-                    return false;
-                }
-                String targetDesc = target.getMethodDescriptor();
-                if (targetDesc != null && !targetDesc.isEmpty()) {
-                    return descriptor.equals(targetDesc);
-                }
-                return true;
+    private AbstractInsnNode findLastInsnOfLine(MethodNode mn, LineNumberNode startLnn) {
+        AbstractInsnNode insn = startLnn;
+        AbstractInsnNode lastRealInsn = null;
+
+        while (insn != null) {
+            if (insn instanceof LineNumberNode && insn != startLnn) {
+                break;
             }
-            return true;
+            if (!(insn instanceof LineNumberNode) && insn.getOpcode() != -1) {
+                lastRealInsn = insn;
+            }
+            if (isReturnOrThrow(insn.getOpcode())) {
+                break;
+            }
+            insn = insn.getNext();
         }
-        return false;
+
+        return lastRealInsn != null ? lastRealInsn : startLnn;
+    }
+
+    private boolean isReturnOrThrow(int opcode) {
+        return opcode == Opcodes.RETURN || opcode == Opcodes.IRETURN
+                || opcode == Opcodes.LRETURN || opcode == Opcodes.FRETURN
+                || opcode == Opcodes.DRETURN || opcode == Opcodes.ARETURN
+                || opcode == Opcodes.ATHROW;
     }
 }

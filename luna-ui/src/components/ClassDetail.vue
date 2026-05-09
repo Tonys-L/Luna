@@ -150,13 +150,14 @@
             </button>
             <div v-if="decompiledCode" class="editor-container">
               <CodeEditor
+                :key="'decompile-' + classInfo?.className"
                 :options="editorOptions"
                 :value="decompiledCode"
                 class="code-editor"
                 language="java"
                 @change="handleEditorChange"
                 @editorWillMount="onEditorWillMount"
-                @mount="onEditorMount"
+                @editorDidMount="onEditorMount"
               />
             </div>
             <div v-else-if="loadingDecompiled" class="loading-placeholder">
@@ -182,6 +183,41 @@
       <span class="no-selection-text">{{ t('detail.no_selection') }}</span>
     </div>
     
+    <!-- 注入详情弹窗 -->
+    <div v-if="injectionDetailVisible && selectedInjectionMarker" class="injection-detail-overlay" @click.self="injectionDetailVisible = false">
+      <div class="injection-detail-panel">
+        <div class="injection-detail-header">
+          <span class="injection-detail-type" :class="'type-' + selectedInjectionMarker.type.toLowerCase().replace('_', '-')">
+            {{ getInjectionTypeLabel(selectedInjectionMarker.type) }}
+          </span>
+          <button class="injection-detail-close" @click="injectionDetailVisible = false">&times;</button>
+        </div>
+        <div class="injection-detail-body">
+          <div class="injection-detail-row">
+            <span class="injection-detail-label">Method:</span>
+            <span class="injection-detail-value">{{ selectedInjectionMarker.method }}</span>
+          </div>
+          <div v-if="selectedInjectionMarker.lineNumber" class="injection-detail-row">
+            <span class="injection-detail-label">Line:</span>
+            <span class="injection-detail-value">{{ selectedInjectionMarker.lineNumber }}</span>
+          </div>
+          <div class="injection-detail-row">
+            <span class="injection-detail-label">Code:</span>
+            <code class="injection-detail-code">{{ selectedInjectionMarker.code }}</code>
+          </div>
+          <div class="injection-detail-row">
+            <span class="injection-detail-label">Time:</span>
+            <span class="injection-detail-value">{{ new Date(selectedInjectionMarker.timestamp).toLocaleString() }}</span>
+          </div>
+        </div>
+        <div class="injection-detail-footer">
+          <button class="injection-detail-delete" @click="removeInjectionPoint(selectedInjectionMarker)">
+            Delete Injection
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 注入日志对话框 -->
     <div v-if="injectDialogVisible" class="dialog-overlay" @click="closeDialog">
       <div class="dialog-content" @click.stop>
@@ -232,6 +268,31 @@
               <span>选择字节码中实际存在的源码行号 (共 {{ availableSourceLines.length }} 行)</span>
             </div>
           </div>
+          <div class="form-group" v-if="isLineInjection && injectForm.lineNumber">
+            <label class="form-label">可用局部变量 (Local Variables)</label>
+            <div class="local-vars-container" v-if="loadingLocalVariables">
+              <div class="loading-spinner-small"></div>
+              <span>加载中...</span>
+            </div>
+            <div class="local-vars-container" v-else-if="localVariables.length > 0">
+              <span 
+                v-for="v in localVariables" 
+                :key="v.name + v.slot"
+                class="local-var-tag"
+                @click="insertLocalVariableRef(v.name)"
+                :title="'点击插入 $' + v.name"
+              >
+                ${{ v.name }} <span class="local-var-type">({{ formatDescriptor(v.descriptor) }})</span>
+              </span>
+            </div>
+            <div class="local-vars-container" v-else>
+              <span class="no-data">该行号处无可见局部变量</span>
+            </div>
+            <div class="form-hint">
+              <i class="fas fa-info-circle"></i>
+              <span>点击变量名可插入到表达式中，使用 $varName 引用局部变量</span>
+            </div>
+          </div>
           <div class="form-group">
             <label class="form-label">{{ t('detail.code_type') }}</label>
             <select 
@@ -251,7 +312,7 @@
             ></textarea>
             <div class="form-hint">
               <i class="fas fa-info-circle"></i>
-              <span>使用 $1, $2, $3... 引用方法参数，例如: name=$1, age=$2</span>
+              <span>使用 $1, $2, $3... 引用方法参数，$varName 引用局部变量，例如: name=$1, result=$result</span>
             </div>
           </div>
         </div>
@@ -273,8 +334,10 @@
 
 <script>
 import { useI18n } from 'vue-i18n'
-import {getDecompiledCode, injectMethodLog, getLineNumbers} from '../utils/api'
+import { markRaw } from 'vue'
+import {getDecompiledCode, injectMethodLog, getLineNumbers, getLocalVariables, getInjectionList, removeInjection} from '../utils/api'
 import {CodeEditor} from 'monaco-editor-vue3'
+import * as monaco from 'monaco-editor'
 
 export default {
   name: 'ClassDetail',
@@ -286,24 +349,83 @@ export default {
     return { t }
   },
   computed: {
+    editorOptions() {
+      const self = this
+      return {
+        readOnly: true,
+        automaticLayout: true,
+        minimap: { enabled: true },
+        scrollBeyondLastLine: false,
+        fontSize: 14,
+        theme: 'vs-dark',
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+        fixedOverflowWidgets: true,
+        glyphMargin: true,
+        lineNumbers: (lineNumber) => {
+          if (self.sourceLineMapping && self.sourceLineMapping[lineNumber]) {
+            return String(self.sourceLineMapping[lineNumber])
+          }
+          return String(lineNumber)
+        }
+      }
+    },
     availableSourceLines() {
-      if (!this.currentMethod || !this.lineNumberMap) return []
-      const methodName = this.currentMethod.name
-      const methodDesc = this.currentMethod.descriptor
-      for (const [methodKey, lineNumbers] of Object.entries(this.lineNumberMap)) {
-        const keyName = methodKey.split('(')[0]
-        const keyDesc = '(' + methodKey.split('(').slice(1).join('(')
-        if (keyName === methodName && (!methodDesc || keyDesc === methodDesc)) {
-          return Array.isArray(lineNumbers) ? [...lineNumbers].sort((a, b) => a - b) : []
+      if (!this.lineNumberMap) return []
+      const methodName = this.currentMethod ? this.currentMethod.name : null
+      const methodDesc = this.currentMethod ? this.currentMethod.descriptor : null
+
+      const normalizeDesc = (desc) => {
+        return desc.replace(/\//g, '.').replace(/\./g, '')
+      }
+
+      if (methodName) {
+        for (const [methodKey, lineNumbers] of Object.entries(this.lineNumberMap)) {
+          const keyName = methodKey.split('(')[0]
+          if (keyName === methodName) {
+            if (!methodDesc) {
+              return Array.isArray(lineNumbers) ? [...new Set(lineNumbers)].sort((a, b) => a - b) : []
+            }
+            const keyDesc = '(' + methodKey.split('(').slice(1).join('(')
+            if (normalizeDesc(keyDesc) === normalizeDesc(methodDesc)) {
+              return Array.isArray(lineNumbers) ? [...new Set(lineNumbers)].sort((a, b) => a - b) : []
+            }
+          }
+        }
+        for (const [methodKey, lineNumbers] of Object.entries(this.lineNumberMap)) {
+          const keyName = methodKey.split('(')[0]
+          if (keyName === methodName) {
+            return Array.isArray(lineNumbers) ? [...new Set(lineNumbers)].sort((a, b) => a - b) : []
+          }
         }
       }
-      for (const [methodKey, lineNumbers] of Object.entries(this.lineNumberMap)) {
-        const keyName = methodKey.split('(')[0]
-        if (keyName === methodName) {
-          return Array.isArray(lineNumbers) ? [...lineNumbers].sort((a, b) => a - b) : []
+
+      const allLines = new Set()
+      for (const lineNumbers of Object.values(this.lineNumberMap)) {
+        if (Array.isArray(lineNumbers)) {
+          lineNumbers.forEach(l => allLines.add(l))
         }
       }
-      return []
+      return [...allLines].sort((a, b) => a - b)
+    },
+    isLineInjection() {
+      return this.injectForm.injectionType === 'LINE_BEFORE' || this.injectForm.injectionType === 'LINE_AFTER'
+    }
+  },
+  watch: {
+    'injectForm.lineNumber'() {
+      if (this.isLineInjection && this.injectForm.lineNumber) {
+        this.fetchLocalVariables()
+      } else {
+        this.localVariables = []
+      }
+    },
+    'injectForm.injectionType'() {
+      if (this.isLineInjection && this.injectForm.lineNumber) {
+        this.fetchLocalVariables()
+      } else {
+        this.localVariables = []
+      }
     }
   },
   props: {
@@ -317,20 +439,6 @@ export default {
       activeTab: 'fields',
       decompiledCode: '',
       loadingDecompiled: false,
-      editorOptions: {
-        readOnly: true,
-        automaticLayout: true,
-        minimap: {
-          enabled: true
-        },
-        scrollBeyondLastLine: false,
-        fontSize: 14,
-        theme: 'vs-dark',
-        wordWrap: 'on',
-        wrappingIndent: 'indent',
-        fixedOverflowWidgets: true,
-        glyphMargin: true
-      },
       injectDialogVisible: false,
       injecting: false,
       injectForm: {
@@ -341,7 +449,16 @@ export default {
       },
       currentMethod: null,
       monacoEditor: null,
-      lineNumberMap: {}
+      lineNumberMap: {},
+      localVariables: [],
+      loadingLocalVariables: false,
+      sourceLineMapping: {},
+      injectionMarkers: [],
+      injectionDecorations: null,
+      sourceLineDecorations: null,
+      loadedClassName: null,
+      selectedInjectionMarker: null,
+      injectionDetailVisible: false
     }
   },
   methods: {
@@ -350,57 +467,143 @@ export default {
 
       this.loadingDecompiled = true
       try {
-        const [code, lineNumbers] = await Promise.all([
-          getDecompiledCode(this.classInfo.className),
-          getLineNumbers(this.classInfo.className)
-        ])
-        this.decompiledCode = code
-        this.lineNumberMap = lineNumbers
-        // 如果编辑器已挂载，更新源码行号装饰
+        const code = await getDecompiledCode(this.classInfo.className)
+
+        if (!code || code.trim() === '') {
+          this.decompiledCode = '// Decompilation returned empty result for class: ' + this.classInfo.className
+          this.sourceLineMapping = {}
+          this.lineNumberMap = {}
+          this.loadingDecompiled = false
+          return
+        }
+
+        const { cleanCode, mapping } = this.parseSourceLineComments(code)
+        this.decompiledCode = cleanCode
+        this.sourceLineMapping = mapping
+        if (this.classInfo.className !== this.loadedClassName) {
+          this.injectionMarkers = []
+          this.loadedClassName = this.classInfo.className
+        }
         if (this.monacoEditor) {
+          this.injectionDecorations = markRaw(this.monacoEditor.createDecorationsCollection([]))
+          this.sourceLineDecorations = markRaw(this.monacoEditor.createDecorationsCollection([]))
+        } else {
+          this.injectionDecorations = null
+          this.sourceLineDecorations = null
+        }
+      } catch (error) {
+        console.error('加载反编译代码失败:', error)
+        this.decompiledCode = '// Failed to load decompiled code: ' + (error.message || error)
+        this.sourceLineMapping = {}
+      } finally {
+        this.loadingDecompiled = false
+      }
+
+      getLineNumbers(this.classInfo.className).then(lineNumbers => {
+        this.lineNumberMap = lineNumbers || {}
+        if (this.monacoEditor && this.sourceLineDecorations) {
           this.$nextTick(() => {
             this.updateSourceLineDecorations()
           })
         }
-      } catch (error) {
-        console.error('加载反编译代码失败:', error)
-        this.$message.error('加载反编译代码失败')
-      } finally {
-        this.loadingDecompiled = false
+      }).catch(err => {
+        console.error('获取行号表失败:', err)
+        this.lineNumberMap = {}
+      })
+
+      getInjectionList(this.classInfo.className).then(injectionData => {
+        if (injectionData && injectionData.injections && injectionData.injections.length > 0) {
+          const existingIds = new Set(this.injectionMarkers.map(m => m.id))
+          for (const inj of injectionData.injections) {
+            if (existingIds.has(inj.id)) continue
+            let editorLine = null
+            if (inj.lineNumber && this.sourceLineMapping) {
+              for (const [eLine, sLine] of Object.entries(this.sourceLineMapping)) {
+                if (sLine === inj.lineNumber) {
+                  editorLine = parseInt(eLine)
+                  break
+                }
+              }
+            }
+            if (!editorLine && inj.method && this.decompiledCode) {
+              editorLine = this.findEditorLineForMethod(inj.method)
+            }
+            this.injectionMarkers.push({
+              id: inj.id,
+              type: inj.type,
+              method: inj.method,
+              lineNumber: inj.lineNumber,
+              code: inj.code,
+              editorLine: editorLine,
+              timestamp: Date.now()
+            })
+          }
+          if (this.monacoEditor && this.injectionDecorations) {
+            this.$nextTick(() => {
+              this.updateInjectionDecorations()
+            })
+          }
+        }
+      }).catch(err => {
+        console.error('Failed to load injection list:', err)
+      })
+    },
+    parseSourceLineComments(code) {
+      if (typeof code !== 'string') {
+        console.error('[Luna] parseSourceLineComments received non-string input:', typeof code, code)
+        return { cleanCode: String(code || ''), mapping: {} }
       }
+
+      const mapping = {}
+      const lines = code.split('\n')
+      const commentPattern = /^\/\*\s*(\d+)\s*\*\/\s?(.*)$/
+
+      for (let i = 0; i < lines.length; i++) {
+        const match = lines[i].match(commentPattern)
+        if (match) {
+          mapping[i + 1] = parseInt(match[1], 10)
+        }
+      }
+
+      return { cleanCode: code, mapping }
+    },
+    getSourceLineForEditorLine(editorLine) {
+      if (this.sourceLineMapping && this.sourceLineMapping[editorLine]) {
+        return this.sourceLineMapping[editorLine]
+      }
+      if (this.sourceLineMapping) {
+        let closest = null
+        let minDist = Infinity
+        for (const [eLine, sLine] of Object.entries(this.sourceLineMapping)) {
+          const dist = Math.abs(parseInt(eLine) - editorLine)
+          if (dist < minDist) {
+            minDist = dist
+            closest = sLine
+          }
+        }
+        return closest
+      }
+      return null
     },
     handleEditorChange(value) {
       console.log('Editor content changed:', value)
     },
-    onEditorWillMount(monaco) {
-      // 保存 monaco 引用，供 updateSourceLineDecorations 使用
-      this.monacoInstance = monaco
-
-      monaco.editor.addCommand({
-        id: 'luna.injectBeforeLine',
-        run: (editor) => {
-          const position = editor.getPosition()
-          if (position) {
-            this.showLineInjectDialog(position.lineNumber, 'LINE_BEFORE')
-          }
-        }
-      })
-      monaco.editor.addCommand({
-        id: 'luna.injectAfterLine',
-        run: (editor) => {
-          const position = editor.getPosition()
-          if (position) {
-            this.showLineInjectDialog(position.lineNumber, 'LINE_AFTER')
-          }
-        }
-      })
+    onEditorWillMount() {
     },
     onEditorMount(editor) {
-      this.monacoEditor = editor
+      this.monacoEditor = markRaw(editor)
 
-      // 如果已有行号数据，更新源码行号装饰
+      this.injectionDecorations = markRaw(editor.createDecorationsCollection([]))
+      this.sourceLineDecorations = markRaw(editor.createDecorationsCollection([]))
+
       if (this.lineNumberMap && Object.keys(this.lineNumberMap).length > 0) {
         this.updateSourceLineDecorations()
+      }
+
+      if (this.injectionMarkers.length > 0) {
+        this.$nextTick(() => {
+          this.updateInjectionDecorations()
+        })
       }
 
       editor.addAction({
@@ -439,44 +642,42 @@ export default {
         ) {
           const lineNumber = e.target.position ? e.target.position.lineNumber : e.target.detail ? e.target.detail.lineNumber : null
           if (lineNumber) {
-            this.showLineInjectDialog(lineNumber, 'LINE_BEFORE')
+            const clickedMarker = this.injectionMarkers.find(m => m.editorLine === lineNumber)
+            if (clickedMarker) {
+              this.selectedInjectionMarker = clickedMarker
+              this.injectionDetailVisible = true
+            } else {
+              this.showLineInjectDialog(lineNumber, 'LINE_BEFORE')
+            }
           }
         }
       })
     },
     updateSourceLineDecorations() {
       if (!this.monacoEditor || !this.decompiledCode || !this.lineNumberMap) return
-
-      const model = this.monacoEditor.getModel()
-      if (!model) return
-
-      const monacoRef = this.monacoInstance
-      if (!monacoRef) return
+      if (!this.sourceLineDecorations) return
 
       const decorations = []
       const lines = this.decompiledCode.split('\n')
 
-      // 遍历行号表，为每个方法找到反编译代码中的位置
       for (const [methodKey, lineNumbers] of Object.entries(this.lineNumberMap)) {
         if (!Array.isArray(lineNumbers) || lineNumbers.length === 0) continue
 
-        // 从 methodKey 中提取方法名（格式: "methodName(Ljava/lang/String;I)V"）
         const methodName = methodKey.split('(')[0]
 
-        // 在反编译代码中搜索方法签名
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i]
           if (line.includes(methodName) && line.includes('(')) {
             const minLine = Math.min(...lineNumbers)
             const maxLine = Math.max(...lineNumbers)
             decorations.push({
-              range: new monacoRef.Range(i + 1, 1, i + 1, 1),
+              range: new monaco.Range(i + 1, 1, i + 1, 1),
               options: {
+                isWholeLine: true,
                 glyphMarginClassName: 'source-line-glyph',
                 glyphMarginHoverMessage: {
-                  value: `**${methodName}** 源码行: ${minLine}-${maxLine} ([${lineNumbers.join(', ')}])`
-                },
-                stickiness: monacoRef.editor.TraversalStickiness.NeverGrowsWhenTypingAtEdges
+                  value: `**${methodName}** source lines: ${minLine}-${maxLine} ([${lineNumbers.join(', ')}])`
+                }
               }
             })
             break
@@ -484,7 +685,7 @@ export default {
         }
       }
 
-      this.monacoEditor.deltaDecorations([], decorations)
+      this.sourceLineDecorations.set(decorations)
     },
     showLineInjectDialog(editorLineNumber, injectionType) {
       const methods = this.classInfo.convertedMethods || this.classInfo.methods || []
@@ -495,7 +696,12 @@ export default {
         this.currentMethod = methods[0]
       }
       this.injectForm.injectionType = injectionType
-      this.injectForm.lineNumber = null
+      const sourceLine = this.getSourceLineForEditorLine(editorLineNumber)
+      if (sourceLine) {
+        this.injectForm.lineNumber = sourceLine
+      } else {
+        this.injectForm.lineNumber = null
+      }
       this.injectForm.logContent = `${injectionType === 'LINE_BEFORE' ? '行前' : '行后'}注入`
       this.injectDialogVisible = true
     },
@@ -503,24 +709,229 @@ export default {
       if (!this.decompiledCode || !this.classInfo) return null
       const methods = this.classInfo.convertedMethods || this.classInfo.methods || []
       const lines = this.decompiledCode.split('\n')
+      let bestMethod = null
+      let bestDistance = Infinity
       for (const method of methods) {
+        if (method.name === '<init>' || method.name === '<clinit>') continue
         const methodName = method.name
-        for (let i = Math.max(0, lineNumber - 5); i < Math.min(lines.length, lineNumber + 5); i++) {
-          if (lines[i] && lines[i].includes(methodName) && lines[i].includes('(')) {
-            return method
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i] && lines[i].includes(methodName) && lines[i].includes('(') && lines[i].includes(')')) {
+            const dist = Math.abs(i + 1 - lineNumber)
+            if (dist < bestDistance && i + 1 <= lineNumber) {
+              bestDistance = dist
+              bestMethod = method
+            }
           }
         }
       }
-      return null
+      return bestMethod
     },
     showInjectDialog(method) {
       this.currentMethod = method
       this.injectForm.logContent = `执行方法: ${this.classInfo.className}.${method.name}`
+      this.localVariables = []
       this.injectDialogVisible = true
     },
     closeDialog() {
       this.injectDialogVisible = false
       this.injecting = false
+    },
+    async fetchLocalVariables() {
+      if (!this.classInfo || !this.currentMethod || !this.injectForm.lineNumber) {
+        this.localVariables = []
+        return
+      }
+      this.loadingLocalVariables = true
+      try {
+        const result = await getLocalVariables(
+          this.classInfo.className,
+          this.currentMethod.name,
+          this.currentMethod.descriptor,
+          this.injectForm.lineNumber
+        )
+        this.localVariables = result.variables || []
+      } catch (error) {
+        console.error('获取局部变量失败:', error)
+        this.localVariables = []
+      } finally {
+        this.loadingLocalVariables = false
+      }
+    },
+    insertLocalVariableRef(varName) {
+      this.injectForm.logContent += '$' + varName
+    },
+    formatDescriptor(desc) {
+      if (!desc) return ''
+      const typeMap = {
+        'Z': 'boolean', 'B': 'byte', 'C': 'char', 'S': 'short',
+        'I': 'int', 'J': 'long', 'F': 'float', 'D': 'double',
+        'V': 'void'
+      }
+      if (desc.startsWith('L') && desc.endsWith(';')) {
+        return desc.substring(1, desc.length - 1).replace(/\//g, '.')
+      }
+      if (desc.startsWith('[')) {
+        return this.formatDescriptor(desc.substring(1)) + '[]'
+      }
+      return typeMap[desc] || desc
+    },
+    addInjectionMarker(injectionData, injectionPointId) {
+      const type = injectionData.injectionType
+      const method = injectionData.method
+      const lineNumber = injectionData.lineNumber
+      const code = injectionData.code
+
+      let editorLine = null
+      if ((type === 'LINE_BEFORE' || type === 'LINE_AFTER') && lineNumber) {
+        for (const [eLine, sLine] of Object.entries(this.sourceLineMapping)) {
+          if (sLine === lineNumber) {
+            editorLine = parseInt(eLine)
+            break
+          }
+        }
+        if (!editorLine && this.decompiledCode) {
+          const lines = this.decompiledCode.split('\n')
+          for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes(method)) {
+              for (let j = i; j < Math.min(i + 30, lines.length); j++) {
+                const srcLine = this.sourceLineMapping[j + 1]
+                if (srcLine === lineNumber) {
+                  editorLine = j + 1
+                  break
+                }
+              }
+              if (editorLine) break
+            }
+          }
+        }
+      }
+
+      if (!editorLine && type !== 'LINE_BEFORE' && type !== 'LINE_AFTER' && method) {
+        editorLine = this.findEditorLineForMethod(method)
+      }
+
+      console.log('[Luna] addInjectionMarker:', { type, method, lineNumber, editorLine, sourceLineMapping: this.sourceLineMapping, decompiledCode: !!this.decompiledCode, monacoEditor: !!this.monacoEditor })
+
+      this.injectionMarkers.push({
+        id: injectionPointId,
+        type,
+        method,
+        lineNumber,
+        code,
+        editorLine,
+        timestamp: Date.now()
+      })
+
+      this.activeTab = 'decompile'
+
+      const tryUpdate = (attempt) => {
+        if (attempt > 20) {
+          console.log('[Luna] gave up waiting for editor after 20 attempts')
+          return
+        }
+        this.$nextTick(() => {
+          if (this.monacoEditor && this.injectionDecorations) {
+            this.updateInjectionDecorations()
+          } else {
+            console.log('[Luna] editor not ready, retry ' + attempt + '...')
+            setTimeout(() => tryUpdate(attempt + 1), 300)
+          }
+        })
+      }
+
+      if (!this.decompiledCode) {
+        this.loadDecompiledCode().then(() => {
+          setTimeout(() => tryUpdate(1), 500)
+        })
+      } else {
+        tryUpdate(1)
+      }
+    },
+    updateInjectionDecorations() {
+      if (!this.monacoEditor || !this.injectionDecorations) return
+
+      const decorations = []
+
+      for (const marker of this.injectionMarkers) {
+        let targetLine = marker.editorLine
+
+        if (!targetLine && marker.method) {
+          targetLine = this.findEditorLineForMethod(marker.method)
+        }
+
+        console.log('[Luna] decoration for marker:', { method: marker.method, lineNumber: marker.lineNumber, editorLine: marker.editorLine, targetLine })
+
+        if (!targetLine) continue
+
+        const typeLabel = this.getInjectionTypeLabel(marker.type)
+
+        let glyphClassName = 'injected-glyph'
+        let lineBgClassName = 'injected-line-bg'
+        if (marker.type === 'LINE_BEFORE') {
+          glyphClassName = 'injected-glyph-before'
+          lineBgClassName = 'injected-line-bg-before'
+        } else if (marker.type === 'LINE_AFTER') {
+          glyphClassName = 'injected-glyph-after'
+          lineBgClassName = 'injected-line-bg-after'
+        }
+
+        decorations.push({
+          range: new monaco.Range(targetLine, 1, targetLine, 1),
+          options: {
+            isWholeLine: true,
+            className: lineBgClassName,
+            glyphMarginClassName: glyphClassName,
+            glyphMarginHoverMessage: {
+              value: `**[${typeLabel}]** ${marker.code}\n\nInjection time: ${new Date(marker.timestamp).toLocaleTimeString()}`
+            }
+          }
+        })
+      }
+
+      console.log('[Luna] applying decorations:', decorations.length, 'items')
+
+      this.injectionDecorations.set(decorations)
+
+      this.monacoEditor.layout()
+    },
+    findEditorLineForMethod(methodName) {
+      if (!this.decompiledCode) return null
+      const lines = this.decompiledCode.split('\n')
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes(methodName) && lines[i].includes('(')) {
+          return i + 1
+        }
+      }
+      return null
+    },
+    getInjectionTypeLabel(type) {
+      const labels = {
+        'ENTER_METHOD': 'Method Enter',
+        'EXIT_METHOD': 'Method Exit',
+        'AROUND_METHOD': 'Around',
+        'LINE_BEFORE': 'Before Line',
+        'LINE_AFTER': 'After Line'
+      }
+      return labels[type] || type
+    },
+    async removeInjectionPoint(marker) {
+      if (!marker || !marker.id) {
+        this.$message.error('No injection point ID')
+        return
+      }
+      try {
+        const result = await removeInjection(marker.id)
+        if (result.success) {
+          this.$message.success('Injection point removed')
+          this.injectionMarkers = this.injectionMarkers.filter(m => m.id !== marker.id)
+          this.injectionDetailVisible = false
+          this.updateInjectionDecorations()
+        } else {
+          this.$message.error(result.error || 'Failed to remove')
+        }
+      } catch (error) {
+        this.$message.error('Failed to remove: ' + error.message)
+      }
     },
     async handleInjectLog() {
       if (!this.classInfo || !this.currentMethod) return
@@ -549,6 +960,7 @@ export default {
 
         if (result.success) {
           this.$message.success('日志注入成功')
+          this.addInjectionMarker(injectionData, result.injectionPointId)
           this.injectDialogVisible = false
         } else {
           this.$message.error(result.error || '注入失败')
@@ -1093,17 +1505,221 @@ export default {
   color: var(--text-tertiary);
   font-size: 11px;
 }
+
+/* 局部变量容器 */
+.local-vars-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+}
+
+/* 局部变量标签 */
+.local-var-tag {
+  padding: 2px 8px;
+  background-color: var(--bg-hover);
+  font-size: 11px;
+  color: var(--accent-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.local-var-tag:hover {
+  background-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.local-var-type {
+  color: var(--text-tertiary);
+  font-size: 10px;
+}
+
+.injection-detail-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.injection-detail-panel {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  min-width: 360px;
+  max-width: 480px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.injection-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.injection-detail-type {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.type-line-before {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.type-line-after {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.type-enter-method,
+.type-exit-method,
+.type-around-method {
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366f1;
+}
+
+.injection-detail-close {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.injection-detail-close:hover {
+  color: var(--text-primary);
+}
+
+.injection-detail-body {
+  padding: 16px;
+}
+
+.injection-detail-row {
+  margin-bottom: 10px;
+}
+
+.injection-detail-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.injection-detail-value {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.injection-detail-code {
+  font-size: 12px;
+  color: #e2e8f0;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: 4px;
+  display: block;
+  word-break: break-all;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.injection-detail-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.injection-detail-delete {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.injection-detail-delete:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
 </style>
 
 <!-- 非 scoped 样式，用于 Monaco Editor 的 glyph margin 装饰 -->
 <style>
 .source-line-glyph {
-  background-color: #4caf50;
+  background: #4caf50;
   border-radius: 50%;
   margin-left: 4px;
   width: 8px !important;
   height: 8px !important;
   margin-top: 5px;
   cursor: pointer;
+}
+
+.injected-glyph {
+  background: #f59e0b;
+  margin-left: 3px;
+  width: 10px !important;
+  height: 10px !important;
+  margin-top: 4px;
+  cursor: pointer;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.injected-glyph-before {
+  background: #22c55e;
+  margin-left: 3px;
+  width: 0 !important;
+  height: 0 !important;
+  margin-top: 4px;
+  cursor: pointer;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid #22c55e;
+}
+
+.injected-glyph-after {
+  background: #f59e0b;
+  margin-left: 3px;
+  width: 0 !important;
+  height: 0 !important;
+  margin-top: 4px;
+  cursor: pointer;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid #f59e0b;
+}
+
+.injected-line-bg {
+  background: rgba(245, 158, 11, 0.12);
+  border-left: 3px solid #f59e0b;
+}
+
+.injected-line-bg-before {
+  background: rgba(34, 197, 94, 0.08);
+  border-left: 3px solid #22c55e;
+}
+
+.injected-line-bg-after {
+  background: rgba(245, 158, 11, 0.08);
+  border-left: 3px solid #f59e0b;
 }
 </style>

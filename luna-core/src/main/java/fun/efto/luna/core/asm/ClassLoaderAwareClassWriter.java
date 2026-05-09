@@ -16,6 +16,11 @@ public class ClassLoaderAwareClassWriter extends ClassWriter {
         this.targetClassLoader = targetClassLoader != null ? targetClassLoader : ClassLoader.getSystemClassLoader();
     }
 
+    public ClassLoaderAwareClassWriter(int flags, ClassLoader targetClassLoader) {
+        super(flags);
+        this.targetClassLoader = targetClassLoader != null ? targetClassLoader : ClassLoader.getSystemClassLoader();
+    }
+
     @Override
     protected String getCommonSuperClass(String type1, String type2) {
         try {

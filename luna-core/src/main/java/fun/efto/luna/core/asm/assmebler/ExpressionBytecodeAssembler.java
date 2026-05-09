@@ -1,6 +1,7 @@
 package fun.efto.luna.core.asm.assmebler;
 
 import fun.efto.luna.core.asm.AsmInjectionContext;
+import fun.efto.luna.core.asm.AsmInjectionContext.LocalVarInfo;
 import fun.efto.luna.core.injection.target.type.LineNumberInjectionType;
 import fun.efto.luna.core.injection.target.type.MethodInjectionType;
 import org.objectweb.asm.MethodVisitor;
@@ -18,7 +19,7 @@ import java.util.regex.Pattern;
  */
 public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
 
-    private static final Pattern PARAM_REF_PATTERN = Pattern.compile("\\$(\\d+)");
+    private static final Pattern COMBINED_REF_PATTERN = Pattern.compile("\\$(\\d+|[a-zA-Z_]\\w*)");
 
     @Override
     protected void doAssemble(AsmInjectionContext asmContext, byte[] bytecode) {
@@ -52,13 +53,13 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         boolean isStatic = isStaticMethod(asmContext);
         List<ParameterInfo> params = parseMethodParams(methodDesc, isStatic);
 
-        List<Object> segments = parseExpression(expression, params);
+        List<Object> segments = parseExpression(expression, params, asmContext.getLocalVariables());
 
-        boolean hasParamRefs = segments.stream().anyMatch(s -> s instanceof ParameterInfo);
+        boolean hasRefs = segments.stream().anyMatch(s -> s instanceof ParameterInfo || s instanceof LocalVariableInfo);
 
         String prefix = resolveLogPrefix(asmContext);
 
-        if (!hasParamRefs) {
+        if (!hasRefs) {
             mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
             mv.visitLdcInsn(prefix + expression);
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
@@ -74,24 +75,22 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
             }
         }
 
-        int paramRefCount = (int) segments.stream().filter(s -> s instanceof ParameterInfo).count();
+        int refCount = (int) segments.stream()
+                .filter(s -> s instanceof ParameterInfo || s instanceof LocalVariableInfo)
+                .count();
 
         mv.visitLdcInsn(formatStr.toString());
 
-        mv.visitInsn(Opcodes.ICONST_0 + paramRefCount);
+        mv.visitInsn(Opcodes.ICONST_0 + refCount);
         mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
 
         int arrayIndex = 0;
         for (Object seg : segments) {
             if (seg instanceof ParameterInfo) {
-                mv.visitInsn(Opcodes.DUP);
-                if (arrayIndex <= 5) {
-                    mv.visitInsn(Opcodes.ICONST_0 + arrayIndex);
-                } else {
-                    mv.visitIntInsn(Opcodes.BIPUSH, arrayIndex);
-                }
-                loadParameterAsObject(mv, (ParameterInfo) seg);
-                mv.visitInsn(Opcodes.AASTORE);
+                emitArrayStore(mv, arrayIndex, () -> loadParameterAsObject(mv, (ParameterInfo) seg));
+                arrayIndex++;
+            } else if (seg instanceof LocalVariableInfo) {
+                emitArrayStore(mv, arrayIndex, () -> loadLocalVariableAsObject(mv, (LocalVariableInfo) seg));
                 arrayIndex++;
             }
         }
@@ -104,65 +103,104 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
     }
 
+    private void emitArrayStore(MethodVisitor mv, int index, Runnable valueLoader) {
+        mv.visitInsn(Opcodes.DUP);
+        if (index <= 5) {
+            mv.visitInsn(Opcodes.ICONST_0 + index);
+        } else {
+            mv.visitIntInsn(Opcodes.BIPUSH, index);
+        }
+        valueLoader.run();
+        mv.visitInsn(Opcodes.AASTORE);
+    }
+
     private void loadParameterAsObject(MethodVisitor mv, ParameterInfo param) {
-        switch (param.getType().getSort()) {
+        loadTypedAsObject(mv, param.getType(), param.getSlot());
+    }
+
+    private void loadLocalVariableAsObject(MethodVisitor mv, LocalVariableInfo localVar) {
+        Type type = Type.getType(localVar.getDescriptor());
+        loadTypedAsObject(mv, type, localVar.getSlot());
+    }
+
+    private void loadTypedAsObject(MethodVisitor mv, Type type, int slot) {
+        switch (type.getSort()) {
             case Type.BOOLEAN:
-                mv.visitVarInsn(Opcodes.ILOAD, param.getSlot());
+                mv.visitVarInsn(Opcodes.ILOAD, slot);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false);
                 break;
             case Type.BYTE:
-                mv.visitVarInsn(Opcodes.ILOAD, param.getSlot());
+                mv.visitVarInsn(Opcodes.ILOAD, slot);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false);
                 break;
             case Type.CHAR:
-                mv.visitVarInsn(Opcodes.ILOAD, param.getSlot());
+                mv.visitVarInsn(Opcodes.ILOAD, slot);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false);
                 break;
             case Type.SHORT:
-                mv.visitVarInsn(Opcodes.ILOAD, param.getSlot());
+                mv.visitVarInsn(Opcodes.ILOAD, slot);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false);
                 break;
             case Type.INT:
-                mv.visitVarInsn(Opcodes.ILOAD, param.getSlot());
+                mv.visitVarInsn(Opcodes.ILOAD, slot);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
                 break;
             case Type.LONG:
-                mv.visitVarInsn(Opcodes.LLOAD, param.getSlot());
+                mv.visitVarInsn(Opcodes.LLOAD, slot);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
                 break;
             case Type.FLOAT:
-                mv.visitVarInsn(Opcodes.FLOAD, param.getSlot());
+                mv.visitVarInsn(Opcodes.FLOAD, slot);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
                 break;
             case Type.DOUBLE:
-                mv.visitVarInsn(Opcodes.DLOAD, param.getSlot());
+                mv.visitVarInsn(Opcodes.DLOAD, slot);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
                 break;
             case Type.ARRAY:
             case Type.OBJECT:
-                mv.visitVarInsn(Opcodes.ALOAD, param.getSlot());
+                mv.visitVarInsn(Opcodes.ALOAD, slot);
                 break;
             default:
-                mv.visitVarInsn(Opcodes.ALOAD, param.getSlot());
+                mv.visitVarInsn(Opcodes.ALOAD, slot);
                 break;
         }
     }
 
-    private List<Object> parseExpression(String expression, List<ParameterInfo> params) {
+    private List<Object> parseExpression(String expression, List<ParameterInfo> params, List<LocalVarInfo> localVars) {
         List<Object> segments = new ArrayList<>();
-        Matcher matcher = PARAM_REF_PATTERN.matcher(expression);
+        Matcher matcher = COMBINED_REF_PATTERN.matcher(expression);
         int lastEnd = 0;
 
         while (matcher.find()) {
             if (matcher.start() > lastEnd) {
                 segments.add(expression.substring(lastEnd, matcher.start()));
             }
-            int paramIndex = Integer.parseInt(matcher.group(1));
-            if (paramIndex < 1 || paramIndex > params.size()) {
-                throw new IllegalArgumentException("invalid parameter reference $" + paramIndex
-                        + ", method has " + params.size() + " parameter(s)");
+            String ref = matcher.group(1);
+
+            if (ref.matches("\\d+")) {
+                int paramIndex = Integer.parseInt(ref);
+                if (paramIndex < 1 || paramIndex > params.size()) {
+                    throw new IllegalArgumentException("invalid parameter reference $" + paramIndex
+                            + ", method has " + params.size() + " parameter(s)");
+                }
+                segments.add(params.get(paramIndex - 1));
+            } else {
+                LocalVarInfo matched = null;
+                if (localVars != null) {
+                    for (LocalVarInfo lv : localVars) {
+                        if (lv.getName().equals(ref)) {
+                            matched = lv;
+                            break;
+                        }
+                    }
+                }
+                if (matched == null) {
+                    segments.add("$" + ref);
+                } else {
+                    segments.add(new LocalVariableInfo(matched.getName(), matched.getDescriptor(), matched.getSlot()));
+                }
             }
-            segments.add(params.get(paramIndex - 1));
             lastEnd = matcher.end();
         }
 
@@ -195,7 +233,7 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
     }
 
     private boolean isStaticMethod(AsmInjectionContext asmContext) {
-        return false;
+        return (asmContext.getMethodAccess() & Opcodes.ACC_STATIC) != 0;
     }
 
     private String resolveLogPrefix(AsmInjectionContext asmContext) {
@@ -231,6 +269,30 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
 
         public Type getType() {
             return type;
+        }
+
+        public int getSlot() {
+            return slot;
+        }
+    }
+
+    private static class LocalVariableInfo {
+        private final String name;
+        private final String descriptor;
+        private final int slot;
+
+        public LocalVariableInfo(String name, String descriptor, int slot) {
+            this.name = name;
+            this.descriptor = descriptor;
+            this.slot = slot;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDescriptor() {
+            return descriptor;
         }
 
         public int getSlot() {

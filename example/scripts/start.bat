@@ -31,6 +31,7 @@ set "DEMO_JAR=%PROJECT_ROOT%\example\luna-demo-app\target\luna-demo-app-1.0-SNAP
 echo.
 echo [1/3] Building Luna Agent...
 cd /d "%PROJECT_ROOT%"
+call mvn clean
 call mvn package -DskipTests -pl luna-core,luna-agent -am -q
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] Failed to build Luna Agent.
@@ -41,6 +42,7 @@ if %ERRORLEVEL% neq 0 (
 :: Step 2: Build Demo App
 echo [2/3] Building Demo Application...
 cd /d "%PROJECT_ROOT%\example\luna-demo-app"
+call mvn clean
 call mvn package -DskipTests -q
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] Failed to build Demo Application.

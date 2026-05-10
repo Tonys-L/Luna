@@ -211,7 +211,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 16px;
+  padding: 10px 20px;
   background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
@@ -238,8 +238,9 @@ export default {
 }
 
 .tool-btn:hover {
-  background: var(--bg-hover);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
+  border-color: var(--text-secondary);
 }
 
 .tool-btn.active {
@@ -284,10 +285,10 @@ export default {
 .log-container {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 16px 20px;
   font-family: var(--font-mono);
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .empty-state {
@@ -306,12 +307,13 @@ export default {
 }
 
 .log-line {
-  padding: 2px 0;
+  padding: 6px 0;
   word-break: break-all;
   white-space: pre-wrap;
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 .log-line:hover {
@@ -328,8 +330,9 @@ export default {
 }
 
 .tag-debug {
-  background-color: #f14c4c;
+  background: linear-gradient(135deg, #f14c4c 0%, #b91c1c 100%);
   color: white;
+  box-shadow: 0 0 8px rgba(241, 76, 76, 0.3);
 }
 
 .snapshot-line {
@@ -337,18 +340,30 @@ export default {
 }
 
 .snapshot-link {
-  color: #4fc1ff;
-  text-decoration: underline;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: #fff;
+  padding: 4px 14px;
+  border-radius: 20px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-normal);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .snapshot-link:hover {
-  color: #9cdcfe;
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--accent-primary);
+  transform: translateX(4px);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
 }
 
 .snapshot-link i {
-  font-size: 11px;
-  margin-right: 4px;
+  color: var(--accent-primary);
+  font-size: 12px;
 }
 </style>

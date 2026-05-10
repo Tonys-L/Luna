@@ -1,0 +1,26 @@
+/* 树节点 */
+.tree-node {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.tree-node:hover {
+  background-color: var(--bg-hover);
+}
+
+/* 节点图标 */
+.node-icon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.tree-node:hover .node-icon {
+  color: var(--text-primary);
+}
+
+/* 注入徽标 */
+.node-injection-badge {

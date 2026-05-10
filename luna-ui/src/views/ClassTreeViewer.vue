@@ -35,6 +35,15 @@
               <div v-else class="loading-spinner"></div>
             </button>
             
+            <!-- 过滤已注入按钮 -->
+            <button 
+              :class="['toolbar-button', { active: showOnlyInjected }]"
+              @click="toggleShowOnlyInjected"
+              :title="showOnlyInjected ? '显示全部类' : '仅显示已注入类'"
+            >
+              <i class="fas fa-syringe" :style="{ color: showOnlyInjected ? '#8b5cf6' : '' }"></i>
+            </button>
+            
             <!-- 全部展开按钮 -->
             <button 
               class="toolbar-button" 
@@ -84,6 +93,9 @@
                   <i v-else class="fas fa-folder"></i>
                 </span>
                 <span class="node-label">{{ node.label }}</span>
+                <span v-if="data.injectionCount > 0" class="node-injection-badge">
+                  {{ data.injectionCount }}
+                </span>
               </div>
           </template>
         </el-tree>
@@ -97,7 +109,42 @@
     
     <!-- 右侧类详情 -->
     <main class="detail-main">
-      <ClassDetail :class-info="selectedClass" />
+      <!-- 标签栏 -->
+      <div v-if="openTabs.length > 0" class="tabs-bar">
+        <div 
+          v-for="tab in openTabs" 
+          :key="tab.className"
+          :class="['tab-item', { active: activeTabName === tab.className }]"
+          @click="selectTab(tab)"
+        >
+          <div v-if="tab.loading" class="tab-loading-spinner"></div>
+          <i v-else class="fas fa-file-code tab-icon"></i>
+          
+          <span class="tab-label" :title="tab.className">{{ getShortClassName(tab.className) }}</span>
+          
+          <span v-if="tab.injectionCount > 0" class="tab-injection-badge" title="Active Injections">
+            {{ tab.injectionCount }}
+          </span>
+
+          <i class="fas fa-times tab-close" @click.stop="closeTab(tab.className)"></i>
+        </div>
+      </div>
+
+      <ClassDetail 
+        v-if="selectedClass" 
+        :key="activeTabName"
+        :class-info="selectedClass" 
+        @sync-state="handleTabStateSync"
+      />
+      
+      <!-- 无选择状态 -->
+      <div v-else class="empty-state">
+        <div class="empty-state-content">
+          <i class="fas fa-code-branch"></i>
+          <h3>开始分析</h3>
+          <p>从左侧树中选择一个类，即可开启分析之旅</p>
+        </div>
+      </div>
     </main>
   </div>
 </template>
@@ -126,11 +173,14 @@ export default {
         label: 'label'
       },
       selectedClass: null,
+      openTabs: [],
+      activeTabName: '',
       rawClassData: {}, // 保存原始数据用于搜索
       loaderCount: 0,
       totalClassCount: 0,
       loading: false,
       isTreeCollapsed: false,
+      showOnlyInjected: false,
       treeKey: 1
     }
   },
@@ -223,7 +273,8 @@ export default {
           if (!current[classNamePart]) {
             current[classNamePart] = {
               className: className,
-              isClass: true
+              isClass: true,
+              injectionCount: cls.injectionCount || 0
             }
           }
         })
@@ -279,12 +330,14 @@ export default {
           })
         } else {
           // 正常添加包节点
+          const pkgInjectionCount = this.sumChildrenInjection(children)
           nodes.push({
             id: `package-${currentPath}`,
             label: pkg.name,
             isClass: false,
             packageName: currentPath,
             children: children,
+            injectionCount: pkgInjectionCount,
             expanded: false
           })
         }
@@ -297,6 +350,7 @@ export default {
           label: cls.name,
           isClass: true,
           className: cls.content.className,
+          injectionCount: cls.content.injectionCount || 0,
           expanded: false
         })
       }
@@ -322,13 +376,63 @@ export default {
     },
     
     async loadClassInfo(className) {
+      // 检查是否已经打开
+      const existingTab = this.openTabs.find(t => t.className === className)
+      if (existingTab) {
+        this.selectTab(existingTab)
+        return
+      }
+
       try {
-        // 使用封装的API方法获取类分析信息
         const classInfo = await getClassAnalysis(className);
-        this.selectedClass = classInfo
+        // 初始化扩展状态
+        const newTab = {
+          ...classInfo,
+          loading: false,
+          injectionCount: 0
+        }
+        this.openTabs.push(newTab)
+        this.selectTab(newTab)
       } catch (error) {
         console.error('加载类信息失败:', error)
         this.$message.error('加载类信息失败: ' + error.message)
+      }
+    },
+    
+    selectTab(tab) {
+      this.selectedClass = tab
+      this.activeTabName = tab.className
+    },
+
+    closeTab(className) {
+      const index = this.openTabs.findIndex(t => t.className === className)
+      if (index === -1) return
+
+      this.openTabs.splice(index, 1)
+
+      // 如果关闭的是当前选中的
+      if (this.activeTabName === className) {
+        if (this.openTabs.length > 0) {
+          // 选中上一个或第一个
+          const nextTab = this.openTabs[Math.max(0, index - 1)]
+          this.selectTab(nextTab)
+        } else {
+          this.selectedClass = null
+          this.activeTabName = ''
+        }
+      }
+    },
+
+    getShortClassName(fullName) {
+      const parts = fullName.split('.')
+      return parts[parts.length - 1]
+    },
+
+    handleTabStateSync(state) {
+      const tab = this.openTabs.find(t => t.className === state.className)
+      if (tab) {
+        if (state.loading !== undefined) tab.loading = state.loading
+        if (state.injectionCount !== undefined) tab.injectionCount = state.injectionCount
       }
     },
     
@@ -337,8 +441,20 @@ export default {
     },
     
     filterNode(value, data) {
-      if (!value) return true
-      return data.label.toLowerCase().includes(value.toLowerCase())
+      // 综合判定搜索文本和“仅显示注入”状态
+      const matchesSearch = !this.searchText || data.label.toLowerCase().includes(this.searchText.toLowerCase())
+      const matchesInjected = !this.showOnlyInjected || data.injectionCount > 0
+      
+      return matchesSearch && matchesInjected
+    },
+    
+    toggleShowOnlyInjected() {
+      this.showOnlyInjected = !this.showOnlyInjected
+      this.$refs.classTree.filter(this.searchText)
+    },
+    
+    sumChildrenInjection(nodes) {
+      return nodes.reduce((sum, node) => sum + (node.injectionCount || 0), 0)
     },
     
     expandAll() {
@@ -597,14 +713,24 @@ export default {
   color: var(--text-primary);
 }
 
-/* 节点标签 */
-.node-label {
-  font-size: 12px;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
+/* 注入徽标 */
+.node-injection-badge {
+  background-color: #8b5cf6;
+  color: white;
+  font-size: 10px;
+  padding: 0 5px;
+  border-radius: 10px;
+  height: 16px;
+  line-height: 16px;
+  min-width: 16px;
+  text-align: center;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(139, 92, 246, 0.5);
+  margin-left: 4px;
+}
+
+.toolbar-button.active {
+  background-color: var(--bg-hover);
 }
 
 /* 折叠按钮 */
@@ -647,6 +773,132 @@ export default {
   flex: 1;
   overflow: hidden;
   background-color: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 标签栏 */
+.tabs-bar {
+  display: flex;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.tabs-bar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 35px;
+  min-width: 120px;
+  max-width: 200px;
+  border-right: 1px solid var(--border-color);
+  cursor: pointer;
+  background-color: var(--bg-secondary);
+  color: var(--text-tertiary);
+  font-size: 12px;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.tab-item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+.tab-item.active {
+  background-color: var(--bg-primary);
+  color: var(--accent-primary);
+  border-bottom: 2px solid var(--accent-primary);
+  height: 34px; /* 为了不遮住下边框 */
+}
+
+.tab-icon {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.tab-loading-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: tab-spin 1s linear infinite;
+}
+
+@keyframes tab-spin { to { transform: rotate(360deg); } }
+
+.tab-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-injection-badge {
+  background-color: var(--accent-primary);
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 0 5px;
+  height: 14px;
+  line-height: 14px;
+  border-radius: 7px;
+  margin-right: 2px;
+}
+
+.tab-close {
+  font-size: 10px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  opacity: 0.5;
+  transition: all 0.2s;
+}
+
+.tab-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+  color: #f87171;
+}
+
+/* 空状态 */
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+}
+
+.empty-state-content {
+  text-align: center;
+}
+
+.empty-state-content i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.2;
+}
+
+.empty-state-content h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.empty-state-content p {
+  font-size: 13px;
 }
 
 /* Element Plus 树样式覆盖 */

@@ -160,30 +160,38 @@ export default {
   box-sizing: border-box;
 }
 
-/* 根变量 - VSCode Dark+ 风格 */
+/* 根变量 - Luna Premium 风格 */
 :root {
-  --bg-primary: #1e1e1e;
-  --bg-secondary: #252526;
-  --bg-tertiary: #2d2d30;
-  --bg-hover: #3c3c3c;
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #121217;
+  --bg-tertiary: #1a1a22;
+  --bg-hover: #23232e;
   
-  --text-primary: #d4d4d4;
-  --text-secondary: #9d9d9d;
-  --text-tertiary: #6a6a6a;
+  --text-primary: #f0f0f5;
+  --text-secondary: #a0a0b0;
+  --text-tertiary: #6b6b7b;
   
-  --border-color: #3c3c3c;
-  --border-focus: #007acc;
+  --border-color: #2a2a35;
+  --border-focus: #6366f1;
   
-  --accent-primary: #007acc;
-  --accent-success: #6a9955;
-  --accent-danger: #f14c4c;
+  --accent-primary: #6366f1;
+  --accent-secondary: #06b6d4;
+  --accent-success: #10b981;
+  --accent-danger: #ef4444;
+  --accent-warning: #f59e0b;
   
-  --radius-sm: 2px;
-  --radius-md: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
   
-  --transition-fast: 0.1s ease;
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  
+  --glass-bg: rgba(18, 18, 23, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glow-primary: rgba(99, 102, 241, 0.3);
 }
 
 /* 基础样式 */
@@ -212,10 +220,25 @@ html, body {
 
 /* 顶部导航栏 */
 .app-header {
-  background-color: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
-  height: 40px;
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+  height: 48px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+}
+
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+  opacity: 0.3;
 }
 
 .header-content {
@@ -252,15 +275,21 @@ html, body {
 }
 
 .brand-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: 0.5px;
+  font-size: 15px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
 }
 
 .brand-tag {
   font-size: 10px;
   color: var(--text-tertiary);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* 导航选项卡 */
@@ -274,26 +303,34 @@ html, body {
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 8px;
+  padding: 8px 16px;
   background-color: transparent;
   border: none;
   color: var(--text-secondary);
   font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  border-bottom: 1px solid transparent;
+  transition: all var(--transition-normal);
+  border-radius: var(--radius-md);
+  margin: 4px 0;
 }
 
 .nav-item:hover {
-  background-color: var(--bg-hover);
+  background-color: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
+  transform: translateY(-1px);
 }
 
 .nav-item.active {
-  color: var(--text-primary);
-  background-color: var(--bg-hover);
-  border-bottom-color: var(--accent-primary);
+  color: #fff;
+  background-color: rgba(99, 102, 241, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.3);
+}
+
+.nav-item.active .nav-icon {
+  color: var(--accent-primary);
+  filter: drop-shadow(0 0 4px var(--accent-primary));
 }
 
 .nav-icon {
@@ -305,13 +342,19 @@ html, body {
   flex: 1;
   overflow: hidden;
   background-color: var(--bg-primary);
+  animation: fadeIn var(--transition-normal);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* 底部状态栏 */
 .app-footer {
   background-color: var(--bg-secondary);
   border-top: 1px solid var(--border-color);
-  height: 22px;
+  height: 24px;
   flex-shrink: 0;
 }
 

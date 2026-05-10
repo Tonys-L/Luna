@@ -18,6 +18,7 @@ public class AsmInjectionContext extends InjectionContext {
     private MethodVisitor methodVisitor;
     private List<LocalVarInfo> localVariables = Collections.emptyList();
     private int methodAccess;
+    private int maxLocals;
 
     public AsmInjectionContext(InjectionContext injectionContext, byte[] bytecode) {
         super(injectionContext.getInjectionPoint());

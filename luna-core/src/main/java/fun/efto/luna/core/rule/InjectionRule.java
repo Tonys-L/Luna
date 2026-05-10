@@ -13,6 +13,8 @@ public class InjectionRule {
     private int lineNumber;
     private String expression;
     private String logContent;
+    private String codeType;
+    private boolean enabled = true;
 
     public long getId() {
         return id;
@@ -68,5 +70,21 @@ public class InjectionRule {
 
     public void setLogContent(String logContent) {
         this.logContent = logContent;
+    }
+
+    public String getCodeType() {
+        return codeType;
+    }
+
+    public void setCodeType(String codeType) {
+        this.codeType = codeType;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

@@ -12,6 +12,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import fun.efto.luna.core.InstrumentationManager;
+import fun.efto.luna.core.InjectionExecutor;
+import fun.efto.luna.core.injection.InjectionPoint;
 
 public class RuleManager {
     private static final RuleManager INSTANCE = new RuleManager();
@@ -23,7 +26,17 @@ public class RuleManager {
 
     private RuleManager() {
         persistenceService = new RulePersistenceService();
-        persistenceService.initialize();
+        List<InjectionRule> loadedRules = persistenceService.initialize();
+        
+        long maxId = 0;
+        for (InjectionRule rule : loadedRules) {
+            rules.put(rule.getId(), rule);
+            if (rule.getId() > maxId) {
+                maxId = rule.getId();
+            }
+        }
+        idGenerator.set(maxId + 1);
+
         saveScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "luna-rule-persister");
             t.setDaemon(true);
@@ -49,6 +62,7 @@ public class RuleManager {
         rule.setId(id);
         rules.put(id, rule);
         saveRules();
+        retransformMatchedClasses(rule.getTargetClass());
         return id;
     }
 
@@ -57,12 +71,67 @@ public class RuleManager {
             rule.setId(id);
             rules.put(id, rule);
             saveRules();
+            retransformMatchedClasses(rule.getTargetClass());
         }
     }
 
     public void deleteRule(long id) {
-        rules.remove(id);
-        saveRules();
+        InjectionRule rule = rules.remove(id);
+        if (rule != null) {
+            saveRules();
+            retransformMatchedClasses(rule.getTargetClass());
+        }
+    }
+
+    /**
+     * 查找匹配指定类名的所有规则
+     */
+    public List<InjectionRule> findRulesForClass(String className) {
+        List<InjectionRule> result = new ArrayList<>();
+        for (InjectionRule rule : rules.values()) {
+            if (!rule.isEnabled()) {
+                continue;
+            }
+            // 支持简单的正则匹配或全路径匹配
+            if (className.equals(rule.getTargetClass()) || className.matches(rule.getTargetClass().replace(".", "\\.").replace("*", ".*"))) {
+                result.add(rule);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 应用指定类的所有规则
+     */
+    public void applyRulesForClass(String className) {
+        // 此方法通常用于初次加载，retransform 会走 Transformer 路径
+    }
+
+    private void retransformMatchedClasses(String classPattern) {
+        if (classPattern == null || classPattern.isEmpty()) return;
+        
+        try {
+            InstrumentationManager instManager = InstrumentationManager.getInstance();
+            java.lang.instrument.Instrumentation inst = instManager.getInstrumentation();
+            
+            String regex = classPattern.replace(".", "\\.").replace("*", ".*");
+            List<Class<?>> targets = new ArrayList<>();
+            
+            for (Class<?> clazz : instManager.getAllLoadedClasses()) {
+                String className = clazz.getName();
+                if (className.equals(classPattern) || className.matches(regex)) {
+                    if (inst.isModifiableClass(clazz) && !className.startsWith("java.lang.invoke.")) {
+                        targets.add(clazz);
+                    }
+                }
+            }
+
+            if (!targets.isEmpty()) {
+                instManager.retransformClasses(targets.toArray(new Class<?>[0]));
+            }
+        } catch (Exception e) {
+            System.err.println("Retransform failed: " + e.getMessage());
+        }
     }
 
     private void saveRules() {

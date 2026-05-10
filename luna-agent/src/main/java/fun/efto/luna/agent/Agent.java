@@ -9,6 +9,8 @@ import fun.efto.luna.core.InjectionExecutor;
 import fun.efto.luna.core.init.InitializerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fun.efto.luna.core.rule.RuleManager;
+import fun.efto.luna.core.transformer.RuleClassFileTransformer;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
@@ -71,6 +73,12 @@ public class Agent {
             jettyWebServer.start();
             logger.info("Luna agent started successfully, web server on port 8421");
 
+            // 注册全局规则转换器（处理后续加载的类）
+            inst.addTransformer(new RuleClassFileTransformer(), true);
+            
+            // 对已经加载的类应用规则
+            applyRulesToLoadedClasses(inst);
+
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
                     logger.info("Shutting down Jetty server...");
@@ -87,6 +95,37 @@ public class Agent {
                 logger.error("Failed to start Luna agent", e);
             }
         }
+    }
+
+    private static void applyRulesToLoadedClasses(Instrumentation inst) {
+        logger.info("Scanning already loaded classes for matching rules...");
+        Class<?>[] allLoadedClasses = inst.getAllLoadedClasses();
+        java.util.List<Class<?>> targets = new java.util.ArrayList<>();
+        
+        for (Class<?> clazz : allLoadedClasses) {
+            String className = clazz.getName();
+            // 快速过滤
+            if (className.startsWith("java.") || className.startsWith("sun.") || className.startsWith("fun.efto.luna.")) {
+                continue;
+            }
+            
+            // 检查是否有匹配规则
+            if (!RuleManager.getInstance().findRulesForClass(className).isEmpty()) {
+                if (inst.isModifiableClass(clazz)) {
+                    targets.add(clazz);
+                }
+            }
+        }
+
+        if (!targets.isEmpty()) {
+            try {
+                logger.info("Applying rules to {} classes via retransform...", targets.size());
+                inst.retransformClasses(targets.toArray(new Class<?>[0]));
+            } catch (Exception e) {
+                logger.error("Initial retransform failed", e);
+            }
+        }
+        logger.info("Initial rule application completed.");
     }
 
     private static CompositeExcludeClassFilter createExcludeClassFilter() {

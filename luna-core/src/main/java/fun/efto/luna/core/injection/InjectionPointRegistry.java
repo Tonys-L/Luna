@@ -88,4 +88,9 @@ public class InjectionPointRegistry {
         List<InjectionPoint> points = registry.get(className);
         return points != null ? new ArrayList<>(points) : new ArrayList<>();
     }
+
+    public int getInjectionCount(String className) {
+        List<InjectionPoint> points = registry.get(className);
+        return points != null ? points.size() : 0;
+    }
 }

@@ -370,18 +370,18 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         if (asmContext.getInjectionPoint().getInjectionType() instanceof MethodInjectionType) {
             MethodInjectionType type = (MethodInjectionType) asmContext.getInjectionPoint().getInjectionType();
             if (type == MethodInjectionType.EXIT) {
-                return "method exit ：";
+                return "method exit: ";
             } else if (type == MethodInjectionType.AROUND) {
-                return "method around ：";
+                return "method around: ";
             }
         } else if (asmContext.getInjectionPoint().getInjectionType() instanceof LineNumberInjectionType) {
             LineNumberInjectionType type = (LineNumberInjectionType) asmContext.getInjectionPoint().getInjectionType();
             if (type == LineNumberInjectionType.AFTER) {
-                return "line after ：";
+                return "line after: ";
             }
-            return "line before ：";
+            return "line before: ";
         }
-        return "method enter ：";
+        return "method enter: ";
     }
 
     private String escapeFormat(String s) {

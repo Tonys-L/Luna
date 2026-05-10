@@ -2,19 +2,15 @@ package fun.efto.luna.core.asm.injector;
 
 import fun.efto.luna.core.asm.AsmInjectionContext;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author : Tony.L(<286269159@qq.com>)
@@ -32,10 +28,15 @@ public class TreeApiBytecodeHelper {
     }
 
     private static class InsnListCollector extends MethodVisitor {
-        private final List<org.objectweb.asm.tree.AbstractInsnNode> nodes = new ArrayList<>();
+        private final List<AbstractInsnNode> nodes = new ArrayList<>();
+        private final Map<Label, LabelNode> labelMap = new HashMap<>();
 
         InsnListCollector() {
             super(Opcodes.ASM9);
+        }
+
+        private LabelNode getLabelNode(Label label) {
+            return labelMap.computeIfAbsent(label, k -> new LabelNode());
         }
 
         @Override
@@ -73,9 +74,29 @@ public class TreeApiBytecodeHelper {
             nodes.add(new LdcInsnNode(value));
         }
 
+        @Override
+        public void visitJumpInsn(int opcode, Label label) {
+            nodes.add(new JumpInsnNode(opcode, getLabelNode(label)));
+        }
+
+        @Override
+        public void visitLabel(Label label) {
+            nodes.add(getLabelNode(label));
+        }
+
+        @Override
+        public void visitLineNumber(int line, Label start) {
+            nodes.add(new LineNumberNode(line, getLabelNode(start)));
+        }
+
+        @Override
+        public void visitFrame(int type, int numLocal, Object[] local, int numStack, Object[] stack) {
+            nodes.add(new FrameNode(type, numLocal, local, numStack, stack));
+        }
+
         InsnList toInsnList() {
             InsnList list = new InsnList();
-            for (org.objectweb.asm.tree.AbstractInsnNode node : nodes) {
+            for (AbstractInsnNode node : nodes) {
                 list.add(node);
             }
             return list;

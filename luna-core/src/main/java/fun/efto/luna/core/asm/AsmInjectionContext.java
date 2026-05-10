@@ -4,7 +4,6 @@ import fun.efto.luna.core.InjectionContext;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,7 +17,6 @@ public class AsmInjectionContext extends InjectionContext {
     private MethodVisitor methodVisitor;
     private List<LocalVarInfo> localVariables = Collections.emptyList();
     private int methodAccess;
-    private int maxLocals;
 
     public AsmInjectionContext(InjectionContext injectionContext, byte[] bytecode) {
         super(injectionContext.getInjectionPoint());

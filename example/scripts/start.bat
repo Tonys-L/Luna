@@ -32,7 +32,7 @@ echo.
 echo [1/3] Building Luna Agent...
 cd /d "%PROJECT_ROOT%"
 call mvn clean
-call mvn package -DskipTests -pl luna-core,luna-agent -am -q
+call mvn package -DskipTests -pl luna-core,luna-agent,luna-ui -am -q
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] Failed to build Luna Agent.
     pause

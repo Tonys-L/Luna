@@ -12,9 +12,13 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -23,6 +27,7 @@ import java.util.List;
  * @since  : 2025/10/4 18:00
  */
 public class AfterLineInjector implements BytecodeInjector {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AfterLineInjector.class);
 
     @Override
     public byte[] inject(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
@@ -34,7 +39,7 @@ public class AfterLineInjector implements BytecodeInjector {
         asmContext.setLocalVariables(visibleVars);
 
         ClassNode cn = new ClassNode();
-        new ClassReader(bytecode).accept(cn, ClassReader.EXPAND_FRAMES);
+        new ClassReader(bytecode).accept(cn, ClassReader.SKIP_FRAMES);
 
         boolean injected = false;
         for (MethodNode mn : cn.methods) {
@@ -43,6 +48,9 @@ public class AfterLineInjector implements BytecodeInjector {
                     && !mn.desc.equals(target.getMethodDescriptor())) continue;
 
             asmContext.setMethodAccess(mn.access);
+            asmContext.setMaxLocals(mn.maxLocals);
+
+            LOGGER.debug("[AfterLine] method={} maxLocals={} visibleVars={}", mn.name, mn.maxLocals, visibleVars.size());
 
             AbstractInsnNode insn = mn.instructions.getFirst();
             while (insn != null) {
@@ -51,6 +59,14 @@ public class AfterLineInjector implements BytecodeInjector {
                     if (lnn.line == target.getLineNumber()) {
                         AbstractInsnNode insertAfter = findLastInsnOfLine(mn, lnn);
                         InsnList injectedCode = TreeApiBytecodeHelper.assemble(asmContext, bytecode, bytecodeAssembler);
+
+                        int maxVarInCode = computeMaxLocalIndex(asmContext, injectedCode);
+                        int neededLocals = Math.max(mn.maxLocals, maxVarInCode + 1);
+                        if (neededLocals > mn.maxLocals) {
+                            LOGGER.debug("[AfterLine] Updating maxLocals from {} to {}", mn.maxLocals, neededLocals);
+                            mn.maxLocals = neededLocals;
+                        }
+
                         mn.instructions.insert(insertAfter, injectedCode);
                         injected = true;
                         break;
@@ -65,10 +81,36 @@ public class AfterLineInjector implements BytecodeInjector {
             throw new RuntimeException("line " + target.getLineNumber() + " not found in method " + target.getMethodName());
         }
 
+        removeFrameNodes(cn);
+
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         ClassWriter cw = new ClassLoaderAwareClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES, loader);
         cn.accept(cw);
         return cw.toByteArray();
+    }
+
+    private int computeMaxLocalIndex(AsmInjectionContext asmContext, InsnList code) {
+        int maxIndex = 0;
+        for (AbstractInsnNode insn = code.getFirst(); insn != null; insn = insn.getNext()) {
+            if (insn instanceof VarInsnNode) {
+                VarInsnNode vin = (VarInsnNode) insn;
+                int size = 1;
+                switch (vin.getOpcode()) {
+                    case Opcodes.LLOAD:
+                    case Opcodes.LSTORE:
+                    case Opcodes.DLOAD:
+                    case Opcodes.DSTORE:
+                        size = 2;
+                        break;
+                    default:
+                        break;
+                }
+                maxIndex = Math.max(maxIndex, vin.var + size);
+            }
+        }
+        int contextVarIndex = asmContext.getMaxLocals() > 0 ? asmContext.getMaxLocals() : 0;
+        maxIndex = Math.max(maxIndex, contextVarIndex + 1);
+        return maxIndex;
     }
 
     private AbstractInsnNode findLastInsnOfLine(MethodNode mn, LineNumberNode startLnn) {
@@ -96,5 +138,18 @@ public class AfterLineInjector implements BytecodeInjector {
                 || opcode == Opcodes.LRETURN || opcode == Opcodes.FRETURN
                 || opcode == Opcodes.DRETURN || opcode == Opcodes.ARETURN
                 || opcode == Opcodes.ATHROW;
+    }
+
+    private void removeFrameNodes(ClassNode cn) {
+        for (MethodNode mn : cn.methods) {
+            AbstractInsnNode insn = mn.instructions.getFirst();
+            while (insn != null) {
+                AbstractInsnNode next = insn.getNext();
+                if (insn instanceof FrameNode) {
+                    mn.instructions.remove(insn);
+                }
+                insn = next;
+            }
+        }
     }
 }

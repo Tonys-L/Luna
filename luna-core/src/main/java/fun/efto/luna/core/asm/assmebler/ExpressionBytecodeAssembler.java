@@ -201,7 +201,9 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
                 maxSlot = Math.max(maxSlot, lv.getSlot() + Type.getType(lv.getDescriptor()).getSize());
             }
         }
-        int contextVarIndex = maxSlot + 1;
+        int contextVarIndex = asmContext.getMaxLocals() > 0
+                ? asmContext.getMaxLocals()
+                : maxSlot + 1;
         
         mv.visitVarInsn(Opcodes.ASTORE, contextVarIndex);
         

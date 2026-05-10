@@ -23,6 +23,7 @@ public class RuleClassFileTransformer implements ClassFileTransformer {
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         if (className == null) return null;
+        if (classBeingRedefined != null) return null;
         
         String normalizedClassName = className.replace('/', '.');
         

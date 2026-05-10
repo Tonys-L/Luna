@@ -317,10 +317,15 @@ public class InjectionController {
             }
         } else {
             try {
-                Class<?> clazz = Class.forName(className, false,
-                        Thread.currentThread().getContextClassLoader());
-                InstrumentationManager.getInstance().retransformClasses(clazz);
-            } catch (Exception ignored) {
+                Class<?> clazz = classResourceHelper.findLoadedClass(className);
+                if (clazz != null) {
+                    InstrumentationManager.getInstance().retransformClasses(clazz);
+                    LOGGER.info("Successfully retransformed class {} after removing all injections", className);
+                } else {
+                    LOGGER.warn("Could not find class {} for retransformation after injection removal", className);
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to retransform class {} after injection removal", className, e);
             }
         }
 

@@ -76,6 +76,23 @@ public class JettyWebServer {
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
+        context.setDisplayName("Luna Web Server");
+        
+        // 注册全局字符编码过滤器
+        context.addFilter(new org.eclipse.jetty.servlet.FilterHolder(new javax.servlet.Filter() {
+            @Override
+            public void init(javax.servlet.FilterConfig filterConfig) {}
+            @Override
+            public void doFilter(javax.servlet.ServletRequest request, javax.servlet.ServletResponse response, javax.servlet.FilterChain chain) 
+                    throws java.io.IOException, javax.servlet.ServletException {
+                request.setCharacterEncoding("UTF-8");
+                response.setCharacterEncoding("UTF-8");
+                chain.doFilter(request, response);
+            }
+            @Override
+            public void destroy() {}
+        }), "/*", java.util.EnumSet.of(javax.servlet.DispatcherType.REQUEST));
+
         context.addServlet(new ServletHolder(dispatcher), "/api/*");
         
         // 注册 WebSocket Servlet

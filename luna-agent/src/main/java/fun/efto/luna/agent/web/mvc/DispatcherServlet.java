@@ -204,14 +204,25 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     static String readRequestBody(HttpServletRequest req) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        String line;
-        try (BufferedReader reader = req.getReader()) {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len;
+        java.io.InputStream is = req.getInputStream();
+        while ((len = is.read(buffer)) != -1) {
+            baos.write(buffer, 0, len);
         }
-        return sb.toString();
+        byte[] bytes = baos.toByteArray();
+        
+        // 调试：打印前 20 个字节的 Hex 码，确认原始编码
+        if (bytes.length > 0) {
+            StringBuilder hex = new StringBuilder();
+            for (int i = 0; i < Math.min(bytes.length, 20); i++) {
+                hex.append(String.format("%02X ", bytes[i]));
+            }
+            LOGGER.debug("Request body (first 20 bytes hex): {}", hex.toString());
+        }
+
+        return new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private static class RouteHandler {

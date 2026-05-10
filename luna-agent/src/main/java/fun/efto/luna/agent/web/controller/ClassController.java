@@ -19,6 +19,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import fun.efto.luna.core.injection.InjectionPointRegistry;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -52,6 +53,15 @@ public class ClassController {
         } else {
             result = classScanner.getLoadedClasses();
         }
+
+        // 填充注入数量
+        InjectionPointRegistry registry = InjectionPointRegistry.getInstance();
+        result.values().forEach(classes -> {
+            classes.forEach(lc -> {
+                lc.setInjectionCount(registry.getInjectionCount(lc.getClassName()));
+            });
+        });
+
         return ApiResult.ok(result);
     }
 

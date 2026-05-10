@@ -1,240 +1,477 @@
 <template>
-  <div v-if="classInfo" class="class-detail">
-    <el-card class="class-header">
-      <template #header>
-        <div class="card-header">
-          <span>类信息: {{ classInfo.className }}</span>
-        </div>
-      </template>
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <div class="info-item"><strong>父类:</strong> {{ classInfo.superClass || '无' }}</div>
-        </el-col>
-        <el-col :span="12">
-          <div class="info-item"><strong>访问标志:</strong> {{ classInfo.readableAccessFlags || classInfo.accessFlags }}</div>
-        </el-col>
-      </el-row>
-      <div class="interfaces-section">
-        <strong>实现接口:</strong>
-        <div class="tags-container">
-          <el-tag 
-            v-for="iface in classInfo.interfaces" 
-            :key="iface" 
-            class="interface-tag"
-          >
-            {{ iface }}
-          </el-tag>
-          <div v-if="!classInfo.interfaces || classInfo.interfaces.length === 0" class="no-data">无</div>
-        </div>
-      </div>
-    </el-card>
-    
-    <el-tabs class="detail-tabs" type="border-card">
-      <el-tab-pane label="字段">
-        <el-table :data="classInfo.convertedFields || classInfo.fields" class="data-table" size="small">
-          <el-table-column label="访问标志" min-width="150">
-            <template #default="scope">
-              {{ `(${scope.row.accessFlags}) ${scope.row.readableAccessFlags}` }}
-            </template>
-          </el-table-column>
-          <el-table-column label="字段名" min-width="150" prop="name"></el-table-column>
-          <el-table-column label="描述符" min-width="200" prop="descriptor"></el-table-column>
-        </el-table>
-      </el-tab-pane>
-      
-      <el-tab-pane label="方法">
-        <el-table :data="classInfo.convertedMethods || classInfo.methods" class="data-table" size="small">
-          <el-table-column label="访问标志" min-width="150">
-            <template #default="scope">
-              {{ `(${scope.row.accessFlags}) ${scope.row.readableAccessFlags}` }}
-            </template>
-          </el-table-column>
-          <el-table-column label="方法名" min-width="150" prop="name"></el-table-column>
-          <el-table-column label="描述符" min-width="200" prop="descriptor"></el-table-column>
-          <el-table-column label="参数" min-width="200">
-            <template #default="scope">
-              <div class="parameter-tags">
-                <el-tag 
-                  v-for="param in scope.row.parameters" 
-                  :key="param.name" 
-                  class="parameter-tag"
-                  size="small"
-                >
-                  {{ param.name }}: {{ param.descriptor }}
-                </el-tag>
-                <div v-if="!scope.row.parameters || scope.row.parameters.length === 0" class="no-data">无参数</div>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" min-width="120">
-            <template #default="scope">
-              <el-button size="small" @click="showInjectDialog(scope.row)">注入日志</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-tab-pane>
-      
-      <el-tab-pane label="反编译源码">
-        <div class="decompile-section">
-          <el-button class="load-button" type="primary" @click="loadDecompiledCode">加载反编译源码</el-button>
-          <div v-if="decompiledCode" class="editor-wrapper">
-            <div class="editor-container">
-              <CodeEditor
-                :options="editorOptions"
-                :value="decompiledCode"
-                class="code-editor"
-                language="java"
-                @change="handleEditorChange"
-              />
-            </div>
+  <div class="class-detail">
+    <!-- 核心视图区域：IDE 风格布局 -->
+    <div v-if="classInfo" class="main-viewer">
+      <!-- 左侧：编辑器区域 -->
+      <div class="editor-pane">
+        <div class="editor-viewport">
+          <div v-if="decompiledCode" class="editor-container">
+            <CodeEditor
+              :key="'decompile-' + classInfo?.className"
+              :options="editorOptions"
+              :value="decompiledCode"
+              class="code-editor"
+              language="java"
+              @editorDidMount="onEditorMount"
+            />
           </div>
           <div v-else-if="loadingDecompiled" class="loading-placeholder">
-            <i class="el-icon-loading"></i> 正在加载反编译源码...
+            <div class="loading-spinner"></div>
+            <span>ANALYZING BYTECODE...</span>
           </div>
           <div v-else class="empty-placeholder">
-            <el-empty description="点击上方按钮加载反编译源码">
-              <template #image>
-                <i class="el-icon-document" style="font-size: 60px; color: #363637;"></i>
-              </template>
-            </el-empty>
+            <div class="empty-icon"><i class="fas fa-terminal"></i></div>
+            <p>源码未加载</p>
+            <button class="load-btn-hero" @click="loadDecompiledCode">
+              <i class="fas fa-cloud-download-alt"></i> 立即加载反编译源码
+            </button>
           </div>
         </div>
-      </el-tab-pane>
-    </el-tabs>
+      </div>
+
+      <!-- 右侧：大纲侧边栏 -->
+      <ClassOutline 
+        :class-info="classInfo" 
+        @scroll-to="scrollToMethod"
+        @inject="showInjectDialog"
+      />
+    </div>
     
-    <!-- 方法注入对话框 -->
-    <el-dialog v-model="injectDialogVisible" title="注入日志" width="500px">
-      <el-form :model="injectForm" label-width="80px">
-        <el-form-item label="注入位置">
-          <el-select v-model="injectForm.injectionType" placeholder="请选择注入位置">
-            <el-option label="方法执行前" value="ENTER_METHOD"></el-option>
-            <el-option label="方法执行后" value="EXIT_METHOD"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="日志内容">
-          <el-input 
-            v-model="injectForm.logContent" 
-            :rows="4"
-            placeholder="请输入日志内容"
-            type="textarea"
-          ></el-input>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="injectDialogVisible = false">取消</el-button>
-          <el-button :loading="injecting" type="primary" @click="handleInjectLog">确定</el-button>
-        </span>
-      </template>
-    </el-dialog>
-  </div>
-  <div v-else class="no-selection">
-    <el-empty description="请选择一个类查看详细信息">
-      <template #image>
-        <i class="el-icon-document" style="font-size: 60px; color: #363637;"></i>
-      </template>
-    </el-empty>
+    <!-- 无选择状态 -->
+    <div v-else class="no-selection">
+      <div class="no-selection-icon"><i class="fas fa-file-code"></i></div>
+      <span class="no-selection-text">{{ t('detail.no_selection') }}</span>
+    </div>
+    
+    <!-- 注入详情悬浮层 -->
+    <InjectionDetailOverlay 
+      :visible="injectionDetailVisible"
+      :marker="selectedInjectionMarker"
+      @close="injectionDetailVisible = false"
+      @delete="removeInjectionPoint"
+    />
+
+    <!-- 注入配置对话框 -->
+    <InjectionDialog 
+      v-if="injectDialogVisible"
+      :visible="injectDialogVisible"
+      :loading="injecting"
+      :class-name="classInfo?.className"
+      :method="currentMethod"
+      :initial-line-number="initialLineNumber"
+      :initial-injection-type="initialInjectionType"
+      :initial-code-type="initialCodeType"
+      :available-lines="Object.values(sourceLineMapping)"
+      @close="injectDialogVisible = false"
+      @submit="handleInjectLog"
+    />
+
+    <!-- 快捷操作菜单 -->
+    <div 
+      v-if="quickActionMenu.visible" 
+      class="quick-action-popover"
+      :style="{ top: quickActionMenu.y + 'px', left: quickActionMenu.x + 'px' }"
+    >
+      <div class="popover-item" @click="handleQuickAction('LINE_BEFORE')">
+        <i class="fas fa-level-up-alt"></i> 行前注入 (Before)
+      </div>
+      <div class="popover-item" @click="handleQuickAction('LINE_AFTER')">
+        <i class="fas fa-level-down-alt"></i> 行后注入 (After)
+      </div>
+      <div class="popover-divider"></div>
+      <div class="popover-item snapshot" @click="handleQuickAction('LINE_BEFORE', 'SNAPSHOT')">
+        <i class="fas fa-camera"></i> 快速快照 (Snapshot)
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import {getDecompiledCode, injectMethodLog} from '../utils/api'
-import {CodeEditor} from 'monaco-editor-vue3'
+import { useI18n } from 'vue-i18n'
+import { markRaw } from 'vue'
+import { getDecompiledCode, injectMethodLog, getLineNumbers, getInjectionList, removeInjection } from '../utils/api'
+import { CodeEditor } from 'monaco-editor-vue3'
+import * as monaco from 'monaco-editor'
+
+// 子组件
+import ClassHeader from './ClassHeader.vue'
+import ClassOutline from './ClassOutline.vue'
+import InjectionDialog from './InjectionDialog.vue'
+import InjectionDetailOverlay from './InjectionDetailOverlay.vue'
 
 export default {
   name: 'ClassDetail',
   components: {
-    CodeEditor
+    CodeEditor,
+    ClassHeader,
+    ClassOutline,
+    InjectionDialog,
+    InjectionDetailOverlay
+  },
+  setup() {
+    const { t } = useI18n()
+    return { t }
   },
   props: {
-    classInfo: {
-      type: Object,
-      default: null
-    }
+    classInfo: { type: Object, default: null }
   },
   data() {
     return {
       decompiledCode: '',
       loadingDecompiled: false,
-      editorOptions: {
+      injectDialogVisible: false,
+      injecting: false,
+      currentMethod: null,
+      monacoEditor: null,
+      lineNumberMap: {},
+      sourceLineMapping: {},
+      injectionMarkers: [],
+      injectionDecorations: null,
+      sourceLineDecorations: null,
+      loadedClassName: null,
+      selectedInjectionMarker: null,
+      injectionDetailVisible: false,
+      initialLineNumber: null,
+      initialInjectionType: 'ENTER_METHOD',
+      initialCodeType: 'EXPRESSION',
+      quickActionMenu: {
+        visible: false,
+        x: 0,
+        y: 0,
+        line: null,
+        method: null
+      }
+    }
+  },
+  computed: {
+    editorOptions() {
+      const self = this
+      return {
         readOnly: true,
         automaticLayout: true,
-        minimap: {
-          enabled: true
-        },
+        minimap: { enabled: true },
         scrollBeyondLastLine: false,
         fontSize: 14,
         theme: 'vs-dark',
-        wordWrap: 'on',
-        wrappingIndent: 'indent',
-        fixedOverflowWidgets: true
-      },
-      // 注入相关数据
-      injectDialogVisible: false,
-      injecting: false,
-      injectForm: {
-        injectionType: 'ENTER_METHOD',
-        logContent: ''
-      },
-      currentMethod: null
+        glyphMargin: true,
+        lineNumbers: (lineNumber) => {
+          return (self.sourceLineMapping && self.sourceLineMapping[lineNumber]) 
+            ? String(self.sourceLineMapping[lineNumber]) 
+            : String(lineNumber)
+        }
+      }
+    },
+    availableSourceLines() {
+      if (!this.lineNumberMap || !this.currentMethod) return []
+      const methodName = this.currentMethod.name
+      const methodDesc = this.currentMethod.descriptor
+
+      const normalizeDesc = (desc) => {
+        return desc.replace(/\//g, '.').replace(/\./g, '')
+      }
+
+      if (methodName) {
+        // 优先匹配方法名 + 描述符
+        for (const [key, lines] of Object.entries(this.lineNumberMap)) {
+          const keyName = key.split('(')[0]
+          if (keyName === methodName) {
+            const keyDesc = '(' + key.split('(').slice(1).join('(')
+            if (normalizeDesc(keyDesc) === normalizeDesc(methodDesc || '')) {
+              return Array.isArray(lines) ? [...new Set(lines)].sort((a, b) => a - b) : []
+            }
+          }
+        }
+        // 退而求其次，仅匹配方法名
+        for (const [key, lines] of Object.entries(this.lineNumberMap)) {
+          if (key.startsWith(methodName + '(')) {
+            return Array.isArray(lines) ? [...new Set(lines)].sort((a, b) => a - b) : []
+          }
+        }
+      }
+      return []
+    }
+  },
+  watch: {
+    classInfo: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal && newVal.className !== this.loadedClassName) {
+          this.loadDecompiledCode()
+        }
+      }
+    },
+    loadingDecompiled(val) {
+      this.$emit('sync-state', { className: this.classInfo?.className, loading: val })
+    },
+    injectionMarkers: {
+      deep: true,
+      handler(val) {
+        this.$emit('sync-state', { className: this.classInfo?.className, injectionCount: val.length })
+      }
     }
   },
   methods: {
     async loadDecompiledCode() {
       if (!this.classInfo) return
-      
       this.loadingDecompiled = true
       try {
         const code = await getDecompiledCode(this.classInfo.className)
-        this.decompiledCode = code
+        const { cleanCode, mapping } = this.parseSourceLineComments(code || '')
+        this.decompiledCode = cleanCode
+        this.sourceLineMapping = mapping
+        
+        this.injectionMarkers = []
+        this.loadedClassName = this.classInfo.className
+        
+        this.refreshDecorations()
+        this.fetchAuxiliaryData()
       } catch (error) {
-        console.error('加载反编译代码失败:', error)
-        this.$message.error('加载反编译代码失败')
+        console.error('Failed to load code:', error)
+        this.decompiledCode = '// Error: ' + error.message
       } finally {
         this.loadingDecompiled = false
       }
     },
-    handleEditorChange(value) {
-      // 编辑器内容变化时的处理函数（只读模式下不会触发）
-      console.log('Editor content changed:', value)
+    parseSourceLineComments(code) {
+      const mapping = {}
+      const lines = code.split('\n')
+      // 允许行首有空格
+      const pattern = /^\s*\/\*\s*(\d+)\s*\*\/\s?(.*)$/
+      lines.forEach((line, i) => {
+        const match = line.match(pattern)
+        if (match) mapping[i + 1] = parseInt(match[1], 10)
+      })
+      return { cleanCode: code, mapping }
     },
-    // 显示注入对话框
-    showInjectDialog(method) {
-      this.currentMethod = method
-      this.injectForm.logContent = `执行方法: ${this.classInfo.className}.${method.name}`
-      this.injectDialogVisible = true
+    async fetchAuxiliaryData() {
+      // 并行获取行号映射和已有注入点
+      Promise.all([
+        getLineNumbers(this.classInfo.className),
+        getInjectionList(this.classInfo.className)
+      ]).then(([lineNumbers, injectionData]) => {
+        this.lineNumberMap = lineNumbers || {}
+        this.updateSourceLineDecorations()
+        
+        if (injectionData?.injections) {
+          this.syncInjectionMarkers(injectionData.injections)
+        }
+      })
     },
-    // 处理日志注入
-    async handleInjectLog() {
-      if (!this.classInfo || !this.currentMethod) return
+    syncInjectionMarkers(injections) {
+      this.injectionMarkers = injections.map(inj => {
+        let editorLine = null;
+        
+        // 如果是方法注入，优先寻找方法定义的行号
+        if (inj.targetType === 'MethodTarget' || inj.targetType === 'METHOD') {
+          editorLine = this.findEditorLineForMethod(inj.targetMethod || inj.method);
+        }
+        
+        // 如果没找到（或者不是方法注入），尝试根据原始行号映射
+        if (!editorLine && inj.lineNumber) {
+          editorLine = Object.keys(this.sourceLineMapping).find(k => this.sourceLineMapping[k] === inj.lineNumber);
+        }
+        
+        // 最后兜底：再次尝试按方法名找
+        if (!editorLine) {
+          editorLine = this.findEditorLineForMethod(inj.targetMethod || inj.method);
+        }
+        
+        return { ...inj, editorLine: parseInt(editorLine) || null };
+      });
+      this.updateInjectionDecorations();
+    },
+    onEditorMount(editor) {
+      this.monacoEditor = markRaw(editor)
+      this.injectionDecorations = markRaw(editor.createDecorationsCollection([]))
+      this.sourceLineDecorations = markRaw(editor.createDecorationsCollection([]))
       
+      editor.onMouseDown((e) => {
+        // TargetType 2 是 Glyph Margin (图标区), 3 是 Line Numbers (行号区)
+        if (e.target?.type === 2 || e.target?.type === 3) {
+          const line = e.target.position?.lineNumber
+          if (!line) return
+
+          // 1. 优先查找现有的注入点（紫点）
+          const marker = this.injectionMarkers.find(m => m.editorLine === line)
+          if (marker) {
+            this.selectedInjectionMarker = marker
+            this.injectionDetailVisible = true
+            return
+          }
+
+          // 2. 如果没点到注入点，看看是不是点到了可注入的方法行（绿点）
+          const method = this.findMethodByEditorLine(line)
+          if (method) {
+            this.quickActionMenu = {
+              visible: true,
+              x: e.event.posx,
+              y: e.event.posy,
+              line: this.sourceLineMapping[line],
+              method: method
+            }
+          }
+        } else {
+          this.quickActionMenu.visible = false
+        }
+      })
+    },
+    scrollToMethod(method) {
+      const line = this.findEditorLineForMethod(method.name)
+      if (line && this.monacoEditor) {
+        this.monacoEditor.revealLineInCenter(line)
+        this.monacoEditor.setPosition({ lineNumber: line, column: 1 })
+        this.monacoEditor.focus()
+      }
+    },
+    findEditorLineForMethod(name) {
+      if (!name) return null
+      const lines = this.decompiledCode.split('\n')
+      
+      // 处理构造函数：字节码里叫 <init>，源码里叫类名
+      let searchName = name
+      if (name === '<init>') {
+        const fullClassName = this.classInfo.className
+        const parts = fullClassName.split('.')
+        searchName = parts[parts.length - 1]
+      }
+      
+      // 更加精准的启发式搜索：寻找方法定义或构造函数的特征
+      const methodDefPattern = new RegExp(`\\b(public|private|protected|static|final|synchronized|native)\\s+.*\\b${searchName}\\s*\\(`)
+      
+      let idx = lines.findIndex(l => methodDefPattern.test(l))
+      
+      if (idx === -1) {
+        idx = lines.findIndex(l => l.includes(searchName + '(') && !l.includes('=') && !l.trim().startsWith('this.'))
+      }
+      
+      return idx !== -1 ? idx + 1 : null
+    },
+
+    findMethodByEditorLine(line) {
+      // 1. 通过行号映射找原始行号
+      const originalLine = this.sourceLineMapping[line]
+      
+      // 2. 在 lineNumberMap 中查找包含该原始行号的方法
+      // lineNumberMap 结构: { "methodName(desc)": [origLine1, origLine2, ...] }
+      for (const [methodKey, origLines] of Object.entries(this.lineNumberMap)) {
+        if (origLines.includes(originalLine)) {
+          const name = methodKey.split('(')[0]
+          // 返回方法对象（模拟大纲里的对象结构）
+          return (this.classInfo.methods || []).find(m => m.name === name)
+        }
+      }
+
+      // 3. 兜底逻辑：如果这一行刚好是方法的定义行（哪怕没有字节码映射）
+      const decompileLines = this.decompiledCode.split('\n')
+      const currentLineText = decompileLines[line - 1] || ''
+      return (this.classInfo.methods || []).find(m => {
+        const simpleName = m.name === '<init>' ? this.classInfo.className.split('.').pop() : m.name
+        return currentLineText.includes(simpleName + '(') && 
+               /public|private|protected/.test(currentLineText)
+      })
+    },
+    showInjectDialog(method, lineNumber = null, type = 'LINE_BEFORE') {
+      this.currentMethod = method
+      this.initialLineNumber = lineNumber
+      this.injectDialogVisible = true
+      this.quickActionMenu.visible = false
+      
+      // 注意：这里需要等弹窗 mount 后修改内部状态，或者通过 prop 传递更多初始状态
+      // 稍后我会修改 InjectionDialog 支持 initialType
+    },
+    handleQuickAction(type, codeType = 'EXPRESSION') {
+      this.initialInjectionType = type
+      this.initialCodeType = codeType
+      this.showInjectDialog(this.quickActionMenu.method, this.quickActionMenu.line)
+    },
+    async handleInjectLog(formData) {
       this.injecting = true
       try {
-        // 构造注入数据
-        const injectionData = {
-          class: this.classInfo.className,
+        let code = formData.logContent || ''
+        if (formData.codeType === 'EXPRESSION' && !code.startsWith('log:')) {
+          code = 'log:' + code
+        } else if (formData.codeType === 'SNAPSHOT') {
+          code = 'snapshot:'
+        }
+
+        const payload = {
+          clazz: this.classInfo.className,
           method: this.currentMethod.name,
-          injectionType: this.injectForm.injectionType,
-          codeType: 'EXPRESSION',
-          code: `LOG:${this.injectForm.logContent}`,
-          desc: this.currentMethod.descriptor
+          desc: this.currentMethod.descriptor,
+          injectionType: formData.injectionType,
+          codeType: formData.codeType,
+          code: code,
+          lineNumber: formData.lineNumber,
+          expression: formData.condition
         }
-        
-        // 调用注入API
-        const result = await injectMethodLog(injectionData)
-        
-        if (result.success) {
-          this.$message.success('日志注入成功')
-          this.injectDialogVisible = false
-        } else {
-          this.$message.error(result.error || '注入失败')
-        }
-      } catch (error) {
-        console.error('方法注入失败:', error)
-        this.$message.error('方法注入失败: ' + error.message)
+        const result = await injectMethodLog(payload)
+        this.injectDialogVisible = false
+        this.loadDecompiledCode() // 刷新以同步状态
+      } catch (e) {
+        alert('注入失败: ' + (e.response?.data?.message || e.message))
       } finally {
         this.injecting = false
       }
+    },
+    async removeInjectionPoint(marker) {
+      if (!confirm('Delete this injection?')) return
+      try {
+        await removeInjection(marker.id)
+        this.injectionDetailVisible = false
+        this.loadDecompiledCode()
+      } catch (e) {
+        alert('删除失败')
+      }
+    },
+    refreshDecorations() {
+      if (this.injectionDecorations) this.injectionDecorations.set([])
+      if (this.sourceLineDecorations) this.sourceLineDecorations.set([])
+    },
+    updateSourceLineDecorations() {
+      if (!this.monacoEditor || !this.sourceLineDecorations) return
+      const decorations = []
+      
+      // 遍历所有建立了映射的行（即所有带有 /* XX */ 注释的行）
+      Object.keys(this.sourceLineMapping).forEach(editorLine => {
+        const line = parseInt(editorLine)
+        decorations.push({
+          range: new monaco.Range(line, 1, line, 1),
+          options: { 
+            isWholeLine: true, 
+            glyphMarginClassName: 'source-line-glyph' 
+          }
+        })
+      })
+      
+      this.sourceLineDecorations.set(decorations)
+    },
+    updateInjectionDecorations() {
+      if (!this.monacoEditor || !this.injectionDecorations) return
+      const decorations = this.injectionMarkers
+        .filter(m => m.editorLine)
+        .map(m => {
+          let glyphClass = 'injected-glyph-default'
+          const type = (m.injectionType || m.type || '').toUpperCase()
+          const codeType = (m.codeType || '').toUpperCase()
+          
+          if (codeType === 'SNAPSHOT') {
+            glyphClass = 'injected-glyph-snapshot'
+          } else if (type.includes('ENTER') || type.includes('BEFORE')) {
+            glyphClass = 'injected-glyph-before'
+          } else if (type.includes('EXIT') || type.includes('AFTER')) {
+            glyphClass = 'injected-glyph-after'
+          }
+          
+          return {
+            range: new monaco.Range(m.editorLine, 1, m.editorLine, 1),
+            options: { 
+              isWholeLine: true, 
+              glyphMarginClassName: `injected-glyph ${glyphClass}`,
+              className: 'injected-line-bg'
+            }
+          }
+        })
+      this.injectionDecorations.set(decorations)
     }
   }
 }
@@ -242,229 +479,150 @@ export default {
 
 <style scoped>
 .class-detail {
-  padding: 20px;
-  height: 100%;
-  overflow: auto;
-  background-color: #141414;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-primary);
+  overflow: hidden;
 }
 
-.card-header {
-  font-weight: bold;
-  color: #e5eaf3;
-  font-size: 16px;
-}
-
-.info-item {
-  padding: 5px 0;
-  color: #cfd3dc;
-}
-
-.interfaces-section {
-  margin-top: 15px;
-  color: #e5eaf3;
-}
-
-.interfaces-section > strong {
-  display: block;
-  margin-bottom: 8px;
-}
-
-.tags-container {
+.main-viewer {
+  flex: 1;
   display: flex;
-  flex-wrap: wrap;
+  background-color: var(--bg-primary);
+  overflow: hidden;
+}
+
+.editor-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.editor-viewport { flex: 1; position: relative; }
+.editor-container { height: 100%; width: 100%; }
+
+.loading-placeholder, .empty-placeholder, .no-selection {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255,255,255,0.05);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.no-selection-icon { font-size: 64px; opacity: 0.1; }
+
+/* 快捷菜单样式 */
+.quick-action-popover {
+  position: fixed;
+  z-index: 3000;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  padding: 6px;
+  min-width: 160px;
+  animation: pop-in 0.15s ease-out;
+}
+
+@keyframes pop-in {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.popover-item {
+  padding: 8px 12px;
+  color: #ccc;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.interface-tag {
-  background-color: #262727;
-  border-color: #363637;
-  color: #cfd3dc;
-  margin: 0;
+.popover-item:hover {
+  background: #3e3e3f;
+  color: #fff;
 }
 
-.no-data {
-  color: #a3a6ad;
-  font-style: italic;
-  padding: 2px 0;
-}
-
-.detail-tabs {
-  margin-top: 20px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.detail-tabs :deep(.el-tabs__content) {
-  flex: 1;
-  overflow: hidden;
-  height: 100%;
-}
-
-.detail-tabs :deep(.el-tab-pane) {
-  height: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.data-table {
-  width: 100%;
-  height: 100%;
-}
-
-.parameter-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  padding: 5px 0;
-}
-
-.parameter-tag {
-  background-color: #262727;
-  border-color: #363637;
-  color: #cfd3dc;
-  margin: 0;
-}
-
-.decompile-section {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  flex: 1;
-  overflow: hidden;
-}
-
-.load-button {
-  align-self: center;
-  margin: 10px 0;
-}
-
-.editor-wrapper {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.editor-container {
-  flex: 1;
-  border: 1px solid #363637;
-  border-radius: 4px;
-  overflow: hidden;
-  min-height: 500px;
-}
-
-.code-editor {
-  height: 100%;
-  min-height: 500px;
-}
-
-.loading-placeholder {
+.popover-item i {
+  width: 14px;
   text-align: center;
-  padding: 30px;
-  color: #a3a6ad;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 11px;
+  color: #6366f1;
 }
 
-.empty-placeholder {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.popover-divider {
+  height: 1px;
+  background: #444;
+  margin: 4px;
 }
 
-.no-selection {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  background-color: #141414;
+.popover-item.snapshot i {
+  color: #f43f5e;
+}
+</style>
+
+<style>
+/* 全局装饰样式 - Monaco Editor 必须是非 scoped */
+.source-line-glyph {
+  background: #10b981;
+  border-radius: 50%;
+  margin-left: 4px;
+  width: 8px !important;
+  height: 8px !important;
+  margin-top: 5px;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
 }
 
-:deep(.el-card) {
-  background-color: #1d1e1f;
-  border: 1px solid #363637;
-  color: #e5eaf3;
-  margin-bottom: 20px;
-  flex-shrink: 0;
+.injected-glyph {
+  margin-left: 3px;
+  width: 10px !important;
+  height: 10px !important;
+  margin-top: 4px;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
 }
 
-:deep(.el-card__header) {
-  background-color: #262727;
-  border-bottom: 1px solid #363637;
-  color: #e5eaf3;
+.injected-glyph-before {
+  background: #6366f1;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* 向上箭头 */
 }
 
-:deep(.el-tabs) {
-  background-color: #1d1e1f;
-  border: 1px solid #363637;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+.injected-glyph-after {
+  background: #8b5cf6;
+  clip-path: polygon(50% 100%, 0% 0%, 100% 0%); /* 向下箭头 */
 }
 
-:deep(.el-tabs__header) {
-  margin-bottom: 0;
-  flex-shrink: 0;
+.injected-glyph-snapshot {
+  background: #f43f5e;
+  border-radius: 2px;
+  clip-path: polygon(0% 20%, 20% 20%, 20% 0%, 80% 0%, 80% 20%, 100% 20%, 100% 100%, 0% 100%); /* 相机轮廓 */
 }
 
-:deep(.el-tabs__item) {
-  color: #cfd3dc;
+.injected-glyph-default {
+  background: #6366f1;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 }
 
-:deep(.el-tabs__item.is-active) {
-  color: #409EFF;
-}
-
-:deep(.el-tabs__active-bar) {
-  background-color: #409EFF;
-}
-
-:deep(.el-tabs__nav-wrap::after) {
-  background-color: #363637;
-}
-
-:deep(.el-table) {
-  background-color: #1d1e1f;
-  height: 100%;
-}
-
-:deep(.el-table__header) {
-  background-color: #262727;
-  color: #e5eaf3;
-}
-
-:deep(.el-table__body) {
-  background-color: #1d1e1f;
-  color: #cfd3dc;
-}
-
-:deep(.el-table__row) {
-  background-color: #1d1e1f;
-}
-
-:deep(.el-table__row:hover) {
-  background-color: #262727;
-}
-
-/* 隐藏表格内的滚动条 */
-:deep(.el-table__body-wrapper::-webkit-scrollbar) {
-  display: none;
-}
-
-:deep(.el-table__body-wrapper) {
-  overflow: auto;
-}
-
-.dialog-footer {
-  text-align: right;
+.injected-line-bg {
+  background: rgba(99, 102, 241, 0.08);
+  border-left: 2px solid #6366f1;
 }
 </style>

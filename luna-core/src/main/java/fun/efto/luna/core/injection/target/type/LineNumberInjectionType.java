@@ -1,23 +1,59 @@
 package fun.efto.luna.core.injection.target.type;
 
-import fun.efto.luna.core.injection.target.LineNumberTarget;
-
 /**
- * @author ：Tony.L(286269159@qq.com)
- * @since ：2025/10/4 4:34
+ * 行号级注入类型
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since : 2026/03/29 02:30
  */
 public class LineNumberInjectionType extends InjectionType {
 
-    public static final LineNumberInjectionType BEFORE = new LineNumberInjectionType("BEFORE_LINE", "在行前注入").register();
-    public static final LineNumberInjectionType AFTER = new LineNumberInjectionType("AFTER_LINE", "在行后注入").register();
+    public static final LineNumberInjectionType BEFORE = new LineNumberInjectionType("line_before", "行号前注入", 0);
+    public static final LineNumberInjectionType AFTER = new LineNumberInjectionType("line_after", "行号后注入", 0);
 
-    public LineNumberInjectionType(String name, String description) {
-        super(name, description, LineNumberTarget.class);
+    private final String name;
+    private final String description;
+    private final int lineNumber;
+
+    public LineNumberInjectionType(String name, String description, int lineNumber) {
+        this.name = name;
+        this.description = description;
+        this.lineNumber = lineNumber;
     }
 
     @Override
-    public LineNumberInjectionType register() {
-        super.register();
-        return this;
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    public int getLineNumber() {
+        return lineNumber;
+    }
+
+    public LineNumberInjectionType withLineNumber(int lineNumber) {
+        return new LineNumberInjectionType(this.name, this.description, lineNumber);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LineNumberInjectionType that = (LineNumberInjectionType) o;
+        return name.equals(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return name + "(" + lineNumber + ")";
     }
 }

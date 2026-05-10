@@ -30,15 +30,32 @@ async function request(url, options = {}) {
   try {
     const response = await fetch(url, config);
     
-    // 检查响应状态
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let errorMsg = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          errorMsg = errorData.error;
+        } else if (errorData.message) {
+          errorMsg = errorData.message;
+        }
+      } catch (e) {
+        try {
+          const errorText = await response.text();
+          if (errorText) errorMsg = errorText;
+        } catch (e2) {
+          // ignore
+        }
+      }
+      const error = new Error(errorMsg);
+      error.status = response.status;
+      throw error;
     }
     
     // 尝试解析JSON
     try {
       const data = await response.json();
-      return data;
+      return unwrapApiResult(data);
     } catch (jsonError) {
       // 如果不是JSON响应，返回文本
       const text = await response.text();
@@ -106,3 +123,15 @@ export function del(url) {
 
 // 导出基础请求方法
 export { request };
+
+function unwrapApiResult(data) {
+  if (data && typeof data === 'object' && 'success' in data && 'data' in data) {
+    if (!data.success) {
+      const error = new Error(data.error || '请求失败');
+      error.status = data.status || 400;
+      throw error;
+    }
+    return data.data;
+  }
+  return data;
+}

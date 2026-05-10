@@ -1,6 +1,12 @@
 package fun.efto.luna.agent.web;
 
 import fun.efto.luna.agent.clazz.ClassScanner;
+import fun.efto.luna.agent.web.controller.ClassController;
+import fun.efto.luna.agent.web.controller.InjectionController;
+import fun.efto.luna.agent.web.controller.RuleController;
+import fun.efto.luna.agent.web.controller.StatusController;
+import fun.efto.luna.agent.web.controller.TestController;
+import fun.efto.luna.agent.web.mvc.DispatcherServlet;
 import fun.efto.luna.core.InjectionExecutor;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -11,14 +17,12 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.instrument.Instrumentation;
 import java.net.URL;
 
 /**
- * Jetty Web服务器实现
- * 洋葱架构基础设施层 - 提供HTTP和WebSocket服务
- *
- * @author Tony.L
- * @since 1.0.0
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since  : 2026/05/09 10:00
  */
 public class JettyWebServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(JettyWebServer.class);
@@ -27,72 +31,83 @@ public class JettyWebServer {
     private final int port;
     private final JettyConfiguration configuration;
     private volatile boolean running = false;
-    private InjectionExecutor injectionExecutor;
-    private ClassScanner classScanner;
 
     public JettyWebServer(int port, JettyConfiguration configuration,
                           InjectionExecutor injectionExecutor,
-                          ClassScanner classScanner) {
+                          ClassScanner classScanner,
+                          Instrumentation instrumentation) {
         this.port = port;
         this.configuration = configuration;
-        this.injectionExecutor = injectionExecutor;
-        this.classScanner = classScanner;
-        this.server = createServer();
+        this.server = createServer(injectionExecutor, classScanner, instrumentation);
     }
 
-    /**
-     * 创建和配置Jetty服务器
-     */
-    private Server createServer() {
+    private Server createServer(InjectionExecutor injectionExecutor,
+                                 ClassScanner classScanner,
+                                 Instrumentation instrumentation) {
         Server jettyServer = new Server();
 
-        // 配置连接器
         ServerConnector connector = new ServerConnector(jettyServer);
         connector.setPort(port);
         connector.setHost(configuration.getHost());
-
-        // 连接器优化配置
         connector.setIdleTimeout(configuration.getIdleTimeoutMs());
         connector.setAcceptQueueSize(configuration.getAcceptQueueSize());
-
         jettyServer.addConnector(connector);
 
-        // 配置静态资源处理器
         ResourceHandler resourceHandler = new ResourceHandler();
         resourceHandler.setDirectoriesListed(false);
         resourceHandler.setWelcomeFiles(new String[]{"index.html"});
 
-        // 设置静态资源基础路径为JAR包内的资源
         URL staticResourceUrl = this.getClass().getClassLoader().getResource("static");
         if (staticResourceUrl != null) {
             resourceHandler.setResourceBase(staticResourceUrl.toExternalForm());
         } else {
-            // 如果在开发环境中找不到资源，使用相对路径
             resourceHandler.setResourceBase("src/main/resources/static");
         }
 
-        // 配置Servlet上下文
+        ClassResourceHelper classResourceHelper = new ClassResourceHelper(instrumentation);
+
+        DispatcherServlet dispatcher = new DispatcherServlet();
+        dispatcher.registerController(new StatusController());
+        dispatcher.registerController(new ClassController(classScanner, classResourceHelper));
+        dispatcher.registerController(new InjectionController(injectionExecutor, classResourceHelper));
+        dispatcher.registerController(new RuleController());
+        dispatcher.registerController(new TestController(classScanner, classResourceHelper));
+        dispatcher.registerController(new fun.efto.luna.agent.web.controller.MetricsController());
+
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
+        context.setDisplayName("Luna Web Server");
+        
+        // 注册全局字符编码过滤器
+        context.addFilter(new org.eclipse.jetty.servlet.FilterHolder(new javax.servlet.Filter() {
+            @Override
+            public void init(javax.servlet.FilterConfig filterConfig) {}
+            @Override
+            public void doFilter(javax.servlet.ServletRequest request, javax.servlet.ServletResponse response, javax.servlet.FilterChain chain) 
+                    throws java.io.IOException, javax.servlet.ServletException {
+                request.setCharacterEncoding("UTF-8");
+                response.setCharacterEncoding("UTF-8");
+                chain.doFilter(request, response);
+            }
+            @Override
+            public void destroy() {}
+        }), "/*", java.util.EnumSet.of(javax.servlet.DispatcherType.REQUEST));
 
-        // 添加REST API Servlet
-        context.addServlet(new ServletHolder(new LunaApiServlet(injectionExecutor, classScanner)), "/api/*");
+        context.addServlet(new ServletHolder(dispatcher), "/api/*");
+        
+        // 注册 WebSocket Servlet
+        context.addServlet(new ServletHolder(new fun.efto.luna.agent.web.ws.LogWebSocketServlet()), "/ws/log");
 
-        // 创建处理器列表，将静态资源处理器和上下文处理器组合
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new org.eclipse.jetty.server.Handler[]{resourceHandler, context});
         jettyServer.setHandler(handlers);
 
-        // 服务器优化配置
         jettyServer.setStopAtShutdown(true);
         jettyServer.setStopTimeout(configuration.getStopTimeoutMs());
 
         return jettyServer;
     }
 
-    /**
-     * 启动服务器
-     */
     public void start() throws Exception {
         if (running) {
             throw new IllegalStateException("服务器已经在运行");
@@ -101,11 +116,13 @@ public class JettyWebServer {
         try {
             server.start();
             running = true;
+            
+            // 启动日志分发器
+            fun.efto.luna.agent.web.ws.LogDispatcher.getInstance().start();
 
             LOGGER.info("Luna Web服务器启动成功:");
             LOGGER.info("  - HTTP服务: http://{}:{}", configuration.getHost(), port);
-            LOGGER.info("  - WebSocket: ws://{}:{}/ws", configuration.getHost(), port);
-            LOGGER.info("  - 管理界面: http://{}:{}", configuration.getHost(), port);
+            LOGGER.info("  - WebSocket服务: ws://{}:{}/ws/log", configuration.getHost(), port);
 
         } catch (Exception e) {
             running = false;
@@ -113,15 +130,15 @@ public class JettyWebServer {
         }
     }
 
-    /**
-     * 停止服务器
-     */
     public void stop() throws Exception {
         if (!running) {
             return;
         }
 
         try {
+            // 停止日志分发器
+            fun.efto.luna.agent.web.ws.LogDispatcher.getInstance().stop();
+            
             server.stop();
             server.destroy();
             running = false;
@@ -131,25 +148,16 @@ public class JettyWebServer {
         }
     }
 
-    /**
-     * 等待服务器启动完成
-     */
     public void join() throws InterruptedException {
         if (server != null) {
             server.join();
         }
     }
 
-    /**
-     * 检查服务器是否运行中
-     */
     public boolean isRunning() {
         return running && server.isRunning();
     }
 
-    /**
-     * 获取服务器统计信息
-     */
     public JettyServerStats getStats() {
         if (!isRunning()) {
             return new JettyServerStats(false, 0, 0, 0, 0);
@@ -160,15 +168,12 @@ public class JettyWebServer {
         return new JettyServerStats(
                 true,
                 connector.getConnectedEndPoints().size(),
-                System.currentTimeMillis() - System.currentTimeMillis(), // 简化实现
+                System.currentTimeMillis() - System.currentTimeMillis(),
                 server.getBeans().size(),
                 Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
         );
     }
 
-    /**
-     * 服务器统计信息
-     */
     public static class JettyServerStats {
         private final boolean running;
         private final int activeConnections;
@@ -185,25 +190,11 @@ public class JettyWebServer {
             this.memoryUsage = memoryUsage;
         }
 
-        public boolean isRunning() {
-            return running;
-        }
-
-        public int getActiveConnections() {
-            return activeConnections;
-        }
-
-        public long getUptimeMs() {
-            return uptimeMs;
-        }
-
-        public int getManagedBeans() {
-            return managedBeans;
-        }
-
-        public long getMemoryUsage() {
-            return memoryUsage;
-        }
+        public boolean isRunning() { return running; }
+        public int getActiveConnections() { return activeConnections; }
+        public long getUptimeMs() { return uptimeMs; }
+        public int getManagedBeans() { return managedBeans; }
+        public long getMemoryUsage() { return memoryUsage; }
 
         @Override
         public String toString() {
@@ -212,4 +203,3 @@ public class JettyWebServer {
         }
     }
 }
-

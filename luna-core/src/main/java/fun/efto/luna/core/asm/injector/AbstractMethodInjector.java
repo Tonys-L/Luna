@@ -2,6 +2,7 @@ package fun.efto.luna.core.asm.injector;
 
 import fun.efto.luna.core.InjectionContext;
 import fun.efto.luna.core.asm.AsmInjectionContext;
+import fun.efto.luna.core.asm.ClassLoaderAwareClassWriter;
 import fun.efto.luna.core.asm.Constants;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.target.MethodTarget;
@@ -23,11 +24,11 @@ public abstract class AbstractMethodInjector implements BytecodeInjector {
 
     @Override
     public byte[] inject(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
-        // 创建ASM注入上下文
         AsmInjectionContext asmContext = new AsmInjectionContext(injectionContext, bytecode);
 
         ClassReader cr = new ClassReader(bytecode);
-        ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        ClassWriter cw = new ClassLoaderAwareClassWriter(cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES, loader);
         asmContext.setClassVisitor(cw);
 
         ClassVisitor cv = new ClassVisitor(Constants.AMS_API_VERSION, cw) {
@@ -42,7 +43,7 @@ public abstract class AbstractMethodInjector implements BytecodeInjector {
             }
         };
 
-        cr.accept(cv, 0);
+        cr.accept(cv, ClassReader.EXPAND_FRAMES);
 
         return cw.toByteArray();
     }
@@ -50,7 +51,15 @@ public abstract class AbstractMethodInjector implements BytecodeInjector {
     private boolean shouldInjectIntoMethod(String name, String descriptor, AsmInjectionContext asmContext) {
         if (asmContext.getInjectionTarget() instanceof MethodTarget) {
             MethodTarget methodTarget = (MethodTarget) asmContext.getInjectionTarget();
-            return name.equals(methodTarget.getMethodName()) && descriptor.equals(methodTarget.getMethodDescriptor());
+            boolean nameMatches = name.equals(methodTarget.getMethodName());
+            if (!nameMatches) {
+                return false;
+            }
+            String targetDesc = methodTarget.getMethodDescriptor();
+            if (targetDesc == null || targetDesc.isEmpty()) {
+                return true;
+            }
+            return descriptor.equals(targetDesc);
         }
         return false;
     }

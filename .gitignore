@@ -2,6 +2,18 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+luna-agent/src/main/resources/static
+.agents
+.trae
+.vscode
+
+node_modules/
+dist/
+.flattened-pom.xml
+dependency-reduced-pom.xml
+*.class
+luna-rules.json
+luna.properties
 
 ### IntelliJ IDEA ###
 .idea/
@@ -18,3 +30,12 @@ target/
 
 ### Mac OS ###
 .DS_Store
+
+### Trae ###
+.trae/
+
+### Temp ###
+TASKS/
+*.bak
+mock-server.js
+test_frontend.py

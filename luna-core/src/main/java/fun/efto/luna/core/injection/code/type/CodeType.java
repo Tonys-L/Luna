@@ -1,43 +1,45 @@
 package fun.efto.luna.core.injection.code.type;
 
-import fun.efto.luna.core.TypeRegistry;
-import fun.efto.luna.core.injection.code.InjectableCode;
-import fun.efto.luna.core.type.RegisterableType;
-
 /**
- * @author ：Tony.L(286269159@qq.com)
- * @since ：2025/10/3 18:03
+ * 代码类型
+ * @author ：Tony.L(<286269159@qq.com>)
+ * @since ：2026/03/29 02:30
  */
-public class CodeType extends RegisterableType<CodeType> {
+public enum CodeType {
 
-    private static final TypeRegistry<CodeType> REGISTRY = new TypeRegistry<>();
-    private final Class<? extends InjectableCode> codeClass;
+    /**
+     * Java 代码
+     */
+    JAVA("java", "Java 代码"),
 
-    public CodeType(String name, String description, Class<? extends InjectableCode> codeClass) {
-        super(name, description);
-        this.codeClass = codeClass;
+    /**
+     * 表达式代码
+     */
+    EXPRESSION("expression", "表达式代码"),
+
+    /**
+     * 快照代码 (虚拟断点)
+     */
+    SNAPSHOT("snapshot", "快照代码");
+
+    private final String name;
+    private final String description;
+
+    CodeType(String name, String description) {
+        this.name = name;
+        this.description = description;
     }
 
-    public static CodeType valueOf(String name) {
-        return valueOf(REGISTRY, name);
+    public String getName() {
+        return name;
     }
 
-    public Class<? extends InjectableCode> getCodeClass() {
-        return codeClass;
+    public String getDescription() {
+        return description;
     }
 
     @Override
-    protected TypeRegistry<CodeType> getRegistry() {
-        return REGISTRY;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
+    public String toString() {
+        return name;
     }
 }

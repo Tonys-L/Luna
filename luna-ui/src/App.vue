@@ -1,34 +1,131 @@
 <template>
-  <div id="app" class="dark">
+  <div id="app" class="industrial-tech">
     <el-config-provider namespace="el">
-      <el-container class="app-container">
-        <el-header class="app-header">
+      <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <header class="app-header">
           <div class="header-content">
-            <h1>Luna</h1>
-            <div class="header-actions">
-              
+            <!-- 品牌标识 -->
+            <div class="brand">
+              <div class="brand-logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <rect x="2" y="2" width="20" height="20" rx="1" stroke="#00d4ff" stroke-width="1.5"/>
+                  <path d="M6 12L9 15L16 8" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <rect x="4" y="4" width="16" height="16" rx="1" stroke="#00d4ff" stroke-width="0.5" stroke-dasharray="2 2"/>
+                </svg>
+              </div>
+              <h1 class="brand-name">LUNA</h1>
+              <div class="brand-tag">{{ t('app.tag') }}</div>
+            </div>
+            
+            <!-- 导航选项卡 -->
+            <nav class="main-nav">
+              <button 
+                :class="['nav-item', { active: activeTab === 'class-tree' }]"
+                @click="activeTab = 'class-tree'"
+              >
+                <i class="fas fa-folder-tree nav-icon"></i>
+                <span class="nav-label">{{ t('nav.class_tree') }}</span>
+              </button>
+              <button 
+                :class="['nav-item', { active: activeTab === 'log' }]"
+                @click="activeTab = 'log'"
+              >
+                <i class="fas fa-terminal nav-icon"></i>
+                <span class="nav-label">日志监控</span>
+              </button>
+              <button 
+                :class="['nav-item', { active: activeTab === 'dashboard' }]"
+                @click="activeTab = 'dashboard'"
+              >
+                <i class="fas fa-tachometer-alt nav-icon"></i>
+                <span class="nav-label">监控大盘</span>
+              </button>
+              <button 
+                :class="['nav-item', { active: activeTab === 'thread-analyzer' }]"
+                @click="activeTab = 'thread-analyzer'"
+              >
+                <i class="fas fa-microchip nav-icon"></i>
+                <span class="nav-label">线程分析</span>
+              </button>
+              <button 
+                :class="['nav-item', { active: activeTab === 'configuration' }]"
+                @click="activeTab = 'configuration'"
+              >
+                <i class="fas fa-sliders-h nav-icon"></i>
+                <span class="nav-label">{{ t('nav.configuration') }}</span>
+              </button>
+            </nav>
+            
+            <!-- 右侧操作区 -->
+            <div class="header-right">
+              <!-- 语言切换按钮 -->
+              <button class="lang-switcher" @click="switchLang">
+                {{ currentLocale === 'zh' ? 'EN' : '中文' }}
+              </button>
             </div>
           </div>
-        </el-header>
+        </header>
         
-        <el-main class="app-main">
-          <ClassTreeViewer @class-count-update="updateClassCount" @refresh-data="handleRefreshData" />
-        </el-main>
-      </el-container>
+        <!-- 主内容区域 -->
+        <main class="app-main">
+          <ClassTreeViewer v-if="activeTab === 'class-tree'" @class-count-update="updateClassCount" @refresh-data="handleRefreshData" />
+          <LogViewer v-else-if="activeTab === 'log'" />
+          <Dashboard v-else-if="activeTab === 'dashboard'" />
+          <ThreadAnalyzer v-else-if="activeTab === 'thread-analyzer'" />
+          <ConfigurationViewer v-else-if="activeTab === 'configuration'" />
+        </main>
+        
+        <!-- 底部状态栏 -->
+        <footer class="app-footer">
+          <div class="footer-content">
+            <div class="footer-info">
+              <span class="info-item">CLASSES: {{ classCount }}</span>
+              <span class="info-item">{{ t('app.version') }}</span>
+            </div>
+            <div class="footer-actions">
+              <button class="footer-button" @click="refreshData">
+                <i class="fas fa-sync-alt"></i>
+                <span>{{ t('app.refresh') }}</span>
+              </button>
+            </div>
+          </div>
+        </footer>
+      </div>
     </el-config-provider>
   </div>
 </template>
 
 <script>
+import { useI18n } from 'vue-i18n'
 import ClassTreeViewer from './views/ClassTreeViewer.vue'
+import ConfigurationViewer from './views/ConfigurationViewer.vue'
+import LogViewer from './views/LogViewer.vue'
+import Dashboard from './views/Dashboard.vue'
+import ThreadAnalyzer from './views/ThreadAnalyzer.vue'
 
 export default {
   name: 'App',
   components: {
-    ClassTreeViewer
+    ClassTreeViewer,
+    ConfigurationViewer,
+    LogViewer,
+    Dashboard,
+    ThreadAnalyzer
+  },
+  setup() {
+    const { t, locale } = useI18n()
+    const currentLocale = locale
+
+    const switchLang = () => {
+      currentLocale.value = currentLocale.value === 'zh' ? 'en' : 'zh'
+    }
+
+    return { t, switchLang, currentLocale }
   },
   data() {
     return {
+      activeTab: 'class-tree',
       loading: false,
       classCount: 0
     }
@@ -37,9 +134,7 @@ export default {
     async refreshData() {
       this.loading = true
       try {
-        // 触发全局事件，通知所有组件刷新数据
         this.$emit('refresh-data')
-        // 等待一段时间以显示加载状态
         await new Promise(resolve => setTimeout(resolve, 500))
       } finally {
         this.loading = false
@@ -56,95 +151,303 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #e5eaf3;
-  height: 100vh;
-  background-color: #141414;
-  overflow: hidden;
-}
+@import "@fortawesome/fontawesome-free/css/all.css";
 
-.app-container {
-  height: 100vh;
-  overflow: hidden;
-}
-
-.app-header {
-  background-color: #1d1e1f;
-  color: white;
-  border-bottom: 1px solid #363637;
+/* 全局重置 */
+* {
+  margin: 0;
   padding: 0;
-  height: auto;
+  box-sizing: border-box;
+}
+
+/* 根变量 - Luna Premium 风格 */
+:root {
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #121217;
+  --bg-tertiary: #1a1a22;
+  --bg-hover: #23232e;
+  
+  --text-primary: #f0f0f5;
+  --text-secondary: #a0a0b0;
+  --text-tertiary: #6b6b7b;
+  
+  --border-color: #2a2a35;
+  --border-focus: #6366f1;
+  
+  --accent-primary: #6366f1;
+  --accent-secondary: #06b6d4;
+  --accent-success: #10b981;
+  --accent-danger: #ef4444;
+  --accent-warning: #f59e0b;
+  
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  
+  --glass-bg: rgba(18, 18, 23, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glow-primary: rgba(99, 102, 241, 0.3);
+}
+
+/* 基础样式 */
+html, body {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  height: 100%;
+  overflow: hidden;
+}
+
+#app {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 应用容器 */
+.app-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+}
+
+/* 顶部导航栏 */
+.app-header {
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+  height: 48px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+}
+
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+  opacity: 0.3;
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  height: 60px;
+  padding: 0 16px;
+  height: 100%;
+  gap: 24px;
 }
 
-.header-actions {
+/* 右侧操作区 */
+.header-right {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
-.refresh-button {
-  background-color: #262727;
-  border-color: #363637;
-  color: #cfd3dc;
+/* 品牌标识 */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-.refresh-button:hover {
-  background-color: #363737;
-  border-color: #464747;
-  color: #e5eaf3;
+.brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
 }
 
-.class-count {
-  color: #a3a6ad;
-  font-size: 14px;
+.brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
 }
 
-.app-main {
-  padding: 0;
-  background-color: #141414;
-  overflow: hidden;
+.brand-tag {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 导航选项卡 */
+.main-nav {
+  display: flex;
+  gap: 8px;
   flex: 1;
+  justify-content: center;
 }
 
-/* 隐藏滚动条 */
-::-webkit-scrollbar {
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  border-radius: var(--radius-md);
+  margin: 4px 0;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.nav-item.active {
+  color: #fff;
+  background-color: rgba(99, 102, 241, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.3);
+}
+
+.nav-item.active .nav-icon {
+  color: var(--accent-primary);
+  filter: drop-shadow(0 0 4px var(--accent-primary));
+}
+
+.nav-icon {
+  flex-shrink: 0;
+}
+
+/* 主内容区域 */
+.app-main {
+  flex: 1;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  animation: fadeIn var(--transition-normal);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 底部状态栏 */
+.app-footer {
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  height: 100%;
+}
+
+.footer-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.info-item {
+  position: relative;
+}
+
+.info-item::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 10px;
+  background-color: var(--border-color);
+}
+
+.info-item:last-child::after {
   display: none;
 }
 
-/* 确保整个页面没有滚动条 */
-html, body {
-  overflow: hidden;
-  height: 100%;
-  margin: 0;
-  padding: 0;
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* 暗黑主题覆盖 */
-html.dark {
-  --el-bg-color: #141414;
-  --el-bg-color-page: #0a0a0a;
-  --el-bg-color-overlay: #1d1e1f;
-  --el-text-color-primary: #e5eaf3;
-  --el-text-color-regular: #cfd3dc;
-  --el-text-color-secondary: #a3a6ad;
-  --el-border-color: #363637;
-  --el-border-color-light: #2d2d2d;
-  --el-border-color-extra-light: #232323;
-  --el-fill-color: #1d1e1f;
-  --el-fill-color-light: #262727;
-  --el-fill-color-blank: #141414;
-  --el-mask-color: rgba(0, 0, 0, 0.8);
+.footer-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background-color: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.footer-button:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-hover);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-color);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .nav-label {
+    display: none;
+  }
+  
+  .status-text {
+    display: none;
+  }
+  
+  .footer-button span {
+    display: none;
+  }
 }
 </style>

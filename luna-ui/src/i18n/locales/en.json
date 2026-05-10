@@ -1,0 +1,64 @@
+{
+  "app": {
+    "title": "LUNA",
+    "tag": "CLASS ANALYZER",
+    "status_ready": "SYSTEM READY",
+    "refresh": "REFRESH",
+    "version": "v1.0.0"
+  },
+  "nav": {
+    "class_tree": "Class Tree",
+    "configuration": "Configuration"
+  },
+  "tree": {
+    "search_placeholder": "SEARCH CLASSES",
+    "expand_all": "EXPAND ALL",
+    "collapse_all": "COLLAPSE ALL",
+    "loaders": "LOADERS",
+    "classes": "CLASSES"
+  },
+  "detail": {
+    "no_selection": "SELECT A CLASS TO VIEW DETAILS",
+    "super_class": "SUPER CLASS",
+    "access": "ACCESS",
+    "interfaces": "INTERFACES",
+    "no_interfaces": "NO INTERFACES",
+    "fields": "FIELDS",
+    "methods": "METHODS",
+    "source": "SOURCE",
+    "load_source": "LOAD SOURCE",
+    "loading": "LOADING...",
+    "loading_source": "CLICK BUTTON TO LOAD SOURCE CODE",
+    "params": "PARAMETERS",
+    "no_params": "N/A",
+    "inject": "INJECT",
+    "inject_log": "INJECT LOG",
+    "injection_type": "INJECTION TYPE",
+    "code_type": "CODE TYPE",
+    "before_method": "BEFORE METHOD",
+    "after_method": "AFTER METHOD",
+    "log_content": "LOG CONTENT",
+    "enter_log_content": "e.g. name=$1, age=$2",
+    "cancel": "CANCEL",
+    "save": "SAVE",
+    "injecting": "INJECTING..."
+  },
+  "config": {
+    "title": "INJECTION RULES",
+    "add_rule": "ADD RULE",
+    "edit_rule": "EDIT RULE",
+    "class": "CLASS",
+    "method": "METHOD",
+    "type": "TYPE",
+    "expression": "EXPRESSION",
+    "enter_class": "Enter class name",
+    "enter_method": "Enter method name",
+    "select_type": "Select type",
+    "enter_expression": "Enter condition expression",
+    "line_number": "LINE NUMBER",
+    "enter_line_number": "Enter line number",
+    "log_content": "LOG CONTENT",
+    "enter_log_content": "Enter log content",
+    "actions": "ACTIONS"
+  }
+}

@@ -1,96 +1,164 @@
-import {get, post} from './request';
+import { get, post, put, del } from './request'
 
-/**
- * 获取类列表
- * @returns {Promise<Object>} 类列表数据
- */
-export async function getClassList() {
-  try {
-    const data = await get('/api/classes');
-    return data;
-  } catch (error) {
-    console.error('获取类列表失败:', error);
-    throw error;
-  }
+const API_BASE = '/api'
+
+function apiUrl(path) {
+  return `${API_BASE}${path}`
 }
 
-/**
- * 获取类详细信息
- * @param {string} className 类名
- * @returns {Promise<Object>} 类详细信息
- */
-export async function getClassInfo(className) {
-  try {
-    const classInfo = await get('/api/analysis', { class: className });
-    return classInfo;
-  } catch (error) {
-    console.error('获取类详细信息失败:', error);
-    throw error;
-  }
-}
-
-/**
- * 获取反编译代码
- * @param {string} className 类名
- * @returns {Promise<string>} 反编译代码
- */
-export async function getDecompiledCode(className) {
-  try {
-    const result = await get(`/api/decompile`, { class: className });
-    
-    // 如果返回了错误信息，直接返回错误
-    if (result.error) {
-      return `// 反编译失败: ${result.error}\n// 类名: ${className}`;
-    }
-    
-    // 返回反编译代码
-    return result.decompiled || "// 未获取到反编译代码";
-  } catch (error) {
-    console.error('获取反编译代码失败:', error);
-    return `// 获取反编译代码失败: ${error.message}\n// 类名: ${className}`;
-  }
-}
-
-/**
- * 获取类树数据
- * @returns {Promise<Object>} 类树数据
- */
 export async function getClassTree() {
   try {
-    const data = await get('/api/classes');
-    return data;
+    const data = await get(apiUrl('/classes'))
+    return data
   } catch (error) {
-    console.error('获取类树数据失败:', error);
-    throw error;
+    console.error('获取类树数据失败:', error)
+    throw error
   }
 }
 
-/**
- * 获取类分析信息
- * @param {string} className 类名
- * @returns {Promise<Object>} 类分析信息
- */
 export async function getClassAnalysis(className) {
   try {
-    const classInfo = await get('/api/analysis', { class: className });
-    return classInfo;
+    const data = await get(apiUrl('/analysis'), { class: className })
+    return data
   } catch (error) {
-    console.error('获取类分析信息失败:', error);
-    throw error;
+    console.error('获取类分析信息失败:', error)
+    throw error
   }
 }
 
-/**
- * 为方法注入日志代码
- * @param {Object} injectionData 注入数据
- * @returns {Promise<Object>} 注入结果
- */
+export async function getDecompiledCode(className) {
+  try {
+    const data = await get(apiUrl('/decompile'), { class: className })
+    if (data && data.decompiled !== undefined) {
+      return data.decompiled
+    }
+    return ''
+  } catch (error) {
+    console.error('获取反编译代码失败:', error)
+    return `// Failed to decompile: ${error.message}\n// Class: ${className}`
+  }
+}
+
 export async function injectMethodLog(injectionData) {
   try {
-    const result = await post('/api/inject', injectionData);
-    return result;
+    const data = await post(apiUrl('/inject'), injectionData)
+    return data
   } catch (error) {
-    console.error('方法注入失败:', error);
-    throw error;
+    console.error('方法注入失败:', error)
+    throw error
+  }
+}
+
+export async function getRules() {
+  try {
+    const data = await get(apiUrl('/rules'))
+    return data || []
+  } catch (error) {
+    console.error('获取规则列表失败:', error)
+    throw error
+  }
+}
+
+export async function addRule(rule) {
+  try {
+    const data = await post(apiUrl('/rules'), rule)
+    return data
+  } catch (error) {
+    console.error('添加规则失败:', error)
+    throw error
+  }
+}
+
+export async function updateRule(id, rule) {
+  try {
+    const data = await put(apiUrl(`/rules/${id}`), rule)
+    return data
+  } catch (error) {
+    console.error('更新规则失败:', error)
+    throw error
+  }
+}
+
+export async function deleteRule(id) {
+  try {
+    const data = await del(apiUrl(`/rules/${id}`))
+    return data
+  } catch (error) {
+    console.error('删除规则失败:', error)
+    throw error
+  }
+}
+
+export async function getStatus() {
+  try {
+    const data = await get(apiUrl('/status'))
+    return data
+  } catch (error) {
+    console.error('获取状态失败:', error)
+    return { status: 'offline' }
+  }
+}
+
+export async function getLineNumbers(className) {
+  try {
+    const data = await get(apiUrl('/line-numbers'), { class: className })
+    return data || {}
+  } catch (error) {
+    console.error('获取行号表失败:', error)
+    return {}
+  }
+}
+
+export async function getLocalVariables(className, methodName, methodDesc, lineNumber) {
+  try {
+    const params = { class: className, method: methodName, line: lineNumber }
+    if (methodDesc) {
+      params.desc = methodDesc
+    }
+    const data = await get(apiUrl('/local-variables'), params)
+    return data || { variables: [] }
+  } catch (error) {
+    console.error('获取局部变量表失败:', error)
+    return { variables: [] }
+  }
+}
+
+export async function getInjectionList(className) {
+  try {
+    const data = await get(apiUrl('/inject/list'), { class: className })
+    return data || { injections: [] }
+  } catch (error) {
+    console.error('获取注入点列表失败:', error)
+    return { injections: [] }
+  }
+}
+
+export async function removeInjection(id) {
+  try {
+    const data = await post(apiUrl('/inject/remove'), { id })
+    return data
+  } catch (error) {
+    console.error('删除注入点失败:', error)
+    throw error
+  }
+}
+
+export async function getJvmMetrics() {
+  try {
+    const data = await get(apiUrl('/metrics/jvm'))
+    return data
+  } catch (error) {
+    console.error('获取 JVM 指标失败:', error)
+    throw error
+  }
+}
+
+export async function getThreadDump() {
+  try {
+    const data = await get(apiUrl('/metrics/threads'))
+    return data
+  } catch (error) {
+    console.error('获取线程堆栈失败:', error)
+    throw error
   }
 }

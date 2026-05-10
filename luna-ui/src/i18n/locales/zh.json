@@ -1,0 +1,64 @@
+{
+  "app": {
+    "title": "LUNA",
+    "tag": "类分析器",
+    "status_ready": "系统就绪",
+    "refresh": "刷新",
+    "version": "v1.0.0"
+  },
+  "nav": {
+    "class_tree": "类树",
+    "configuration": "规则"
+  },
+  "tree": {
+    "search_placeholder": "搜索类",
+    "expand_all": "全部展开",
+    "collapse_all": "全部折叠",
+    "loaders": "加载器",
+    "classes": "类"
+  },
+  "detail": {
+    "no_selection": "选择一个类以查看详情",
+    "super_class": "父类",
+    "access": "访问修饰符",
+    "interfaces": "接口",
+    "no_interfaces": "无接口",
+    "fields": "字段",
+    "methods": "方法",
+    "source": "源码",
+    "load_source": "加载源码",
+    "loading": "加载中...",
+    "loading_source": "点击按钮加载源代码",
+    "params": "参数",
+    "no_params": "无",
+    "inject": "注入",
+    "inject_log": "注入日志",
+    "injection_type": "注入类型",
+    "code_type": "代码类型",
+    "before_method": "方法前",
+    "after_method": "方法后",
+    "log_content": "日志内容",
+    "enter_log_content": "输入日志内容，如: name=$1, age=$2",
+    "cancel": "取消",
+    "save": "保存",
+    "injecting": "注入中..."
+  },
+  "config": {
+    "title": "注入规则",
+    "add_rule": "添加规则",
+    "edit_rule": "编辑规则",
+    "class": "类",
+    "method": "方法",
+    "type": "类型",
+    "expression": "表达式",
+    "enter_class": "输入类名",
+    "enter_method": "输入方法名",
+    "select_type": "选择类型",
+    "enter_expression": "输入条件表达式",
+    "line_number": "行号",
+    "enter_line_number": "输入行号",
+    "log_content": "日志内容",
+    "enter_log_content": "输入日志内容",
+    "actions": "操作"
+  }
+}

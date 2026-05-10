@@ -11,11 +11,13 @@ import java.security.CodeSource;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Objects;
+import java.util.Scanner;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
- * @since ：2025/10/19 14:12
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since  : 2025/10/19 14:12
  */
 public class CfrDecompiler implements Decompiler {
     private static final Logger logger = LoggerFactory.getLogger(CfrDecompiler.class);
@@ -26,10 +28,8 @@ public class CfrDecompiler implements Decompiler {
             logger.debug("Starting to decompile class: {}", className);
             String initialCp = System.getProperty("java.class.path");
 
-            // 执行初始反编译（尝试使用系统类路径和类名）
             String decompiledCode = doDecompile(className, initialCp);
 
-            // 如果结果为空，尝试精准定位
             if (decompiledCode.isEmpty()) {
                 logger.info("Decompilation returned empty for {}, searching for better target...", className);
                 Class<?> clazz = findClass(className);
@@ -74,6 +74,7 @@ public class CfrDecompiler implements Decompiler {
     private String doDecompile(String target, String classPath) throws Throwable {
         Map<String, String> options = new HashMap<>();
         options.put("c", classPath);
+        options.put("trackbytecodeloc", "true");
 
         SimpleOutputSinkFactory simpleOutputSinkFactory = new SimpleOutputSinkFactory();
         CfrDriver driver = new CfrDriver.Builder()
@@ -87,7 +88,50 @@ public class CfrDecompiler implements Decompiler {
             throw simpleOutputSinkFactory.getException();
         }
 
-        return simpleOutputSinkFactory.getDecompile() == null ? "" : simpleOutputSinkFactory.getDecompile();
+        String result = simpleOutputSinkFactory.getDecompile();
+        if (result == null || result.isEmpty()) {
+            return "";
+        }
+
+        NavigableMap<Integer, Integer> lineMapping = simpleOutputSinkFactory.getLineMapping();
+        if (lineMapping != null && !lineMapping.isEmpty()) {
+            result = applyLineNumberComments(result, lineMapping);
+        }
+
+        return result;
+    }
+
+    private String applyLineNumberComments(String src, NavigableMap<Integer, Integer> lineMapping) {
+        int maxSrcLine = 0;
+        for (Integer value : lineMapping.values()) {
+            if (value != null && value > maxSrcLine) {
+                maxSrcLine = value;
+            }
+        }
+
+        String formatStr;
+        if (maxSrcLine >= 1000) {
+            formatStr = "/* %4d */ ";
+        } else if (maxSrcLine >= 100) {
+            formatStr = "/* %3d */ ";
+        } else {
+            formatStr = "/* %2d */ ";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        int index = 0;
+        try (Scanner sc = new Scanner(src)) {
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                Integer srcLineNumber = lineMapping.get(index + 1);
+                if (srcLineNumber != null) {
+                    sb.append(String.format(formatStr, srcLineNumber));
+                }
+                sb.append(line).append("\n");
+                index++;
+            }
+        }
+        return sb.toString();
     }
 
     private Class<?> findClass(String className) {
@@ -117,20 +161,17 @@ public class CfrDecompiler implements Decompiler {
             if (codeSource != null && codeSource.getLocation() != null) {
                 File root = new File(codeSource.getLocation().toURI());
                 if (root.isDirectory()) {
-                    // 如果类在目录中，通过绝对路径指定 .class 文件，这能最有效地解决目录查找问题
                     File classFile = new File(root, className.replace('.', File.separatorChar) + ".class");
                     if (classFile.exists()) {
                         return new DecompileTarget(classFile.getAbsolutePath(), root.getAbsolutePath());
                     }
                 }
-                // JAR 包文件
                 return new DecompileTarget(className, root.getAbsolutePath());
             }
         } catch (Throwable e) {
             logger.debug("Failed to find target via CodeSource for {}", className, e);
         }
 
-        // 备选方案：通过资源路径解析
         try {
             String resourceName = className.replace('.', '/') + ".class";
             URL url = clazz.getResource("/" + resourceName);
@@ -143,11 +184,9 @@ public class CfrDecompiler implements Decompiler {
                     path = path.substring(5);
                 }
                 if (path.contains("!/")) {
-                    // JAR 中的类
                     String jarPath = path.substring(0, path.indexOf("!/"));
                     return new DecompileTarget(className, new File(jarPath).getAbsolutePath());
                 } else {
-                    // 目录中的类
                     String rootPath = path.substring(0, path.length() - resourceName.length());
                     return new DecompileTarget(new File(path).getAbsolutePath(), new File(rootPath).getAbsolutePath());
                 }
@@ -159,8 +198,8 @@ public class CfrDecompiler implements Decompiler {
     }
 
     private static class DecompileTarget {
-        final String target; // 类名或文件绝对路径
-        final String rootPath; // 根目录或 JAR 路径
+        final String target;
+        final String rootPath;
 
         DecompileTarget(String target, String rootPath) {
             this.target = target;

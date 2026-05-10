@@ -12,11 +12,19 @@ public class LoadedClass {
     private final String className;
     @JSONField(serialize = false)
     private Class<?> clazz;
+    private int injectionCount;
 
     public LoadedClass(String className) {
         this.className = className;
     }
 
+    public int getInjectionCount() {
+        return injectionCount;
+    }
+
+    public void setInjectionCount(int injectionCount) {
+        this.injectionCount = injectionCount;
+    }
 
     public String getClassName() {
         return className;
@@ -42,11 +50,11 @@ public class LoadedClass {
             return false;
         }
         LoadedClass that = (LoadedClass) o;
-        return Objects.equals(className, that.className) && Objects.equals(clazz, that.clazz);
+        return Objects.equals(className, that.className);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, clazz);
+        return Objects.hash(className);
     }
 }

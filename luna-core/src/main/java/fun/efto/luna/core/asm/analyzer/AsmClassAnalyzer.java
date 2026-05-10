@@ -1,238 +1,128 @@
 package fun.efto.luna.core.asm.analyzer;
 
-import fun.efto.luna.core.analyzer.AbstractAnalyzer;
+import fun.efto.luna.core.asm.Constants;
+import fun.efto.luna.core.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.analyzer.ClassAnalysisResult;
-import fun.efto.luna.core.util.ClassNameUtils;
-import org.objectweb.asm.*;
+import fun.efto.luna.core.analyzer.ClassAnalysisResult.FieldInfo;
+import fun.efto.luna.core.analyzer.ClassAnalysisResult.MethodInfo;
+import fun.efto.luna.core.analyzer.ClassAnalysisResult.ParameterInfo;
+import fun.efto.luna.core.analyzer.ClassAnalysisResult.LocalVariableInfo;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Label;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
- * @since ：2025/10/4 17:45
+ * ASM 类分析器
+ * 使用 ASM ClassReader/ClassVisitor 解析字节码，提取类结构信息
+ *
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since : 2026/03/29 02:30
  */
-public class AsmClassAnalyzer extends AbstractAnalyzer {
+public class AsmClassAnalyzer implements ClassAnalyzer {
 
     @Override
-    protected ClassAnalysisResult doAnalyze(byte[] bytecode) {
-        if (bytecode == null || bytecode.length == 0) {
-            throw new IllegalArgumentException("Bytecode cannot be null or empty");
+    public ClassAnalysisResult analyze(byte[] classBytes) {
+        if (classBytes == null || classBytes.length == 0) {
+            return new ClassAnalysisResult(
+                    "", Collections.emptyList(), Collections.emptyList(),
+                    "", Collections.emptyList(), 0
+            );
         }
 
-        ClassReader classReader = new ClassReader(bytecode);
-        ClassAnalysisVisitor visitor = new ClassAnalysisVisitor();
-        classReader.accept(visitor, 0);
-
-        return new ClassAnalysisResult(
-                visitor.getClassName(),
-                visitor.getFields(),
-                visitor.getMethods(),
-                visitor.getSuperClass(),
-                visitor.getInterfaces(),
-                visitor.getAccessFlags());
+        try {
+            ClassReader reader = new ClassReader(classBytes);
+            AnalysisVisitor visitor = new AnalysisVisitor();
+            reader.accept(visitor, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+            return visitor.buildResult();
+        } catch (Exception e) {
+            return new ClassAnalysisResult(
+                    "", Collections.emptyList(), Collections.emptyList(),
+                    "", Collections.emptyList(), 0
+            );
+        }
     }
 
-    /**
-     * 类分析访问器
-     * 用于访问和收集类的结构信息
-     */
-    private static class ClassAnalysisVisitor extends ClassVisitor {
+    private static class AnalysisVisitor extends ClassVisitor {
         private String className;
         private String superClass;
-        private List<String> interfaces = new ArrayList<>();
         private int accessFlags;
-        private List<ClassAnalysisResult.FieldInfo> fields = new ArrayList<>();
-        private List<ClassAnalysisResult.MethodInfo> methods = new ArrayList<>();
+        private final List<String> interfaces = new ArrayList<>();
+        private final List<FieldInfo> fields = new ArrayList<>();
+        private final List<MethodInfo> methods = new ArrayList<>();
 
-        public ClassAnalysisVisitor() {
-            super(Opcodes.ASM9);
+        AnalysisVisitor() {
+            super(Constants.AMS_API_VERSION);
         }
 
         @Override
-        public void visit(int version, int access, String name, String signature, String superName,
-                          String[] interfaces) {
-            this.className = ClassNameUtils.toFqn(name);
-            this.superClass = superName != null ? ClassNameUtils.toFqn(superName) : null;
+        public void visit(int version, int access, String name, String signature,
+                          String superName, String[] interfaces) {
+            this.className = name != null ? name.replace('/', '.') : "";
+            this.superClass = superName != null ? superName.replace('/', '.') : "";
             this.accessFlags = access;
-
             if (interfaces != null) {
                 for (String iface : interfaces) {
-                    this.interfaces.add(ClassNameUtils.toFqn(iface));
+                    this.interfaces.add(iface.replace('/', '.'));
                 }
             }
-
-            super.visit(version, access, name, signature, superName, interfaces);
         }
 
         @Override
-        public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-            fields.add(new ClassAnalysisResult.FieldInfo(name, descriptor, access));
-            return super.visitField(access, name, descriptor, signature, value);
+        public FieldVisitor visitField(int access, String name, String descriptor,
+                                       String signature, Object value) {
+            fields.add(new FieldInfo(name, descriptor, access));
+            return null;
         }
 
         @Override
-        public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
-                                         String[] exceptions) {
-            MethodAnalysisVisitor methodVisitor = new MethodAnalysisVisitor(access, name, descriptor);
-            methods.add(methodVisitor.getMethodInfo());
-            return methodVisitor;
+        public MethodVisitor visitMethod(int access, String name, String descriptor,
+                                         String signature, String[] exceptions) {
+            List<ParameterInfo> parameters = new ArrayList<>();
+            List<LocalVariableInfo> localVariables = new ArrayList<>();
+            return new MethodAnalysisVisitor(api, parameters, localVariables,
+                    () -> methods.add(new MethodInfo(name, descriptor, access, parameters, localVariables)));
         }
 
-        // Getters
-        public String getClassName() {
-            return className;
-        }
-
-        public String getSuperClass() {
-            return superClass;
-        }
-
-        public List<String> getInterfaces() {
-            return new ArrayList<>(interfaces);
-        }
-
-        public int getAccessFlags() {
-            return accessFlags;
-        }
-
-        public List<ClassAnalysisResult.FieldInfo> getFields() {
-            return new ArrayList<>(fields);
-        }
-
-        public List<ClassAnalysisResult.MethodInfo> getMethods() {
-            return new ArrayList<>(methods);
+        ClassAnalysisResult buildResult() {
+            return new ClassAnalysisResult(className, fields, methods, superClass, interfaces, accessFlags);
         }
     }
 
-    /**
-     * 方法分析访问器
-     * 用于访问和收集方法的参数及局部变量信息
-     */
+    @FunctionalInterface
+    private interface MethodCompleteCallback {
+        void onComplete();
+    }
+
     private static class MethodAnalysisVisitor extends MethodVisitor {
-        private final int access;
-        private final String name;
-        private final String descriptor;
-        private final List<ClassAnalysisResult.ParameterInfo> parameters = new ArrayList<>();
-        private final List<ClassAnalysisResult.LocalVariableInfo> localVariables = new ArrayList<>();
+        private final List<ParameterInfo> parameters;
+        private final List<LocalVariableInfo> localVariables;
+        private final MethodCompleteCallback callback;
 
-        // 用于映射 Label 到行号
-        private final java.util.Map<Label, Integer> labelToLine = new java.util.HashMap<>();
-        private int currentLine = -1;
-
-        public MethodAnalysisVisitor(int access, String name, String descriptor) {
-            super(Opcodes.ASM9);
-            this.access = access;
-            this.name = name;
-            this.descriptor = descriptor;
-
-            // 解析方法参数
-            parseParameters(descriptor);
+        MethodAnalysisVisitor(int api, List<ParameterInfo> parameters,
+                              List<LocalVariableInfo> localVariables,
+                              MethodCompleteCallback callback) {
+            super(api);
+            this.parameters = parameters;
+            this.localVariables = localVariables;
+            this.callback = callback;
         }
 
         @Override
-        public void visitLineNumber(int line, Label start) {
-            currentLine = line;
-            labelToLine.put(start, line);
-            super.visitLineNumber(line, start);
+        public void visitLocalVariable(String name, String descriptor, String signature,
+                                        Label start, Label end, int index) {
+            localVariables.add(new LocalVariableInfo(name, descriptor, index, -1, -1));
         }
 
         @Override
-        public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end,
-                                       int index) {
-            int startLine = labelToLine.getOrDefault(start, -1);
-            int endLine = labelToLine.getOrDefault(end, -1);
-
-            // 如果在行号表里没找到，尝试用当前行号（粗略估计）
-            if (startLine == -1)
-                startLine = currentLine;
-
-            localVariables.add(new ClassAnalysisResult.LocalVariableInfo(name, descriptor, index, startLine, endLine));
-            super.visitLocalVariable(name, descriptor, signature, start, end, index);
-        }
-
-        private void parseParameters(String descriptor) {
-            // 方法描述符格式: (参数类型)返回值类型
-            int start = descriptor.indexOf('(');
-            int end = descriptor.indexOf(')');
-
-            if (start != -1 && end != -1 && end > start) {
-                String paramsPart = descriptor.substring(start + 1, end);
-                parseParameterDescriptors(paramsPart);
-            }
-        }
-
-        private void parseParameterDescriptors(String paramsPart) {
-            int paramIndex = 0;
-            int i = 0;
-
-            while (i < paramsPart.length()) {
-                char c = paramsPart.charAt(i);
-                String paramType;
-                int endPos;
-
-                switch (c) {
-                    case 'B': // byte
-                    case 'C': // char
-                    case 'D': // double
-                    case 'F': // float
-                    case 'I': // int
-                    case 'J': // long
-                    case 'S': // short
-                    case 'Z': // boolean
-                        paramType = String.valueOf(c);
-                        i++;
-                        break;
-                    case 'L': // 对象类型
-                        endPos = paramsPart.indexOf(';', i);
-                        if (endPos != -1) {
-                            paramType = paramsPart.substring(i, endPos + 1);
-                            i = endPos + 1;
-                        } else {
-                            paramType = paramsPart.substring(i);
-                            i = paramsPart.length();
-                        }
-                        break;
-                    case '[': // 数组类型
-                        int arrayStart = i;
-                        while (i < paramsPart.length() && paramsPart.charAt(i) == '[') {
-                            i++;
-                        }
-                        if (i < paramsPart.length()) {
-                            char arrayType = paramsPart.charAt(i);
-                            if (arrayType == 'L') {
-                                endPos = paramsPart.indexOf(';', i);
-                                if (endPos != -1) {
-                                    paramType = paramsPart.substring(arrayStart, endPos + 1);
-                                    i = endPos + 1;
-                                } else {
-                                    paramType = paramsPart.substring(arrayStart);
-                                    i = paramsPart.length();
-                                }
-                            } else {
-                                paramType = paramsPart.substring(arrayStart, i + 1);
-                                i++;
-                            }
-                        } else {
-                            paramType = paramsPart.substring(arrayStart);
-                            i = paramsPart.length();
-                        }
-                        break;
-                    default:
-                        // 未知类型，跳过
-                        i++;
-                        continue;
-                }
-
-                // 生成参数名（ASM无法获取真实参数名，使用arg0, arg1等）
-                String paramName = "arg" + paramIndex;
-                parameters.add(new ClassAnalysisResult.ParameterInfo(paramName, paramType));
-                paramIndex++;
-            }
-        }
-
-        public ClassAnalysisResult.MethodInfo getMethodInfo() {
-            return new ClassAnalysisResult.MethodInfo(name, descriptor, access, parameters, localVariables);
+        public void visitEnd() {
+            callback.onComplete();
         }
     }
 }

@@ -9,6 +9,8 @@ import fun.efto.luna.core.InjectionExecutor;
 import fun.efto.luna.core.init.InitializerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fun.efto.luna.core.rule.RuleManager;
+import fun.efto.luna.core.transformer.RuleClassFileTransformer;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
@@ -42,9 +44,7 @@ public class Agent {
     private static void executeWithAgentClassLoader(String args, Instrumentation inst) {
         try {
             initializeAgentEnvironment();
-            // 使用自定义类加载器加载指定类
             Class<?> agentMainClass = lunaAgentClassLoader.loadClass("fun.efto.luna.agent.Agent");
-            // 获取对应的方法
             Method method = agentMainClass.getDeclaredMethod("startAgent", String.class, Instrumentation.class);
             method.setAccessible(true);
             method.invoke(null, args, inst);
@@ -58,12 +58,26 @@ public class Agent {
     private static void startAgent(String args, Instrumentation inst) {
         initLogger();
         try {
+            // 获取 agent jar 文件路径并添加到 bootstrap classloader，确保 Spy 类全局可见且共享
+            String agentJarPath = Agent.class.getProtectionDomain()
+                    .getCodeSource().getLocation().toURI().getPath();
+            logger.info("Appending agent jar to bootstrap classloader: {}", agentJarPath);
+            inst.appendToBootstrapClassLoaderSearch(new java.util.jar.JarFile(agentJarPath));
+
+            logger.info("Initializing Luna agent components...");
             InitializerManager.getInstance().initializeAll();
             InjectionExecutor injectionExecutor = InjectionExecutor.init(inst);
             ClassScanner classScanner = ClassScanner.getInstance(inst, createExcludeClassFilter());
-            JettyWebServer jettyWebServer = new JettyWebServer(8421, JettyConfiguration.createDevelopment(), injectionExecutor, classScanner);
+            JettyWebServer jettyWebServer = new JettyWebServer(8421, JettyConfiguration.createDevelopment(), injectionExecutor, classScanner, inst);
 
             jettyWebServer.start();
+            logger.info("Luna agent started successfully, web server on port 8421");
+
+            // 注册全局规则转换器（处理后续加载的类）
+            inst.addTransformer(new RuleClassFileTransformer(), true);
+            
+            // 对已经加载的类应用规则
+            applyRulesToLoadedClasses(inst);
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
@@ -75,10 +89,43 @@ public class Agent {
                 }
             }));
         } catch (Exception e) {
-            logger.error("Failed to start Luna agent", e);
             System.err.println("[Luna] Failed to start agent: " + e.getMessage());
             e.printStackTrace();
+            if (logger != null) {
+                logger.error("Failed to start Luna agent", e);
+            }
         }
+    }
+
+    private static void applyRulesToLoadedClasses(Instrumentation inst) {
+        logger.info("Scanning already loaded classes for matching rules...");
+        Class<?>[] allLoadedClasses = inst.getAllLoadedClasses();
+        java.util.List<Class<?>> targets = new java.util.ArrayList<>();
+        
+        for (Class<?> clazz : allLoadedClasses) {
+            String className = clazz.getName();
+            // 快速过滤
+            if (className.startsWith("java.") || className.startsWith("sun.") || className.startsWith("fun.efto.luna.")) {
+                continue;
+            }
+            
+            // 检查是否有匹配规则
+            if (!RuleManager.getInstance().findRulesForClass(className).isEmpty()) {
+                if (inst.isModifiableClass(clazz)) {
+                    targets.add(clazz);
+                }
+            }
+        }
+
+        if (!targets.isEmpty()) {
+            try {
+                logger.info("Applying rules to {} classes via retransform...", targets.size());
+                inst.retransformClasses(targets.toArray(new Class<?>[0]));
+            } catch (Exception e) {
+                logger.error("Initial retransform failed", e);
+            }
+        }
+        logger.info("Initial rule application completed.");
     }
 
     private static CompositeExcludeClassFilter createExcludeClassFilter() {

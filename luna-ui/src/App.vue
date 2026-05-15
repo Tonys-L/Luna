@@ -55,6 +55,13 @@
                 <i class="fas fa-sliders-h nav-icon"></i>
                 <span class="nav-label">{{ t('nav.configuration') }}</span>
               </button>
+              <button 
+                :class="['nav-item', { active: activeTab === 'plugin-manager' }]"
+                @click="activeTab = 'plugin-manager'"
+              >
+                <i class="fas fa-puzzle-piece nav-icon"></i>
+                <span class="nav-label">插件管理</span>
+              </button>
             </nav>
             
             <!-- 右侧操作区 -->
@@ -74,6 +81,7 @@
           <Dashboard v-else-if="activeTab === 'dashboard'" />
           <ThreadAnalyzer v-else-if="activeTab === 'thread-analyzer'" />
           <ConfigurationViewer v-else-if="activeTab === 'configuration'" />
+          <PluginManager v-else-if="activeTab === 'plugin-manager'" />
         </main>
         
         <!-- 底部状态栏 -->
@@ -103,6 +111,8 @@ import ConfigurationViewer from './views/ConfigurationViewer.vue'
 import LogViewer from './views/LogViewer.vue'
 import Dashboard from './views/Dashboard.vue'
 import ThreadAnalyzer from './views/ThreadAnalyzer.vue'
+import PluginManager from './views/PluginManager.vue'
+import { pluginRegistry } from './utils/plugin-registry'
 
 export default {
   name: 'App',
@@ -111,7 +121,8 @@ export default {
     ConfigurationViewer,
     LogViewer,
     Dashboard,
-    ThreadAnalyzer
+    ThreadAnalyzer,
+    PluginManager
   },
   setup() {
     const { t, locale } = useI18n()
@@ -129,6 +140,9 @@ export default {
       loading: false,
       classCount: 0
     }
+  },
+  async mounted() {
+    await pluginRegistry.init()
   },
   methods: {
     async refreshData() {

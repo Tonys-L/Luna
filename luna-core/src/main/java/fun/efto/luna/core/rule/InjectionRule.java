@@ -9,12 +9,15 @@ public class InjectionRule {
     private long id;
     private String targetClass;
     private String targetMethod;
+    private String methodDescriptor;
     private String injectionType;
     private int lineNumber;
     private String expression;
     private String logContent;
     private String codeType;
     private boolean enabled = true;
+    private RuleStatus status = RuleStatus.ACTIVE;
+    private String suspendReason;
 
     public long getId() {
         return id;
@@ -38,6 +41,14 @@ public class InjectionRule {
 
     public void setTargetMethod(String targetMethod) {
         this.targetMethod = targetMethod;
+    }
+
+    public String getMethodDescriptor() {
+        return methodDescriptor;
+    }
+
+    public void setMethodDescriptor(String methodDescriptor) {
+        this.methodDescriptor = methodDescriptor;
     }
 
     public String getInjectionType() {
@@ -86,5 +97,21 @@ public class InjectionRule {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public RuleStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RuleStatus status) {
+        this.status = status;
+    }
+
+    public String getSuspendReason() {
+        return suspendReason;
+    }
+
+    public void setSuspendReason(String suspendReason) {
+        this.suspendReason = suspendReason;
     }
 }

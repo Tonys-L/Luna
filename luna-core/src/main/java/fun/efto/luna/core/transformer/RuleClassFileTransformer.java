@@ -2,7 +2,7 @@ package fun.efto.luna.core.transformer;
 
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.rule.InjectionRule;
-import fun.efto.luna.core.rule.RuleConverter;
+import fun.efto.luna.core.plugin.RuleConverterRegistry;
 import fun.efto.luna.core.rule.RuleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,6 @@ public class RuleClassFileTransformer implements ClassFileTransformer {
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         if (className == null) return null;
-        if (classBeingRedefined != null) return null;
         
         String normalizedClassName = className.replace('/', '.');
         
@@ -39,7 +38,7 @@ public class RuleClassFileTransformer implements ClassFileTransformer {
         List<InjectionPoint> points = new ArrayList<>();
         for (InjectionRule rule : matchedRules) {
             try {
-                points.add(RuleConverter.convert(rule));
+                points.add(RuleConverterRegistry.convert(rule));
             } catch (Exception e) {
                 LOGGER.error("Failed to convert rule to injection point for class: {}", normalizedClassName, e);
             }

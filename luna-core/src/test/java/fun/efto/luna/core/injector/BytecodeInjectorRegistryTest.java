@@ -1,7 +1,3 @@
-/**
- * @author : Tony.L(<286269159@qq.com>)
- * @since  : 2026/05/01 12:00
- */
 package fun.efto.luna.core.injector;
 
 import fun.efto.luna.core.injection.target.type.MethodInjectionType;
@@ -12,6 +8,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since  : 2026/05/01 12:00
+ */
 public class BytecodeInjectorRegistryTest {
 
     @Test

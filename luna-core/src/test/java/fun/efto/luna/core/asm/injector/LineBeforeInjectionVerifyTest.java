@@ -240,4 +240,107 @@ public class LineBeforeInjectionVerifyTest {
             }
         }
     }
+
+    @Test
+    public void testLineBeforeLogWithLocalVarNoDescriptor() throws Exception {
+        String targetClassName = TargetService.class.getName();
+        String targetInternalName = targetClassName.replace('.', '/');
+
+        InputStream is = getClass().getClassLoader().getResourceAsStream(targetInternalName + ".class");
+        assertNotNull(is, "Cannot find class file");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        int bytesRead;
+        while ((bytesRead = is.read(buffer)) != -1) {
+            baos.write(buffer, 0, bytesRead);
+        }
+        is.close();
+        byte[] originalBytecode = baos.toByteArray();
+
+        int countLine = -1;
+        ClassNode cn = new ClassNode();
+        new ClassReader(originalBytecode).accept(cn, 0);
+        for (MethodNode mn : cn.methods) {
+            if (mn.name.equals("createUser")) {
+                int lineIdx = 0;
+                for (AbstractInsnNode insn = mn.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                    if (insn instanceof LineNumberNode) {
+                        System.out.println("[DEBUG] lineIdx=" + lineIdx + " line=" + ((LineNumberNode) insn).line);
+                        if (lineIdx == 1) {
+                            countLine = ((LineNumberNode) insn).line;
+                        }
+                        lineIdx++;
+                    }
+                }
+                System.out.println("[DEBUG] localVariables in createUser:");
+                if (mn.localVariables != null) {
+                    for (org.objectweb.asm.tree.LocalVariableNode lv : mn.localVariables) {
+                        System.out.println("[DEBUG]   var=" + lv.name + " desc=" + lv.desc + " index=" + lv.index);
+                    }
+                }
+            }
+        }
+        assertTrue(countLine > 0, "Should find the line number for 'int count = 0'");
+        System.out.println("[DEBUG] Target line for injection: " + countLine);
+
+        List<AsmInjectionContext.LocalVarInfo> safeVars = LocalVariableScanner.scanVisibleLocalVariables(
+                originalBytecode, "createUser", "(Ljava/lang/String;I)V", countLine, true);
+        List<AsmInjectionContext.LocalVarInfo> allVars = LocalVariableScanner.scanVisibleLocalVariables(
+                originalBytecode, "createUser", "(Ljava/lang/String;I)V", countLine, false);
+        System.out.println("[DEBUG] safeVars (excludeSameLineStart=true): " + safeVars.size());
+        for (AsmInjectionContext.LocalVarInfo v : safeVars) {
+            System.out.println("[DEBUG]   safe: " + v.getName() + " slot=" + v.getSlot() + " desc=" + v.getDescriptor());
+        }
+        System.out.println("[DEBUG] allVars (excludeSameLineStart=false): " + allVars.size());
+        for (AsmInjectionContext.LocalVarInfo v : allVars) {
+            System.out.println("[DEBUG]   all: " + v.getName() + " slot=" + v.getSlot() + " desc=" + v.getDescriptor());
+        }
+
+        LineNumberTarget target = new LineNumberTarget(
+                LineNumberInjectionType.BEFORE, targetClassName, countLine, 0,
+                "createUser", "");
+
+        InjectableCode code = new InjectableCode() {
+            @Override
+            public String getCode() {
+                return "log:check $id";
+            }
+            @Override
+            public CodeType getCodeType() {
+                return CodeType.EXPRESSION;
+            }
+        };
+
+        InjectionPoint injectionPoint = new InjectionPoint(target, code);
+        InjectionContext context = new InjectionContext(injectionPoint);
+
+        BeforeLineInjector injector = new BeforeLineInjector();
+        ExpressionBytecodeAssembler assembler = new ExpressionBytecodeAssembler();
+
+        byte[] transformedBytecode = injector.inject(context, originalBytecode, assembler);
+
+        assertNotNull(transformedBytecode, "Transformed bytecode should not be null");
+
+        BytecodeClassLoader classLoader = new BytecodeClassLoader();
+        Class<?> transformedClass = classLoader.defineClass(targetClassName, transformedBytecode);
+
+        Object instance = transformedClass.getDeclaredConstructor().newInstance();
+        java.lang.reflect.Method method = transformedClass.getMethod("createUser", String.class, int.class);
+
+        while (fun.efto.luna.core.spy.LunaSpy.LOG_BUFFER.poll() != null) {}
+
+        assertDoesNotThrow(() -> method.invoke(instance, "TestUser", 25),
+                "Injected method should execute without VerifyError");
+
+        String logOutput = null;
+        for (int i = 0; i < 100; i++) {
+            logOutput = fun.efto.luna.core.spy.LunaSpy.LOG_BUFFER.poll();
+            if (logOutput != null && logOutput.contains("check")) break;
+            Thread.sleep(10);
+        }
+
+        assertNotNull(logOutput, "Should have log output containing 'check'");
+        System.out.println("[TEST] Log output: " + logOutput);
+        assertFalse(logOutput.contains("$id"), "Variable $id should be resolved, not appear as literal text. Got: " + logOutput);
+    }
 }

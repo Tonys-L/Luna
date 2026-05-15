@@ -162,3 +162,103 @@ export async function getThreadDump() {
     throw error
   }
 }
+
+export async function getPlugins() {
+  try {
+    const data = await get(apiUrl('/plugins'))
+    return data || []
+  } catch (error) {
+    console.error('获取插件列表失败:', error)
+    throw error
+  }
+}
+
+export async function getPluginDetail(pluginId) {
+  try {
+    const data = await get(apiUrl(`/plugins/${pluginId}`))
+    return data
+  } catch (error) {
+    console.error('获取插件详情失败:', error)
+    throw error
+  }
+}
+
+export async function disablePlugin(pluginId) {
+  try {
+    const data = await post(apiUrl(`/plugins/${pluginId}/disable`))
+    return data
+  } catch (error) {
+    console.error('禁用插件失败:', error)
+    throw error
+  }
+}
+
+export async function enablePlugin(pluginId) {
+  try {
+    const data = await post(apiUrl(`/plugins/${pluginId}/enable`))
+    return data
+  } catch (error) {
+    console.error('启用插件失败:', error)
+    throw error
+  }
+}
+
+export async function unloadPlugin(pluginId) {
+  try {
+    const data = await post(apiUrl(`/plugins/${pluginId}/unload`))
+    return data
+  } catch (error) {
+    console.error('卸载插件失败:', error)
+    throw error
+  }
+}
+
+export async function searchPlugins(keyword) {
+  try {
+    const data = await get(apiUrl('/plugins/market/search'), { keyword })
+    return data || []
+  } catch (error) {
+    console.error('搜索插件失败:', error)
+    throw error
+  }
+}
+
+export async function installPlugin(pluginId) {
+  try {
+    const data = await post(apiUrl(`/plugins/market/install/${pluginId}`))
+    return data
+  } catch (error) {
+    console.error('安装插件失败:', error)
+    throw error
+  }
+}
+
+export async function getPluginConfig(pluginId) {
+  try {
+    const data = await get(apiUrl(`/plugins/${pluginId}/config`))
+    return data || {}
+  } catch (error) {
+    console.error('获取插件配置失败:', error)
+    throw error
+  }
+}
+
+export async function savePluginConfig(pluginId, config) {
+  try {
+    const data = await put(apiUrl(`/plugins/${pluginId}/config`), config)
+    return data
+  } catch (error) {
+    console.error('保存插件配置失败:', error)
+    throw error
+  }
+}
+
+export async function checkPluginUpdate(pluginId) {
+  try {
+    const data = await post(apiUrl(`/plugins/market/plugins/${pluginId}/update`))
+    return data
+  } catch (error) {
+    console.error('检查插件更新失败:', error)
+    throw error
+  }
+}

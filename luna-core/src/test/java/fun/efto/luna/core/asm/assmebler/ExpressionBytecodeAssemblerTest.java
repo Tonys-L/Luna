@@ -1,7 +1,3 @@
-/**
- * @author : Tony.L(<286269159@qq.com>)
- * @since  : 2026/05/01 12:00
- */
 package fun.efto.luna.core.asm.assmebler;
 
 import fun.efto.luna.core.asm.AsmInjectionContext.LocalVarInfo;
@@ -16,6 +12,10 @@ import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since  : 2026/05/01 12:00
+ */
 public class ExpressionBytecodeAssemblerTest {
 
     private static final Pattern COMBINED_REF_PATTERN = Pattern.compile("\\$(\\d+|[a-zA-Z_]\\w*)");

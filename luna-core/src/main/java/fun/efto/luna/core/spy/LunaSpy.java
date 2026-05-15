@@ -12,11 +12,9 @@ import fun.efto.luna.core.buffer.RingBuffer;
  */
 public class LunaSpy {
 
-    /**
-     * 全局日志 RingBuffer，大小配置为 4096。
-     * 如果满了，offer() 将返回 false 并丢弃日志，严格保证业务线程不阻塞。
-     */
     public static final RingBuffer<String> LOG_BUFFER = new RingBuffer<>(4096);
+
+    private static final ThreadLocal<Long> TRACE_START_TIME = new ThreadLocal<>();
 
     /**
      * 被注入到目标方法中的日志打印回调
@@ -42,11 +40,33 @@ public class LunaSpy {
      */
     public static void onSnapshot(String pointId, Object[] localVars, String[] varNames) {
         try {
-            // 调用 StackFrameCapture 获取当前栈和局部变量 JSON
             String snapshotJson = fun.efto.luna.core.snapshot.StackFrameCapture.capture(pointId, localVars, varNames);
             LOG_BUFFER.offer(snapshotJson);
         } catch (Throwable t) {
             // 极度防御：Agent 不得影响业务执行
+        }
+    }
+
+    public static void onTraceStart() {
+        TRACE_START_TIME.set(System.nanoTime());
+    }
+
+    public static void onTraceEnd(String className, String methodName, long thresholdMs) {
+        Long startTime = TRACE_START_TIME.get();
+        if (startTime == null) return;
+        TRACE_START_TIME.remove();
+        long elapsedMs = (System.nanoTime() - startTime) / 1_000_000;
+        if (elapsedMs >= thresholdMs) {
+            LOG_BUFFER.offer("[TRACE] " + className + "." + methodName + " took " + elapsedMs + " ms");
+        }
+    }
+
+    public static void onTraceAlert(String className, String methodName, long thresholdMs) {
+        Long startTime = TRACE_START_TIME.get();
+        if (startTime == null) return;
+        long elapsedMs = (System.nanoTime() - startTime) / 1_000_000;
+        if (elapsedMs >= thresholdMs) {
+            LOG_BUFFER.offer("[SLOW] " + className + "." + methodName + " took " + elapsedMs + " ms (threshold=" + thresholdMs + " ms)");
         }
     }
 }

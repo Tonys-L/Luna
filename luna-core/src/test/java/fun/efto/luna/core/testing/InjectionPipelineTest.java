@@ -1,7 +1,3 @@
-/**
- * @author : Tony.L(<286269159@qq.com>)
- * @since  : 2026/05/02 10:00
- */
 package fun.efto.luna.core.testing;
 
 import fun.efto.luna.core.injection.InjectionPoint;
@@ -20,6 +16,10 @@ import org.objectweb.asm.Opcodes;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since  : 2026/05/02 10:00
+ */
 public class InjectionPipelineTest {
 
     private static final String TEST_CLASS = "com.example.TestSubject";

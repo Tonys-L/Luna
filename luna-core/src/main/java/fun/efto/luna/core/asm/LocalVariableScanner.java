@@ -7,6 +7,8 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +21,8 @@ import java.util.Map;
  * @since  : 2026/05/03 19:10
  */
 public final class LocalVariableScanner {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalVariableScanner.class);
 
     private LocalVariableScanner() {
     }
@@ -44,6 +48,7 @@ public final class LocalVariableScanner {
             return scanMethod(mn, lineNumber, excludeSameLineStart);
         }
 
+        LOGGER.warn("[LocalVarScanner] No method found: {} desc={} for line {}", methodName, methodDescriptor, lineNumber);
         return Collections.emptyList();
     }
 
@@ -52,9 +57,13 @@ public final class LocalVariableScanner {
 
         List<AsmInjectionContext.LocalVarInfo> result = new ArrayList<>();
 
-        if (mn.localVariables == null) {
+        if (mn.localVariables == null || mn.localVariables.isEmpty()) {
+            LOGGER.warn("[LocalVarScanner] method={} has no local variable table (compiled without -g?)", mn.name);
             return result;
         }
+
+        LOGGER.debug("[LocalVarScanner] method={} line={} excludeSameLineStart={} totalVarsInTable={}",
+                mn.name, lineNumber, excludeSameLineStart, mn.localVariables.size());
 
         for (LocalVariableNode lv : mn.localVariables) {
             if (lv.start == null || lv.end == null) continue;
@@ -64,12 +73,27 @@ public final class LocalVariableScanner {
 
             if (startLabel == null) continue;
 
-            if (isVariableVisibleAtLine(mn, labelLines, startLabel, endLabel, lineNumber, excludeSameLineStart)) {
+            boolean visible = isVariableVisibleAtLine(mn, labelLines, startLabel, endLabel, lineNumber, excludeSameLineStart);
+            Integer startLine = resolveStartLine(mn, labelLines, startLabel);
+
+            LOGGER.debug("[LocalVarScanner]   var={} slot={} desc={} startLine={} visible={}",
+                    lv.name, lv.index, lv.desc, startLine, visible);
+
+            if (visible) {
                 result.add(new AsmInjectionContext.LocalVarInfo(lv.name, lv.desc, lv.index));
             }
         }
 
+        LOGGER.debug("[LocalVarScanner] method={} line={} visibleVars={}", mn.name, lineNumber, result.size());
         return result;
+    }
+
+    private static Integer resolveStartLine(MethodNode mn, Map<LabelNode, Integer> labelLines, LabelNode start) {
+        Integer startLine = labelLines.get(start);
+        if (startLine == null) {
+            startLine = findNearestPrecedingLine(mn, labelLines, start);
+        }
+        return startLine;
     }
 
     private static Map<LabelNode, Integer> buildLabelLineMap(MethodNode mn) {

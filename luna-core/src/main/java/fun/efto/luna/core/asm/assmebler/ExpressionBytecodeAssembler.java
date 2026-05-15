@@ -7,18 +7,23 @@ import fun.efto.luna.core.injection.target.type.MethodInjectionType;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author : Tony.L(286269159@qq.com)
- * @since : 2025/10/3 18:04
+ * @since  : 2025/10/3 18:04
  */
 public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionBytecodeAssembler.class);
     private static final Pattern COMBINED_REF_PATTERN = Pattern.compile("\\$(\\d+|[a-zA-Z_]\\w*)");
 
     @Override
@@ -51,23 +56,22 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
             case "snapshot":
                 generateSnapshotBytecode(mv, asmContext, condition != null);
                 break;
+            case "trace":
+                generateTraceBytecode(mv, expression, asmContext, condition != null);
+                break;
             default:
                 throw new IllegalArgumentException("unsupported expression " + content);
         }
     }
 
-    private void generateLogBytecode(MethodVisitor mv, String expression, AsmInjectionContext asmContext, boolean hasCondition) {
+    public static void generateLogBytecode(MethodVisitor mv, String expression, AsmInjectionContext asmContext, boolean hasCondition) {
         String methodDesc = asmContext.getInjectionPoint().getTarget().getMethodDescriptor();
-        if (methodDesc == null || methodDesc.isEmpty()) {
-            String prefix = resolveLogPrefix(asmContext);
-            mv.visitLdcInsn(prefix + expression);
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/spy/LunaSpy", "onLog", "(Ljava/lang/String;)V", false);
-            return;
-        }
         boolean isStatic = isStaticMethod(asmContext);
-        List<ParameterInfo> params = parseMethodParams(methodDesc, isStatic);
+        List<ParameterInfo> params = (methodDesc != null && !methodDesc.isEmpty())
+                ? parseMethodParams(methodDesc, isStatic)
+                : Collections.emptyList();
 
-        List<Object> segments = parseExpression(expression, params, asmContext.getLocalVariables());
+        List<Object> segments = parseExpression(expression, params, asmContext.getLocalVariables(), asmContext.getExcludedSameLineVariables());
 
         boolean hasRefs = segments.stream().anyMatch(s -> s instanceof ParameterInfo || s instanceof LocalVariableInfo);
         
@@ -119,8 +123,6 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/String", "format",
                 "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;", false);
 
-        // 格式化后的字符串位于栈顶
-        // 调用 LunaSpy.onLog(String) 投递到 RingBuffer
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/spy/LunaSpy", "onLog", "(Ljava/lang/String;)V", false);
         
         if (hasCondition) {
@@ -128,10 +130,12 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         }
     }
 
-    private void generateSnapshotBytecode(MethodVisitor mv, AsmInjectionContext asmContext, boolean hasCondition) {
+    public static void generateSnapshotBytecode(MethodVisitor mv, AsmInjectionContext asmContext, boolean hasCondition) {
         String methodDesc = asmContext.getInjectionPoint().getTarget().getMethodDescriptor();
         boolean isStatic = isStaticMethod(asmContext);
-        List<ParameterInfo> params = parseMethodParams(methodDesc, isStatic);
+        List<ParameterInfo> params = (methodDesc != null && !methodDesc.isEmpty())
+                ? parseMethodParams(methodDesc, isStatic)
+                : Collections.emptyList();
         List<LocalVarInfo> localVars = asmContext.getLocalVariables();
         
         org.objectweb.asm.Label endLabel = new org.objectweb.asm.Label();
@@ -189,7 +193,46 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         }
     }
 
-    private void generateConditionCheck(MethodVisitor mv, AsmInjectionContext asmContext, List<ParameterInfo> params, boolean isStatic, org.objectweb.asm.Label endLabel) {
+    public static void generateTraceBytecode(MethodVisitor mv, String expression, AsmInjectionContext asmContext, boolean hasCondition) {
+        String methodDesc = asmContext.getInjectionPoint().getTarget().getMethodDescriptor();
+        boolean isStatic = isStaticMethod(asmContext);
+        List<ParameterInfo> params = (methodDesc != null && !methodDesc.isEmpty())
+                ? parseMethodParams(methodDesc, isStatic)
+                : Collections.emptyList();
+
+        org.objectweb.asm.Label endLabel = new org.objectweb.asm.Label();
+        if (hasCondition) {
+            generateConditionCheck(mv, asmContext, params, isStatic, endLabel);
+        }
+
+        if ("start".equals(expression)) {
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/spy/LunaSpy", "onTraceStart", "()V", false);
+        } else if (expression.startsWith("end:")) {
+            String thresholdStr = expression.substring(4).trim();
+            long threshold = thresholdStr.isEmpty() ? 0 : Long.parseLong(thresholdStr);
+            String className = asmContext.getInjectionPoint().getTarget().getTargetClass();
+            String methodName = asmContext.getInjectionPoint().getTarget().getMethodName();
+            mv.visitLdcInsn(className);
+            mv.visitLdcInsn(methodName);
+            mv.visitLdcInsn(threshold);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/spy/LunaSpy", "onTraceEnd", "(Ljava/lang/String;Ljava/lang/String;J)V", false);
+        } else if (expression.startsWith("alert:")) {
+            String thresholdStr = expression.substring(6).trim();
+            long threshold = thresholdStr.isEmpty() ? 0 : Long.parseLong(thresholdStr);
+            String className = asmContext.getInjectionPoint().getTarget().getTargetClass();
+            String methodName = asmContext.getInjectionPoint().getTarget().getMethodName();
+            mv.visitLdcInsn(className);
+            mv.visitLdcInsn(methodName);
+            mv.visitLdcInsn(threshold);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/spy/LunaSpy", "onTraceAlert", "(Ljava/lang/String;Ljava/lang/String;J)V", false);
+        }
+
+        if (hasCondition) {
+            mv.visitLabel(endLabel);
+        }
+    }
+
+    private static void generateConditionCheck(MethodVisitor mv, AsmInjectionContext asmContext, List<ParameterInfo> params, boolean isStatic, org.objectweb.asm.Label endLabel) {
         String injectionId = asmContext.getInjectionPoint().getId();
         
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/expression/context/EvaluationContext", "getThreadLocal", "()Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
@@ -230,7 +273,7 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         mv.visitJumpInsn(Opcodes.IFEQ, endLabel);
     }
 
-    private void emitArrayStore(MethodVisitor mv, int index, Runnable valueLoader) {
+    private static void emitArrayStore(MethodVisitor mv, int index, Runnable valueLoader) {
         mv.visitInsn(Opcodes.DUP);
         if (index <= 5) {
             mv.visitInsn(Opcodes.ICONST_0 + index);
@@ -241,21 +284,21 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         mv.visitInsn(Opcodes.AASTORE);
     }
 
-    private void loadParameterAsObject(MethodVisitor mv, ParameterInfo param) {
+    private static void loadParameterAsObject(MethodVisitor mv, ParameterInfo param) {
         loadTypedAsObject(mv, param.getType(), param.getSlot());
     }
 
-    private void loadLocalVariableAsObject(MethodVisitor mv, LocalVariableInfo localVar) {
+    private static void loadLocalVariableAsObject(MethodVisitor mv, LocalVariableInfo localVar) {
         Type type = Type.getType(localVar.getDescriptor());
         loadTypedAsObject(mv, type, localVar.getSlot());
     }
 
-    private void loadLocalVariableAsObject(MethodVisitor mv, LocalVarInfo localVar) {
+    private static void loadLocalVariableAsObject(MethodVisitor mv, LocalVarInfo localVar) {
         Type type = Type.getType(localVar.getDescriptor());
         loadTypedAsObject(mv, type, localVar.getSlot());
     }
 
-    private void loadTypedAsObject(MethodVisitor mv, Type type, int slot) {
+    private static void loadTypedAsObject(MethodVisitor mv, Type type, int slot) {
         switch (type.getSort()) {
             case Type.BOOLEAN:
                 mv.visitVarInsn(Opcodes.ILOAD, slot);
@@ -299,7 +342,7 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         }
     }
 
-    private List<Object> parseExpression(String expression, List<ParameterInfo> params, List<LocalVarInfo> localVars) {
+    private static List<Object> parseExpression(String expression, List<ParameterInfo> params, List<LocalVarInfo> localVars, List<LocalVarInfo> excludedSameLineVars) {
         List<Object> segments = new ArrayList<>();
         Matcher matcher = COMBINED_REF_PATTERN.matcher(expression);
         int lastEnd = 0;
@@ -313,10 +356,14 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
             if (ref.matches("\\d+")) {
                 int paramIndex = Integer.parseInt(ref);
                 if (paramIndex < 1 || paramIndex > params.size()) {
-                    throw new IllegalArgumentException("invalid parameter reference $" + paramIndex
-                            + ", method has " + params.size() + " parameter(s)");
+                    LOGGER.warn("[ExpressionParser] Unresolved parameter reference: ${}, method has {} parameter(s). "
+                            + "Possible cause: methodDescriptor is empty, cannot resolve parameter types. "
+                            + "Ensure the injection rule includes methodDescriptor.",
+                            "$" + ref, params.size());
+                    segments.add("$" + ref);
+                } else {
+                    segments.add(params.get(paramIndex - 1));
                 }
-                segments.add(params.get(paramIndex - 1));
             } else {
                 LocalVarInfo matched = null;
                 if (localVars != null) {
@@ -328,6 +375,24 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
                     }
                 }
                 if (matched == null) {
+                    boolean isSameLineVar = excludedSameLineVars != null
+                            && excludedSameLineVars.stream().anyMatch(v -> v.getName().equals(ref));
+                    if (isSameLineVar) {
+                        LOGGER.warn("[ExpressionParser] Unresolved variable: ${} - variable is declared on the same line as LINE_BEFORE injection point. "
+                                + "At LINE_BEFORE, this variable has NOT been initialized yet. "
+                                + "Use LINE_AFTER injection or reference it from a later line. "
+                                + "Available safe vars: [{}]",
+                                ref, localVars != null ? localVars.stream().map(LocalVarInfo::getName).collect(Collectors.joining(", ")) : "(none)");
+                    } else {
+                        String availableVars = localVars != null
+                                ? localVars.stream().map(LocalVarInfo::getName).collect(Collectors.joining(", "))
+                                : "(none)";
+                        LOGGER.warn("[ExpressionParser] Unresolved variable reference: ${}, available local vars: [{}]. "
+                                + "Possible causes: 1) variable not in scope at injection point, "
+                                + "2) class compiled without debug info (-g:none). "
+                                + "Use $1, $2... for method parameters.",
+                                ref, availableVars);
+                    }
                     segments.add("$" + ref);
                 } else {
                     segments.add(new LocalVariableInfo(matched.getName(), matched.getDescriptor(), matched.getSlot()));
@@ -347,7 +412,7 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         return segments;
     }
 
-    private List<ParameterInfo> parseMethodParams(String methodDescriptor, boolean isStatic) {
+    private static List<ParameterInfo> parseMethodParams(String methodDescriptor, boolean isStatic) {
         List<ParameterInfo> params = new ArrayList<>();
         if (methodDescriptor == null || methodDescriptor.isEmpty()) {
             return params;
@@ -364,11 +429,11 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         return params;
     }
 
-    private boolean isStaticMethod(AsmInjectionContext asmContext) {
+    private static boolean isStaticMethod(AsmInjectionContext asmContext) {
         return (asmContext.getMethodAccess() & Opcodes.ACC_STATIC) != 0;
     }
 
-    private String resolveLogPrefix(AsmInjectionContext asmContext) {
+    private static String resolveLogPrefix(AsmInjectionContext asmContext) {
         if (asmContext.getInjectionPoint().getInjectionType() instanceof MethodInjectionType) {
             MethodInjectionType type = (MethodInjectionType) asmContext.getInjectionPoint().getInjectionType();
             if (type == MethodInjectionType.EXIT) {
@@ -386,7 +451,7 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         return "method enter: ";
     }
 
-    private String escapeFormat(String s) {
+    private static String escapeFormat(String s) {
         return s.replace("%", "%%");
     }
 
@@ -431,7 +496,7 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
             return slot;
         }
     }
-    private void pushInt(MethodVisitor mv, int value) {
+    private static void pushInt(MethodVisitor mv, int value) {
         if (value >= 0 && value <= 5) {
             mv.visitInsn(Opcodes.ICONST_0 + value);
         } else if (value >= -128 && value <= 127) {

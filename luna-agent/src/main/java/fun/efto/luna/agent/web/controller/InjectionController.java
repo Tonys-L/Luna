@@ -23,6 +23,7 @@ import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.injection.target.type.InjectionType;
 import fun.efto.luna.core.injection.target.type.LineNumberInjectionType;
 import fun.efto.luna.core.injection.target.type.MethodInjectionType;
+import fun.efto.luna.core.plugin.InjectionTypeRegistry;
 import fun.efto.luna.core.testing.InjectionTestHarness;
 import fun.efto.luna.core.testing.TestResult;
 import fun.efto.luna.core.transformer.ClassTransformer;
@@ -101,7 +102,7 @@ public class InjectionController {
         if (paramError != null) return ApiResult.fail(paramError);
 
         String localVarError = validateLocalVarReferences(cmd.getCode(), cmd.getClazz(),
-                cmd.getMethod(), cmd.getDesc(), cmd.getLineNumber());
+                cmd.getMethod(), cmd.getDesc(), cmd.getLineNumber(), cmd.getInjectionType());
         if (localVarError != null) return ApiResult.fail(localVarError);
 
         if (isLineInjection(cmd) && (cmd.getMethod() == null || cmd.getMethod().isEmpty())) {
@@ -143,7 +144,7 @@ public class InjectionController {
         if (paramError != null) return ApiResult.fail(paramError);
 
         String localVarError = validateLocalVarReferences(cmd.getCode(), cmd.getClazz(),
-                cmd.getMethod(), cmd.getDesc(), cmd.getLineNumber());
+                cmd.getMethod(), cmd.getDesc(), cmd.getLineNumber(), cmd.getInjectionType());
         if (localVarError != null) return ApiResult.fail(localVarError);
 
         if (isLineInjection(cmd) && (cmd.getMethod() == null || cmd.getMethod().isEmpty())) {
@@ -239,7 +240,7 @@ public class InjectionController {
         if (paramError != null) return ApiResult.fail(paramError);
 
         String localVarError = validateLocalVarReferences(cmd.getCode(), cmd.getClazz(),
-                cmd.getMethod(), cmd.getDesc(), cmd.getLineNumber());
+                cmd.getMethod(), cmd.getDesc(), cmd.getLineNumber(), cmd.getInjectionType());
         if (localVarError != null) return ApiResult.fail(localVarError);
 
         try {
@@ -337,7 +338,7 @@ public class InjectionController {
     }
 
     private InjectionPoint buildInjectionPoint(InjectionCommand cmd) {
-        InjectionType injectionType = resolveInjectionType(cmd.getInjectionType());
+        InjectionType injectionType = InjectionTypeRegistry.resolve(cmd.getInjectionType());
         InjectionTarget target;
         if (injectionType instanceof LineNumberInjectionType) {
             int lineNumber = cmd.getLineNumber() != null ? cmd.getLineNumber() : 0;
@@ -369,34 +370,6 @@ public class InjectionController {
                 || cmd.getInjectionType().equals("LINE_AFTER"));
     }
 
-    private InjectionType resolveInjectionType(String injectionType) {
-        if (injectionType == null || injectionType.isEmpty()) {
-            return MethodInjectionType.ENTER;
-        }
-        switch (injectionType.toUpperCase()) {
-            case "METHOD_ENTER":
-            case "ENTER":
-            case "ENTER_METHOD":
-                return MethodInjectionType.ENTER;
-            case "METHOD_EXIT":
-            case "EXIT":
-            case "EXIT_METHOD":
-                return MethodInjectionType.EXIT;
-            case "METHOD_AROUND":
-            case "AROUND":
-            case "AROUND_METHOD":
-                return MethodInjectionType.AROUND;
-            case "LINE_BEFORE":
-            case "BEFORE_LINE":
-                return LineNumberInjectionType.BEFORE;
-            case "LINE_AFTER":
-            case "AFTER_LINE":
-                return LineNumberInjectionType.AFTER;
-            default:
-                return MethodInjectionType.ENTER;
-        }
-    }
-
     private String validateParamReferences(String code, String methodDescriptor) {
         if (code == null || !code.contains("$")) return null;
 
@@ -421,7 +394,7 @@ public class InjectionController {
 
     private String validateLocalVarReferences(String code, String className,
                                                String methodName, String methodDesc,
-                                               Integer lineNumber) {
+                                               Integer lineNumber, String injectionType) {
         if (code == null || !code.contains("$")) return null;
         if (lineNumber == null || lineNumber < 1) return null;
 

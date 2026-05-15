@@ -100,6 +100,16 @@ public class RuleManager {
         return result;
     }
 
+    public List<InjectionRule> getSuspendedRules() {
+        List<InjectionRule> result = new ArrayList<>();
+        for (InjectionRule rule : rules.values()) {
+            if (rule.getStatus() == RuleStatus.SUSPENDED) {
+                result.add(rule);
+            }
+        }
+        return result;
+    }
+
     /**
      * 应用指定类的所有规则
      */

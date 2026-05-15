@@ -16,11 +16,9 @@
         <div class="form-group">
           <label class="form-label">注入位置</label>
           <select v-model="form.injectionType" class="form-select">
-            <option value="ENTER_METHOD">方法进入 (Before)</option>
-            <option value="EXIT_METHOD">方法退出 (After)</option>
-            <option value="AROUND_METHOD">方法环绕 (Around)</option>
-            <option value="LINE_BEFORE">行号前 (Before Line)</option>
-            <option value="LINE_AFTER">行号后 (After Line)</option>
+            <optgroup v-for="group in groupedInjectionTypes" :key="group.category" :label="group.label">
+              <option v-for="t in group.types" :key="t.name" :value="t.name">{{ t.displayName }}</option>
+            </optgroup>
           </select>
         </div>
 
@@ -111,6 +109,7 @@
 
 <script>
 import { getLocalVariables } from '../utils/api'
+import { pluginRegistry } from '../utils/plugin-registry'
 
 export default {
   name: 'InjectionDialog',
@@ -141,6 +140,16 @@ export default {
   computed: {
     isLineInjection() {
       return this.form.injectionType.startsWith('LINE_')
+    },
+    groupedInjectionTypes() {
+      const types = pluginRegistry.injectionTypes
+      const groups = {}
+      types.forEach(t => {
+        const cat = t.category || 'other'
+        if (!groups[cat]) groups[cat] = { category: cat, label: this.getCategoryLabel(cat), types: [] }
+        groups[cat].types.push(t)
+      })
+      return Object.values(groups)
     }
   },
   watch: {
@@ -159,6 +168,10 @@ export default {
     }
   },
   methods: {
+    getCategoryLabel(cat) {
+      const labels = { method: '方法注入', line: '行号注入', field: '字段注入', other: '其他' }
+      return labels[cat] || cat
+    },
     resetForm() {
       const isLine = this.initialLineNumber !== null
       

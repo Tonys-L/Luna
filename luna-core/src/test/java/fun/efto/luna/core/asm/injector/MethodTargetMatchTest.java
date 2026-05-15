@@ -1,7 +1,3 @@
-/**
- * @author : Tony.L(<286269159@qq.com>)
- * @since  : 2026/05/01 12:00
- */
 package fun.efto.luna.core.asm.injector;
 
 import fun.efto.luna.core.InjectionContext;
@@ -20,6 +16,10 @@ import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since  : 2026/05/01 12:00
+ */
 public class MethodTargetMatchTest {
 
     private AbstractMethodInjector injector;

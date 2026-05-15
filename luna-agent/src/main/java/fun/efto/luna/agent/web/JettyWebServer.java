@@ -5,6 +5,7 @@ import fun.efto.luna.agent.web.controller.ClassController;
 import fun.efto.luna.agent.web.controller.InjectionController;
 import fun.efto.luna.agent.web.controller.RuleController;
 import fun.efto.luna.agent.web.controller.StatusController;
+import fun.efto.luna.agent.web.controller.TemplateController;
 import fun.efto.luna.agent.web.controller.TestController;
 import fun.efto.luna.agent.web.mvc.DispatcherServlet;
 import fun.efto.luna.core.InjectionExecutor;
@@ -71,6 +72,7 @@ public class JettyWebServer {
         dispatcher.registerController(new ClassController(classScanner, classResourceHelper));
         dispatcher.registerController(new InjectionController(injectionExecutor, classResourceHelper));
         dispatcher.registerController(new RuleController());
+        dispatcher.registerController(new TemplateController());
         dispatcher.registerController(new TestController(classScanner, classResourceHelper));
         dispatcher.registerController(new fun.efto.luna.agent.web.controller.MetricsController());
 

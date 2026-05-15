@@ -19,6 +19,8 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,9 +35,20 @@ public class BeforeLineInjector implements BytecodeInjector {
         AsmInjectionContext asmContext = new AsmInjectionContext(injectionContext, bytecode);
 
         LineNumberTarget target = (LineNumberTarget) asmContext.getInjectionTarget();
-        List<AsmInjectionContext.LocalVarInfo> visibleVars = LocalVariableScanner.scanVisibleLocalVariables(
+        List<AsmInjectionContext.LocalVarInfo> safeVars = LocalVariableScanner.scanVisibleLocalVariables(
                 bytecode, target.getMethodName(), target.getMethodDescriptor(), target.getLineNumber(), true);
-        asmContext.setLocalVariables(visibleVars);
+        List<AsmInjectionContext.LocalVarInfo> allVars = LocalVariableScanner.scanVisibleLocalVariables(
+                bytecode, target.getMethodName(), target.getMethodDescriptor(), target.getLineNumber(), false);
+
+        List<AsmInjectionContext.LocalVarInfo> excludedVars = new ArrayList<>();
+        for (AsmInjectionContext.LocalVarInfo lv : allVars) {
+            if (safeVars.stream().noneMatch(v -> v.getName().equals(lv.getName()))) {
+                excludedVars.add(lv);
+            }
+        }
+
+        asmContext.setLocalVariables(allVars);
+        asmContext.setExcludedSameLineVariables(excludedVars);
 
         ClassNode cn = new ClassNode();
         new ClassReader(bytecode).accept(cn, ClassReader.SKIP_FRAMES);
@@ -49,7 +62,13 @@ public class BeforeLineInjector implements BytecodeInjector {
             asmContext.setMethodAccess(mn.access);
             asmContext.setMaxLocals(mn.maxLocals);
 
-            LOGGER.debug("[BeforeLine] method={} maxLocals={} visibleVars={}", mn.name, mn.maxLocals, visibleVars.size());
+            LOGGER.debug("[BeforeLine] method={}{} maxLocals={} allVars={} safeVars={} excludedSameLine={}",
+                    mn.name, mn.desc, mn.maxLocals, allVars.size(), safeVars.size(), excludedVars.size());
+            for (AsmInjectionContext.LocalVarInfo lv : allVars) {
+                boolean isExcluded = excludedVars.stream().anyMatch(e -> e.getName().equals(lv.getName()));
+                LOGGER.debug("[BeforeLine]   {} name={} slot={} desc={}",
+                        isExcluded ? "same-line(uninitialized)" : "safe", lv.getName(), lv.getSlot(), lv.getDescriptor());
+            }
 
             AbstractInsnNode insn = mn.instructions.getFirst();
             while (insn != null) {

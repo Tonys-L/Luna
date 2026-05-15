@@ -82,32 +82,35 @@
                 <label>动作类型</label>
                 <div class="mode-selector">
                   <button 
-                    :class="{ active: rule.codeType === 'EXPRESSION' }"
-                    @click="rule.codeType = 'EXPRESSION'"
+                    v-for="proto in expressionProtocols"
+                    :key="proto.protocol"
+                    :class="{ active: selectedProtocol === proto.protocol }"
+                    @click="selectProtocol(proto)"
                   >
-                    <i class="fas fa-file-code"></i> 日志表达式
-                  </button>
-                  <button 
-                    :class="{ active: rule.codeType === 'SNAPSHOT' }"
-                    @click="rule.codeType = 'SNAPSHOT'"
-                  >
-                    <i class="fas fa-camera"></i> 内存快照
+                    <i class="fas fa-file-code"></i> {{ proto.displayName }}
                   </button>
                 </div>
               </div>
             </div>
 
-            <div class="form-row" v-if="rule.codeType === 'EXPRESSION'">
+            <div class="form-row" v-if="selectedProtocolSyntax">
+              <div class="form-item">
+                <label>语法提示</label>
+                <div class="syntax-hint">{{ selectedProtocolSyntax }}</div>
+              </div>
+            </div>
+
+            <div class="form-row" v-if="selectedProtocol">
               <div class="form-item">
                 <label>条件表达式 (可选)</label>
                 <textarea v-model="rule.expression" placeholder="e.g. params[0] != null" class="premium-textarea"></textarea>
               </div>
             </div>
             
-            <div class="form-row" v-if="rule.codeType === 'EXPRESSION'">
+            <div class="form-row" v-if="selectedProtocol">
               <div class="form-item">
                 <label>日志模板</label>
-                <textarea v-model="rule.logContent" placeholder="e.g. User logged in: {}" class="premium-textarea"></textarea>
+                <textarea v-model="rule.logContent" :placeholder="logContentPlaceholder" class="premium-textarea"></textarea>
               </div>
             </div>
           </div>
@@ -127,6 +130,8 @@
 </template>
 
 <script>
+import { pluginRegistry } from '../utils/plugin-registry'
+
 export default {
   name: 'RuleEditor',
   props: {
@@ -135,19 +140,62 @@ export default {
   emits: ['update:modelValue', 'save', 'cancel'],
   data() {
     return {
-      injectionTypes: [
-        { label: '方法进入', value: 'METHOD_ENTER', icon: 'fas fa-sign-in-alt' },
-        { label: '方法退出', value: 'METHOD_EXIT', icon: 'fas fa-sign-out-alt' },
-        { label: '方法环绕', value: 'METHOD_AROUND', icon: 'fas fa-sync' },
-        { label: '行前注入', value: 'LINE_BEFORE', icon: 'fas fa-indent' },
-        { label: '行后注入', value: 'LINE_AFTER', icon: 'fas fa-outdent' }
-      ]
+      expressionProtocols: [],
+      selectedProtocol: null
     }
   },
   computed: {
     rule: {
       get() { return this.modelValue },
       set(val) { this.$emit('update:modelValue', val) }
+    },
+    injectionTypes() {
+      return pluginRegistry.injectionTypes.map(t => ({
+        label: t.displayName,
+        value: t.name,
+        icon: t.icon || 'fas fa-circle',
+        category: t.category || 'other'
+      }))
+    },
+    groupedInjectionTypes() {
+      const groups = {}
+      this.injectionTypes.forEach(t => {
+        const cat = t.category
+        if (!groups[cat]) groups[cat] = { label: this.getCategoryLabel(cat), types: [] }
+        groups[cat].types.push(t)
+      })
+      return Object.values(groups)
+    },
+    selectedProtocolSyntax() {
+      if (!this.selectedProtocol) return ''
+      const proto = this.expressionProtocols.find(p => p.protocol === this.selectedProtocol)
+      return proto ? proto.syntax : ''
+    },
+    logContentPlaceholder() {
+      if (!this.selectedProtocol) return ''
+      return this.selectedProtocol + ':<expression>'
+    }
+  },
+  mounted() {
+    this.expressionProtocols = pluginRegistry.expressionProtocols
+    if (this.expressionProtocols.length > 0 && !this.selectedProtocol) {
+      this.selectedProtocol = this.expressionProtocols[0].protocol
+    }
+  },
+  methods: {
+    getCategoryLabel(cat) {
+      const labels = { method: '方法注入', line: '行号注入', field: '字段注入', other: '其他' }
+      return labels[cat] || cat
+    },
+    selectProtocol(proto) {
+      this.selectedProtocol = proto.protocol
+      if (this.rule) {
+        if (proto.protocol === 'snapshot') {
+          this.rule.codeType = 'SNAPSHOT'
+        } else {
+          this.rule.codeType = 'EXPRESSION'
+        }
+      }
     }
   }
 }
@@ -427,6 +475,17 @@ export default {
   background-color: rgba(99, 102, 241, 0.1);
   border-color: var(--accent-primary);
   color: var(--accent-primary);
+}
+
+.syntax-hint {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  line-height: 1.5;
 }
 
 .premium-input, .premium-textarea {

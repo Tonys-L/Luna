@@ -1,7 +1,7 @@
 package fun.efto.luna.core.asm.assmebler;
 
 import fun.efto.luna.core.InjectionContext;
-import fun.efto.luna.core.asm.injector.MethodEnterInjector;
+import fun.efto.luna.core.asm.injector.EnterMethodInjector;
 import fun.efto.luna.core.expression.ConditionRegistry;
 import fun.efto.luna.core.expression.context.EvaluationContext;
 import fun.efto.luna.core.injection.InjectionPoint;
@@ -99,7 +99,7 @@ public class ConditionalInjectionEndToEndTest {
 
         // 3. 执行注入转换
         InjectionContext context = new InjectionContext(point);
-        MethodEnterInjector injector = new MethodEnterInjector();
+        EnterMethodInjector injector = new EnterMethodInjector();
         ExpressionBytecodeAssembler assembler = new ExpressionBytecodeAssembler();
         
         ClassReader cr = new ClassReader(originalBytecode);

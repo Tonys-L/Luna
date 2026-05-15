@@ -16,6 +16,7 @@ public class AsmInjectionContext extends InjectionContext {
     private ClassVisitor classVisitor;
     private MethodVisitor methodVisitor;
     private List<LocalVarInfo> localVariables = Collections.emptyList();
+    private List<LocalVarInfo> excludedSameLineVariables = Collections.emptyList();
     private int methodAccess;
     private int maxLocals;
 
@@ -50,6 +51,14 @@ public class AsmInjectionContext extends InjectionContext {
 
     public void setLocalVariables(List<LocalVarInfo> localVariables) {
         this.localVariables = localVariables != null ? localVariables : Collections.emptyList();
+    }
+
+    public List<LocalVarInfo> getExcludedSameLineVariables() {
+        return excludedSameLineVariables;
+    }
+
+    public void setExcludedSameLineVariables(List<LocalVarInfo> excludedSameLineVariables) {
+        this.excludedSameLineVariables = excludedSameLineVariables != null ? excludedSameLineVariables : Collections.emptyList();
     }
 
     public int getMethodAccess() {

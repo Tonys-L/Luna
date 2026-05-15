@@ -1,7 +1,3 @@
-/**
- * @author : Tony.L(<286269159@qq.com>)
- * @since : 2026/03/29 02:30
- */
 package fun.efto.luna.core.asm.analyzer;
 
 import fun.efto.luna.core.analyzer.ClassAnalysisResult;
@@ -12,6 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * @author : Tony.L(<286269159@qq.com>)
+ * @since : 2026/03/29 02:30
+ */
 public class AsmClassAnalyzerTest {
 
     private AsmClassAnalyzer analyzer;

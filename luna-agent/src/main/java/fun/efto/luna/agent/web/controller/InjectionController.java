@@ -12,7 +12,7 @@ import fun.efto.luna.agent.web.mvc.RequestMapping;
 import fun.efto.luna.agent.web.mvc.RequestParam;
 import fun.efto.luna.agent.web.vo.InjectionCommand;
 import fun.efto.luna.core.InjectionExecutor;
-import fun.efto.luna.core.InstrumentationManager;
+import fun.efto.luna.core.InstrumentationHolder;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.InjectionPointRegistry;
 import fun.efto.luna.core.injection.code.InjectableCode;
@@ -320,7 +320,7 @@ public class InjectionController {
             try {
                 Class<?> clazz = classResourceHelper.findLoadedClass(className);
                 if (clazz != null) {
-                    InstrumentationManager.getInstance().retransformClasses(clazz);
+                    InstrumentationHolder.retransformClasses(clazz);
                     LOGGER.info("Successfully retransformed class {} after removing all injections", className);
                 } else {
                     LOGGER.warn("Could not find class {} for retransformation after injection removal", className);

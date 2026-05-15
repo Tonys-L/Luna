@@ -12,8 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import fun.efto.luna.core.InstrumentationManager;
-import fun.efto.luna.core.InjectionExecutor;
+import fun.efto.luna.core.InstrumentationHolder;
 import fun.efto.luna.core.injection.InjectionPoint;
 
 public class RuleManager {
@@ -93,7 +92,7 @@ public class RuleManager {
                 continue;
             }
             // 支持简单的正则匹配或全路径匹配
-            if (className.equals(rule.getTargetClass()) || className.matches(rule.getTargetClass().replace(".", "\\.").replace("*", ".*"))) {
+            if (ClassNameMatcher.matches(className, rule.getTargetClass())) {
                 result.add(rule);
             }
         }
@@ -121,23 +120,12 @@ public class RuleManager {
         if (classPattern == null || classPattern.isEmpty()) return;
         
         try {
-            InstrumentationManager instManager = InstrumentationManager.getInstance();
-            java.lang.instrument.Instrumentation inst = instManager.getInstrumentation();
-            
-            String regex = classPattern.replace(".", "\\.").replace("*", ".*");
-            List<Class<?>> targets = new ArrayList<>();
-            
-            for (Class<?> clazz : instManager.getAllLoadedClasses()) {
-                String className = clazz.getName();
-                if (className.equals(classPattern) || className.matches(regex)) {
-                    if (inst.isModifiableClass(clazz) && !className.startsWith("java.lang.invoke.")) {
-                        targets.add(clazz);
-                    }
-                }
-            }
+            List<Class<?>> targets = InstrumentationHolder.findModifiableClasses(
+                    className -> ClassNameMatcher.matches(className, classPattern)
+                            && !className.startsWith("java.lang.invoke."));
 
             if (!targets.isEmpty()) {
-                instManager.retransformClasses(targets.toArray(new Class<?>[0]));
+                InstrumentationHolder.retransformClasses(targets.toArray(new Class<?>[0]));
             }
         } catch (Exception e) {
             System.err.println("Retransform failed: " + e.getMessage());

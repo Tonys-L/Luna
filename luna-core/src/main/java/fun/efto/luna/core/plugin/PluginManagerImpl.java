@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.InstrumentationManager;
+import fun.efto.luna.core.InstrumentationHolder;
 import fun.efto.luna.core.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.buffer.RingBuffer;
 import fun.efto.luna.core.bytecode.BytecodeAssemblerRegistry;
@@ -516,17 +516,11 @@ public class PluginManagerImpl implements PluginManager {
     public Map<String, PluginRegistrationRecord> getRecords() { return records; }
 
     private void retransformAffectedClasses(Set<String> classNames) {
-        if (classNames == null || classNames.isEmpty() || instrumentation == null) return;
+        if (classNames == null || classNames.isEmpty()) return;
         try {
-            InstrumentationManager instManager = InstrumentationManager.getInstance();
-            List<Class<?>> targets = new ArrayList<>();
-            for (Class<?> clazz : instManager.getAllLoadedClasses()) {
-                if (classNames.contains(clazz.getName()) && instManager.getInstrumentation().isModifiableClass(clazz)) {
-                    targets.add(clazz);
-                }
-            }
+            List<Class<?>> targets = InstrumentationHolder.findModifiableClasses(classNames::contains);
             if (!targets.isEmpty()) {
-                instManager.retransformClasses(targets.toArray(new Class<?>[0]));
+                InstrumentationHolder.retransformClasses(targets.toArray(new Class<?>[0]));
             }
         } catch (Exception e) {
             // Agent 不得影响业务执行

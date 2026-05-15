@@ -78,30 +78,8 @@ public class MarketController implements LunaController {
             return ApiResult.fail("Plugin not found in market: " + pluginId, 404);
         }
 
-        String downloadUrl = meta.getDownloadUrl();
-        String expectedChecksum = meta.getChecksum();
-        String version = meta.getVersion();
-
-        if (downloadUrl == null || downloadUrl.isEmpty()) {
-            return ApiResult.fail("No download URL for plugin: " + pluginId, 400);
-        }
-
         try {
-            Path pluginDir = PluginLoader.getPluginsDir().resolve(pluginId);
-            Path tmpJar = client.download(downloadUrl, pluginDir);
-
-            if (expectedChecksum != null && !expectedChecksum.isEmpty()) {
-                String actualChecksum = MarketClient.sha256(tmpJar);
-                String expected = expectedChecksum.replace("sha256:", "");
-                if (!expected.equals(actualChecksum)) {
-                    Files.deleteIfExists(tmpJar);
-                    return ApiResult.fail("Checksum verification failed, file may be tampered", 400);
-                }
-            }
-
-            Path finalJar = pluginDir.resolve(pluginId + "-" + (version != null ? version : "latest") + ".jar");
-            Files.move(tmpJar, finalJar, StandardCopyOption.REPLACE_EXISTING);
-
+            Path finalJar = downloadAndVerify(client, meta, pluginId);
             PluginLoadResult result = pluginManager.load(finalJar.toString());
             if (result.isSuccess()) {
                 return ApiResult.ok(result);
@@ -158,30 +136,8 @@ public class MarketController implements LunaController {
             return ApiResult.fail("Plugin not found in market: " + pluginId, 404);
         }
 
-        String downloadUrl = meta.getDownloadUrl();
-        String expectedChecksum = meta.getChecksum();
-        String version = meta.getVersion();
-
-        if (downloadUrl == null || downloadUrl.isEmpty()) {
-            return ApiResult.fail("No download URL for plugin: " + pluginId, 400);
-        }
-
         try {
-            Path pluginDir = PluginLoader.getPluginsDir().resolve(pluginId);
-            Path tmpJar = client.download(downloadUrl, pluginDir);
-
-            if (expectedChecksum != null && !expectedChecksum.isEmpty()) {
-                String actualChecksum = MarketClient.sha256(tmpJar);
-                String expected = expectedChecksum.replace("sha256:", "");
-                if (!expected.equals(actualChecksum)) {
-                    Files.deleteIfExists(tmpJar);
-                    return ApiResult.fail("Checksum verification failed, file may be tampered", 400);
-                }
-            }
-
-            Path finalJar = pluginDir.resolve(pluginId + "-" + (version != null ? version : "latest") + ".jar");
-            Files.move(tmpJar, finalJar, StandardCopyOption.REPLACE_EXISTING);
-
+            Path finalJar = downloadAndVerify(client, meta, pluginId);
             PluginUpdateResult result = pluginManager.update(pluginId);
             if (result.isSuccess()) {
                 return ApiResult.ok(result);
@@ -194,6 +150,32 @@ public class MarketController implements LunaController {
             log.log(Level.SEVERE, "Plugin update failed: " + pluginId, e);
             return ApiResult.fail("Update failed: " + e.getMessage(), 500);
         }
+    }
+
+    private Path downloadAndVerify(MarketClient client, PluginMetadata meta, String pluginId) throws Exception {
+        String downloadUrl = meta.getDownloadUrl();
+        String expectedChecksum = meta.getChecksum();
+        String version = meta.getVersion();
+
+        if (downloadUrl == null || downloadUrl.isEmpty()) {
+            throw new IllegalArgumentException("No download URL for plugin: " + pluginId);
+        }
+
+        Path pluginDir = PluginLoader.getPluginsDir().resolve(pluginId);
+        Path tmpJar = client.download(downloadUrl, pluginDir);
+
+        if (expectedChecksum != null && !expectedChecksum.isEmpty()) {
+            String actualChecksum = MarketClient.sha256(tmpJar);
+            String expected = expectedChecksum.replace("sha256:", "");
+            if (!expected.equals(actualChecksum)) {
+                Files.deleteIfExists(tmpJar);
+                throw new SecurityException("Checksum verification failed, file may be tampered");
+            }
+        }
+
+        Path finalJar = pluginDir.resolve(pluginId + "-" + (version != null ? version : "latest") + ".jar");
+        Files.move(tmpJar, finalJar, StandardCopyOption.REPLACE_EXISTING);
+        return finalJar;
     }
 
     private MarketClient getMarketClient() {

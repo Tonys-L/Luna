@@ -1,6 +1,6 @@
 package fun.efto.luna.core.decompile;
 
-import fun.efto.luna.core.InstrumentationManager;
+import fun.efto.luna.core.InstrumentationHolder;
 import org.benf.cfr.reader.api.CfrDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,8 +142,7 @@ public class CfrDecompiler implements Decompiler {
                 return Class.forName(className, false, CfrDecompiler.class.getClassLoader());
             } catch (ClassNotFoundException e1) {
                 try {
-                    InstrumentationManager manager = InstrumentationManager.getInstance();
-                    for (Class<?> c : manager.getAllLoadedClasses()) {
+                    for (Class<?> c : InstrumentationHolder.getAllLoadedClasses()) {
                         if (c.getName().equals(className)) {
                             return c;
                         }

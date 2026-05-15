@@ -2,6 +2,7 @@ package fun.efto.luna.core.asm.assmebler;
 
 import fun.efto.luna.core.asm.AsmInjectionContext;
 import fun.efto.luna.core.asm.AsmInjectionContext.LocalVarInfo;
+import fun.efto.luna.core.asm.AsmTypeHelper;
 import fun.efto.luna.core.injection.target.type.LineNumberInjectionType;
 import fun.efto.luna.core.injection.target.type.MethodInjectionType;
 import org.objectweb.asm.MethodVisitor;
@@ -261,7 +262,7 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
             for (LocalVarInfo lv : asmContext.getLocalVariables()) {
                 mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);
                 mv.visitLdcInsn(lv.getName());
-                loadTypedAsObject(mv, Type.getType(lv.getDescriptor()), lv.getSlot());
+                AsmTypeHelper.loadAndBox(mv, Type.getType(lv.getDescriptor()), lv.getSlot());
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "fun/efto/luna/core/expression/context/EvaluationContext", "bind", "(Ljava/lang/String;Ljava/lang/Object;)Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
                 mv.visitInsn(Opcodes.POP);
             }
@@ -285,61 +286,17 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
     }
 
     private static void loadParameterAsObject(MethodVisitor mv, ParameterInfo param) {
-        loadTypedAsObject(mv, param.getType(), param.getSlot());
+        AsmTypeHelper.loadAndBox(mv, param.getType(), param.getSlot());
     }
 
     private static void loadLocalVariableAsObject(MethodVisitor mv, LocalVariableInfo localVar) {
         Type type = Type.getType(localVar.getDescriptor());
-        loadTypedAsObject(mv, type, localVar.getSlot());
+        AsmTypeHelper.loadAndBox(mv, type, localVar.getSlot());
     }
 
     private static void loadLocalVariableAsObject(MethodVisitor mv, LocalVarInfo localVar) {
         Type type = Type.getType(localVar.getDescriptor());
-        loadTypedAsObject(mv, type, localVar.getSlot());
-    }
-
-    private static void loadTypedAsObject(MethodVisitor mv, Type type, int slot) {
-        switch (type.getSort()) {
-            case Type.BOOLEAN:
-                mv.visitVarInsn(Opcodes.ILOAD, slot);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false);
-                break;
-            case Type.BYTE:
-                mv.visitVarInsn(Opcodes.ILOAD, slot);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false);
-                break;
-            case Type.CHAR:
-                mv.visitVarInsn(Opcodes.ILOAD, slot);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false);
-                break;
-            case Type.SHORT:
-                mv.visitVarInsn(Opcodes.ILOAD, slot);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false);
-                break;
-            case Type.INT:
-                mv.visitVarInsn(Opcodes.ILOAD, slot);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-                break;
-            case Type.LONG:
-                mv.visitVarInsn(Opcodes.LLOAD, slot);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
-                break;
-            case Type.FLOAT:
-                mv.visitVarInsn(Opcodes.FLOAD, slot);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
-                break;
-            case Type.DOUBLE:
-                mv.visitVarInsn(Opcodes.DLOAD, slot);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
-                break;
-            case Type.ARRAY:
-            case Type.OBJECT:
-                mv.visitVarInsn(Opcodes.ALOAD, slot);
-                break;
-            default:
-                mv.visitVarInsn(Opcodes.ALOAD, slot);
-                break;
-        }
+        AsmTypeHelper.loadAndBox(mv, type, localVar.getSlot());
     }
 
     private static List<Object> parseExpression(String expression, List<ParameterInfo> params, List<LocalVarInfo> localVars, List<LocalVarInfo> excludedSameLineVars) {
@@ -497,14 +454,6 @@ public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {
         }
     }
     private static void pushInt(MethodVisitor mv, int value) {
-        if (value >= 0 && value <= 5) {
-            mv.visitInsn(Opcodes.ICONST_0 + value);
-        } else if (value >= -128 && value <= 127) {
-            mv.visitIntInsn(Opcodes.BIPUSH, value);
-        } else if (value >= -32768 && value <= 32767) {
-            mv.visitIntInsn(Opcodes.SIPUSH, value);
-        } else {
-            mv.visitLdcInsn(value);
-        }
+        AsmTypeHelper.emitIntConstant(mv, value);
     }
 }

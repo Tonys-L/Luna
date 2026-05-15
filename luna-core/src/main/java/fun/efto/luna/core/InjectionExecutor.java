@@ -20,16 +20,10 @@ import java.util.List;
 public class InjectionExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(InjectionExecutor.class);
     private static volatile InjectionExecutor instance;
-    private final InstrumentationManager instManager;
 
     private InjectionExecutor(Instrumentation instrumentation) {
-        this.instManager = InstrumentationManager.init(instrumentation);
+        InstrumentationHolder.init(instrumentation);
     }
-
-    private InjectionExecutor() {
-        this.instManager = InstrumentationManager.getInstance();
-    }
-
 
     public static InjectionExecutor init(Instrumentation instrumentation) {
         if (instance == null) {
@@ -42,10 +36,9 @@ public class InjectionExecutor {
         return instance;
     }
 
-
     public static InjectionExecutor getInstance() {
         if (instance == null) {
-            throw new IllegalStateException("未初始化");
+            throw new IllegalStateException("InjectionExecutor not initialized");
         }
         return instance;
     }
@@ -63,17 +56,17 @@ public class InjectionExecutor {
                 targetClass, allInjectionPoints, classTransformer
         );
 
-        instManager.addTransformer(adapter, true);
+        InstrumentationHolder.addTransformer(adapter, true);
 
         try {
-            Class<?>[] allLoadedClasses = instManager.getAllLoadedClasses();
+            Class<?>[] allLoadedClasses = InstrumentationHolder.getAllLoadedClasses();
             boolean found = false;
             for (Class<?> clazz : allLoadedClasses) {
                 if (clazz.getName().equals(targetClass)) {
                     found = true;
                     LOGGER.info("Found class: {} loader={}", clazz.getName(), clazz.getClassLoader());
                     try {
-                        instManager.retransformClasses(clazz);
+                        InstrumentationHolder.retransformClasses(clazz);
                         LOGGER.info("Retransform completed for: {}", clazz.getName());
                     } catch (Exception e) {
                         LOGGER.error("Failed to retransform class {}", clazz.getName(), e);
@@ -96,7 +89,7 @@ public class InjectionExecutor {
                 return notFoundResults;
             }
         } finally {
-            instManager.removeTransformer(adapter);
+            InstrumentationHolder.removeTransformer(adapter);
         }
 
         return adapter.getResults();

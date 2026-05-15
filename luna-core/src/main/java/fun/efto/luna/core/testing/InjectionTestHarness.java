@@ -1,6 +1,6 @@
 package fun.efto.luna.core.testing;
 
-import fun.efto.luna.core.InstrumentationManager;
+import fun.efto.luna.core.InstrumentationHolder;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
@@ -122,23 +122,23 @@ public class InjectionTestHarness {
         ClassTransformer classTransformer = new DefaultClassTransformer();
         ClassFileTransformerAdapter adapter = new ClassFileTransformerAdapter(injectionPoint, classTransformer);
 
-        InstrumentationManager instManager = InstrumentationManager.getInstance();
+        InstrumentationHolder.addTransformer(adapter, true);
 
         Class<?> targetClass = findLoadedClass(className);
         if (targetClass == null) {
+            InstrumentationHolder.removeTransformer(adapter);
             return TestResult.fail("Class not loaded: " + className);
         }
 
-        instManager.addTransformer(adapter, true);
         byte[] generatedBytecode = null;
 
         try {
-            instManager.retransformClasses(targetClass);
+            InstrumentationHolder.retransformClasses(targetClass);
         } catch (Exception e) {
             LOGGER.error("Retransform failed for class: {}", className, e);
             return TestResult.fail("Retransform failed: " + e.getMessage());
         } finally {
-            instManager.removeTransformer(adapter);
+            InstrumentationHolder.removeTransformer(adapter);
         }
 
         PrintStream originalOut = System.out;

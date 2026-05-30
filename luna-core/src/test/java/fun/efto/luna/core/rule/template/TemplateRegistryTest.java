@@ -8,7 +8,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 14:00
  */
 public class TemplateRegistryTest {

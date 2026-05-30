@@ -4,7 +4,7 @@ package fun.efto.luna.core.injection.port;
  * LocalVarValidator（出站端口）。
  * 领域层需要"校验局部变量引用合法性"的能力，不直接依赖 ASM LocalVariableScanner。
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 18:00
  */
 public interface LocalVarValidator {

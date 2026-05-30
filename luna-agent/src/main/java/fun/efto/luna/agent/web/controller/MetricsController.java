@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * JVM 指标与线程分析控制器
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:35
  */
 @Controller

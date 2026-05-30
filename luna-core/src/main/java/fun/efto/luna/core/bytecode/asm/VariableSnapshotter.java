@@ -3,7 +3,7 @@ package fun.efto.luna.core.bytecode.asm;
 import java.util.List;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/31 21:00
  */
 public interface VariableSnapshotter {

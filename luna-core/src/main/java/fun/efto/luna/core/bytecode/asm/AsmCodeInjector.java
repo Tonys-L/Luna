@@ -7,7 +7,7 @@ import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.injection.InjectionPoint;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/31 21:00
  */
 public final class AsmCodeInjector implements CodeInjector {

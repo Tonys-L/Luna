@@ -41,7 +41,7 @@ import java.util.EnumSet;
 import java.io.IOException;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/09 10:00
  */
 public class JettyWebServer implements WebServer {

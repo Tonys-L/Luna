@@ -1,14 +1,14 @@
 package fun.efto.luna.core.injection;
 
 import fun.efto.luna.core.injection.code.InjectableCode;
-import fun.efto.luna.core.injection.code.type.CodeType;
+import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.injection.target.InjectionType;
 
 import java.util.UUID;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since : 2025/10/2 20:41
  */
 public class InjectionPoint {

@@ -1,4 +1,4 @@
-package fun.efto.luna.core.injection.code.type;
+package fun.efto.luna.core.injection.code;
 
 /**
  * 代码类型

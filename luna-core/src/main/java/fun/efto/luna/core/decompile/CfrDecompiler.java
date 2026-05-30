@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.Scanner;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2025/10/19 14:12
  */
 public class CfrDecompiler implements Decompiler {

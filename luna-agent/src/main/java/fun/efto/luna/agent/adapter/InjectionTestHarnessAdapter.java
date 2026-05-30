@@ -2,7 +2,7 @@ package fun.efto.luna.agent.adapter;
 
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
-import fun.efto.luna.core.injection.code.type.CodeType;
+import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.common.InstrumentationHolder;
@@ -24,7 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * InjectionVerifier 适配器实现。
  * 通过反射调用 + 临时 Transformer 注入来验证注入效果。
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 21:00
  */
 public class InjectionTestHarnessAdapter implements InjectionVerifier {

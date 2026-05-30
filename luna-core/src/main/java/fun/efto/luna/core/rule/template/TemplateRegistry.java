@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 模板注册中心 - 管理内置模板和社区模板
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 10:00
  */
 public class TemplateRegistry {

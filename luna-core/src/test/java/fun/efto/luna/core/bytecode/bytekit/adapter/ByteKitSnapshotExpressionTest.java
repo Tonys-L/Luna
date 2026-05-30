@@ -1,5 +1,5 @@
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/06/01 00:30
  */
 package fun.efto.luna.core.bytecode.bytekit.adapter;
@@ -12,7 +12,7 @@ import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
-import fun.efto.luna.core.injection.code.type.CodeType;
+import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
 import fun.efto.luna.core.probe.ProbeMessage;

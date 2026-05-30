@@ -7,7 +7,7 @@ import java.net.URLStreamHandlerFactory;
 import java.util.Enumeration;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2025/10/18 18:35
  */
 public class LunaAgentClassLoader extends URLClassLoader {

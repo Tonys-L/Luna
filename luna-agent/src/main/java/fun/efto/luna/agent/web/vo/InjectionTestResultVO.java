@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * 注入测试结果 VO
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 12:00
  */
 public class InjectionTestResultVO {

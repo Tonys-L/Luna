@@ -11,7 +11,7 @@ import fun.efto.luna.core.decompile.Decompiler;
 import fun.efto.luna.core.injection.CodeCompiler;
 import fun.efto.luna.core.injection.CodeCompilerStrategy;
 import fun.efto.luna.core.injection.target.InjectionType;
-import fun.efto.luna.core.injection.code.type.CodeType;
+import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.plugin.*;
 import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 22:00
  */
 class PluginContextImpl implements PluginContext {

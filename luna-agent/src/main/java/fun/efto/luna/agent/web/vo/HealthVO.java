@@ -3,7 +3,7 @@ package fun.efto.luna.agent.web.vo;
 /**
  * 健康检查 VO
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 12:00
  */
 public class HealthVO {

@@ -1,5 +1,5 @@
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/31 23:30
  */
 package fun.efto.luna.core.bytecode.bytekit.adapter;

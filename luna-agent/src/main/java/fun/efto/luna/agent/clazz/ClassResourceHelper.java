@@ -9,7 +9,7 @@ import java.lang.instrument.Instrumentation;
  * 类资源访问辅助，封装 Instrumentation + 类字节码加载。
  * 不属于 Web 层，属于类扫描/加载基础设施。
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/09 10:00
  */
 public class ClassResourceHelper {

@@ -4,7 +4,7 @@ package fun.efto.luna.core.injection.port;
  * InjectionVerifier（出站端口）。
  * 领域层需要"验证注入效果"的能力，不关心底层是反射调用还是其他方式。
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 20:00
  */
 public interface InjectionVerifier {

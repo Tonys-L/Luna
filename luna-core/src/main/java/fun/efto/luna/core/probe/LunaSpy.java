@@ -16,7 +16,7 @@ import fun.efto.luna.core.probe.ProbeOutput;
  * <p>所有方法均委托给对应的 Probe 类，确保单一数据路径，
  * 避免 ThreadLocal 不共享等数据流断裂问题。</p>
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:00
  */
 public class LunaSpy {

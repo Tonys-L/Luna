@@ -8,7 +8,7 @@ import fun.efto.luna.core.bytecode.asm.LocalVariableScanner;
 import fun.efto.luna.core.bytecode.asm.assembler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
-import fun.efto.luna.core.injection.code.type.CodeType;
+import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
 import fun.efto.luna.core.plugin.builtin.line.BeforeLineInjector;
 import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
@@ -30,7 +30,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 18:00
  */
 public class LineBeforeInjectionVerifyTest {

@@ -4,7 +4,7 @@ package fun.efto.luna.core.injection.port;
  * BytecodeLoader（出站端口）。
  * 领域层需要"获取类字节码"的能力，不关心底层是 ClassLoader 读取还是其他方式。
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 20:00
  */
 public interface BytecodeLoader {

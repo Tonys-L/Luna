@@ -1,5 +1,5 @@
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/06/01 00:00
  */
 package fun.efto.luna.core.bytecode.bytekit.interceptor;

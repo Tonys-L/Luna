@@ -2,7 +2,7 @@ package fun.efto.luna.agent.web.vo;
 
 /**
  * 注入结果 VO
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/26 22:00
  */
 public class InjectionResultVO {

@@ -7,7 +7,7 @@ import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
 import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
-import fun.efto.luna.core.injection.code.type.CodeType;
+import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
 import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
 import fun.efto.luna.core.testing.LineInjectionTestHelper;
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/31 21:00
  */
 @DisplayName("AsmCodeInjector 测试")

@@ -7,7 +7,7 @@ import java.util.Collections;
 /**
  * 测试专用的内置规则模板定义工具类
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/17 18:00
  */
 public final class BuiltinTemplates {

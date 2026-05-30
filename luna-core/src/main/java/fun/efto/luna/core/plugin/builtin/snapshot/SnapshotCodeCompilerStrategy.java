@@ -1,12 +1,12 @@
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/17 18:32
  */
 package fun.efto.luna.core.plugin.builtin.snapshot;
 
 import fun.efto.luna.core.injection.CodeCompilerStrategy;
 import fun.efto.luna.core.injection.PersistentInjection;
-import fun.efto.luna.core.injection.code.type.CodeType;
+import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.code.ExpressBaseInjectableCode;
 import fun.efto.luna.core.injection.code.InjectableCode;
 

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 /**
  * 模板引擎 - 解析模板、替换参数、生成规则列表
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 10:00
  */
 public class TemplateEngine {

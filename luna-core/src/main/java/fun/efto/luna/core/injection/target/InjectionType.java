@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * 注入类型基类
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/03/29 02:30
  */
 public abstract class InjectionType {

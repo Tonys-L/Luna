@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * 局部变量列表 VO
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 12:00
  */
 public class LocalVariablesVO {
@@ -22,7 +22,7 @@ public class LocalVariablesVO {
     /**
      * 局部变量信息
      *
-     * @author : Tony.L(<286269159@qq.com>)
+     * @author ：Tony.L(286269159@qq.com)
      * @since  : 2026/05/27 12:00
      */
     public static class LocalVarInfo {

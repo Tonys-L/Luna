@@ -14,7 +14,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2025/10/20 20:44
  */
 public class SimpleOutputSinkFactory implements OutputSinkFactory {

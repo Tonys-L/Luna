@@ -2,7 +2,7 @@ package fun.efto.luna.core.bytecode;
 
 import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
-import fun.efto.luna.core.injection.code.type.CodeType;
+import fun.efto.luna.core.injection.code.CodeType;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -10,7 +10,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/01 12:00
  */
 public class BytecodeAssemblerRegistryTest {

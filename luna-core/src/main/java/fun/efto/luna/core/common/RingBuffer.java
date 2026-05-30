@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
  * 轻量级无锁多生产者单消费者（MPSC）RingBuffer。
  * 替代 Disruptor，用于高性能日志投递，确保业务线程（生产者）在任何情况下都不被阻塞。
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:00
  */
 public class RingBuffer<T> {

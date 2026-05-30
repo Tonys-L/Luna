@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 实时日志分发器
  * 负责在后台不断从 RingBuffer 拉取数据并推送给所有连入的 WebSocket 客户端
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:00
  */
 public class LogDispatcher {

@@ -8,7 +8,7 @@ import java.util.List;
  * InjectionStore（出站端口）。
  * 领域层需要"存储和查询运行时注入点"的能力，不直接依赖 InjectionPointRegistry 单例。
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 18:00
  */
 public interface InjectionStore {

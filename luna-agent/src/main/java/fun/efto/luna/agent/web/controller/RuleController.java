@@ -14,7 +14,7 @@ import fun.efto.luna.core.rule.InjectionRule;
 import fun.efto.luna.core.rule.RuleManager;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/09 10:00
  */
 @Controller

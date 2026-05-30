@@ -1,7 +1,7 @@
 package fun.efto.luna.core.plugin.builtin.line;
 
 import fun.efto.luna.core.injection.InjectionPoint;
-import fun.efto.luna.core.injection.code.type.CodeType;
+import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.code.ExpressBaseInjectableCode;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
@@ -11,7 +11,7 @@ import fun.efto.luna.core.injection.PersistentInjection;
 import fun.efto.luna.core.rule.InjectionRule;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/16 10:00
  */
 public class LineRuleConverter extends AbstractRuleConverter {

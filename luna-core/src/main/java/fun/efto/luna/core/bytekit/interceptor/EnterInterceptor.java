@@ -9,7 +9,7 @@ import com.alibaba.bytekit.asm.binding.Binding;
 
 public class EnterInterceptor {
 
-    @AtEnter(inline = true, suppress = Throwable.class)
+    @AtEnter(inline = true, suppress = Throwable.class, suppressHandler = SuppressHandler.class)
     public static void onEnter(
             @Binding.This Object target,
             @Binding.Args Object[] args,

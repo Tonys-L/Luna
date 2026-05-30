@@ -9,7 +9,7 @@ import com.alibaba.bytekit.asm.binding.Binding;
 
 public class ExceptionExitInterceptor {
 
-    @AtExceptionExit(inline = true, suppress = Throwable.class)
+    @AtExceptionExit(inline = true, suppress = Throwable.class, suppressHandler = SuppressHandler.class)
     public static void onExceptionExit(
             @Binding.This Object target,
             @Binding.MethodName String methodName,

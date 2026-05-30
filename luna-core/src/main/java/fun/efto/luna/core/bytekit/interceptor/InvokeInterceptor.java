@@ -9,7 +9,7 @@ import com.alibaba.bytekit.asm.binding.Binding;
 
 public class InvokeInterceptor {
 
-    @AtInvoke(inline = true, suppress = Throwable.class, owner = String.class, name = "toUpperCase")
+    @AtInvoke(inline = true, suppress = Throwable.class, suppressHandler = SuppressHandler.class, owner = String.class, name = "toUpperCase")
     public static void onInvoke(
             @Binding.This Object target,
             @Binding.MethodName String methodName) {

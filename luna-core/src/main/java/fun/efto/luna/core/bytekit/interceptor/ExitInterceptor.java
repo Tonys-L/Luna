@@ -9,7 +9,7 @@ import com.alibaba.bytekit.asm.binding.Binding;
 
 public class ExitInterceptor {
 
-    @AtExit(inline = true, suppress = Throwable.class)
+    @AtExit(inline = true, suppress = Throwable.class, suppressHandler = SuppressHandler.class)
     public static void onExit(
             @Binding.This Object target,
             @Binding.Args Object[] args,

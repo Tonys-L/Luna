@@ -1,4 +1,4 @@
-package fun.efto.luna.core.util;
+package fun.efto.luna.core.infra.util;
 
 /**
  * @author : Tony.L(286269159@qq.com)

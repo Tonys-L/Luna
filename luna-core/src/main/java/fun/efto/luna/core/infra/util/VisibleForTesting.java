@@ -1,4 +1,4 @@
-package fun.efto.luna.core.util;
+package fun.efto.luna.core.infra.util;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

@@ -2,7 +2,7 @@ package fun.efto.luna.core.injection;
 
 import fun.efto.luna.core.injection.port.InjectionStore;
 import fun.efto.luna.core.injection.port.Retransformer;
-import fun.efto.luna.core.util.VisibleForTesting;
+import fun.efto.luna.core.infra.util.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

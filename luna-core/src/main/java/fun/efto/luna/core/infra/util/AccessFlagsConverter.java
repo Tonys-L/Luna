@@ -1,4 +1,4 @@
-package fun.efto.luna.core.util;
+package fun.efto.luna.core.infra.util;
 
 import java.util.ArrayList;
 import java.util.List;

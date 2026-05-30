@@ -1,6 +1,6 @@
 package fun.efto.luna.core.analyzer;
 
-import fun.efto.luna.core.util.AccessFlagsConverter;
+import fun.efto.luna.core.infra.util.AccessFlagsConverter;
 
 import java.util.ArrayList;
 import java.util.List;

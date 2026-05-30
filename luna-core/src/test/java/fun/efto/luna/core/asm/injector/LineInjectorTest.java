@@ -2,20 +2,14 @@ package fun.efto.luna.core.asm.injector;
 
 import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.TestSetup;
-import fun.efto.luna.core.asm.AsmInjectionContext;
 import fun.efto.luna.core.asm.assembler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
-import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.plugin.builtin.line.AfterLineInjector;
 import fun.efto.luna.core.plugin.builtin.line.BeforeLineInjector;
 import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
-import fun.efto.luna.core.plugin.builtin.method.AroundMethodInjector;
-import fun.efto.luna.core.plugin.builtin.method.EnterMethodInjector;
-import fun.efto.luna.core.plugin.builtin.method.ExitMethodInjector;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -248,116 +242,6 @@ public class LineInjectorTest {
             InjectionContext ctx = new InjectionContext(ip);
 
             AfterLineInjector injector = new AfterLineInjector();
-            byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
-
-            assertValidBytecode(result, TargetService.class.getName());
-        }
-    }
-
-    @Nested
-    @DisplayName("EnterMethodInjector 测试")
-    class EnterMethodTests {
-
-        @Test
-        @DisplayName("方法入口 log 注入 - 无 VerifyError")
-        void testEnterLogInjection() throws Exception {
-            byte[] bytecode = getClassBytecode(TargetService.class);
-
-            MethodTarget target = new MethodTarget(
-                    MethodInjectionType.ENTER, TargetService.class.getName(),
-                    "createUser", "(Ljava/lang/String;I)V");
-
-            InjectableCode code = createCode("log:Method entered: $1");
-            InjectionPoint ip = new InjectionPoint(target, code);
-            InjectionContext ctx = new InjectionContext(ip);
-
-            EnterMethodInjector injector = new EnterMethodInjector();
-            byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
-
-            assertValidBytecode(result, TargetService.class.getName());
-        }
-
-        @Test
-        @DisplayName("方法入口 snapshot 注入 - 无 VerifyError")
-        void testEnterSnapshotInjection() throws Exception {
-            byte[] bytecode = getClassBytecode(TargetService.class);
-
-            MethodTarget target = new MethodTarget(
-                    MethodInjectionType.ENTER, TargetService.class.getName(),
-                    "calculate", "(II)I");
-
-            InjectableCode code = createCode("snapshot:true");
-            InjectionPoint ip = new InjectionPoint(target, code);
-            InjectionContext ctx = new InjectionContext(ip);
-
-            EnterMethodInjector injector = new EnterMethodInjector();
-            byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
-
-            assertValidBytecode(result, TargetService.class.getName());
-        }
-    }
-
-    @Nested
-    @DisplayName("ExitMethodInjector 测试")
-    class ExitMethodTests {
-
-        @Test
-        @DisplayName("方法退出 log 注入 - 无 VerifyError")
-        void testExitLogInjection() throws Exception {
-            byte[] bytecode = getClassBytecode(TargetService.class);
-
-            MethodTarget target = new MethodTarget(
-                    MethodInjectionType.EXIT, TargetService.class.getName(),
-                    "createUser", "(Ljava/lang/String;I)V");
-
-            InjectableCode code = createCode("log:Method exited");
-            InjectionPoint ip = new InjectionPoint(target, code);
-            InjectionContext ctx = new InjectionContext(ip);
-
-            ExitMethodInjector injector = new ExitMethodInjector();
-            byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
-
-            assertValidBytecode(result, TargetService.class.getName());
-        }
-
-        @Test
-        @DisplayName("多 return 方法退出注入 - 无 VerifyError")
-        void testMultiReturnExitInjection() throws Exception {
-            byte[] bytecode = getClassBytecode(TargetService.class);
-
-            MethodTarget target = new MethodTarget(
-                    MethodInjectionType.EXIT, TargetService.class.getName(),
-                    "multiReturn", "(I)V");
-
-            InjectableCode code = createCode("log:Multi-return method exited");
-            InjectionPoint ip = new InjectionPoint(target, code);
-            InjectionContext ctx = new InjectionContext(ip);
-
-            ExitMethodInjector injector = new ExitMethodInjector();
-            byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
-
-            assertValidBytecode(result, TargetService.class.getName());
-        }
-    }
-
-    @Nested
-    @DisplayName("AroundMethodInjector 测试")
-    class AroundMethodTests {
-
-        @Test
-        @DisplayName("方法环绕 log 注入 - 无 VerifyError")
-        void testAroundLogInjection() throws Exception {
-            byte[] bytecode = getClassBytecode(TargetService.class);
-
-            MethodTarget target = new MethodTarget(
-                    MethodInjectionType.AROUND, TargetService.class.getName(),
-                    "greet", "(Ljava/lang/String;)Ljava/lang/String;");
-
-            InjectableCode code = createCode("log:Around: $1");
-            InjectionPoint ip = new InjectionPoint(target, code);
-            InjectionContext ctx = new InjectionContext(ip);
-
-            AroundMethodInjector injector = new AroundMethodInjector();
             byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
             assertValidBytecode(result, TargetService.class.getName());

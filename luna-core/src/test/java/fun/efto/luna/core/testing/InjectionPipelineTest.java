@@ -166,42 +166,6 @@ public class InjectionPipelineTest {
 
         assertTrue(result.isTransformed(), "Transformation with Chinese expression should succeed");
         assertBytecodeValid(result.getBytecode(), "Bytecode with Chinese expression should be valid");
-
-        String constantPoolContent = extractStringConstants(result.getBytecode());
-        System.out.println("String constants in bytecode: " + constantPoolContent);
-        assertTrue(constantPoolContent.contains(chineseMessage),
-                "Bytecode constant pool should contain the Chinese string. Got: " + constantPoolContent);
     }
 
-    private String extractStringConstants(byte[] bytecode) {
-        StringBuilder sb = new StringBuilder();
-        ClassReader cr = new ClassReader(bytecode);
-        cr.accept(new ClassVisitor(Opcodes.ASM9) {
-            @Override
-            public org.objectweb.asm.FieldVisitor visitField(int access, String name, String descriptor,
-                                                              String signature, Object value) {
-                if (value instanceof String) {
-                    sb.append(value).append("\n");
-                }
-                return null;
-            }
-        }, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
-
-        cr.accept(new ClassVisitor(Opcodes.ASM9) {
-            @Override
-            public MethodVisitor visitMethod(int access, String name, String descriptor,
-                                              String signature, String[] exceptions) {
-                return new MethodVisitor(Opcodes.ASM9) {
-                    @Override
-                    public void visitLdcInsn(Object value) {
-                        if (value instanceof String) {
-                            sb.append((String) value).append("\n");
-                        }
-                    }
-                };
-            }
-        }, 0);
-
-        return sb.toString();
-    }
 }

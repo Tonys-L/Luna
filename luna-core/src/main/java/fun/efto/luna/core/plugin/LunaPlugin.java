@@ -1,7 +1,5 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.rule.template.RuleTemplate;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -29,7 +27,4 @@ public interface LunaPlugin {
 
     default void getControllers(List<LunaController> controllers) {}
 
-    default void getTemplates(List<RuleTemplate> templates) {}
-
-    default boolean isBuiltin() { return false; }
 }

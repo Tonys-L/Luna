@@ -4,7 +4,6 @@ import fun.efto.luna.core.util.AccessFlagsConverter;
 
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * 带有格式化访问标识的类分析结果
  * 扩展了ClassAnalysisResult，添加了可读的访问标识字符串
@@ -33,10 +32,14 @@ public class ClassAnalysisResultWithReadableAccess extends ClassAnalysisResult {
         // 转换方法信息
         this.convertedMethods = new ArrayList<>();
         for (MethodInfo method : methods) {
-            this.convertedMethods.add(new MethodInfoWithReadableAccess(method.getName(), method.getDescriptor(),
+            MethodInfoWithReadableAccess convertedMethod = new MethodInfoWithReadableAccess(
+                    method.getName(), method.getDescriptor(),
                     method.getAccessFlags(), method.getParameters(),
                     AccessFlagsConverter.convertMethodAccessFlags(method.getAccessFlags()),
-                    method.getLocalVariables()));
+                    method.getLocalVariables());
+            convertedMethod.setAnnotations(method.getAnnotations());
+            convertedMethod.setExceptionTable(method.getExceptionTable());
+            this.convertedMethods.add(convertedMethod);
         }
     }
 

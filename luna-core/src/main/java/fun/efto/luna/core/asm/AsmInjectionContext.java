@@ -1,6 +1,6 @@
 package fun.efto.luna.core.asm;
 
-import fun.efto.luna.core.InjectionContext;
+import fun.efto.luna.core.injection.InjectionContext;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 

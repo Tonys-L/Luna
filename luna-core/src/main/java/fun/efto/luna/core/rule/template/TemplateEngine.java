@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,7 @@ public class TemplateEngine {
                                             Map<String, String> paramValues) {
         List<InjectionRule> result = new ArrayList<>();
         Map<String, String> resolvedParams = resolveDefaults(template, paramValues);
+        String groupId = UUID.randomUUID().toString();
 
         for (RuleTemplate.TemplateRule templateRule : template.getRules()) {
             InjectionRule rule = new InjectionRule();
@@ -33,6 +35,7 @@ public class TemplateEngine {
             rule.setCodeType(templateRule.getCodeType() != null ? templateRule.getCodeType() : "EXPRESSION");
             rule.setLineNumber(templateRule.getLineNumber());
             rule.setEnabled(true);
+            rule.setGroupId(groupId);
 
             String code = templateRule.getCode();
             code = substituteParams(code, resolvedParams);

@@ -1,7 +1,5 @@
 package fun.efto.luna.core.injection.target;
 
-import fun.efto.luna.core.injection.target.type.MethodInjectionType;
-
 /**
  * @author ：Tony.L(286269159@qq.com)
  * @since ：2025/10/4 4:29
@@ -13,8 +11,8 @@ public class MethodTarget extends BaseTarget {
     public MethodTarget() {
     }
 
-    public MethodTarget(MethodInjectionType type, String targetClass, String methodName, String methodDescriptor) {
-        super(type, targetClass);
+    public MethodTarget(InjectionType injectionType, String targetClass, String methodName, String methodDescriptor) {
+        super(injectionType, targetClass);
         this.methodName = methodName;
         this.methodDescriptor = methodDescriptor;
     }

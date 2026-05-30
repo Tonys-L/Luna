@@ -1,6 +1,4 @@
-fun.efto.luna.core.plugin.builtin.MethodInjectionPlugin
-fun.efto.luna.core.plugin.builtin.LineInjectionPlugin
-fun.efto.luna.core.plugin.builtin.LogPlugin
-fun.efto.luna.core.plugin.builtin.SnapshotPlugin
-fun.efto.luna.core.plugin.builtin.TracePlugin
-fun.efto.luna.core.plugin.builtin.ConditionalBreakpointPlugin
+fun.efto.luna.core.plugin.builtin.log.LogPlugin
+fun.efto.luna.core.plugin.builtin.snapshot.SnapshotPlugin
+fun.efto.luna.core.plugin.builtin.trace.TracePlugin
+fun.efto.luna.core.plugin.builtin.conditional.ConditionalBreakpointPlugin

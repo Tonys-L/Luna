@@ -1,12 +1,13 @@
 package fun.efto.luna.agent.web.controller;
 
 import fun.efto.luna.agent.web.MetricsService;
-import fun.efto.luna.agent.web.mvc.ApiResult;
-import fun.efto.luna.agent.web.mvc.Controller;
-import fun.efto.luna.agent.web.mvc.GetMapping;
+import fun.efto.luna.agent.web.vo.ThreadDumpVO;
+import fun.efto.luna.core.web.ApiResult;
+import fun.efto.luna.core.web.Controller;
+import fun.efto.luna.core.web.GetMapping;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JVM 指标与线程分析控制器
@@ -24,9 +25,13 @@ public class MetricsController {
 
     @GetMapping("/metrics/threads")
     public ApiResult getThreadDump() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("threads", MetricsService.getThreadDump());
-        data.put("deadlockedIds", MetricsService.findDeadlockedThreads());
-        return ApiResult.ok(data);
+        long[] deadlocked = MetricsService.findDeadlockedThreads();
+        List<Long> deadlockedIds = new ArrayList<>();
+        if (deadlocked != null) {
+            for (long id : deadlocked) {
+                deadlockedIds.add(id);
+            }
+        }
+        return ApiResult.ok(new ThreadDumpVO(MetricsService.getThreadDump(), deadlockedIds));
     }
 }

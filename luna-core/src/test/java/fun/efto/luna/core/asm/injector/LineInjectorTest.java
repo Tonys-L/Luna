@@ -1,15 +1,22 @@
 package fun.efto.luna.core.asm.injector;
 
-import fun.efto.luna.core.InjectionContext;
+import fun.efto.luna.core.injection.InjectionContext;
+import fun.efto.luna.core.TestSetup;
 import fun.efto.luna.core.asm.AsmInjectionContext;
-import fun.efto.luna.core.asm.assmebler.ExpressionBytecodeAssembler;
+import fun.efto.luna.core.asm.assembler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.injection.target.type.LineNumberInjectionType;
-import fun.efto.luna.core.injection.target.type.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.AfterLineInjector;
+import fun.efto.luna.core.plugin.builtin.line.BeforeLineInjector;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.AroundMethodInjector;
+import fun.efto.luna.core.plugin.builtin.method.EnterMethodInjector;
+import fun.efto.luna.core.plugin.builtin.method.ExitMethodInjector;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,6 +36,11 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @DisplayName("行号级注入器测试")
 public class LineInjectorTest {
+
+    @BeforeAll
+    static void setUp() {
+        TestSetup.init();
+    }
 
     public static class TargetService {
         public void createUser(String name, int age) {

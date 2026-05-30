@@ -1,6 +1,5 @@
 package fun.efto.luna.core.plugin.web;
 
-import fun.efto.luna.core.config.ConfigManager;
 import fun.efto.luna.core.plugin.LunaController;
 import fun.efto.luna.core.plugin.PluginInfo;
 import fun.efto.luna.core.plugin.PluginLoadResult;
@@ -15,8 +14,8 @@ import fun.efto.luna.core.web.PostMapping;
 import fun.efto.luna.core.web.PutMapping;
 import fun.efto.luna.core.web.RequestBody;
 import fun.efto.luna.core.web.RequestMapping;
-import fun.efto.luna.core.web.RequestParam;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,8 +51,8 @@ public class PluginManagerController implements LunaController {
         return ApiResult.fail("Plugin not found: " + pluginId, 404);
     }
 
-    @PostMapping("/load")
-    public ApiResult load(@RequestParam("pluginId") String pluginId) {
+    @PostMapping("/{pluginId}/load")
+    public ApiResult load(@PathVariable("pluginId") String pluginId) {
         PluginLoadResult result = pluginManager.load(pluginId);
         if (result.isSuccess()) {
             return ApiResult.ok(result);
@@ -61,8 +60,8 @@ public class PluginManagerController implements LunaController {
         return ApiResult.fail(result.getErrorMessage(), 400);
     }
 
-    @PostMapping("/unload")
-    public ApiResult unload(@RequestParam("pluginId") String pluginId) {
+    @PostMapping("/{pluginId}/unload")
+    public ApiResult unload(@PathVariable("pluginId") String pluginId) {
         PluginUnloadResult result = pluginManager.unload(pluginId);
         if (result.isSuccess()) {
             return ApiResult.ok(result);
@@ -70,8 +69,8 @@ public class PluginManagerController implements LunaController {
         return ApiResult.fail(result.getErrorMessage(), 400);
     }
 
-    @PostMapping("/update")
-    public ApiResult update(@RequestParam("pluginId") String pluginId) {
+    @PostMapping("/{pluginId}/update")
+    public ApiResult update(@PathVariable("pluginId") String pluginId) {
         PluginUpdateResult result = pluginManager.update(pluginId);
         if (result.isSuccess()) {
             return ApiResult.ok(result);
@@ -79,16 +78,34 @@ public class PluginManagerController implements LunaController {
         return ApiResult.fail(result.getErrorMessage(), 400);
     }
 
+    @PostMapping("/{pluginId}/disable")
+    public ApiResult disable(@PathVariable("pluginId") String pluginId) {
+        pluginManager.disable(pluginId);
+        Map<String, String> result = new HashMap<>();
+        result.put("pluginId", pluginId);
+        result.put("disabled", "true");
+        return ApiResult.ok(result);
+    }
+
+    @PostMapping("/{pluginId}/enable")
+    public ApiResult enable(@PathVariable("pluginId") String pluginId) {
+        pluginManager.enable(pluginId);
+        Map<String, String> result = new HashMap<>();
+        result.put("pluginId", pluginId);
+        result.put("enabled", "true");
+        return ApiResult.ok(result);
+    }
+
     @GetMapping("/{pluginId}/config")
     public ApiResult getConfig(@PathVariable("pluginId") String pluginId) {
-        Map<String, String> config = ConfigManager.getPluginConfig(pluginId);
+        Map<String, String> config = pluginManager.getPluginConfig(pluginId);
         return ApiResult.ok(config);
     }
 
     @PutMapping("/{pluginId}/config")
     public ApiResult saveConfig(@PathVariable("pluginId") String pluginId,
                                 @RequestBody Map<String, String> config) {
-        ConfigManager.savePluginConfig(pluginId, config);
+        pluginManager.savePluginConfig(pluginId, config);
         return ApiResult.ok(config);
     }
 }

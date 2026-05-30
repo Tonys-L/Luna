@@ -1,6 +1,6 @@
 package fun.efto.luna.core.bytecode;
 
-import fun.efto.luna.core.InjectionContext;
+import fun.efto.luna.core.injection.InjectionContext;
 
 /**
  * @author ：Tony.L(286269159@qq.com)

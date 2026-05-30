@@ -1,0 +1,20 @@
+package fun.efto.luna.core.plugin.builtin.method;
+
+import fun.efto.luna.core.asm.AsmInjectionContext;
+import fun.efto.luna.core.asm.Constants;
+import fun.efto.luna.core.plugin.builtin.method.visitor.ExitMethodVisitor;
+import fun.efto.luna.core.bytecode.BytecodeAssembler;
+import org.objectweb.asm.MethodVisitor;
+
+/**
+ * @author ：Tony.L(286269159@qq.com)
+ * @since ：2025/10/2 20:45
+ */
+public class ExitMethodInjector extends AbstractMethodInjector {
+    @Override
+    protected MethodVisitor createMethodVisitor(AsmInjectionContext context, BytecodeAssembler bytecodeAssembler) {
+        return new ExitMethodVisitor(Constants.AMS_API_VERSION, context, bytecodeAssembler);
+    }
+
+
+}

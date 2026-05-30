@@ -1,6 +1,6 @@
 package fun.efto.luna.core.analyzer;
 
-import fun.efto.luna.core.TypeRegistry;
+import fun.efto.luna.core.type.TypeRegistry;
 import fun.efto.luna.core.type.RegisterableType;
 
 /**

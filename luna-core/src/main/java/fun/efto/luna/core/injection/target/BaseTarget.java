@@ -1,6 +1,6 @@
 package fun.efto.luna.core.injection.target;
 
-import fun.efto.luna.core.injection.target.type.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionType;
 
 /**
  * 基础注入目标

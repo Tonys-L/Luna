@@ -1,5 +1,6 @@
 package fun.efto.luna.core.plugin;
 
+import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ public class ExpressionHandlerRegistryTest {
 
     @AfterEach
     void tearDown() {
-        ExpressionHandlerRegistry.clear();
+        ExpressionHandlerRegistry.getInstance().clear();
     }
 
     @Test
@@ -32,8 +33,8 @@ public class ExpressionHandlerRegistryTest {
             }
         };
 
-        ExpressionHandlerRegistry.register(handler);
-        assertSame(handler, ExpressionHandlerRegistry.get("log"));
+        ExpressionHandlerRegistry.getInstance().register(handler);
+        assertSame(handler, ExpressionHandlerRegistry.getInstance().get("log").orElse(null));
     }
 
     @Test
@@ -49,9 +50,9 @@ public class ExpressionHandlerRegistryTest {
             }
         };
 
-        ExpressionHandlerRegistry.register(handler);
-        assertTrue(ExpressionHandlerRegistry.hasProtocol("log:message"));
-        assertFalse(ExpressionHandlerRegistry.hasProtocol("unknown:message"));
+        ExpressionHandlerRegistry.getInstance().register(handler);
+        assertTrue(ExpressionHandlerRegistry.getInstance().hasProtocol("log:message"));
+        assertFalse(ExpressionHandlerRegistry.getInstance().hasProtocol("unknown:message"));
     }
 
     @Test
@@ -67,8 +68,8 @@ public class ExpressionHandlerRegistryTest {
             }
         };
 
-        ExpressionHandlerRegistry.register(handler);
-        ExpressionHandlerRegistry.unregisterAll(Collections.singletonList(handler));
-        assertNull(ExpressionHandlerRegistry.get("log"));
+        ExpressionHandlerRegistry.getInstance().register(handler);
+        ExpressionHandlerRegistry.getInstance().unregisterAll(Collections.singletonList(handler));
+        assertFalse(ExpressionHandlerRegistry.getInstance().get("log").isPresent());
     }
 }

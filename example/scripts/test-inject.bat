@@ -52,16 +52,16 @@ if %READY% equ 0 (
 
 echo [5/6] Testing injection...
 echo   - Dry run...
-curl -s -X POST "%BASE_URL%/api/inject/dry-run" -H "Content-Type: application/json" -d "{\"clazz\":\"fun.efto.luna.demo.service.UserService\",\"method\":\"createUser\",\"injectionType\":\"ENTER\",\"codeType\":\"EXPRESSION\",\"code\":\"log:test-injection\"}"
+curl -s -X POST "%BASE_URL%/api/injections/dry-run" -H "Content-Type: application/json" -d "{\"clazz\":\"fun.efto.luna.demo.service.UserService\",\"method\":\"createUser\",\"injectionType\":\"ENTER\",\"codeType\":\"EXPRESSION\",\"code\":\"log:test-injection\"}"
 
 echo.
 echo   - Injecting...
-curl -s -X POST "%BASE_URL%/api/inject" -H "Content-Type: application/json" -d "{\"clazz\":\"fun.efto.luna.demo.service.UserService\",\"method\":\"createUser\",\"injectionType\":\"ENTER\",\"codeType\":\"EXPRESSION\",\"code\":\"log:test-injection\"}"
+curl -s -X POST "%BASE_URL%/api/injections" -H "Content-Type: application/json" -d "{\"clazz\":\"fun.efto.luna.demo.service.UserService\",\"method\":\"createUser\",\"injectionType\":\"ENTER\",\"codeType\":\"EXPRESSION\",\"code\":\"log:test-injection\"}"
 
 echo.
 echo [6/6] Verifying injection...
 set VERIFY_RESULT=
-for /f "delims=" %%r in ('curl -s -X POST "%BASE_URL%/api/inject/verify" -H "Content-Type: application/json" -d "{\"clazz\":\"fun.efto.luna.demo.service.UserService\",\"method\":\"createUser\",\"injectionType\":\"ENTER\",\"codeType\":\"EXPRESSION\",\"code\":\"log:verify-test\"}"') do set VERIFY_RESULT=%%r
+for /f "delims=" %%r in ('curl -s -X POST "%BASE_URL%/api/injections/verify" -H "Content-Type: application/json" -d "{\"clazz\":\"fun.efto.luna.demo.service.UserService\",\"method\":\"createUser\",\"injectionType\":\"ENTER\",\"codeType\":\"EXPRESSION\",\"code\":\"log:verify-test\"}"') do set VERIFY_RESULT=%%r
 
 echo   Verify result: %VERIFY_RESULT%
 echo %VERIFY_RESULT% | findstr /C:"method enter" > nul

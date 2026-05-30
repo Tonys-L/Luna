@@ -1,12 +1,11 @@
 package fun.efto.luna.core.plugin.builtin;
 
-import fun.efto.luna.core.plugin.handler.TraceExpressionHandler;
-import fun.efto.luna.core.rule.template.RuleTemplate;
+import fun.efto.luna.core.plugin.builtin.trace.TracePlugin;
+import fun.efto.luna.core.plugin.builtin.trace.TraceExpressionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author : Tony.L(<286269159@qq.com>)
  * @since  : 2026/05/11 22:00
  */
-@DisplayName("TracePlugin æµ‹è¯•")
+@DisplayName("TracePlugin 测试")
 public class TracePluginTest {
 
     private TracePlugin plugin;
@@ -28,13 +27,13 @@ public class TracePluginTest {
     }
 
     @Test
-    @DisplayName("initialize ä¸æŠ›å¼‚å¸¸")
+    @DisplayName("initialize 不抛异常")
     void testInitializeNoException() {
         assertDoesNotThrow(() -> plugin.initialize(ctx));
     }
 
     @Test
-    @DisplayName("æ³¨å†Œäº?1 ä¸?ExpressionHandler")
+    @DisplayName("注册了 1 个 ExpressionHandler")
     void testRegisteredExpressionHandler() {
         plugin.initialize(ctx);
         assertEquals(1, ctx.getExpressionHandlers().size());
@@ -42,7 +41,7 @@ public class TracePluginTest {
     }
 
     @Test
-    @DisplayName("ä¾èµ– method-injection æ’ä»¶")
+    @DisplayName("依赖 method-injection 插件")
     void testDependencies() {
         List<String> deps = plugin.getDependencies();
         assertEquals(1, deps.size());
@@ -50,14 +49,13 @@ public class TracePluginTest {
     }
 
     @Test
-    @DisplayName("getTemplates è¿”å›ž trace æ¨¡æ¿")
-    void testGetTemplates() {
-        List<RuleTemplate> templates = new ArrayList<>();
-        plugin.getTemplates(templates);
-        assertFalse(templates.isEmpty());
-        assertTrue(templates.stream().anyMatch(t -> "method-timing".equals(t.getName())));
-        assertTrue(templates.stream().anyMatch(t -> "method-timing-threshold".equals(t.getName())));
-        assertTrue(templates.stream().anyMatch(t -> "slow-method-alert".equals(t.getName())));
+    @DisplayName("registerTemplate 注册 trace 模板")
+    void testRegisterTemplates() {
+        plugin.initialize(ctx);
+        assertFalse(ctx.getTemplates().isEmpty());
+        assertTrue(ctx.getTemplates().stream().anyMatch(t -> "method-timing".equals(t.getName())));
+        assertTrue(ctx.getTemplates().stream().anyMatch(t -> "method-timing-threshold".equals(t.getName())));
+        assertTrue(ctx.getTemplates().stream().anyMatch(t -> "slow-method-alert".equals(t.getName())));
     }
 
     @Test
@@ -68,6 +66,5 @@ public class TracePluginTest {
         assertEquals("1.0.0", plugin.getVersion());
         assertEquals("Luna Core Team", plugin.getAuthor());
         assertEquals("performance", plugin.getCategory());
-        assertTrue(plugin.isBuiltin());
     }
 }

@@ -1,7 +1,11 @@
 package fun.efto.luna.core.injector;
 
-import fun.efto.luna.core.injection.target.type.MethodInjectionType;
-import fun.efto.luna.core.injection.target.type.LineNumberInjectionType;
+import fun.efto.luna.core.TestSetup;
+import fun.efto.luna.core.asm.injector.BytecodeInjector;
+import fun.efto.luna.core.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -13,6 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since  : 2026/05/01 12:00
  */
 public class BytecodeInjectorRegistryTest {
+
+    @BeforeAll
+    static void setUp() {
+        TestSetup.init();
+    }
 
     @Test
     public void testGetInstance() {

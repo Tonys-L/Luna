@@ -63,9 +63,10 @@
         <!-- 动作类型 -->
         <div class="form-group">
           <label class="form-label">动作类型</label>
-          <select v-model="form.codeType" class="form-select">
-            <option value="EXPRESSION">表达式 (Expression)</option>
-            <option value="SNAPSHOT">捕获快照 (Snapshot)</option>
+          <select v-model="form.codeType" class="form-select" @change="onCodeTypeChange">
+            <option v-for="proto in expressionProtocols" :key="proto.codeType" :value="proto.codeType">
+              {{ proto.displayName }}
+            </option>
           </select>
         </div>
 
@@ -141,6 +142,9 @@ export default {
     isLineInjection() {
       return this.form.injectionType.startsWith('LINE_')
     },
+    expressionProtocols() {
+      return pluginRegistry.expressionProtocols
+    },
     groupedInjectionTypes() {
       const types = pluginRegistry.injectionTypes
       const groups = {}
@@ -207,6 +211,12 @@ export default {
     },
     insertVar(name) {
       this.form.logContent += ` $${name}`
+    },
+    onCodeTypeChange() {
+      const proto = this.expressionProtocols.find(p => p.codeType === this.form.codeType)
+      if (proto && proto.protocol === 'snapshot') {
+        this.form.logContent = ''
+      }
     },
     handleSubmit() {
       this.$emit('submit', { ...this.form })

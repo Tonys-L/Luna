@@ -1,6 +1,8 @@
 package fun.efto.luna.core.spy;
 
 import fun.efto.luna.core.buffer.RingBuffer;
+import fun.efto.luna.core.plugin.builtin.snapshot.StackFrameCapture;
+import fun.efto.luna.core.probe.ProbeMessage;
 
 /**
  * 间谍类：作为注入字节码与 Agent 核心通信的桥梁。
@@ -12,7 +14,7 @@ import fun.efto.luna.core.buffer.RingBuffer;
  */
 public class LunaSpy {
 
-    public static final RingBuffer<String> LOG_BUFFER = new RingBuffer<>(4096);
+    public static final RingBuffer<ProbeMessage> LOG_BUFFER = new RingBuffer<>(4096);
 
     private static final ThreadLocal<Long> TRACE_START_TIME = new ThreadLocal<>();
 
@@ -28,7 +30,7 @@ public class LunaSpy {
         // 临时增加控制台输出，用于排查跨 ClassLoader 连通性
         System.out.println("[Luna-Spy-Debug] onLog: " + message);
         // 非阻塞投递
-        LOG_BUFFER.offer(message);
+        LOG_BUFFER.offer(new ProbeMessage("LOG", message));
     }
 
     /**
@@ -40,8 +42,8 @@ public class LunaSpy {
      */
     public static void onSnapshot(String pointId, Object[] localVars, String[] varNames) {
         try {
-            String snapshotJson = fun.efto.luna.core.snapshot.StackFrameCapture.capture(pointId, localVars, varNames);
-            LOG_BUFFER.offer(snapshotJson);
+            String snapshotJson = StackFrameCapture.capture(pointId, localVars, varNames);
+            LOG_BUFFER.offer(new ProbeMessage("SNAPSHOT", snapshotJson));
         } catch (Throwable t) {
             // 极度防御：Agent 不得影响业务执行
         }
@@ -57,7 +59,7 @@ public class LunaSpy {
         TRACE_START_TIME.remove();
         long elapsedMs = (System.nanoTime() - startTime) / 1_000_000;
         if (elapsedMs >= thresholdMs) {
-            LOG_BUFFER.offer("[TRACE] " + className + "." + methodName + " took " + elapsedMs + " ms");
+            LOG_BUFFER.offer(new ProbeMessage("TRACE", "[TRACE] " + className + "." + methodName + " took " + elapsedMs + " ms"));
         }
     }
 
@@ -66,7 +68,7 @@ public class LunaSpy {
         if (startTime == null) return;
         long elapsedMs = (System.nanoTime() - startTime) / 1_000_000;
         if (elapsedMs >= thresholdMs) {
-            LOG_BUFFER.offer("[SLOW] " + className + "." + methodName + " took " + elapsedMs + " ms (threshold=" + thresholdMs + " ms)");
+            LOG_BUFFER.offer(new ProbeMessage("TRACE", "[SLOW] " + className + "." + methodName + " took " + elapsedMs + " ms (threshold=" + thresholdMs + " ms)"));
         }
     }
 }

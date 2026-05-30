@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import fun.efto.luna.core.InstrumentationHolder;
+import fun.efto.luna.core.instrument.InstrumentationHolder;
 import fun.efto.luna.core.injection.InjectionPoint;
 
 public class RuleManager {

@@ -4,9 +4,9 @@ import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.injection.target.type.InjectionType;
-import fun.efto.luna.core.injection.target.type.MethodInjectionType;
-import fun.efto.luna.core.injection.target.type.LineNumberInjectionType;
+import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

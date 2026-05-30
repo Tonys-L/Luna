@@ -41,7 +41,7 @@ export async function getDecompiledCode(className) {
 
 export async function injectMethodLog(injectionData) {
   try {
-    const data = await post(apiUrl('/inject'), injectionData)
+    const data = await post(apiUrl('/injections'), injectionData)
     return data
   } catch (error) {
     console.error('方法注入失败:', error)
@@ -125,7 +125,7 @@ export async function getLocalVariables(className, methodName, methodDesc, lineN
 
 export async function getInjectionList(className) {
   try {
-    const data = await get(apiUrl('/inject/list'), { class: className })
+    const data = await get(apiUrl('/injections/list'), { class: className })
     return data || { injections: [] }
   } catch (error) {
     console.error('获取注入点列表失败:', error)
@@ -135,7 +135,7 @@ export async function getInjectionList(className) {
 
 export async function removeInjection(id) {
   try {
-    const data = await post(apiUrl('/inject/remove'), { id })
+    const data = await del(apiUrl(`/injections/${id}`))
     return data
   } catch (error) {
     console.error('删除注入点失败:', error)

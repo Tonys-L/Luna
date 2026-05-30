@@ -1,7 +1,7 @@
 package fun.efto.luna.core.market;
 
 import fun.efto.luna.core.plugin.LunaController;
-import fun.efto.luna.core.plugin.PluginLoader;
+import fun.efto.luna.core.plugin.loader.PluginLoader;
 import fun.efto.luna.core.plugin.PluginManager;
 import fun.efto.luna.core.plugin.PluginLoadResult;
 import fun.efto.luna.core.plugin.PluginUnloadResult;

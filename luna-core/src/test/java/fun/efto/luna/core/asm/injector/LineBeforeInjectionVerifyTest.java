@@ -1,15 +1,18 @@
 package fun.efto.luna.core.asm.injector;
 
-import fun.efto.luna.core.InjectionContext;
+import fun.efto.luna.core.TestSetup;
+import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.asm.AsmInjectionContext;
 import fun.efto.luna.core.asm.ClassLoaderAwareClassWriter;
 import fun.efto.luna.core.asm.LocalVariableScanner;
-import fun.efto.luna.core.asm.assmebler.ExpressionBytecodeAssembler;
+import fun.efto.luna.core.asm.assembler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
-import fun.efto.luna.core.injection.target.type.LineNumberInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.BeforeLineInjector;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -31,6 +34,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since  : 2026/05/10 18:00
  */
 public class LineBeforeInjectionVerifyTest {
+
+    @BeforeAll
+    static void setUp() {
+        TestSetup.init();
+    }
 
     public static class TargetService {
         public void createUser(String name, int age) {
@@ -66,7 +74,7 @@ public class LineBeforeInjectionVerifyTest {
         byte[] originalBytecode = baos.toByteArray();
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, targetClassName, 37, 0,
+                LineNumberInjectionType.BEFORE, targetClassName, 45, 0,
                 "createUser", "(Ljava/lang/String;I)V");
 
         InjectableCode code = new InjectableCode() {
@@ -117,7 +125,7 @@ public class LineBeforeInjectionVerifyTest {
         byte[] originalBytecode = baos.toByteArray();
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, targetClassName, 37, 0,
+                LineNumberInjectionType.BEFORE, targetClassName, 45, 0,
                 "createUser", "(Ljava/lang/String;I)V");
 
         InjectableCode code = new InjectableCode() {
@@ -167,7 +175,7 @@ public class LineBeforeInjectionVerifyTest {
         byte[] originalBytecode = baos.toByteArray();
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, targetClassName, 37, 0,
+                LineNumberInjectionType.BEFORE, targetClassName, 45, 0,
                 "createUser", "(Ljava/lang/String;I)V");
 
         InjectableCode code = new InjectableCode() {
@@ -327,20 +335,21 @@ public class LineBeforeInjectionVerifyTest {
         Object instance = transformedClass.getDeclaredConstructor().newInstance();
         java.lang.reflect.Method method = transformedClass.getMethod("createUser", String.class, int.class);
 
-        while (fun.efto.luna.core.spy.LunaSpy.LOG_BUFFER.poll() != null) {}
+        while (fun.efto.luna.core.probe.ProbeOutput.BUFFER.poll() != null) {}
 
         assertDoesNotThrow(() -> method.invoke(instance, "TestUser", 25),
                 "Injected method should execute without VerifyError");
 
-        String logOutput = null;
+        fun.efto.luna.core.probe.ProbeMessage logOutput = null;
         for (int i = 0; i < 100; i++) {
-            logOutput = fun.efto.luna.core.spy.LunaSpy.LOG_BUFFER.poll();
-            if (logOutput != null && logOutput.contains("check")) break;
+            logOutput = fun.efto.luna.core.probe.ProbeOutput.BUFFER.poll();
+            if (logOutput != null && logOutput.getPayload().contains("check")) break;
             Thread.sleep(10);
         }
 
         assertNotNull(logOutput, "Should have log output containing 'check'");
-        System.out.println("[TEST] Log output: " + logOutput);
-        assertFalse(logOutput.contains("$id"), "Variable $id should be resolved, not appear as literal text. Got: " + logOutput);
+        String payload = logOutput.getPayload();
+        System.out.println("[TEST] Log output: " + payload);
+        assertFalse(payload.contains("$id"), "Variable $id should be resolved, not appear as literal text. Got: " + payload);
     }
 }

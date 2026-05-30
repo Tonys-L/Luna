@@ -1,13 +1,14 @@
 package fun.efto.luna.core.asm.injector;
 
-import fun.efto.luna.core.InjectionContext;
+import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.asm.AsmInjectionContext;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.injection.target.type.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.AbstractMethodInjector;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.MethodVisitor;

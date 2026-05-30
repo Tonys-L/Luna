@@ -20,5 +20,23 @@ public interface BytecodeHelper {
 
     void invokeStatic(String owner, String name, String descriptor);
 
+    void invokeVirtual(String owner, String name, String descriptor);
+
+    void invokeInterface(String owner, String name, String descriptor);
+
+    void loadInt(int value);
+
+    void newObject(String internalName, String descriptor);
+
+    void storeLocal(int slot);
+
+    void loadLocal(int slot);
+
+    Object newLabel();
+
+    void markLabel(Object label);
+
+    void jump(Object label);
+
     void returnVoid();
 }

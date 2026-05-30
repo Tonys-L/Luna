@@ -1,5 +1,6 @@
 package fun.efto.luna.core.snapshot;
 
+import fun.efto.luna.core.plugin.builtin.snapshot.SnapshotSerializer;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.HashMap;

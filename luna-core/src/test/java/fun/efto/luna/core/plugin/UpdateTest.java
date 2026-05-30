@@ -1,6 +1,9 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.buffer.RingBuffer;
+import fun.efto.luna.core.injection.port.Retransformer;
+import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
+import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,14 +31,14 @@ public class UpdateTest {
             readyGate,
             new DefaultLogEmitter(),
             new RingBuffer<>(1024),
-            null,
+            (Retransformer) className -> {},
             null,
             null
         );
     }
 
     @Test
-    @DisplayName("æ›´æ–°ä¸å­˜åœ¨çš„æ’ä»¶è¿”å›žå¤±è´¥")
+    @DisplayName("更新不存在的插件返回失败")
     void testUpdateNonExistentPlugin() {
         PluginUpdateResult result = pluginManager.update("nonexistent");
         assertFalse(result.isSuccess());
@@ -44,20 +47,9 @@ public class UpdateTest {
     }
 
     @Test
-    @DisplayName("å†…ç½®æ’ä»¶ä¸å¯æ›´æ–°")
-    void testUpdateBuiltinPlugin() {
-        LunaPlugin builtin = new TestPlugin("builtin-plugin", Collections.emptyList(), true, "1.0.0");
-        pluginManager.initializeAll(Arrays.asList(builtin));
-
-        PluginUpdateResult result = pluginManager.update("builtin-plugin");
-        assertFalse(result.isSuccess());
-        assertTrue(result.getErrorMessage().contains("builtin"));
-    }
-
-    @Test
     @DisplayName("更新没有存储路径的插件返回失败")
     void testUpdatePluginWithoutStoredPath() {
-        LunaPlugin plugin = new TestPlugin("no-path-plugin", Collections.emptyList(), false, "1.0.0");
+        LunaPlugin plugin = new TestPlugin("no-path-plugin", Collections.emptyList(), "1.0.0");
         pluginManager.initializeAll(Arrays.asList(plugin));
 
         PluginUpdateResult result = pluginManager.update("no-path-plugin");
@@ -66,7 +58,7 @@ public class UpdateTest {
     }
 
     @Test
-    @DisplayName("PluginUpdateResult success å·¥åŽ‚æ–¹æ³•")
+    @DisplayName("PluginUpdateResult success 工厂方法")
     void testUpdateResultSuccess() {
         PluginUpdateResult result = PluginUpdateResult.success("test", "1.0.0", "2.0.0");
         assertTrue(result.isSuccess());
@@ -77,7 +69,7 @@ public class UpdateTest {
     }
 
     @Test
-    @DisplayName("PluginUpdateResult failedWithRollback å·¥åŽ‚æ–¹æ³•")
+    @DisplayName("PluginUpdateResult failedWithRollback 工厂方法")
     void testUpdateResultFailedWithRollback() {
         PluginUpdateResult result = PluginUpdateResult.failedWithRollback("test", "1.0.0", "2.0.0", "error");
         assertFalse(result.isSuccess());
@@ -86,7 +78,7 @@ public class UpdateTest {
     }
 
     @Test
-    @DisplayName("PluginUpdateResult failedNoRollback å·¥åŽ‚æ–¹æ³•")
+    @DisplayName("PluginUpdateResult failedNoRollback 工厂方法")
     void testUpdateResultFailedNoRollback() {
         PluginUpdateResult result = PluginUpdateResult.failedNoRollback("test", "1.0.0", "2.0.0", "error");
         assertFalse(result.isSuccess());
@@ -96,13 +88,11 @@ public class UpdateTest {
     private static class TestPlugin implements LunaPlugin {
         private final String id;
         private final List<String> dependencies;
-        private final boolean builtin;
         private final String version;
 
-        TestPlugin(String id, List<String> dependencies, boolean builtin, String version) {
+        TestPlugin(String id, List<String> dependencies, String version) {
             this.id = id;
             this.dependencies = dependencies;
-            this.builtin = builtin;
             this.version = version;
         }
 
@@ -115,7 +105,5 @@ public class UpdateTest {
         @Override public void initialize(PluginContext context) {}
         @Override public void destroy() {}
         @Override public void getControllers(List<LunaController> controllers) {}
-        @Override public void getTemplates(List<fun.efto.luna.core.rule.template.RuleTemplate> templates) {}
-        @Override public boolean isBuiltin() { return builtin; }
     }
 }

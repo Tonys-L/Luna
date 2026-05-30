@@ -1,8 +1,9 @@
 package fun.efto.luna.core.transformer;
 
 import fun.efto.luna.core.injection.InjectionPoint;
+import fun.efto.luna.core.injection.PersistentInjection;
 import fun.efto.luna.core.rule.InjectionRule;
-import fun.efto.luna.core.plugin.RuleConverterRegistry;
+import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import fun.efto.luna.core.rule.RuleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class RuleClassFileTransformer implements ClassFileTransformer {
         List<InjectionPoint> points = new ArrayList<>();
         for (InjectionRule rule : matchedRules) {
             try {
-                points.add(RuleConverterRegistry.convert(rule));
+                points.add(RuleConverterRegistry.getInstance().convert(toPersistentInjection(rule)));
             } catch (Exception e) {
                 LOGGER.error("Failed to convert rule to injection point for class: {}", normalizedClassName, e);
             }
@@ -60,5 +61,19 @@ public class RuleClassFileTransformer implements ClassFileTransformer {
         }
 
         return currentBytecode == classfileBuffer ? null : currentBytecode;
+    }
+
+    private PersistentInjection toPersistentInjection(InjectionRule rule) {
+        PersistentInjection injection = new PersistentInjection();
+        injection.setClazz(rule.getTargetClass());
+        injection.setMethodName(rule.getTargetMethod());
+        injection.setMethodDescriptor(rule.getMethodDescriptor());
+        injection.setInjectionType(rule.getInjectionType());
+        injection.setLineNumber(rule.getLineNumber());
+        injection.setExpression(rule.getExpression());
+        injection.setCode(rule.getLogContent());
+        injection.setCodeType(rule.getCodeType());
+        injection.setEnabled(rule.isEnabled());
+        return injection;
     }
 }

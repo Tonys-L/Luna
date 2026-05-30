@@ -45,10 +45,10 @@
               <td>{{ p.category || '-' }}</td>
               <td class="desc-cell">{{ p.description || '-' }}</td>
               <td class="action-cell" @click.stop>
-                <button v-if="p.state === 'ACTIVE' && !p.builtin" class="action-btn warn" @click="disablePlugin(p.id)">禁用</button>
+                <button v-if="p.state === 'ACTIVE'" class="action-btn warn" @click="disablePlugin(p.id)">禁用</button>
                 <button v-if="p.state === 'DISABLED'" class="action-btn success" @click="enablePlugin(p.id)">启用</button>
-                <button v-if="!p.builtin" class="action-btn danger" @click="unloadPlugin(p.id)">卸载</button>
-                <button v-if="!p.builtin" class="action-btn info" @click="checkUpdate(p.id)" :disabled="updatingPlugins[p.id]">
+                <button class="action-btn danger" @click="unloadPlugin(p.id)">卸载</button>
+                <button class="action-btn info" @click="checkUpdate(p.id)" :disabled="updatingPlugins[p.id]">
                   <i class="fas fa-arrow-up"></i> {{ updatingPlugins[p.id] ? '更新中...' : '检查更新' }}
                 </button>
               </td>

@@ -1,15 +1,16 @@
 package fun.efto.luna.core.asm.injector;
 
-import fun.efto.luna.core.asm.assmebler.ExpressionBytecodeAssembler;
-import fun.efto.luna.core.bytecode.BytecodeAssemblerRegistry;
+import fun.efto.luna.core.asm.assembler.ExpressionBytecodeAssembler;
+import fun.efto.luna.core.asm.assembler.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.injection.target.type.MethodInjectionType;
-import fun.efto.luna.core.injector.BytecodeInjectorRegistry;
-import fun.efto.luna.core.plugin.ExpressionHandlerRegistry;
-import fun.efto.luna.core.plugin.handler.LogExpressionHandler;
+import fun.efto.luna.core.plugin.builtin.method.EnterMethodInjector;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
+import fun.efto.luna.core.plugin.builtin.log.LogExpressionHandler;
 import fun.efto.luna.core.transformer.DefaultClassTransformer;
 import fun.efto.luna.core.transformer.TransformerResult;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,7 +31,7 @@ public class EnterMethodInjectorTest {
     static void registerComponents() {
         BytecodeInjectorRegistry.getInstance().register(MethodInjectionType.ENTER, new EnterMethodInjector());
         BytecodeAssemblerRegistry.getInstance().register(CodeType.EXPRESSION, new ExpressionBytecodeAssembler());
-        ExpressionHandlerRegistry.register(new LogExpressionHandler());
+        ExpressionHandlerRegistry.getInstance().register(new LogExpressionHandler());
     }
 
     private byte[] generateTestClassBytecode() {

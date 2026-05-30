@@ -2,6 +2,7 @@ package fun.efto.luna.core.expression.parser;
 
 import fun.efto.luna.core.expression.Token;
 import fun.efto.luna.core.expression.ast.*;
+import fun.efto.luna.core.expression.ast.PropertyAccessNode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -206,7 +207,7 @@ public class ExpressionParser {
                 throw new IllegalArgumentException("Expected property name after .");
             }
             consume();
-            node = new fun.efto.luna.core.expression.ast.PropertyAccessNode(node, propToken.getValue());
+            node = new PropertyAccessNode(node, propToken.getValue());
         }
 
         return node;

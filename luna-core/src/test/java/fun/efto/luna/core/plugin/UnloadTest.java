@@ -1,6 +1,10 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.buffer.RingBuffer;
+import fun.efto.luna.core.injection.port.Retransformer;
+import fun.efto.luna.core.plugin.lifecycle.AffectedClassTracker;
+import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
+import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
 import fun.efto.luna.core.rule.InjectionRule;
 import fun.efto.luna.core.rule.RuleManager;
 import fun.efto.luna.core.rule.RuleStatus;
@@ -30,7 +34,7 @@ public class UnloadTest {
             readyGate,
             new DefaultLogEmitter(),
             new RingBuffer<>(1024),
-            null,
+            (Retransformer) className -> {},
             null,
             null
         );
@@ -51,22 +55,10 @@ public class UnloadTest {
     }
 
     @Test
-    @DisplayName("内置插件不可卸载")
-    void testUnloadBuiltinPlugin() {
-        LunaPlugin builtin = new TestPlugin("builtin-plugin", Collections.emptyList(), true);
-        pluginManager.initializeAll(Arrays.asList(builtin));
-
-        PluginUnloadResult result = pluginManager.unload("builtin-plugin");
-        assertFalse(result.isSuccess());
-        assertTrue(result.getErrorMessage().contains("builtin"));
-        assertEquals(PluginState.ACTIVE, pluginManager.getState("builtin-plugin"));
-    }
-
-    @Test
     @DisplayName("被依赖的插件不可卸载")
     void testUnloadDependedPlugin() {
-        LunaPlugin base = new TestPlugin("base", Collections.emptyList(), false);
-        LunaPlugin dependent = new TestPlugin("dependent", Arrays.asList("base"), false);
+        LunaPlugin base = new TestPlugin("base", Collections.emptyList());
+        LunaPlugin dependent = new TestPlugin("dependent", Arrays.asList("base"));
         pluginManager.initializeAll(Arrays.asList(base, dependent));
 
         PluginUnloadResult result = pluginManager.unload("base");
@@ -75,9 +67,9 @@ public class UnloadTest {
     }
 
     @Test
-    @DisplayName("成功卸载非内置插件后状态变为UNLOADED")
+    @DisplayName("成功卸载插件后状态变为UNLOADED")
     void testUnloadNonBuiltinPlugin() {
-        LunaPlugin plugin = new TestPlugin("removable", Collections.emptyList(), false);
+        LunaPlugin plugin = new TestPlugin("removable", Collections.emptyList());
         pluginManager.initializeAll(Arrays.asList(plugin));
 
         assertEquals(PluginState.ACTIVE, pluginManager.getState("removable"));
@@ -91,7 +83,7 @@ public class UnloadTest {
     @Test
     @DisplayName("卸载插件后相关规则被挂起")
     void testSuspendOrphanedRulesOnUnload() {
-        LunaPlugin plugin = new TestPlugin("rule-provider", Collections.emptyList(), false);
+        LunaPlugin plugin = new TestPlugin("rule-provider", Collections.emptyList());
         pluginManager.initializeAll(Arrays.asList(plugin));
 
         InjectionRule rule = new InjectionRule();
@@ -106,12 +98,10 @@ public class UnloadTest {
     private static class TestPlugin implements LunaPlugin {
         private final String id;
         private final List<String> dependencies;
-        private final boolean builtin;
 
-        TestPlugin(String id, List<String> dependencies, boolean builtin) {
+        TestPlugin(String id, List<String> dependencies) {
             this.id = id;
             this.dependencies = dependencies;
-            this.builtin = builtin;
         }
 
         @Override public String getId() { return id; }
@@ -123,7 +113,5 @@ public class UnloadTest {
         @Override public void initialize(PluginContext context) {}
         @Override public void destroy() {}
         @Override public void getControllers(List<LunaController> controllers) {}
-        @Override public void getTemplates(List<fun.efto.luna.core.rule.template.RuleTemplate> templates) {}
-        @Override public boolean isBuiltin() { return builtin; }
     }
 }

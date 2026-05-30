@@ -5,10 +5,13 @@ import fun.efto.luna.core.buffer.RingBuffer;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.decompile.Decompiler;
 import fun.efto.luna.core.injection.code.type.CodeType;
-import fun.efto.luna.core.injection.target.type.InjectionType;
-import fun.efto.luna.core.injector.BytecodeInjector;
+import fun.efto.luna.core.injection.CodeCompilerStrategy;
+import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.asm.injector.BytecodeInjector;
+import fun.efto.luna.core.rule.template.RuleTemplate;
 
-import java.lang.instrument.Instrumentation;
+import fun.efto.luna.core.injection.port.Retransformer;
+
 import java.util.Map;
 
 /**
@@ -29,6 +32,12 @@ public interface PluginContext {
 
     void registerRuleConverter(InjectionType type, InjectionRuleConverter converter);
 
+    void registerTemplate(RuleTemplate template);
+
+    void registerCodeCompilerStrategy(CodeCompilerStrategy strategy);
+
+    void registerBootstrapClass(String internalName);
+
     ClassAnalyzer getClassAnalyzer();
 
     Decompiler getDecompiler();
@@ -37,7 +46,7 @@ public interface PluginContext {
 
     RingBuffer<String> getLogBuffer();
 
-    Instrumentation getInstrumentation();
+    Retransformer getRetransformer();
 
     Map<String, String> getPluginConfig();
 

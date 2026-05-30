@@ -1,18 +1,41 @@
 package fun.efto.luna.agent;
 
-import fun.efto.luna.agent.classloader.LunaAgentClassLoader;
+import fun.efto.luna.agent.adapter.InjectionTestHarnessAdapter;
 import fun.efto.luna.agent.clazz.*;
 import fun.efto.luna.agent.log.LoggerInitializer;
 import fun.efto.luna.agent.web.JettyConfiguration;
 import fun.efto.luna.agent.web.JettyWebServer;
-import fun.efto.luna.core.InjectionExecutor;
+import fun.efto.luna.core.instrument.InstrumentationHolder;
 import fun.efto.luna.core.init.InitializerManager;
+import fun.efto.luna.core.injection.InjectionManager;
+import fun.efto.luna.core.injection.InjectionPointRegistry;
+import fun.efto.luna.core.injection.InjectionService;
+import fun.efto.luna.core.injection.port.BytecodeLoader;
+import fun.efto.luna.core.injection.port.InjectionStore;
+import fun.efto.luna.core.injection.port.InjectionVerifier;
+import fun.efto.luna.core.injection.port.LocalVarValidator;
+import fun.efto.luna.core.injection.port.Retransformer;
+import fun.efto.luna.core.asm.AsmInjectionContext;
+import fun.efto.luna.core.asm.LocalVariableScanner;
+import fun.efto.luna.core.injection.InjectionValidator;
+import fun.efto.luna.core.injection.port.BytecodePreviewer;
+import fun.efto.luna.core.plugin.loader.LunaAgentClassLoader;
+import fun.efto.luna.core.plugin.DefaultLogEmitter;
+import fun.efto.luna.core.plugin.LunaPlugin;
+import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
+import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
+import fun.efto.luna.core.rule.RuleManager;
+import fun.efto.luna.core.rule.template.TemplateRegistry;
+import fun.efto.luna.core.rule.template.TemplateService;
+import fun.efto.luna.core.transformer.RuleClassFileTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import fun.efto.luna.core.rule.RuleManager;
-import fun.efto.luna.core.transformer.RuleClassFileTransformer;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.jar.JarFile;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -23,7 +46,6 @@ import java.net.URL;
  */
 @SuppressWarnings("java:S106")
 public class Agent {
-    // 延迟初始化Logger，在日志系统配置完成后再获取Logger实例
     private static Logger logger;
     private static volatile ClassLoader lunaAgentClassLoader;
 
@@ -39,7 +61,6 @@ public class Agent {
         executeWithAgentClassLoader(args, inst);
         System.out.println("[Luna] agent agentmain");
     }
-
 
     private static void executeWithAgentClassLoader(String args, Instrumentation inst) {
         try {
@@ -58,25 +79,35 @@ public class Agent {
     private static void startAgent(String args, Instrumentation inst) {
         initLogger();
         try {
-            // 获取 agent jar 文件路径并添加到 bootstrap classloader，确保 Spy 类全局可见且共享
             String agentJarPath = Agent.class.getProtectionDomain()
                     .getCodeSource().getLocation().toURI().getPath();
             logger.info("Appending agent jar to bootstrap classloader: {}", agentJarPath);
-            inst.appendToBootstrapClassLoaderSearch(new java.util.jar.JarFile(agentJarPath));
+            inst.appendToBootstrapClassLoaderSearch(new JarFile(agentJarPath));
 
             logger.info("Initializing Luna agent components...");
             InitializerManager.getInstance().initializeAll();
-            InjectionExecutor injectionExecutor = InjectionExecutor.init(inst);
+            InstrumentationHolder.init(inst);
+
+            initializeBuiltinPlugins();
+
             ClassScanner classScanner = ClassScanner.getInstance(inst, createExcludeClassFilter());
-            JettyWebServer jettyWebServer = new JettyWebServer(8421, JettyConfiguration.createDevelopment(), injectionExecutor, classScanner, inst);
+            ClassResourceHelper classResourceHelper = new ClassResourceHelper(inst);
+
+            InjectionService injectionService = assembleInjectionService(classResourceHelper, inst);
+
+            RuleManager ruleManager = RuleManager.getInstance();
+            TemplateService templateService = new TemplateService(
+                    TemplateRegistry.getInstance(), ruleManager);
+
+            JettyWebServer jettyWebServer = new JettyWebServer(
+                    8421, JettyConfiguration.createDevelopment(),
+                    classScanner, classResourceHelper, injectionService,
+                    ruleManager, templateService);
 
             jettyWebServer.start();
             logger.info("Luna agent started successfully, web server on port 8421");
 
-            // 注册全局规则转换器（处理后续加载的类）
             inst.addTransformer(new RuleClassFileTransformer(), true);
-            
-            // 对已经加载的类应用规则
             applyRulesToLoadedClasses(inst);
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -97,19 +128,94 @@ public class Agent {
         }
     }
 
+    private static InjectionService assembleInjectionService(ClassResourceHelper classResourceHelper,
+                                                              Instrumentation inst) {
+        InjectionManager injectionManager = InjectionManager.getInstance();
+
+        // Retransformer 适配器
+        Retransformer retransformer = new Retransformer() {
+            @Override
+            public void retransform(String className) {
+                try {
+                    List<Class<?>> classes = InstrumentationHolder.findClasses(className);
+                    if (!classes.isEmpty()) {
+                        InstrumentationHolder.retransformClasses(classes.toArray(new Class<?>[0]));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Retransform failed for class: " + className, e);
+                }
+            }
+
+            @Override
+            public void retransformAll(Set<String> classNames) {
+                if (classNames == null || classNames.isEmpty()) return;
+                try {
+                    List<Class<?>> targets = InstrumentationHolder.findModifiableClasses(classNames::contains);
+                    if (!targets.isEmpty()) {
+                        InstrumentationHolder.retransformClasses(targets.toArray(new Class<?>[0]));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Batch retransform failed", e);
+                }
+            }
+        };
+
+        // InjectionStore 适配器
+        InjectionStore injectionStore = InjectionPointRegistry.getInstance().asInjectionStore();
+
+        // 注册端口到 InjectionManager
+        injectionManager.setRetransformer(retransformer);
+        injectionManager.setInjectionStore(injectionStore);
+
+        // BytecodeLoader 适配器
+        BytecodeLoader bytecodeLoader = className -> classResourceHelper.loadClassBytes(className);
+
+        // LocalVarValidator 适配器
+        LocalVarValidator localVarValidator = (code, className, methodName, methodDesc, lineNumber, classBytes) -> {
+            if (code == null || !code.contains("$")) return null;
+            if (lineNumber == null || lineNumber < 1) return null;
+            try {
+                List<AsmInjectionContext.LocalVarInfo> vars =
+                        LocalVariableScanner.scanVisibleLocalVariables(
+                                classBytes, methodName, methodDesc, lineNumber);
+                List<InjectionValidator.LocalVarInfo> domainVars =
+                new ArrayList<>();
+                for (AsmInjectionContext.LocalVarInfo v : vars) {
+                    domainVars.add(new InjectionValidator.LocalVarInfo(
+                            v.getName(), v.getDescriptor(), v.getSlot()));
+                }
+                return InjectionValidator.validateLocalVarReferences(
+                        code, className, methodName, methodDesc, lineNumber, domainVars);
+            } catch (Exception e) {
+                return null;
+            }
+        };
+
+        // InjectionVerifier 适配器
+        InjectionVerifier injectionVerifier = new InjectionTestHarnessAdapter(inst);
+
+        // BytecodePreviewer 适配器（InjectionService.preview() 直接用 ClassTransformer，此端口仅作备用）
+        BytecodePreviewer bytecodePreviewer =
+                (injectionId, className, originalBytes) -> {
+                    throw new UnsupportedOperationException(
+                            "Use InjectionService.preview() which directly uses ClassTransformer");
+                };
+
+        return new InjectionService(injectionManager, bytecodeLoader, bytecodePreviewer,
+                localVarValidator, injectionVerifier);
+    }
+
     private static void applyRulesToLoadedClasses(Instrumentation inst) {
         logger.info("Scanning already loaded classes for matching rules...");
         Class<?>[] allLoadedClasses = inst.getAllLoadedClasses();
-        java.util.List<Class<?>> targets = new java.util.ArrayList<>();
-        
+        List<Class<?>> targets = new ArrayList<>();
+
         for (Class<?> clazz : allLoadedClasses) {
             String className = clazz.getName();
-            // 快速过滤
             if (className.startsWith("java.") || className.startsWith("sun.") || className.startsWith("fun.efto.luna.")) {
                 continue;
             }
-            
-            // 检查是否有匹配规则
+
             if (!RuleManager.getInstance().findRulesForClass(className).isEmpty()) {
                 if (inst.isModifiableClass(clazz)) {
                     targets.add(clazz);
@@ -134,31 +240,55 @@ public class Agent {
                 new ExcludeByClassLoaderNameFilter("jdk.internal.reflect.DelegatingClassLoader",
                         "sun.reflect.DelegatingClassLoader",
                         "sun.reflect.misc.MethodUtil",
-                        "fun.efto.luna.agent.classloader.LunaAgentClassLoader"),
+                        "fun.efto.luna.core.plugin.loader.LunaAgentClassLoader"),
                 new ExcludeGeneratedClassFilter());
     }
 
-    /**
-     * 初始化独立的日志上下文，避免影响宿主应用的日志系统
-     */
     private static void initLogger() {
         try {
-            // 首先初始化独立的日志上下文
             LoggerInitializer.initLoggerContext();
-            // 然后获取Logger实例，确保使用的是我们配置的日志系统
             logger = LoggerFactory.getLogger(Agent.class);
             logger.info("Luna logger initialized successfully");
         } catch (Exception e) {
             System.err.println("[Luna] 初始化 logger 失败: " + e.getMessage());
             e.printStackTrace();
-            // 即使初始化失败，也确保有一个Logger实例可用
             logger = LoggerFactory.getLogger(Agent.class);
+        }
+    }
+
+    private static void initializeBuiltinPlugins() {
+        List<LunaPlugin> builtinPlugins = new ArrayList<>();
+        java.util.ServiceLoader<LunaPlugin> loader = java.util.ServiceLoader.load(LunaPlugin.class);
+        for (LunaPlugin plugin : loader) {
+            builtinPlugins.add(plugin);
+        }
+
+        if (builtinPlugins.isEmpty()) {
+            logger.warn("No builtin plugins found via ServiceLoader");
+            return;
+        }
+
+        PluginManagerImpl pluginManager = new PluginManagerImpl(
+                new ReadyGate(),
+                new DefaultLogEmitter(),
+                new fun.efto.luna.core.buffer.RingBuffer<>(4096),
+                null,
+                null,
+                null
+        );
+
+        for (LunaPlugin plugin : builtinPlugins) {
+            try {
+                pluginManager.initializeAll(java.util.Collections.singletonList(plugin));
+                logger.info("Initialized builtin plugin: {} ({})", plugin.getId(), plugin.getDisplayName());
+            } catch (Exception e) {
+                logger.warn("Skipped builtin plugin {} due to unmet dependencies: {}", plugin.getId(), e.getMessage());
+            }
         }
     }
 
     private static void initializeAgentEnvironment() {
         try {
-            // 获取 agent jar 文件路径
             String agentJarPath = Agent.class.getProtectionDomain()
                     .getCodeSource().getLocation().toURI().getPath();
 

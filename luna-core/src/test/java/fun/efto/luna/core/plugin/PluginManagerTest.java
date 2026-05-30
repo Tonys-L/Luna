@@ -1,5 +1,8 @@
 package fun.efto.luna.core.plugin;
 
+import fun.efto.luna.core.injection.port.Retransformer;
+import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
+import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author : Tony.L(<286269159@qq.com>)
  * @since  : 2026/05/11 22:00
  */
-@DisplayName("PluginManager æµ‹è¯•")
+@DisplayName("PluginManager 测试")
 public class PluginManagerTest {
 
     private PluginManagerImpl pluginManager;
@@ -26,14 +29,14 @@ public class PluginManagerTest {
             readyGate,
             new DefaultLogEmitter(),
             new fun.efto.luna.core.buffer.RingBuffer<>(1024),
-            null,
+            (Retransformer) className -> {},
             null,
             null
         );
     }
 
     @Test
-    @DisplayName("åˆå§‹åŒ?ä¸ªå†…ç½®æ’ä»¶ï¼ŒéªŒè¯listPluginsè¿”å›žæ­£ç¡®æ•°é‡")
+    @DisplayName("初始化3个插件，验证listPlugins返回正确数量")
     void testInitializeAll() {
         List<LunaPlugin> plugins = new ArrayList<>();
         plugins.add(new StubPlugin("plugin-a", Collections.emptyList()));
@@ -77,7 +80,7 @@ public class PluginManagerTest {
     }
 
     @Test
-    @DisplayName("å¾ªçŽ¯ä¾èµ–æŠ›å‡ºå¼‚å¸¸")
+    @DisplayName("循环依赖抛出异常")
     void testCyclicDependency() {
         LunaPlugin a = new StubPlugin("a", Arrays.asList("b"));
         LunaPlugin b = new StubPlugin("b", Arrays.asList("a"));
@@ -88,7 +91,7 @@ public class PluginManagerTest {
     }
 
     @Test
-    @DisplayName("ç¼ºå°‘ä¾èµ–æŠ›å‡ºå¼‚å¸¸")
+    @DisplayName("缺少依赖抛出异常")
     void testMissingDependency() {
         LunaPlugin a = new StubPlugin("a", Arrays.asList("nonexistent"));
 
@@ -98,7 +101,7 @@ public class PluginManagerTest {
     }
 
     @Test
-    @DisplayName("æ’ä»¶çŠ¶æ€æ­£ç¡®ï¼šåˆå§‹åŒ–åŽä¸ºACTIVE")
+    @DisplayName("插件状态正确：初始化后为ACTIVE")
     void testPluginState() {
         LunaPlugin plugin = new StubPlugin("test-plugin", Collections.emptyList());
         pluginManager.initializeAll(Arrays.asList(plugin));
@@ -118,21 +121,21 @@ public class PluginManagerTest {
     }
 
     @Test
-    @DisplayName("getPluginè¿”å›žnullå¯¹äºŽä¸å­˜åœ¨çš„æ’ä»¶")
+    @DisplayName("getPlugin返回null对于不存在的插件")
     void testGetPluginNotFound() {
         assertNull(pluginManager.getPlugin("nonexistent"));
     }
 
     @Test
-    @DisplayName("getStateè¿”å›žUNLOADEDå¯¹äºŽä¸å­˜åœ¨çš„æ’ä»¶")
+    @DisplayName("getState返回UNLOADED对于不存在的插件")
     void testGetStateNotFound() {
         assertEquals(PluginState.UNLOADED, pluginManager.getState("nonexistent"));
     }
 
     @Test
-    @DisplayName("disableéžå†…ç½®æ’ä»¶ï¼šçŠ¶æ€ä»ŽACTIVEå˜ä¸ºDISABLED")
-    void testDisableNonBuiltinPlugin() {
-        LunaPlugin plugin = new NonBuiltinStubPlugin("ext-plugin", Collections.emptyList());
+    @DisplayName("disable插件：状态从ACTIVE变为DISABLED")
+    void testDisablePlugin() {
+        LunaPlugin plugin = new StubPlugin("ext-plugin", Collections.emptyList());
         pluginManager.initializeAll(Arrays.asList(plugin));
 
         assertEquals(PluginState.ACTIVE, pluginManager.getState("ext-plugin"));
@@ -143,18 +146,7 @@ public class PluginManagerTest {
     }
 
     @Test
-    @DisplayName("disableå†…ç½®æ’ä»¶æŠ›å‡ºIllegalStateException")
-    void testDisableBuiltinPluginThrows() {
-        LunaPlugin plugin = new StubPlugin("builtin-plugin", Collections.emptyList());
-        pluginManager.initializeAll(Arrays.asList(plugin));
-
-        assertThrows(IllegalStateException.class, () -> {
-            pluginManager.disable("builtin-plugin");
-        });
-    }
-
-    @Test
-    @DisplayName("disableä¸å­˜åœ¨çš„æ’ä»¶æŠ›å‡ºIllegalArgumentException")
+    @DisplayName("disable不存在的插件抛出IllegalArgumentException")
     void testDisableNonExistentPluginThrows() {
         assertThrows(IllegalArgumentException.class, () -> {
             pluginManager.disable("nonexistent");
@@ -162,9 +154,9 @@ public class PluginManagerTest {
     }
 
     @Test
-    @DisplayName("disableéžACTIVEæ’ä»¶æŠ›å‡ºIllegalStateException")
+    @DisplayName("disable非ACTIVE插件抛出IllegalStateException")
     void testDisableNonActivePluginThrows() {
-        LunaPlugin plugin = new NonBuiltinStubPlugin("ext-plugin", Collections.emptyList());
+        LunaPlugin plugin = new StubPlugin("ext-plugin", Collections.emptyList());
         pluginManager.initializeAll(Arrays.asList(plugin));
 
         pluginManager.disable("ext-plugin");
@@ -176,9 +168,9 @@ public class PluginManagerTest {
     }
 
     @Test
-    @DisplayName("enable DISABLEDæ’ä»¶ï¼šçŠ¶æ€æ¢å¤ä¸ºACTIVE")
+    @DisplayName("enable DISABLED插件：状态恢复为ACTIVE")
     void testEnableDisabledPlugin() {
-        LunaPlugin plugin = new NonBuiltinStubPlugin("ext-plugin", Collections.emptyList());
+        LunaPlugin plugin = new StubPlugin("ext-plugin", Collections.emptyList());
         pluginManager.initializeAll(Arrays.asList(plugin));
 
         pluginManager.disable("ext-plugin");
@@ -189,7 +181,7 @@ public class PluginManagerTest {
     }
 
     @Test
-    @DisplayName("enableä¸å­˜åœ¨çš„æ’ä»¶æŠ›å‡ºIllegalArgumentException")
+    @DisplayName("enable不存在的插件抛出IllegalArgumentException")
     void testEnableNonExistentPluginThrows() {
         assertThrows(IllegalArgumentException.class, () -> {
             pluginManager.enable("nonexistent");
@@ -197,9 +189,9 @@ public class PluginManagerTest {
     }
 
     @Test
-    @DisplayName("enableéžDISABLEDæ’ä»¶æŠ›å‡ºIllegalStateException")
+    @DisplayName("enable非DISABLED插件抛出IllegalStateException")
     void testEnableNonDisabledPluginThrows() {
-        LunaPlugin plugin = new NonBuiltinStubPlugin("ext-plugin", Collections.emptyList());
+        LunaPlugin plugin = new StubPlugin("ext-plugin", Collections.emptyList());
         pluginManager.initializeAll(Arrays.asList(plugin));
 
         assertThrows(IllegalStateException.class, () -> {
@@ -208,9 +200,9 @@ public class PluginManagerTest {
     }
 
     @Test
-    @DisplayName("disable/enableè§¦å‘LifecycleListeneräº‹ä»¶")
+    @DisplayName("disable/enable触发LifecycleListener事件")
     void testDisableEnableFiresListenerEvents() {
-        LunaPlugin plugin = new NonBuiltinStubPlugin("ext-plugin", Collections.emptyList());
+        LunaPlugin plugin = new StubPlugin("ext-plugin", Collections.emptyList());
         pluginManager.initializeAll(Arrays.asList(plugin));
 
         List<String> events = new ArrayList<>();
@@ -228,17 +220,6 @@ public class PluginManagerTest {
         pluginManager.enable("ext-plugin");
 
         assertEquals(Arrays.asList("disabled:ext-plugin", "enabled:ext-plugin"), events);
-    }
-
-    private static class NonBuiltinStubPlugin extends StubPlugin {
-        NonBuiltinStubPlugin(String id, List<String> dependencies) {
-            super(id, dependencies);
-        }
-
-        @Override
-        public boolean isBuiltin() {
-            return false;
-        }
     }
 
     private static class StubPlugin implements LunaPlugin {
@@ -259,7 +240,5 @@ public class PluginManagerTest {
         @Override public void initialize(PluginContext context) {}
         @Override public void destroy() {}
         @Override public void getControllers(List<LunaController> controllers) {}
-        @Override public void getTemplates(List<fun.efto.luna.core.rule.template.RuleTemplate> templates) {}
-        @Override public boolean isBuiltin() { return true; }
     }
 }

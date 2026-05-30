@@ -1,7 +1,8 @@
 package fun.efto.luna.core.plugin.builtin;
 
 import fun.efto.luna.core.injection.code.type.CodeType;
-import fun.efto.luna.core.plugin.handler.SnapshotExpressionHandler;
+import fun.efto.luna.core.plugin.builtin.snapshot.SnapshotPlugin;
+import fun.efto.luna.core.plugin.builtin.snapshot.SnapshotExpressionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author : Tony.L(<286269159@qq.com>)
  * @since  : 2026/05/11 22:00
  */
-@DisplayName("SnapshotPlugin æµ‹è¯•")
+@DisplayName("SnapshotPlugin 测试")
 public class SnapshotPluginTest {
 
     private SnapshotPlugin plugin;
@@ -25,13 +26,13 @@ public class SnapshotPluginTest {
     }
 
     @Test
-    @DisplayName("initialize ä¸æŠ›å¼‚å¸¸")
+    @DisplayName("initialize 不抛异常")
     void testInitializeNoException() {
         assertDoesNotThrow(() -> plugin.initialize(ctx));
     }
 
     @Test
-    @DisplayName("æ³¨å†Œäº?1 ä¸?ExpressionHandler")
+    @DisplayName("注册了1个ExpressionHandler")
     void testRegisteredExpressionHandler() {
         plugin.initialize(ctx);
         assertEquals(1, ctx.getExpressionHandlers().size());
@@ -39,7 +40,7 @@ public class SnapshotPluginTest {
     }
 
     @Test
-    @DisplayName("æ³¨å†Œäº?SNAPSHOT Assembler")
+    @DisplayName("注册了SNAPSHOT Assembler")
     void testRegisteredAssembler() {
         plugin.initialize(ctx);
         assertNotNull(ctx.getAssemblers().get(CodeType.SNAPSHOT));
@@ -53,7 +54,6 @@ public class SnapshotPluginTest {
         assertEquals("1.0.0", plugin.getVersion());
         assertEquals("Luna Core Team", plugin.getAuthor());
         assertEquals("injection", plugin.getCategory());
-        assertTrue(plugin.isBuiltin());
         assertTrue(plugin.getDependencies().isEmpty());
     }
 }

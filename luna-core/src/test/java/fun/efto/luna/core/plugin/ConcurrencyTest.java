@@ -1,6 +1,9 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.buffer.RingBuffer;
+import fun.efto.luna.core.injection.port.Retransformer;
+import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
+import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author : Tony.L(<286269159@qq.com>)
  * @since  : 2026/05/11 22:00
  */
-@DisplayName("StampedLock å¹¶å‘æŽ§åˆ¶æµ‹è¯•")
+@DisplayName("StampedLock 并发控制测试")
 public class ConcurrencyTest {
 
     private PluginManagerImpl pluginManager;
@@ -32,14 +35,14 @@ public class ConcurrencyTest {
             readyGate,
             new DefaultLogEmitter(),
             new RingBuffer<>(1024),
-            null,
+            (Retransformer) className -> {},
             null,
             null
         );
     }
 
     @Test
-    @DisplayName("getTransformLock è¿”å›ž StampedLock å®žä¾‹")
+    @DisplayName("getTransformLock 返回 StampedLock 实例")
     void testGetTransformLockReturnsStampedLock() {
         StampedLock lock = pluginManager.getTransformLock();
         assertNotNull(lock);
@@ -81,7 +84,7 @@ public class ConcurrencyTest {
     }
 
     @Test
-    @DisplayName("å†™é”é˜»å¡žè¯»é”")
+    @DisplayName("写锁阻塞读锁")
     void testWriteLockBlocksReaders() throws InterruptedException {
         StampedLock lock = pluginManager.getTransformLock();
         long writeStamp = lock.writeLock();

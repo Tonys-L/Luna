@@ -3,7 +3,7 @@ package fun.efto.luna.core.injection;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.InjectionTarget;
-import fun.efto.luna.core.injection.target.type.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionType;
 
 import java.util.UUID;
 
@@ -18,6 +18,12 @@ public class InjectionPoint {
 
     public InjectionPoint(InjectionTarget target, InjectableCode code) {
         this.id = UUID.randomUUID().toString();
+        this.target = target;
+        this.code = code;
+    }
+
+    public InjectionPoint(String id, InjectionTarget target, InjectableCode code) {
+        this.id = id != null ? id : UUID.randomUUID().toString();
         this.target = target;
         this.code = code;
     }

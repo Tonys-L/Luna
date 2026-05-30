@@ -1,5 +1,6 @@
 package fun.efto.luna.agent.web;
 
+import fun.efto.luna.agent.clazz.ClassResourceHelper;
 import fun.efto.luna.agent.clazz.ClassScanner;
 import fun.efto.luna.agent.web.controller.ClassController;
 import fun.efto.luna.agent.web.controller.InjectionController;
@@ -7,44 +8,68 @@ import fun.efto.luna.agent.web.controller.RuleController;
 import fun.efto.luna.agent.web.controller.StatusController;
 import fun.efto.luna.agent.web.controller.TemplateController;
 import fun.efto.luna.agent.web.controller.TestController;
+import fun.efto.luna.agent.web.controller.MetricsController;
 import fun.efto.luna.agent.web.mvc.DispatcherServlet;
-import fun.efto.luna.core.InjectionExecutor;
+import fun.efto.luna.agent.web.ws.LogDispatcher;
+import fun.efto.luna.agent.web.ws.LogWebSocketServlet;
+import fun.efto.luna.core.injection.InjectionService;
+import fun.efto.luna.core.plugin.LunaController;
+import fun.efto.luna.core.rule.RuleManager;
+import fun.efto.luna.core.rule.template.TemplateService;
+import fun.efto.luna.core.web.WebServer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.instrument.Instrumentation;
 import java.net.URL;
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.util.List;
+import java.util.EnumSet;
+import java.io.IOException;
 
 /**
  * @author : Tony.L(<286269159@qq.com>)
  * @since  : 2026/05/09 10:00
  */
-public class JettyWebServer {
+public class JettyWebServer implements WebServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(JettyWebServer.class);
 
     private final Server server;
     private final int port;
     private final JettyConfiguration configuration;
+    private final DispatcherServlet dispatcher;
     private volatile boolean running = false;
 
     public JettyWebServer(int port, JettyConfiguration configuration,
-                          InjectionExecutor injectionExecutor,
                           ClassScanner classScanner,
-                          Instrumentation instrumentation) {
+                          ClassResourceHelper classResourceHelper,
+                          InjectionService injectionService,
+                          RuleManager ruleManager,
+                          TemplateService templateService) {
         this.port = port;
         this.configuration = configuration;
-        this.server = createServer(injectionExecutor, classScanner, instrumentation);
+        this.dispatcher = new DispatcherServlet();
+        this.server = createServer(classScanner, classResourceHelper, injectionService,
+                ruleManager, templateService);
     }
 
-    private Server createServer(InjectionExecutor injectionExecutor,
-                                 ClassScanner classScanner,
-                                 Instrumentation instrumentation) {
+    private Server createServer(ClassScanner classScanner,
+                                 ClassResourceHelper classResourceHelper,
+                                 InjectionService injectionService,
+                                 RuleManager ruleManager,
+                                 TemplateService templateService) {
         Server jettyServer = new Server();
 
         ServerConnector connector = new ServerConnector(jettyServer);
@@ -65,40 +90,34 @@ public class JettyWebServer {
             resourceHandler.setResourceBase("src/main/resources/static");
         }
 
-        ClassResourceHelper classResourceHelper = new ClassResourceHelper(instrumentation);
-
-        DispatcherServlet dispatcher = new DispatcherServlet();
         dispatcher.registerController(new StatusController());
-        dispatcher.registerController(new ClassController(classScanner, classResourceHelper));
-        dispatcher.registerController(new InjectionController(injectionExecutor, classResourceHelper));
-        dispatcher.registerController(new RuleController());
-        dispatcher.registerController(new TemplateController());
+        dispatcher.registerController(new ClassController(classScanner, classResourceHelper, injectionService));
+        dispatcher.registerController(new InjectionController(injectionService));
+        dispatcher.registerController(new RuleController(ruleManager));
+        dispatcher.registerController(new TemplateController(templateService));
         dispatcher.registerController(new TestController(classScanner, classResourceHelper));
-        dispatcher.registerController(new fun.efto.luna.agent.web.controller.MetricsController());
+        dispatcher.registerController(new MetricsController());
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         context.setDisplayName("Luna Web Server");
-        
-        // 注册全局字符编码过滤器
-        context.addFilter(new org.eclipse.jetty.servlet.FilterHolder(new javax.servlet.Filter() {
+
+        context.addFilter(new FilterHolder(new Filter() {
             @Override
-            public void init(javax.servlet.FilterConfig filterConfig) {}
+            public void init(FilterConfig filterConfig) {}
             @Override
-            public void doFilter(javax.servlet.ServletRequest request, javax.servlet.ServletResponse response, javax.servlet.FilterChain chain) 
-                    throws java.io.IOException, javax.servlet.ServletException {
+            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                    throws IOException, ServletException {
                 request.setCharacterEncoding("UTF-8");
                 response.setCharacterEncoding("UTF-8");
                 chain.doFilter(request, response);
             }
             @Override
             public void destroy() {}
-        }), "/*", java.util.EnumSet.of(javax.servlet.DispatcherType.REQUEST));
+        }), "/*", EnumSet.of(DispatcherType.REQUEST));
 
         context.addServlet(new ServletHolder(dispatcher), "/api/*");
-        
-        // 注册 WebSocket Servlet
-        context.addServlet(new ServletHolder(new fun.efto.luna.agent.web.ws.LogWebSocketServlet()), "/ws/log");
+        context.addServlet(new ServletHolder(new LogWebSocketServlet()), "/ws/log");
 
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new org.eclipse.jetty.server.Handler[]{resourceHandler, context});
@@ -110,6 +129,20 @@ public class JettyWebServer {
         return jettyServer;
     }
 
+    @Override
+    public void registerControllers(List<LunaController> controllers) {
+        for (LunaController controller : controllers) {
+            dispatcher.registerController(controller);
+        }
+    }
+
+    @Override
+    public void unregisterControllers(List<LunaController> controllers) {
+        for (LunaController controller : controllers) {
+            dispatcher.unregisterController(controller);
+        }
+    }
+
     public void start() throws Exception {
         if (running) {
             throw new IllegalStateException("服务器已经在运行");
@@ -118,9 +151,8 @@ public class JettyWebServer {
         try {
             server.start();
             running = true;
-            
-            // 启动日志分发器
-            fun.efto.luna.agent.web.ws.LogDispatcher.getInstance().start();
+
+            LogDispatcher.getInstance().start();
 
             LOGGER.info("Luna Web服务器启动成功:");
             LOGGER.info("  - HTTP服务: http://{}:{}", configuration.getHost(), port);
@@ -138,9 +170,8 @@ public class JettyWebServer {
         }
 
         try {
-            // 停止日志分发器
-            fun.efto.luna.agent.web.ws.LogDispatcher.getInstance().stop();
-            
+            LogDispatcher.getInstance().stop();
+
             server.stop();
             server.destroy();
             running = false;

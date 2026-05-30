@@ -1,7 +1,7 @@
 package fun.efto.luna.core.asm;
 
 import fun.efto.luna.core.analyzer.AnalyzerRegistry;
-import fun.efto.luna.core.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.asm.injector.BytecodeInjectorRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

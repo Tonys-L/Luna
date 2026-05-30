@@ -1,12 +1,14 @@
 package fun.efto.luna.core.testing;
 
+import fun.efto.luna.core.TestSetup;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.injection.target.type.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
 import fun.efto.luna.core.transformer.DefaultClassTransformer;
 import fun.efto.luna.core.transformer.TransformerResult;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -21,6 +23,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since  : 2026/05/02 10:00
  */
 public class InjectionPipelineTest {
+
+    @BeforeAll
+    static void setUp() {
+        TestSetup.init();
+    }
 
     private static final String TEST_CLASS = "com.example.TestSubject";
     private static final String TEST_METHOD = "greet";

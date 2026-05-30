@@ -40,4 +40,15 @@ test.describe('Luna 应用 - 监控大盘', () => {
     await autoRefreshCheck.uncheck()
     await expect(autoRefreshCheck).not.toBeChecked()
   })
+
+  test('JVM 指标数据展示', async ({ page }) => {
+    const refreshBtn = page.locator('.refresh-btn')
+    await refreshBtn.click()
+    await page.waitForTimeout(2000)
+    const statCards = page.locator('.stat-card')
+    if (await statCards.count() > 0) {
+      const firstCard = statCards.first()
+      await expect(firstCard).toBeVisible()
+    }
+  })
 })

@@ -1,19 +1,16 @@
 package fun.efto.luna.agent.web.controller;
 
-import fun.efto.luna.agent.web.mvc.ApiResult;
-import fun.efto.luna.agent.web.mvc.Controller;
-import fun.efto.luna.agent.web.mvc.GetMapping;
-import fun.efto.luna.agent.web.mvc.PathVariable;
-import fun.efto.luna.agent.web.mvc.PostMapping;
-import fun.efto.luna.agent.web.mvc.RequestBody;
-import fun.efto.luna.agent.web.mvc.RequestMapping;
-import fun.efto.luna.core.rule.InjectionRule;
-import fun.efto.luna.core.rule.RuleManager;
+import fun.efto.luna.agent.web.vo.TemplateApplyResultVO;
+import fun.efto.luna.core.web.ApiResult;
+import fun.efto.luna.core.web.Controller;
+import fun.efto.luna.core.web.GetMapping;
+import fun.efto.luna.core.web.PathVariable;
+import fun.efto.luna.core.web.PostMapping;
+import fun.efto.luna.core.web.RequestBody;
+import fun.efto.luna.core.web.RequestMapping;
 import fun.efto.luna.core.rule.template.RuleTemplate;
-import fun.efto.luna.core.rule.template.TemplateEngine;
-import fun.efto.luna.core.rule.template.TemplateRegistry;
+import fun.efto.luna.core.rule.template.TemplateService;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,19 +23,25 @@ import java.util.Map;
 @RequestMapping("/templates")
 public class TemplateController {
 
+    private final TemplateService templateService;
+
+    public TemplateController(TemplateService templateService) {
+        this.templateService = templateService;
+    }
+
     @GetMapping
     public ApiResult list() {
-        List<RuleTemplate> templates = TemplateRegistry.getInstance().getAllTemplates();
+        List<RuleTemplate> templates = templateService.listTemplates();
         return ApiResult.ok(templates);
     }
 
     @GetMapping("/categories")
     public ApiResult categories() {
-        List<RuleTemplate> allTemplates = TemplateRegistry.getInstance().getAllTemplates();
+        List<RuleTemplate> allTemplates = templateService.listTemplates();
         Map<String, List<RuleTemplate>> grouped = new HashMap<>();
         for (RuleTemplate t : allTemplates) {
             String category = t.getCategory() != null ? t.getCategory() : "other";
-            java.util.List<RuleTemplate> list = grouped.computeIfAbsent(category, k -> new java.util.ArrayList<>());
+            List<RuleTemplate> list = grouped.computeIfAbsent(category, k -> new java.util.ArrayList<>());
             list.add(t);
         }
         return ApiResult.ok(grouped);
@@ -46,41 +49,29 @@ public class TemplateController {
 
     @GetMapping("/{name}")
     public ApiResult get(@PathVariable("name") String name) {
-        RuleTemplate template = TemplateRegistry.getInstance().getTemplate(name);
+        RuleTemplate template = templateService.getTemplate(name);
         if (template != null) {
             return ApiResult.ok(template);
         }
-        return ApiResult.fail("模板不存在: " + name, HttpServletResponse.SC_NOT_FOUND);
+        return ApiResult.fail("模板不存在: " + name, 404);
     }
 
     @PostMapping("/apply")
     public ApiResult apply(@RequestBody ApplyTemplateRequest request) {
-        RuleTemplate template = TemplateRegistry.getInstance().getTemplate(request.getTemplateName());
-        if (template == null) {
-            return ApiResult.fail("模板不存在: " + request.getTemplateName(), HttpServletResponse.SC_NOT_FOUND);
-        }
-
-        List<InjectionRule> rules = TemplateEngine.apply(
-                template,
+        TemplateService.ApplyResult result = templateService.applyTemplate(
+                request.getTemplateName(),
                 request.getTargetClass(),
                 request.getTargetMethod(),
                 request.getMethodDesc(),
-                request.getParameters()
-        );
+                request.getParameters());
 
-        java.util.List<Long> createdIds = new java.util.ArrayList<>();
-        for (InjectionRule rule : rules) {
-            long id = RuleManager.getInstance().addRule(rule);
-            createdIds.add(id);
+        if (!result.isSuccess()) {
+            return ApiResult.fail(result.getErrorMessage(), 404);
         }
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("templateName", request.getTemplateName());
-        data.put("targetClass", request.getTargetClass());
-        data.put("targetMethod", request.getTargetMethod());
-        data.put("createdRuleIds", createdIds);
-        data.put("ruleCount", createdIds.size());
-        return ApiResult.ok(data);
+        return ApiResult.ok(new TemplateApplyResultVO(
+                result.getTemplateName(), result.getTargetClass(), result.getTargetMethod(),
+                result.getCreatedIds(), result.getCreatedCount()));
     }
 
     public static class ApplyTemplateRequest {

@@ -13,18 +13,16 @@ public class PluginInfo {
     private final String version;
     private final String author;
     private final String category;
-    private final boolean builtin;
     private volatile PluginState state;
     private final List<String> dependencies;
 
     public PluginInfo(String id, String displayName, String version, String author,
-                      String category, boolean builtin, PluginState state, List<String> dependencies) {
+                      String category, PluginState state, List<String> dependencies) {
         this.id = id;
         this.displayName = displayName;
         this.version = version;
         this.author = author;
         this.category = category;
-        this.builtin = builtin;
         this.state = state;
         this.dependencies = dependencies;
     }
@@ -47,10 +45,6 @@ public class PluginInfo {
 
     public String getCategory() {
         return category;
-    }
-
-    public boolean isBuiltin() {
-        return builtin;
     }
 
     public PluginState getState() {

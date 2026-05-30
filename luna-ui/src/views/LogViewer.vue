@@ -26,13 +26,25 @@
         v-for="(log, index) in logs" 
         :key="index" 
         class="log-line"
-        :class="{ 'snapshot-line': log.type === 'SNAPSHOT' }"
+        :class="{ 
+          'snapshot-line': log.type === 'SNAPSHOT',
+          'trace-line': log.type === 'TRACE',
+          'call-chain-line': log.type === 'CALL_CHAIN'
+        }"
       >
         <template v-if="log.type === 'SNAPSHOT'">
           <span class="log-tag tag-debug">DEBUG</span>
           <span class="log-content snapshot-link" @click="openDebugger(log.data)">
             <i class="fas fa-bug"></i> 触发虚拟断点快照: {{ log.data.pointId }} (点击查看详情)
           </span>
+        </template>
+        <template v-else-if="log.type === 'TRACE'">
+          <span class="log-tag tag-trace">TRACE</span>
+          <span class="log-content trace-content">{{ log.text }}</span>
+        </template>
+        <template v-else-if="log.type === 'CALL_CHAIN'">
+          <span class="log-tag tag-chain">CHAIN</span>
+          <span class="log-content call-chain-content">{{ log.text }}</span>
         </template>
         <template v-else>
           <span class="log-content">{{ log.text }}</span>
@@ -144,16 +156,28 @@ export default {
     appendLog(message) {
       console.log('[Luna] Appending log:', message)
       let logObj = { type: 'TEXT', text: message }
-      
-      // 尝试解析为快照数据
-      if (message.startsWith('{') && message.includes('"type":"SNAPSHOT"')) {
-        try {
-          const data = JSON.parse(message)
-          if (data.type === 'SNAPSHOT') {
-            logObj = { type: 'SNAPSHOT', data: data }
-          }
-        } catch (e) {
-          // 如果不是合法的 JSON，按普通文本处理
+
+      // 尝试解析为 ProbeMessage JSON 格式
+      let parsed = null
+      try {
+        parsed = JSON.parse(message)
+      } catch (e) {
+        parsed = null
+      }
+
+      if (parsed && parsed.type) {
+        // ProbeMessage 格式: { type, payload, timestamp }
+        const msgType = parsed.type // "LOG", "SNAPSHOT", "TRACE", "CALL_CHAIN"
+        if (msgType === 'SNAPSHOT') {
+          logObj = { type: 'SNAPSHOT', data: parsed }
+        } else if (msgType === 'TRACE') {
+          logObj = { type: 'TRACE', text: parsed.payload || message, timestamp: parsed.timestamp }
+        } else if (msgType === 'LOG') {
+          logObj = { type: 'LOG', text: parsed.payload || message, timestamp: parsed.timestamp }
+        } else if (msgType === 'CALL_CHAIN') {
+          logObj = { type: 'CALL_CHAIN', text: parsed.payload || message, timestamp: parsed.timestamp }
+        } else {
+          logObj = { type: msgType, text: parsed.payload || message, timestamp: parsed.timestamp }
         }
       }
 
@@ -365,5 +389,33 @@ export default {
 .snapshot-link i {
   color: var(--accent-primary);
   font-size: 12px;
+}
+
+.trace-line {
+  background-color: rgba(234, 179, 8, 0.05);
+}
+
+.tag-trace {
+  background: linear-gradient(135deg, #eab308 0%, #a16207 100%);
+  color: white;
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.3);
+}
+
+.trace-content {
+  color: #eab308;
+}
+
+.call-chain-line {
+  background-color: rgba(34, 197, 94, 0.05);
+}
+
+.tag-chain {
+  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+  color: white;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+}
+
+.call-chain-content {
+  color: #22c55e;
 }
 </style>

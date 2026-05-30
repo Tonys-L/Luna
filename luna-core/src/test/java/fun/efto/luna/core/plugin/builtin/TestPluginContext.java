@@ -4,12 +4,15 @@ import fun.efto.luna.core.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.buffer.RingBuffer;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.decompile.Decompiler;
+import fun.efto.luna.core.injection.CodeCompilerStrategy;
 import fun.efto.luna.core.injection.code.type.CodeType;
-import fun.efto.luna.core.injection.target.type.InjectionType;
-import fun.efto.luna.core.injector.BytecodeInjector;
+import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.plugin.*;
+import fun.efto.luna.core.rule.template.RuleTemplate;
 
-import java.lang.instrument.Instrumentation;
+import fun.efto.luna.core.injection.port.Retransformer;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,9 @@ public class TestPluginContext implements PluginContext {
     private final List<ExpressionHandler> expressionHandlers = new ArrayList<>();
     private final List<InjectionRuleConverter> ruleConverters = new ArrayList<>();
     private final Map<InjectionType, InjectionRuleConverter> typedRuleConverters = new HashMap<>();
+    private final List<RuleTemplate> templates = new ArrayList<>();
+    private final List<CodeCompilerStrategy> codeCompilerStrategies = new ArrayList<>();
+    private final List<String> bootstrapClasses = new ArrayList<>();
 
     @Override
     public void registerInjectionType(InjectionType type) {
@@ -59,6 +65,21 @@ public class TestPluginContext implements PluginContext {
     }
 
     @Override
+    public void registerTemplate(RuleTemplate template) {
+        templates.add(template);
+    }
+
+    @Override
+    public void registerCodeCompilerStrategy(CodeCompilerStrategy strategy) {
+        codeCompilerStrategies.add(strategy);
+    }
+
+    @Override
+    public void registerBootstrapClass(String internalName) {
+        bootstrapClasses.add(internalName);
+    }
+
+    @Override
     public ClassAnalyzer getClassAnalyzer() { return null; }
 
     @Override
@@ -71,7 +92,7 @@ public class TestPluginContext implements PluginContext {
     public RingBuffer<String> getLogBuffer() { return null; }
 
     @Override
-    public Instrumentation getInstrumentation() { return null; }
+    public Retransformer getRetransformer() { return className -> {}; }
 
     @Override
     public Map<String, String> getPluginConfig() { return new HashMap<>(); }
@@ -85,4 +106,5 @@ public class TestPluginContext implements PluginContext {
     public List<ExpressionHandler> getExpressionHandlers() { return expressionHandlers; }
     public List<InjectionRuleConverter> getRuleConverters() { return ruleConverters; }
     public Map<InjectionType, InjectionRuleConverter> getTypedRuleConverters() { return typedRuleConverters; }
+    public List<RuleTemplate> getTemplates() { return templates; }
 }

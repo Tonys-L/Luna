@@ -50,6 +50,38 @@ test.describe('插件管理页面', () => {
     const searchInput = page.locator('.search-input')
     await expect(searchInput).toBeVisible()
   })
+
+  test('插件配置编辑功能', async ({ page }) => {
+    await page.getByText('插件管理').click()
+    await page.waitForTimeout(1000)
+    const pluginRow = page.locator('.plugin-table tbody tr, .plugin-card').first()
+    if (await pluginRow.count() > 0) {
+      const configBtn = page.locator('.config-btn, [title="配置"]').first()
+      if (await configBtn.count() > 0) {
+        await configBtn.click()
+        await page.waitForTimeout(500)
+        const configDialog = page.locator('.config-dialog, .el-dialog')
+        if (await configDialog.count() > 0) {
+          await expect(configDialog).toBeVisible()
+        }
+      }
+    }
+  })
+
+  test('插件市场搜索功能', async ({ page }) => {
+    await page.getByText('插件管理').click()
+    await page.waitForTimeout(500)
+    const marketBtn = page.locator('.market-btn')
+    if (await marketBtn.count() > 0) {
+      await marketBtn.click()
+      await page.waitForTimeout(500)
+      const searchInput = page.locator('.market-content .search-input input, .market-search input')
+      if (await searchInput.count() > 0) {
+        await searchInput.fill('test')
+        await page.waitForTimeout(1000)
+      }
+    }
+  })
 })
 
 test.describe('注入对话框动态化', () => {

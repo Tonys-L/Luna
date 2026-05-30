@@ -34,4 +34,19 @@ test.describe('Luna 应用 - 线程分析', () => {
     const isVisible = await deadlockAlert.isVisible().catch(() => false)
     expect(typeof isVisible).toBe('boolean')
   })
+
+  test('线程详情点击展示', async ({ page }) => {
+    const refreshBtn = page.locator('.refresh-btn')
+    await refreshBtn.click()
+    await page.waitForTimeout(2000)
+    const threadItem = page.locator('.thread-item, .thread-list-item').first()
+    if (await threadItem.count() > 0) {
+      await threadItem.click()
+      await page.waitForTimeout(1000)
+      const threadDetail = page.locator('.thread-detail, .stack-trace')
+      if (await threadDetail.count() > 0) {
+        await expect(threadDetail).toBeVisible()
+      }
+    }
+  })
 })

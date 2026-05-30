@@ -1,13 +1,18 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.buffer.RingBuffer;
-import fun.efto.luna.core.injection.target.type.InjectionType;
-import fun.efto.luna.core.plugin.InjectionTypeRegistry;
-import fun.efto.luna.core.rule.InjectionRule;
-import fun.efto.luna.core.rule.RuleManager;
-import fun.efto.luna.core.rule.RuleStatus;
+import fun.efto.luna.core.injection.PersistentInjection;
+import fun.efto.luna.core.injection.InjectionManager;
+import fun.efto.luna.core.injection.InjectionStatus;
+import fun.efto.luna.core.injection.port.Retransformer;
+import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.plugin.lifecycle.AffectedClassTracker;
+import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
+import fun.efto.luna.core.plugin.lifecycle.PluginRegistrationRecord;
+import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
+import fun.efto.luna.core.plugin.DefaultLogEmitter;
+import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.rule.template.RuleTemplate;
-import fun.efto.luna.core.rule.template.TemplateRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author : Tony.L(<286269159@qq.com>)
  * @since  : 2026/05/11 22:45
  */
-@DisplayName("æ’ä»¶æž¶æž„é›†æˆæµ‹è¯•")
+@DisplayName("插件架构集成测试")
 public class PluginIntegrationTest {
 
     private PluginManagerImpl pluginManager;
@@ -40,7 +45,7 @@ public class PluginIntegrationTest {
             readyGate,
             new DefaultLogEmitter(),
             new RingBuffer<>(1024),
-            null,
+            (Retransformer) className -> {},
             null,
             null
         );
@@ -53,43 +58,41 @@ public class PluginIntegrationTest {
     }
 
     @Nested
-    @DisplayName("SPI æ‰«æä¸Žåˆå§‹åŒ–")
+    @DisplayName("SPI 扫描与初始化")
     class SpiScanTests {
 
         @Test
-        @DisplayName("5个内置插件通过 initializeAll 正确初始化")
+        @DisplayName("4个插件通过 initializeAll 正确初始化")
         void testBuiltinPluginsInitialization() {
             List<LunaPlugin> builtins = createBuiltinPlugins();
             pluginManager.initializeAll(builtins);
 
             List<PluginInfo> plugins = pluginManager.listPlugins();
-            assertEquals(5, plugins.size());
+            assertEquals(4, plugins.size());
 
             for (PluginInfo info : plugins) {
-                assertTrue(info.isBuiltin());
                 assertEquals(PluginState.ACTIVE, info.getState());
             }
         }
 
         @Test
-        @DisplayName("å†…ç½®æ’ä»¶ä¸å¯å¸è½½")
-        void testBuiltinPluginsCannotUnload() {
+        @DisplayName("插件可正常卸载")
+        void testPluginsCanBeUnloaded() {
             pluginManager.initializeAll(createBuiltinPlugins());
 
             for (PluginInfo info : pluginManager.listPlugins()) {
                 PluginUnloadResult result = pluginManager.unload(info.getId());
-                assertFalse(result.isSuccess());
-                assertTrue(result.getErrorMessage().contains("builtin"));
+                assertTrue(result.isSuccess());
             }
         }
     }
 
     @Nested
-    @DisplayName("Registry åŒå†™éªŒè¯")
+    @DisplayName("Registry 双写校验")
     class DualWriteTests {
 
         @Test
-        @DisplayName("æ’ä»¶æ³¨å†Œ InjectionType æ—¶åŒæ—¶å†™å…?Registry å’?Record")
+        @DisplayName("插件注册 InjectionType 时同时写入 Registry 和 Record")
         void testInjectionTypeDualWrite() {
             final InjectionType testType = InjectionType.of("test-type", "Test Type", "TEST");
             LunaPlugin plugin = new StubPlugin("test-plugin", Collections.emptyList()) {
@@ -101,13 +104,13 @@ public class PluginIntegrationTest {
 
             pluginManager.initializeAll(Arrays.asList(plugin));
 
-            InjectionType resolved = InjectionTypeRegistry.find("test-type").orElse(null);
+            InjectionType resolved = InjectionTypeRegistry.getInstance().get("test-type").orElse(null);
             assertNotNull(resolved, "InjectionType should be registered in Registry");
             assertEquals("test-type", resolved.getName());
 
             PluginRegistrationRecord record = pluginManager.getRecords().get("test-plugin");
             assertNotNull(record);
-            assertTrue(record.injectionTypes.stream().anyMatch(t -> t.getName().equals("test-type")),
+            assertTrue(record.getInjectionTypes().stream().anyMatch(t -> t.getName().equals("test-type")),
                 "InjectionType should be in PluginRegistrationRecord");
         }
 
@@ -115,7 +118,7 @@ public class PluginIntegrationTest {
         @DisplayName("卸载插件后 Registry 中的注册被清除")
         void testRegistryCleanupOnUnload() {
             final InjectionType testType = InjectionType.of("cleanup-type", "Cleanup Type", "CLEANUP");
-            LunaPlugin plugin = new StubPlugin("cleanup-plugin", Collections.emptyList(), false) {
+            LunaPlugin plugin = new StubPlugin("cleanup-plugin", Collections.emptyList()) {
                 @Override
                 public void initialize(PluginContext context) {
                     context.registerInjectionType(testType);
@@ -123,35 +126,35 @@ public class PluginIntegrationTest {
             };
 
             pluginManager.initializeAll(Arrays.asList(plugin));
-            assertNotNull(InjectionTypeRegistry.find("cleanup-type").orElse(null));
+            assertNotNull(InjectionTypeRegistry.getInstance().get("cleanup-type").orElse(null));
 
             PluginUnloadResult result = pluginManager.unload("cleanup-plugin");
             assertTrue(result.isSuccess());
 
-            assertNull(InjectionTypeRegistry.find("cleanup-type").orElse(null),
+            assertNull(InjectionTypeRegistry.getInstance().get("cleanup-type").orElse(null),
                 "InjectionType should be removed from Registry after unload");
         }
     }
 
     @Nested
-    @DisplayName("ReadyGate å¯åŠ¨å±éšœ")
+    @DisplayName("ReadyGate 启动屏障")
     class ReadyGateTests {
 
         @Test
-        @DisplayName("åˆå§‹çŠ¶æ€?isReady è¿”å›ž false")
+        @DisplayName("初始状态 isReady 返回 false")
         void testInitiallyNotReady() {
             assertFalse(readyGate.isReady());
         }
 
         @Test
-        @DisplayName("markReady å?isReady è¿”å›ž true")
+        @DisplayName("markReady 后 isReady 返回 true")
         void testReadyAfterMark() {
             readyGate.markReady();
             assertTrue(readyGate.isReady());
         }
 
         @Test
-        @DisplayName("æ’ä»¶åˆå§‹åŒ–å®ŒæˆåŽåº”è°ƒç”?markReady")
+        @DisplayName("插件初始化完成后应调用 markReady")
         void testMarkReadyAfterInit() {
             pluginManager.initializeAll(createBuiltinPlugins());
             readyGate.markReady();
@@ -160,14 +163,14 @@ public class PluginIntegrationTest {
     }
 
     @Nested
-    @DisplayName("è§„åˆ™æŒ‚èµ·/æ¢å¤æœºåˆ¶")
+    @DisplayName("规则挂起/恢复机制")
     class RuleSuspendResumeTests {
 
         @Test
-        @DisplayName("å¸è½½æ’ä»¶åŽå¼•ç”¨å…¶ InjectionType çš„è§„åˆ™è¢«æŒ‚èµ·")
+        @DisplayName("卸载插件后引用其 InjectionType 的规则被挂起")
         void testRulesSuspendedOnUnload() {
             final InjectionType customType = InjectionType.of("custom-type", "Custom Type", "CUSTOM");
-            LunaPlugin plugin = new StubPlugin("type-provider", Collections.emptyList(), false) {
+            LunaPlugin plugin = new StubPlugin("type-provider", Collections.emptyList()) {
                 @Override
                 public void initialize(PluginContext context) {
                     context.registerInjectionType(customType);
@@ -176,18 +179,20 @@ public class PluginIntegrationTest {
 
             pluginManager.initializeAll(Arrays.asList(plugin));
 
-            InjectionRule rule = new InjectionRule();
-            rule.setInjectionType("custom-type");
-            rule.setStatus(RuleStatus.ACTIVE);
-            RuleManager.getInstance().addRule(rule);
+            PersistentInjection injection = new PersistentInjection();
+            injection.setClazz("com.example.TestService");
+            injection.setMethodName("someMethod");
+            injection.setInjectionType("custom-type");
+            injection.setStatus(InjectionStatus.ACTIVE);
+            InjectionManager.getInstance().addInjection(injection);
 
             PluginUnloadResult result = pluginManager.unload("type-provider");
             assertTrue(result.isSuccess());
             assertFalse(result.getSuspendedRuleIds().isEmpty(),
                 "Should have suspended rules referencing the unloaded plugin's types");
 
-            assertEquals(RuleStatus.SUSPENDED, rule.getStatus());
-            assertNotNull(rule.getSuspendReason());
+            assertEquals(InjectionStatus.SUSPENDED, injection.getStatus());
+            assertNotNull(injection.getSuspendReason());
         }
 
         @Test
@@ -195,7 +200,7 @@ public class PluginIntegrationTest {
         void testRulesResumedOnReload() {
             final InjectionType customType = InjectionType.of("resume-type", "Resume Type", "RESUME");
 
-            LunaPlugin plugin = new StubPlugin("reload-provider", Collections.emptyList(), false) {
+            LunaPlugin plugin = new StubPlugin("reload-provider", Collections.emptyList()) {
                 @Override
                 public void initialize(PluginContext context) {
                     context.registerInjectionType(customType);
@@ -204,15 +209,17 @@ public class PluginIntegrationTest {
 
             pluginManager.initializeAll(Arrays.asList(plugin));
 
-            InjectionRule rule = new InjectionRule();
-            rule.setInjectionType("resume-type");
-            rule.setStatus(RuleStatus.ACTIVE);
-            RuleManager.getInstance().addRule(rule);
+            PersistentInjection injection = new PersistentInjection();
+            injection.setClazz("com.example.ResumeService");
+            injection.setMethodName("resumeMethod");
+            injection.setInjectionType("resume-type");
+            injection.setStatus(InjectionStatus.ACTIVE);
+            InjectionManager.getInstance().addInjection(injection);
 
             pluginManager.unload("reload-provider");
-            assertEquals(RuleStatus.SUSPENDED, rule.getStatus());
+            assertEquals(InjectionStatus.SUSPENDED, injection.getStatus());
 
-            LunaPlugin reloadedPlugin = new StubPlugin("reload-provider", Collections.emptyList(), false) {
+            LunaPlugin reloadedPlugin = new StubPlugin("reload-provider", Collections.emptyList()) {
                 @Override
                 public void initialize(PluginContext context) {
                     context.registerInjectionType(customType);
@@ -220,17 +227,17 @@ public class PluginIntegrationTest {
             };
             pluginManager.initializeAll(Arrays.asList(reloadedPlugin));
 
-            InjectionType resolved = InjectionTypeRegistry.find("resume-type").orElse(null);
+            InjectionType resolved = InjectionTypeRegistry.getInstance().get("resume-type").orElse(null);
             assertNotNull(resolved, "InjectionType should be re-registered");
         }
     }
 
     @Nested
-    @DisplayName("PluginLifecycleListener äº‹ä»¶")
+    @DisplayName("PluginLifecycleListener 事件")
     class LifecycleListenerTests {
 
         @Test
-        @DisplayName("æ’ä»¶åŠ è½½æ—¶è§¦å?onLoaded äº‹ä»¶")
+        @DisplayName("插件加载时触发 onLoaded 事件")
         void testOnLoadedEvent() {
             AtomicBoolean loaded = new AtomicBoolean(false);
             AtomicReference<String> loadedId = new AtomicReference<>();
@@ -257,7 +264,7 @@ public class PluginIntegrationTest {
         }
 
         @Test
-        @DisplayName("æ’ä»¶å¸è½½æ—¶è§¦å?onUnloaded äº‹ä»¶")
+        @DisplayName("插件卸载时触发 onUnloaded 事件")
         void testOnUnloadedEvent() {
             AtomicBoolean unloaded = new AtomicBoolean(false);
             AtomicReference<String> unloadedId = new AtomicReference<>();
@@ -276,7 +283,7 @@ public class PluginIntegrationTest {
                 @Override public void onEnabled(PluginInfo info) {}
             });
 
-            LunaPlugin plugin = new StubPlugin("unload-event-plugin", Collections.emptyList(), false);
+            LunaPlugin plugin = new StubPlugin("unload-event-plugin", Collections.emptyList());
             pluginManager.initializeAll(Arrays.asList(plugin));
             pluginManager.unload("unload-event-plugin");
 
@@ -286,7 +293,7 @@ public class PluginIntegrationTest {
     }
 
     @Nested
-    @DisplayName("ä¾èµ–æŽ’åº")
+    @DisplayName("依赖排序")
     class DependencySortTests {
 
         @Test
@@ -327,37 +334,20 @@ public class PluginIntegrationTest {
 
     private List<LunaPlugin> createBuiltinPlugins() {
         List<LunaPlugin> plugins = new ArrayList<>();
-        plugins.add(new StubPlugin("method-injection", Collections.emptyList()) {
-            @Override public boolean isBuiltin() { return true; }
-        });
-        plugins.add(new StubPlugin("line-injection", Collections.emptyList()) {
-            @Override public boolean isBuiltin() { return true; }
-        });
-        plugins.add(new StubPlugin("log", Collections.emptyList()) {
-            @Override public boolean isBuiltin() { return true; }
-        });
-        plugins.add(new StubPlugin("snapshot", Collections.emptyList()) {
-            @Override public boolean isBuiltin() { return true; }
-        });
-        plugins.add(new StubPlugin("trace", Collections.emptyList()) {
-            @Override public boolean isBuiltin() { return true; }
-        });
+        plugins.add(new StubPlugin("log", Collections.emptyList()));
+        plugins.add(new StubPlugin("snapshot", Collections.emptyList()));
+        plugins.add(new StubPlugin("trace", Collections.emptyList()));
+        plugins.add(new StubPlugin("conditional-breakpoint", Collections.emptyList()));
         return plugins;
     }
 
     private static class StubPlugin implements LunaPlugin {
         private final String id;
         private final List<String> dependencies;
-        private final boolean builtin;
 
         StubPlugin(String id, List<String> dependencies) {
-            this(id, dependencies, true);
-        }
-
-        StubPlugin(String id, List<String> dependencies, boolean builtin) {
             this.id = id;
             this.dependencies = dependencies;
-            this.builtin = builtin;
         }
 
         @Override public String getId() { return id; }
@@ -369,7 +359,5 @@ public class PluginIntegrationTest {
         @Override public void initialize(PluginContext context) {}
         @Override public void destroy() {}
         @Override public void getControllers(List<LunaController> controllers) {}
-        @Override public void getTemplates(List<RuleTemplate> templates) {}
-        @Override public boolean isBuiltin() { return builtin; }
     }
 }

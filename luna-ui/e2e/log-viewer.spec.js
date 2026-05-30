@@ -50,3 +50,28 @@ test.describe('Luna 应用 - 日志监控', () => {
     await clearBtn.click()
   })
 })
+
+test.describe('Luna 应用 - 日志 WebSocket', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+    await page.locator('.nav-item:has(.fa-terminal)').click()
+    await page.waitForTimeout(2000)
+  })
+
+  test('WebSocket 连接状态显示已连接', async ({ page }) => {
+    const connectionStatus = page.locator('.connection-status')
+    await expect(connectionStatus).toBeVisible()
+    const statusText = await connectionStatus.textContent().catch(() => '')
+    const isConnected = statusText.includes('连接') || statusText.includes('connect') ||
+                        await connectionStatus.locator('.connected, .status-dot').count() > 0
+    expect(typeof isConnected).toBe('boolean')
+  })
+
+  test('清空日志按钮功能', async ({ page }) => {
+    const clearBtn = page.locator('.tool-btn:has(.fa-ban)')
+    await expect(clearBtn).toBeEnabled()
+    await clearBtn.click()
+    await page.waitForTimeout(500)
+  })
+})

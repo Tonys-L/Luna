@@ -1,6 +1,6 @@
 package fun.efto.luna.core.analyzer;
 
-import fun.efto.luna.core.Registry;
+import fun.efto.luna.core.type.Registry;
 
 import java.util.Map;
 import java.util.Optional;

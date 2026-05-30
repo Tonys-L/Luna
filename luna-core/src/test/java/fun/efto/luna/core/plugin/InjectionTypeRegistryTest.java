@@ -1,6 +1,7 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.injection.target.type.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,7 @@ public class InjectionTypeRegistryTest {
 
     @AfterEach
     void tearDown() {
-        InjectionTypeRegistry.clear();
+        InjectionTypeRegistry.getInstance().clear();
     }
 
     @Test
@@ -35,13 +36,13 @@ public class InjectionTypeRegistryTest {
             }
         };
 
-        InjectionTypeRegistry.register(type);
-        assertSame(type, InjectionTypeRegistry.resolve("method_enter"));
+        InjectionTypeRegistry.getInstance().register(type);
+        assertSame(type, InjectionTypeRegistry.getInstance().resolve("method_enter"));
     }
 
     @Test
     void testResolveUnknown() {
-        assertThrows(IllegalArgumentException.class, () -> InjectionTypeRegistry.resolve("unknown"));
+        assertThrows(IllegalArgumentException.class, () -> InjectionTypeRegistry.getInstance().resolve("unknown"));
     }
 
     @Test
@@ -63,9 +64,9 @@ public class InjectionTypeRegistryTest {
             }
         };
 
-        InjectionTypeRegistry.register(type);
-        assertSame(type, InjectionTypeRegistry.resolve("enter"));
-        assertSame(type, InjectionTypeRegistry.resolve("ENTER"));
+        InjectionTypeRegistry.getInstance().register(type);
+        assertSame(type, InjectionTypeRegistry.getInstance().resolve("enter"));
+        assertSame(type, InjectionTypeRegistry.getInstance().resolve("ENTER"));
     }
 
     @Test
@@ -82,8 +83,8 @@ public class InjectionTypeRegistryTest {
             }
         };
 
-        InjectionTypeRegistry.register(type);
-        InjectionTypeRegistry.unregisterAll(Collections.singletonList(type));
-        assertThrows(IllegalArgumentException.class, () -> InjectionTypeRegistry.resolve("method_enter"));
+        InjectionTypeRegistry.getInstance().register(type);
+        InjectionTypeRegistry.getInstance().unregisterAll(Collections.singletonList(type));
+        assertThrows(IllegalArgumentException.class, () -> InjectionTypeRegistry.getInstance().resolve("method_enter"));
     }
 }

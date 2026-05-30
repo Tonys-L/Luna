@@ -1,20 +1,17 @@
 package fun.efto.luna.agent.web.controller;
 
-import fun.efto.luna.agent.web.mvc.ApiResult;
-import fun.efto.luna.agent.web.mvc.Controller;
-import fun.efto.luna.agent.web.mvc.DeleteMapping;
-import fun.efto.luna.agent.web.mvc.GetMapping;
-import fun.efto.luna.agent.web.mvc.PathVariable;
-import fun.efto.luna.agent.web.mvc.PostMapping;
-import fun.efto.luna.agent.web.mvc.PutMapping;
-import fun.efto.luna.agent.web.mvc.RequestBody;
-import fun.efto.luna.agent.web.mvc.RequestMapping;
+import fun.efto.luna.agent.web.vo.RuleOperationVO;
+import fun.efto.luna.core.web.ApiResult;
+import fun.efto.luna.core.web.Controller;
+import fun.efto.luna.core.web.DeleteMapping;
+import fun.efto.luna.core.web.GetMapping;
+import fun.efto.luna.core.web.PathVariable;
+import fun.efto.luna.core.web.PostMapping;
+import fun.efto.luna.core.web.PutMapping;
+import fun.efto.luna.core.web.RequestBody;
+import fun.efto.luna.core.web.RequestMapping;
 import fun.efto.luna.core.rule.InjectionRule;
 import fun.efto.luna.core.rule.RuleManager;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author : Tony.L(<286269159@qq.com>)
@@ -24,42 +21,41 @@ import java.util.Map;
 @RequestMapping("/rules")
 public class RuleController {
 
+    private final RuleManager ruleManager;
+
+    public RuleController(RuleManager ruleManager) {
+        this.ruleManager = ruleManager;
+    }
+
     @GetMapping
     public ApiResult list() {
-        return ApiResult.ok(RuleManager.getInstance().getRules());
+        return ApiResult.ok(ruleManager.getRules());
     }
 
     @GetMapping("/{id}")
     public ApiResult get(@PathVariable("id") long id) {
-        InjectionRule rule = RuleManager.getInstance().getRule(id);
+        InjectionRule rule = ruleManager.getRule(id);
         if (rule != null) {
             return ApiResult.ok(rule);
         }
-        return ApiResult.fail("规则不存在", HttpServletResponse.SC_NOT_FOUND);
+        return ApiResult.fail("规则不存在", 404);
     }
 
     @PostMapping
     public ApiResult create(@RequestBody InjectionRule rule) {
-        long id = RuleManager.getInstance().addRule(rule);
-        Map<String, Object> data = new HashMap<>();
-        data.put("success", true);
-        data.put("id", id);
-        return ApiResult.ok(data);
+        long id = ruleManager.addRule(rule);
+        return ApiResult.ok(RuleOperationVO.successWithId(id));
     }
 
     @PutMapping("/{id}")
     public ApiResult update(@PathVariable("id") long id, @RequestBody InjectionRule rule) {
-        RuleManager.getInstance().updateRule(id, rule);
-        Map<String, Object> data = new HashMap<>();
-        data.put("success", true);
-        return ApiResult.ok(data);
+        ruleManager.updateRule(id, rule);
+        return ApiResult.ok(RuleOperationVO.success());
     }
 
     @DeleteMapping("/{id}")
     public ApiResult delete(@PathVariable("id") long id) {
-        RuleManager.getInstance().deleteRule(id);
-        Map<String, Object> data = new HashMap<>();
-        data.put("success", true);
-        return ApiResult.ok(data);
+        ruleManager.deleteRule(id);
+        return ApiResult.ok(RuleOperationVO.success());
     }
 }

@@ -1,7 +1,10 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.injection.InjectionPoint;
-import fun.efto.luna.core.injection.target.type.InjectionType;
+import fun.efto.luna.core.injection.PersistentInjection;
+import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
+import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import fun.efto.luna.core.rule.InjectionRule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +23,8 @@ public class RuleConverterRegistryTest {
 
     @AfterEach
     void tearDown() {
-        RuleConverterRegistry.clear();
-        InjectionTypeRegistry.clear();
+        RuleConverterRegistry.getInstance().clear();
+        InjectionTypeRegistry.getInstance().clear();
     }
 
     @Test
@@ -42,13 +45,13 @@ public class RuleConverterRegistryTest {
 
         InjectionRuleConverter converter = rule -> expectedPoint;
 
-        InjectionTypeRegistry.register(type);
-        RuleConverterRegistry.register(type, converter);
+        InjectionTypeRegistry.getInstance().register(type);
+        RuleConverterRegistry.getInstance().register(type, converter);
 
-        InjectionRule rule = new InjectionRule();
-        rule.setInjectionType("method_enter");
+        PersistentInjection injection = new PersistentInjection();
+        injection.setInjectionType("method_enter");
 
-        InjectionPoint result = RuleConverterRegistry.convert(rule);
+        InjectionPoint result = RuleConverterRegistry.getInstance().convert(injection);
         assertSame(expectedPoint, result);
     }
 
@@ -66,11 +69,11 @@ public class RuleConverterRegistryTest {
             }
         };
 
-        InjectionTypeRegistry.register(type);
+        InjectionTypeRegistry.getInstance().register(type);
 
-        InjectionRule rule = new InjectionRule();
-        rule.setInjectionType("method_enter");
+        PersistentInjection injection = new PersistentInjection();
+        injection.setInjectionType("method_enter");
 
-        assertThrows(IllegalStateException.class, () -> RuleConverterRegistry.convert(rule));
+        assertThrows(IllegalStateException.class, () -> RuleConverterRegistry.getInstance().convert(injection));
     }
 }

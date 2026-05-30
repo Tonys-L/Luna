@@ -104,3 +104,40 @@ test.describe('Luna 应用 - 类树浏览器', () => {
     await expect(injectFilterBtn).toHaveClass(/active/)
   })
 })
+
+test.describe('Luna 应用 - 类详情交互', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(2000)
+    const expandBtn = page.locator('.toolbar-button:has(.fa-folder-open)')
+    await expandBtn.click()
+    await page.waitForTimeout(2000)
+    const classNode = page.locator('.el-tree-node .node-icon .fa-file-code').first()
+    if (await classNode.count() > 0) {
+      await classNode.click()
+      await page.waitForTimeout(3000)
+    }
+  })
+
+  test('反编译代码在编辑器中显示', async ({ page }) => {
+    const editor = page.locator('.monaco-editor, .class-detail')
+    if (await editor.count() > 0) {
+      await expect(editor.first()).toBeVisible()
+    }
+  })
+
+  test('方法大纲面板显示', async ({ page }) => {
+    const outline = page.locator('.class-outline, .outline-panel')
+    if (await outline.count() > 0) {
+      await expect(outline).toBeVisible()
+    }
+  })
+
+  test('注入点标记可见（如有注入）', async ({ page }) => {
+    const glyphMargin = page.locator('.glyph-margin, .margin-view-overlays')
+    if (await glyphMargin.count() > 0) {
+      await expect(glyphMargin.first()).toBeVisible()
+    }
+  })
+})

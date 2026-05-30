@@ -42,4 +42,13 @@ public enum CodeType {
     public String toString() {
         return name;
     }
+
+    public static CodeType fromName(String name) {
+        for (CodeType ct : values()) {
+            if (ct.name.equalsIgnoreCase(name)) {
+                return ct;
+            }
+        }
+        throw new IllegalArgumentException("Unknown CodeType: " + name);
+    }
 }

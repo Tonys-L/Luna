@@ -1,6 +1,6 @@
 package fun.efto.luna.core.decompile;
 
-import fun.efto.luna.core.InstrumentationHolder;
+import fun.efto.luna.core.instrument.InstrumentationHolder;
 import org.benf.cfr.reader.api.CfrDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

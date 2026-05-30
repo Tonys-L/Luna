@@ -1,8 +1,5 @@
 package fun.efto.luna.core.type;
 
-import fun.efto.luna.core.Registry;
-import fun.efto.luna.core.TypeRegistry;
-
 /**
  * @author ：Tony.L(286269159@qq.com)
  * @since ：2026/01/25

@@ -1,6 +1,6 @@
 package fun.efto.luna.core.spy;
 
-import fun.efto.luna.core.buffer.RingBuffer;
+import fun.efto.luna.core.probe.ProbeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,12 +28,13 @@ public class LunaSpyTraceTest {
 
         LunaSpy.onTraceEnd("com.example.Service", "doWork", 0);
 
-        List<String> messages = drainBuffer();
+        List<ProbeMessage> messages = drainBuffer();
         assertEquals(1, messages.size());
-        assertTrue(messages.get(0).startsWith("[TRACE]"));
-        assertTrue(messages.get(0).contains("com.example.Service.doWork"));
-        assertTrue(messages.get(0).contains("took"));
-        assertTrue(messages.get(0).contains("ms"));
+        assertEquals("TRACE", messages.get(0).getType());
+        assertTrue(messages.get(0).getPayload().startsWith("[TRACE]"));
+        assertTrue(messages.get(0).getPayload().contains("com.example.Service.doWork"));
+        assertTrue(messages.get(0).getPayload().contains("took"));
+        assertTrue(messages.get(0).getPayload().contains("ms"));
     }
 
     @Test
@@ -42,7 +43,7 @@ public class LunaSpyTraceTest {
 
         LunaSpy.onTraceEnd("com.example.Service", "fastMethod", 10000);
 
-        List<String> messages = drainBuffer();
+        List<ProbeMessage> messages = drainBuffer();
         assertTrue(messages.isEmpty());
     }
 
@@ -54,7 +55,7 @@ public class LunaSpyTraceTest {
 
         LunaSpy.onTraceEnd("com.example.Service", "slowMethod", 0);
 
-        List<String> messages = drainBuffer();
+        List<ProbeMessage> messages = drainBuffer();
         assertEquals(1, messages.size());
     }
 
@@ -62,7 +63,7 @@ public class LunaSpyTraceTest {
     void testTraceEndWithoutStart() {
         LunaSpy.onTraceEnd("com.example.Service", "doWork", 0);
 
-        List<String> messages = drainBuffer();
+        List<ProbeMessage> messages = drainBuffer();
         assertTrue(messages.isEmpty());
     }
 
@@ -72,7 +73,7 @@ public class LunaSpyTraceTest {
 
         LunaSpy.onTraceAlert("com.example.Service", "fastMethod", 10000);
 
-        List<String> messages = drainBuffer();
+        List<ProbeMessage> messages = drainBuffer();
         assertTrue(messages.isEmpty());
     }
 
@@ -86,24 +87,23 @@ public class LunaSpyTraceTest {
 
         LunaSpy.onTraceAlert("com.example.Service", "slowMethod", 0);
 
-        List<String> messages = drainBuffer();
+        List<ProbeMessage> messages = drainBuffer();
         assertEquals(1, messages.size());
-        assertTrue(messages.get(0).startsWith("[SLOW]"));
-        assertTrue(messages.get(0).contains("threshold"));
+        assertEquals("TRACE", messages.get(0).getType());
+        assertTrue(messages.get(0).getPayload().startsWith("[SLOW]"));
+        assertTrue(messages.get(0).getPayload().contains("threshold"));
     }
 
     @Test
     void testTraceAlertWithoutStart() {
         LunaSpy.onTraceAlert("com.example.Service", "doWork", 100);
 
-        List<String> messages = drainBuffer();
+        List<ProbeMessage> messages = drainBuffer();
         assertTrue(messages.isEmpty());
     }
 
     @Test
     void testTraceThreadIsolation() throws InterruptedException {
-        List<String> allMessages = new ArrayList<>();
-
         Thread t1 = new Thread(() -> {
             LunaSpy.onTraceStart();
             simulateWork();
@@ -122,7 +122,7 @@ public class LunaSpyTraceTest {
         t1.join();
         t2.join();
 
-        List<String> messages = drainBuffer();
+        List<ProbeMessage> messages = drainBuffer();
         assertEquals(2, messages.size());
     }
 
@@ -133,9 +133,9 @@ public class LunaSpyTraceTest {
         }
     }
 
-    private List<String> drainBuffer() {
-        List<String> messages = new ArrayList<>();
-        String msg;
+    private List<ProbeMessage> drainBuffer() {
+        List<ProbeMessage> messages = new ArrayList<>();
+        ProbeMessage msg;
         while ((msg = LunaSpy.LOG_BUFFER.poll()) != null) {
             messages.add(msg);
         }

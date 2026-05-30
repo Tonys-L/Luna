@@ -16,8 +16,17 @@ public class InjectionRule {
     private String logContent;
     private String codeType;
     private boolean enabled = true;
+    private String groupId;
     private RuleStatus status = RuleStatus.ACTIVE;
     private String suspendReason;
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
 
     public long getId() {
         return id;

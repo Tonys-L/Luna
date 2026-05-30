@@ -1,5 +1,7 @@
 package fun.efto.luna.core.injection;
 
+import fun.efto.luna.core.injection.port.InjectionStore;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -92,5 +94,32 @@ public class InjectionPointRegistry {
     public int getInjectionCount(String className) {
         List<InjectionPoint> points = registry.get(className);
         return points != null ? points.size() : 0;
+    }
+
+    /**
+     * 将自身适配为 InjectionStore（向后兼容）
+     */
+    public InjectionStore asInjectionStore() {
+        return new InjectionStore() {
+            @Override
+            public void save(InjectionPoint point) {
+                InjectionPointRegistry.this.register(point);
+            }
+
+            @Override
+            public void clear(String className) {
+                InjectionPointRegistry.this.clear(className);
+            }
+
+            @Override
+            public List<InjectionPoint> findByClassName(String className) {
+                return InjectionPointRegistry.this.getAllInjectionPoints(className);
+            }
+
+            @Override
+            public int countByClassName(String className) {
+                return InjectionPointRegistry.this.getInjectionCount(className);
+            }
+        };
     }
 }

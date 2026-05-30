@@ -1,6 +1,7 @@
 package fun.efto.luna.core.analyzer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,6 +18,7 @@ public class ClassAnalysisResult {
     private final String superClass;
     private final List<String> interfaces;
     private final int accessFlags;
+    private List<AnnotationInfo> classAnnotations = Collections.emptyList();
 
     public ClassAnalysisResult(String className, List<FieldInfo> fields, List<MethodInfo> methods,
                                String superClass, List<String> interfaces, int accessFlags) {
@@ -52,6 +54,14 @@ public class ClassAnalysisResult {
         return accessFlags;
     }
 
+    public List<AnnotationInfo> getClassAnnotations() {
+        return classAnnotations;
+    }
+
+    public void setClassAnnotations(List<AnnotationInfo> classAnnotations) {
+        this.classAnnotations = classAnnotations;
+    }
+
     public static class FieldInfo {
         private final String name;
         private final String descriptor;
@@ -82,6 +92,8 @@ public class ClassAnalysisResult {
         private final int accessFlags;
         private final List<ParameterInfo> parameters;
         private final List<LocalVariableInfo> localVariables;
+        private List<AnnotationInfo> annotations = Collections.emptyList();
+        private List<ExceptionTableEntry> exceptionTable = Collections.emptyList();
 
         public MethodInfo(String name, String descriptor, int accessFlags,
                           List<ParameterInfo> parameters, List<LocalVariableInfo> localVariables) {
@@ -111,6 +123,12 @@ public class ClassAnalysisResult {
         public List<LocalVariableInfo> getLocalVariables() {
             return new ArrayList<>(localVariables);
         }
+
+        public List<AnnotationInfo> getAnnotations() { return annotations; }
+        public void setAnnotations(List<AnnotationInfo> annotations) { this.annotations = annotations; }
+
+        public List<ExceptionTableEntry> getExceptionTable() { return exceptionTable; }
+        public void setExceptionTable(List<ExceptionTableEntry> exceptionTable) { this.exceptionTable = exceptionTable; }
     }
 
     public static class ParameterInfo {

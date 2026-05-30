@@ -20,20 +20,49 @@ import java.util.List;
 
 public abstract class ByteKitInjectorBase implements BytecodeInjector {
 
+    private volatile List<InterceptorProcessor> cachedProcessors;
+    private volatile InjectionCacheEntry injectionCache;
+
+    private static class InjectionCacheEntry {
+        final byte[] inputBytecode;
+        final byte[] outputBytecode;
+        final String methodName;
+        final String methodDesc;
+
+        InjectionCacheEntry(byte[] inputBytecode, byte[] outputBytecode, String methodName, String methodDesc) {
+            this.inputBytecode = inputBytecode;
+            this.outputBytecode = outputBytecode;
+            this.methodName = methodName;
+            this.methodDesc = methodDesc;
+        }
+
+        boolean matches(byte[] bytecode, String name, String desc) {
+            return inputBytecode == bytecode
+                    && methodName.equals(name)
+                    && methodDesc.equals(desc);
+        }
+    }
+
     @Override
     public byte[] inject(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
-        AsmInjectionContext asmContext = new AsmInjectionContext(injectionContext, bytecode);
-
         String targetMethodName = injectionContext.getInjectionTarget().getMethodName();
         String targetMethodDesc = injectionContext.getInjectionTarget().getMethodDescriptor();
 
+        InjectionCacheEntry entry = injectionCache;
+        if (entry != null && entry.matches(bytecode, targetMethodName, targetMethodDesc)) {
+            return entry.outputBytecode;
+        }
+
+        AsmInjectionContext asmContext = new AsmInjectionContext(injectionContext, bytecode);
+
         ClassNode classNode = new ClassNode(Opcodes.ASM9);
-        new ClassReader(bytecode).accept(classNode, ClassReader.SKIP_FRAMES);
+        ClassReader classReader = new ClassReader(bytecode);
+        classReader.accept(classNode, ClassReader.SKIP_FRAMES);
 
         for (MethodNode methodNode : classNode.methods) {
             if (shouldProcessMethod(methodNode, targetMethodName, targetMethodDesc)) {
                 MethodProcessor methodProcessor = new MethodProcessor(classNode, methodNode);
-                List<InterceptorProcessor> processors = createInterceptorProcessors(methodProcessor, asmContext);
+                List<InterceptorProcessor> processors = resolveProcessors(methodProcessor, asmContext);
                 for (InterceptorProcessor processor : processors) {
                     try {
                         processor.process(methodProcessor);
@@ -45,9 +74,27 @@ public abstract class ByteKitInjectorBase implements BytecodeInjector {
         }
 
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        ByteKitClassLoaderAwareClassWriter cw = new ByteKitClassLoaderAwareClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES, loader);
+        ByteKitClassLoaderAwareClassWriter cw = new ByteKitClassLoaderAwareClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES, loader);
         classNode.accept(cw);
-        return cw.toByteArray();
+        byte[] result = cw.toByteArray();
+
+        injectionCache = new InjectionCacheEntry(bytecode, result, targetMethodName, targetMethodDesc);
+
+        return result;
+    }
+
+    private List<InterceptorProcessor> resolveProcessors(MethodProcessor methodProcessor, AsmInjectionContext context) {
+        List<InterceptorProcessor> processors = cachedProcessors;
+        if (processors == null) {
+            synchronized (this) {
+                processors = cachedProcessors;
+                if (processors == null) {
+                    processors = createInterceptorProcessors(methodProcessor, context);
+                    cachedProcessors = processors;
+                }
+            }
+        }
+        return processors;
     }
 
     protected boolean shouldProcessMethod(MethodNode methodNode, String targetMethodName, String targetMethodDesc) {

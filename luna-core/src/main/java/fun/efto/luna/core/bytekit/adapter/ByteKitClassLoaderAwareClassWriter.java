@@ -4,9 +4,14 @@
  */
 package fun.efto.luna.core.bytekit.adapter;
 
+import com.alibaba.deps.org.objectweb.asm.ClassReader;
 import com.alibaba.deps.org.objectweb.asm.ClassWriter;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ByteKitClassLoaderAwareClassWriter extends ClassWriter {
+
+    private static final ConcurrentHashMap<String, String> SUPER_CLASS_CACHE = new ConcurrentHashMap<>();
 
     private final ClassLoader targetClassLoader;
 
@@ -15,8 +20,25 @@ public class ByteKitClassLoaderAwareClassWriter extends ClassWriter {
         this.targetClassLoader = targetClassLoader != null ? targetClassLoader : ClassLoader.getSystemClassLoader();
     }
 
+    public ByteKitClassLoaderAwareClassWriter(ClassReader classReader, int flags, ClassLoader targetClassLoader) {
+        super(classReader, flags);
+        this.targetClassLoader = targetClassLoader != null ? targetClassLoader : ClassLoader.getSystemClassLoader();
+    }
+
     @Override
     protected String getCommonSuperClass(String type1, String type2) {
+        String cacheKey = type1 + "|" + type2;
+        String cached = SUPER_CLASS_CACHE.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
+        String result = computeCommonSuperClass(type1, type2);
+        SUPER_CLASS_CACHE.put(cacheKey, result);
+        return result;
+    }
+
+    private String computeCommonSuperClass(String type1, String type2) {
         try {
             Class<?> class1 = Class.forName(type1.replace('/', '.'), false, targetClassLoader);
             Class<?> class2 = Class.forName(type2.replace('/', '.'), false, targetClassLoader);

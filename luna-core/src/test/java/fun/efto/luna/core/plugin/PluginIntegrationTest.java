@@ -13,7 +13,7 @@ import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
 import fun.efto.luna.core.plugin.DefaultLogEmitter;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.probe.ProbeOutput;
-import fun.efto.luna.core.rule.template.RuleTemplate;
+import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,4 +1,4 @@
-package fun.efto.luna.core.rule.template;
+package fun.efto.luna.core.injection.rule.template;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

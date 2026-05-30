@@ -6,7 +6,7 @@ import fun.efto.luna.core.injection.CodeCompilerStrategy;
 import fun.efto.luna.core.injection.target.InjectionType;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.plugin.*;
-import fun.efto.luna.core.rule.template.RuleTemplate;
+import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 

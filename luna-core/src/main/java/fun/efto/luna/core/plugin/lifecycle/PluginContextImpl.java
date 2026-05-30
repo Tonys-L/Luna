@@ -17,8 +17,8 @@ import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
-import fun.efto.luna.core.rule.template.RuleTemplate;
-import fun.efto.luna.core.rule.template.TemplateRegistry;
+import fun.efto.luna.core.injection.rule.template.RuleTemplate;
+import fun.efto.luna.core.injection.rule.template.TemplateRegistry;
 
 import fun.efto.luna.core.injection.port.Retransformer;
 

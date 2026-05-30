@@ -1,7 +1,7 @@
 package fun.efto.luna.core.plugin.builtin.trace;
 
 import fun.efto.luna.core.plugin.*;
-import fun.efto.luna.core.rule.template.RuleTemplate;
+import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 
 import java.util.Arrays;
 import java.util.List;

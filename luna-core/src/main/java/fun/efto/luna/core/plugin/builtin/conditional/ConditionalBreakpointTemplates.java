@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.builtin.conditional;
 
-import fun.efto.luna.core.rule.template.RuleTemplate;
+import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 
 import java.util.Arrays;
 

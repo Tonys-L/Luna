@@ -1,4 +1,4 @@
-package fun.efto.luna.core.rule;
+package fun.efto.luna.core.injection.rule;
 
 /**
  * 注入规则

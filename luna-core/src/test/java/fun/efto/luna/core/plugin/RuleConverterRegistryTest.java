@@ -5,7 +5,7 @@ import fun.efto.luna.core.injection.PersistentInjection;
 import fun.efto.luna.core.injection.target.InjectionType;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
-import fun.efto.luna.core.rule.InjectionRule;
+import fun.efto.luna.core.injection.rule.InjectionRule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

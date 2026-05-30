@@ -8,7 +8,7 @@ import fun.efto.luna.core.injection.target.LineNumberTarget;
 import fun.efto.luna.core.plugin.builtin.AbstractRuleConverter;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.injection.PersistentInjection;
-import fun.efto.luna.core.rule.InjectionRule;
+import fun.efto.luna.core.injection.rule.InjectionRule;
 
 /**
  * @author : Tony.L(286269159@qq.com)

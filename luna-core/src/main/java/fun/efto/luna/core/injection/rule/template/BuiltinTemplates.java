@@ -1,4 +1,4 @@
-package fun.efto.luna.core.rule.template;
+package fun.efto.luna.core.injection.rule.template;
 
 import java.util.Arrays;
 import java.util.List;

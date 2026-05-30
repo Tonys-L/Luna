@@ -4,8 +4,8 @@ import fun.efto.luna.core.injection.target.InjectionType;
 import fun.efto.luna.core.plugin.ExpressionHandler;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
-import fun.efto.luna.core.rule.template.RuleTemplate;
-import fun.efto.luna.core.rule.template.TemplateRegistry;
+import fun.efto.luna.core.injection.rule.template.RuleTemplate;
+import fun.efto.luna.core.injection.rule.template.TemplateRegistry;
 
 import java.util.*;
 

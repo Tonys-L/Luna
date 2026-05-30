@@ -1,4 +1,4 @@
-package fun.efto.luna.core.rule;
+package fun.efto.luna.core.injection.rule;
 
 import com.alibaba.fastjson.JSON;
 import java.nio.charset.StandardCharsets;

@@ -7,7 +7,7 @@ import fun.efto.luna.core.plugin.PluginManager;
 import fun.efto.luna.core.plugin.PluginState;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
-import fun.efto.luna.core.rule.template.TemplateRegistry;
+import fun.efto.luna.core.injection.rule.template.TemplateRegistry;
 import fun.efto.luna.core.infra.web.ApiResult;
 import fun.efto.luna.core.infra.web.Controller;
 import fun.efto.luna.core.infra.web.GetMapping;

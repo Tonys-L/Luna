@@ -1,6 +1,6 @@
-package fun.efto.luna.core.rule.template;
+package fun.efto.luna.core.injection.rule.template;
 
-import fun.efto.luna.core.rule.InjectionRule;
+import fun.efto.luna.core.injection.rule.InjectionRule;
 
 import java.util.ArrayList;
 import java.util.HashMap;

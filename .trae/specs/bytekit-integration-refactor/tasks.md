@@ -252,36 +252,47 @@
 
 ---
 
-## Phase 3: 表达式引擎集成 ⚠️ 延后（medium 优先级）
+## Phase 3: 表达式引擎集成 ✅
 
-### Task 3.1: log: 表达式通过 ByteKit 注入
+### Task 3.1: log: 表达式通过 ByteKit 注入 ✅
 
-- [ ] RED: 编写 `ByteKitLogExpressionTest`
-  - 测试：`log:$name` 表达式通过 ByteKit ENTER 注入后，反射调用目标方法时输出日志
-  - → 预期：编译失败或测试失败
+- [x] RED: 编写 `ByteKitLogExpressionTest`
+  - 测试：`log:hello` 表达式通过 ByteKit ENTER 注入后，反射调用目标方法时输出日志
+  - 测试：`log:hello $1` 表达式通过 ByteKit ENTER 注入后，日志包含参数值
+  - 测试：`log:done` 表达式通过 ByteKit EXIT 注入后，反射调用目标方法时输出日志
+  - → 实际结果：3/3 测试失败（ByteKitInjectorBase 忽略 bytecodeAssembler 参数）
 
-- [ ] GREEN: 在 `ByteKitInjectorBase` 中集成 `ExpressionBytecodeAssembler`
-  - Interceptor 回调方法体中，根据表达式协议生成探针调用代码
-  - 条件判断在回调内部执行
+- [x] GREEN: 创建 `AsmMethodExpressionInjector` + 修改 `ByteKitInjectorBase`
+  - 创建 `fun.efto.luna.core.bytekit.adapter.AsmMethodExpressionInjector`
+    - 实现 `BytecodeInjector` 接口
+    - 支持 Phase.ENTER / EXIT / AROUND
+    - 使用 ASM Tree API + `TreeApiBytecodeHelper.assemble()` 生成表达式字节码
+    - ENTER 阶段仅扫描方法参数（避免加载未初始化的局部变量）
+    - EXIT 阶段扫描所有可见局部变量
+  - 修改 `ByteKitInjectorBase.inject()`：
+    - 检测 `bytecodeAssembler instanceof ExpressionBytecodeAssembler`
+    - 有表达式时委托给 `AsmMethodExpressionInjector`
+    - 无表达式时使用 ByteKit 原有路径
+  - 修改 `ByteKitExitInjector` / `ByteKitAroundInjector` 覆盖 `getExpressionPhase()`
 
-- [ ] REFACTOR: 提取表达式生成逻辑
+- [x] REFACTOR: 无需重构
 
-- [ ] COMMIT: `feat: log: 表达式通过 ByteKit 注入`
+- [x] COMMIT: `feat: log expression through ByteKit injection - AsmMethodExpressionInjector hybrid strategy` (edd20d2)
 
-### Task 3.2: snapshot: 表达式通过 ByteKit 注入
+### Task 3.2: snapshot: 表达式通过 ByteKit 注入 ✅
 
-- [ ] RED: 编写 `ByteKitSnapshotExpressionTest`
-  - 测试：`snapshot:` 表达式通过 ByteKit 注入后，可正确捕获局部变量
-  - → 预期：测试失败
+- [x] RED: 编写 `ByteKitSnapshotExpressionTest`
+  - 测试：`snapshot:true` 表达式通过 ByteKit ENTER 注入后，可正确捕获方法参数
+  - → 实际结果：VerifyError（AsmMethodExpressionInjector 扫描了所有局部变量，包括未初始化的 `sum`）
 
-- [ ] GREEN: 在 Interceptor 回调中集成 `@Binding.LocalVars` + `@Binding.LocalVarNames`
+- [x] GREEN: 修复 `AsmMethodExpressionInjector.scanMethodParameters()`
+  - ENTER 阶段：只返回方法参数（slot < paramSlotCount），避免加载未初始化变量
+  - 新增 `computeParamSlotCount(access, desc)` 方法，从方法描述符计算参数槽位数
+  - EXIT/AROUND 阶段：返回所有可见局部变量
 
-- [ ] REFACTOR: 无需重构
+- [x] REFACTOR: 无需重构
 
-- [ ] COMMIT: `feat: snapshot: 表达式通过 ByteKit 注入`
-
-> **设计决策**：表达式引擎当前仍走 ASM 路径（`ExpressionBytecodeGenerator`），ByteKit 仅负责定位注入点。
-> Task 3.1-3.2 的目标是让 ByteKit 注入器也能处理表达式协议，而非替换表达式引擎。
+- [x] COMMIT: `feat: snapshot expression through ByteKit injection - AsmMethodExpressionInjector ENTER phase filters params only` (3cf0d3b)
 
 ---
 
@@ -415,8 +426,8 @@ Phase 6:  5.2 → 6.1 → 6.2
 | ~~P0~~ | ~~Task 2.8~~ | ~~生产 Interceptor 补充 suppressHandler（BUG-001 修复）~~ ✅ |
 | ~~P0~~ | ~~Phase 6 提交~~ | ~~提交性能测试和 retransform 测试代码~~ ✅ |
 | ~~P1~~ | ~~Task 1.4~~ | ~~核心层 import 纯度测试~~ ✅ |
-| **P2** | Task 3.1 | log: 表达式通过 ByteKit 注入 |
-| **P2** | Task 3.2 | snapshot: 表达式通过 ByteKit 注入 |
+| ~~P2~~ | ~~Task 3.1~~ | ~~log: 表达式通过 ByteKit 注入~~ ✅ |
+| ~~P2~~ | ~~Task 3.2~~ | ~~snapshot: 表达式通过 ByteKit 注入~~ ✅ |
 
 # Commit 规范
 

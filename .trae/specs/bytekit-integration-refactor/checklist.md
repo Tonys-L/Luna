@@ -40,10 +40,13 @@
 - [x] `ByteKitSuppressSafetyTest` 通过：suppress 保护下注入代码抛异常不影响业务
 - [x] 生产 Interceptor 补充 suppressHandler ✅ BUG-001 已修复
 
-## Phase 3: 表达式引擎集成 ⚠️ 延后
+## Phase 3: 表达式引擎集成 ✅
 
-- [ ] `ByteKitLogExpressionTest` 通过：log: 表达式通过 ByteKit 注入后输出日志
-- [ ] `ByteKitSnapshotExpressionTest` 通过：snapshot: 表达式通过 ByteKit 注入后捕获局部变量
+- [x] `ByteKitLogExpressionTest` 通过：log: 表达式通过 ByteKit 注入后输出日志
+- [x] `ByteKitLogExpressionTest` 通过：log:hello $1 表达式包含参数值
+- [x] `ByteKitSnapshotExpressionTest` 通过：snapshot: 表达式通过 ByteKit 注入后捕获方法参数
+- [x] `AsmMethodExpressionInjector` 已创建，支持 ENTER/EXIT/AROUND 阶段
+- [x] `ByteKitInjectorBase` 检测表达式时委托给 ASM 路径
 
 ## Phase 4: 注册表与初始化适配 ✅
 

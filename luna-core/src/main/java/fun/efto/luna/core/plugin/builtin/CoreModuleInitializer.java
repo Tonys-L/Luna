@@ -1,7 +1,3 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/25 22:00
- */
 package fun.efto.luna.core.plugin.builtin;
 
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
@@ -27,6 +23,9 @@ import java.util.Collections;
  * Initializes core injection modules (Method/Line) directly,
  * without going through the PluginManager lifecycle.
  * These modules are fundamental infrastructure that cannot be unloaded.
+ *
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/25 22:00
  */
 public final class CoreModuleInitializer {
 

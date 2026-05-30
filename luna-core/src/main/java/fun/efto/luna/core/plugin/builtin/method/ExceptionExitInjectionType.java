@@ -1,7 +1,3 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/06/01 00:00
- */
 package fun.efto.luna.core.plugin.builtin.method;
 
 import fun.efto.luna.core.injection.target.InjectionTarget;
@@ -11,6 +7,10 @@ import fun.efto.luna.core.injection.target.MethodTarget;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/06/01 00:00
+ */
 public class ExceptionExitInjectionType extends InjectionType {
 
     public static final ExceptionExitInjectionType EXCEPTION_EXIT = new ExceptionExitInjectionType("exception_exit", "方法异常退出注入", "exception_exit", "EXCEPTION_EXIT_METHOD");

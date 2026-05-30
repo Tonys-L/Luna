@@ -1,7 +1,3 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/27 20:00
- */
 package fun.efto.luna.core.injection;
 
 import fun.efto.luna.core.injection.port.BytecodeLoader;
@@ -18,6 +14,9 @@ import java.util.List;
  * 注入应用服务。
  * 编排校验→预览→注入→验证流程，Controller 的唯一入口。
  * 纯生命周期操作（查询、删除）委托给 InjectionManager。
+ *
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/27 20:00
  */
 public class InjectionService implements InjectionQuery {
 

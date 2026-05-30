@@ -1,7 +1,3 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/17 18:55
- */
 package fun.efto.luna.core.injection;
 
 import com.alibaba.fastjson.JSON;
@@ -10,6 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/17 18:55
+ */
 public class InjectionPersistenceService {
     private static final String FILE_NAME = "luna-injections.json";
 

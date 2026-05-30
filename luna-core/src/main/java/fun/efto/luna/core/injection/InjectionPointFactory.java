@@ -1,7 +1,3 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/17 18:40
- */
 package fun.efto.luna.core.injection;
 
 import fun.efto.luna.core.injection.code.InjectableCode;
@@ -9,6 +5,10 @@ import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.injection.target.InjectionType;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 
+/**
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/17 18:40
+ */
 public class InjectionPointFactory {
 
     public static InjectionPoint create(PersistentInjection persistent) {

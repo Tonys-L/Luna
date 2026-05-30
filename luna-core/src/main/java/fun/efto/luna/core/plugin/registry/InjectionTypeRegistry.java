@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.registry;
 
-import fun.efto.luna.core.type.Registry;
+import fun.efto.luna.core.common.type.Registry;
 import fun.efto.luna.core.injection.target.InjectionType;
 
 import java.util.Collection;

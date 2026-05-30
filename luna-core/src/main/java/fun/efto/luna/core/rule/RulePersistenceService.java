@@ -1,8 +1,3 @@
-/**
- * 规则持久化服务
- * @author ：Tony.L(<286269159@qq.com>)
- * @since ：2026/03/29 02:30
- */
 package fun.efto.luna.core.rule;
 
 import com.alibaba.fastjson.JSON;
@@ -14,6 +9,11 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 规则持久化服务
+ * @author ：Tony.L(<286269159@qq.com>)
+ * @since ：2026/03/29 02:30
+ */
 public class RulePersistenceService {
     private static final String RULES_FILE = "luna-rules.json";
 

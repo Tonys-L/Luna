@@ -1,12 +1,12 @@
+package fun.efto.luna.core.common;
+
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * 字节码缓存
  * @author ：Tony.L(<286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
-package fun.efto.luna.core.common;
-
-import java.util.concurrent.ConcurrentHashMap;
-
 public class BytecodeCache {
     private static final BytecodeCache INSTANCE = new BytecodeCache();
     private final ConcurrentHashMap<String, byte[]> bytecodeCache = new ConcurrentHashMap<>();

@@ -1,11 +1,11 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/25 23:00
- */
 package fun.efto.luna.core.injection.target;
 
 import fun.efto.luna.core.injection.target.InjectionType;
 
+/**
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/25 23:00
+ */
 public class ConstructorTarget extends BaseTarget {
 
     private final String methodDescriptor;

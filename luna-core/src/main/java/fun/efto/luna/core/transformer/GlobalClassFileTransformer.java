@@ -1,7 +1,3 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/17 19:15
- */
 package fun.efto.luna.core.transformer;
 
 import fun.efto.luna.core.injection.InjectionPoint;
@@ -16,6 +12,9 @@ import java.util.List;
 /**
  * 全局唯一常驻类字节码转换器：在类初次装载或 retransform 时执行注入匹配与织入。
  * 通过 InjectionQuery 接口查询注入点，不直接依赖 InjectionManager。
+ *
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/17 19:15
  */
 public class GlobalClassFileTransformer implements ClassFileTransformer {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalClassFileTransformer.class);

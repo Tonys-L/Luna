@@ -1,8 +1,3 @@
-/**
- * 规则管理器
- * @author ：Tony.L(<286269159@qq.com>)
- * @since ：2026/03/29 02:30
- */
 package fun.efto.luna.core.rule;
 
 import java.util.ArrayList;
@@ -15,6 +10,11 @@ import java.util.concurrent.TimeUnit;
 import fun.efto.luna.core.injection.InjectionManager;
 import fun.efto.luna.core.injection.PersistentInjection;
 
+/**
+ * 规则管理器
+ * @author ：Tony.L(<286269159@qq.com>)
+ * @since ：2026/03/29 02:30
+ */
 public class RuleManager {
     private static final RuleManager INSTANCE = new RuleManager();
     private final ConcurrentHashMap<Long, InjectionRule> rules = new ConcurrentHashMap<>();

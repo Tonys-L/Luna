@@ -1,4 +1,4 @@
-package fun.efto.luna.core.type;
+package fun.efto.luna.core.common.type;
 
 /**
  * @author ：Tony.L(286269159@qq.com)

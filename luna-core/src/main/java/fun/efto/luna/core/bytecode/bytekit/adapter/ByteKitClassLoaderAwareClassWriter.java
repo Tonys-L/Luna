@@ -1,7 +1,3 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/31 22:00
- */
 package fun.efto.luna.core.bytecode.bytekit.adapter;
 
 import com.alibaba.deps.org.objectweb.asm.ClassReader;
@@ -9,6 +5,10 @@ import com.alibaba.deps.org.objectweb.asm.ClassWriter;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/31 22:00
+ */
 public class ByteKitClassLoaderAwareClassWriter extends ClassWriter {
 
     private static final ConcurrentHashMap<String, String> SUPER_CLASS_CACHE = new ConcurrentHashMap<>();

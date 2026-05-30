@@ -1,7 +1,3 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/25 20:00
- */
 package fun.efto.luna.core.plugin.web;
 
 import fun.efto.luna.core.injection.target.InjectionType;
@@ -13,6 +9,10 @@ import fun.efto.luna.core.rule.template.TemplateRegistry;
 
 import java.util.*;
 
+/**
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/25 20:00
+ */
 public class UiManifest {
 
     private List<Map<String, Object>> injectionTypes;

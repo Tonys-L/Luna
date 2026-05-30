@@ -1,7 +1,3 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/26 00:00
- */
 package fun.efto.luna.core.analyzer;
 
 import java.util.Collections;
@@ -10,6 +6,9 @@ import java.util.Map;
 /**
  * 注解信息
  * 包含注解描述符、可见性及键值对属性
+ *
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/26 00:00
  */
 public class AnnotationInfo {
     private final String descriptor;

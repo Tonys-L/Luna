@@ -1,7 +1,3 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/17 18:30
- */
 package fun.efto.luna.core.plugin.builtin.log;
 
 import fun.efto.luna.core.injection.CodeCompilerStrategy;
@@ -10,6 +6,10 @@ import fun.efto.luna.core.injection.code.ExpressBaseInjectableCode;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 
+/**
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/17 18:30
+ */
 public class LogCodeCompilerStrategy implements CodeCompilerStrategy {
 
     @Override

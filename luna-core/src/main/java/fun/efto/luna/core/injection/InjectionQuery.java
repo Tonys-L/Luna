@@ -1,11 +1,11 @@
-/**
- * @author ：Tony.L(286269159@qq.com)
- * @since  : 2026/05/17 18:45
- */
 package fun.efto.luna.core.injection;
 
 import java.util.List;
 
+/**
+ * @author ：Tony.L(286269159@qq.com)
+ * @since  : 2026/05/17 18:45
+ */
 public interface InjectionQuery {
     /**
      * O(1) 获取某个类下当前已编译激活的强类型运行时注入点列表

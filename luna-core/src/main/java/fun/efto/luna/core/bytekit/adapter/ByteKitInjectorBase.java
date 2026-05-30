@@ -12,6 +12,7 @@ import com.alibaba.deps.org.objectweb.asm.Opcodes;
 import com.alibaba.deps.org.objectweb.asm.tree.ClassNode;
 import com.alibaba.deps.org.objectweb.asm.tree.MethodNode;
 import fun.efto.luna.core.asm.AsmInjectionContext;
+import fun.efto.luna.core.asm.assembler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.InjectionContext;
@@ -45,6 +46,22 @@ public abstract class ByteKitInjectorBase implements BytecodeInjector {
 
     @Override
     public byte[] inject(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
+        if (bytecodeAssembler instanceof ExpressionBytecodeAssembler) {
+            return injectWithExpression(injectionContext, bytecode, bytecodeAssembler);
+        }
+        return injectWithByteKit(injectionContext, bytecode);
+    }
+
+    private byte[] injectWithExpression(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
+        AsmMethodExpressionInjector asmInjector = new AsmMethodExpressionInjector(getExpressionPhase());
+        return asmInjector.inject(injectionContext, bytecode, bytecodeAssembler);
+    }
+
+    protected AsmMethodExpressionInjector.Phase getExpressionPhase() {
+        return AsmMethodExpressionInjector.Phase.ENTER;
+    }
+
+    private byte[] injectWithByteKit(InjectionContext injectionContext, byte[] bytecode) {
         String targetMethodName = injectionContext.getInjectionTarget().getMethodName();
         String targetMethodDesc = injectionContext.getInjectionTarget().getMethodDescriptor();
 

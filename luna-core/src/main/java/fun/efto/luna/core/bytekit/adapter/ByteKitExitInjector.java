@@ -15,6 +15,11 @@ import java.util.List;
 public class ByteKitExitInjector extends ByteKitInjectorBase {
 
     @Override
+    protected AsmMethodExpressionInjector.Phase getExpressionPhase() {
+        return AsmMethodExpressionInjector.Phase.EXIT;
+    }
+
+    @Override
     protected List<InterceptorProcessor> createInterceptorProcessors(MethodProcessor methodProcessor, AsmInjectionContext context) {
         DefaultInterceptorClassParser parser = new DefaultInterceptorClassParser();
         return parser.parse(ExitInterceptor.class);

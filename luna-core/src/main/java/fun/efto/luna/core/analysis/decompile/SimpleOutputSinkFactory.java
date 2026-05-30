@@ -1,4 +1,4 @@
-package fun.efto.luna.core.decompile;
+package fun.efto.luna.core.analysis.decompile;
 
 import org.benf.cfr.reader.api.OutputSinkFactory;
 import org.benf.cfr.reader.api.OutputSinkFactory.SinkClass;

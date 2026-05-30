@@ -1,4 +1,4 @@
-package fun.efto.luna.core.analyzer;
+package fun.efto.luna.core.analysis.analyzer;
 
 /**
  * 异常表条目

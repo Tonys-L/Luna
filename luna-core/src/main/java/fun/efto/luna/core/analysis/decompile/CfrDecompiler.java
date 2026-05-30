@@ -1,4 +1,4 @@
-package fun.efto.luna.core.decompile;
+package fun.efto.luna.core.analysis.decompile;
 
 import fun.efto.luna.core.infra.InstrumentationHolder;
 import org.benf.cfr.reader.api.CfrDriver;

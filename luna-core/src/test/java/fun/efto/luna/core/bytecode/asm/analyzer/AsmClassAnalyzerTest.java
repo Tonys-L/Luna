@@ -1,8 +1,8 @@
 package fun.efto.luna.core.bytecode.asm.analyzer;
 
-import fun.efto.luna.core.analyzer.ClassAnalysisResult;
-import fun.efto.luna.core.analyzer.ClassAnalysisResult.FieldInfo;
-import fun.efto.luna.core.analyzer.ClassAnalysisResult.MethodInfo;
+import fun.efto.luna.core.analysis.analyzer.ClassAnalysisResult;
+import fun.efto.luna.core.analysis.analyzer.ClassAnalysisResult.FieldInfo;
+import fun.efto.luna.core.analysis.analyzer.ClassAnalysisResult.MethodInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

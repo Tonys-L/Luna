@@ -1,4 +1,4 @@
-package fun.efto.luna.core.analyzer;
+package fun.efto.luna.core.analysis.analyzer;
 
 import fun.efto.luna.core.infra.type.TypeRegistry;
 import fun.efto.luna.core.infra.type.RegisterableType;

@@ -1,14 +1,14 @@
 package fun.efto.luna.core.bytecode.asm.analyzer;
 
 import fun.efto.luna.core.bytecode.asm.Constants;
-import fun.efto.luna.core.analyzer.ClassAnalyzer;
-import fun.efto.luna.core.analyzer.ClassAnalysisResult;
-import fun.efto.luna.core.analyzer.ClassAnalysisResult.FieldInfo;
-import fun.efto.luna.core.analyzer.ClassAnalysisResult.MethodInfo;
-import fun.efto.luna.core.analyzer.ClassAnalysisResult.ParameterInfo;
-import fun.efto.luna.core.analyzer.ClassAnalysisResult.LocalVariableInfo;
-import fun.efto.luna.core.analyzer.AnnotationInfo;
-import fun.efto.luna.core.analyzer.ExceptionTableEntry;
+import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
+import fun.efto.luna.core.analysis.analyzer.ClassAnalysisResult;
+import fun.efto.luna.core.analysis.analyzer.ClassAnalysisResult.FieldInfo;
+import fun.efto.luna.core.analysis.analyzer.ClassAnalysisResult.MethodInfo;
+import fun.efto.luna.core.analysis.analyzer.ClassAnalysisResult.ParameterInfo;
+import fun.efto.luna.core.analysis.analyzer.ClassAnalysisResult.LocalVariableInfo;
+import fun.efto.luna.core.analysis.analyzer.AnnotationInfo;
+import fun.efto.luna.core.analysis.analyzer.ExceptionTableEntry;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;

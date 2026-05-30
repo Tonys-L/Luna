@@ -1,4 +1,4 @@
-package fun.efto.luna.core.analyzer;
+package fun.efto.luna.core.analysis.analyzer;
 
 /**
  * @author : Tony.L(286269159@qq.com)

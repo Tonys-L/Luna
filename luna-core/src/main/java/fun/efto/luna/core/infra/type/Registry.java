@@ -1,4 +1,4 @@
-package fun.efto.luna.core.common.type;
+package fun.efto.luna.core.infra.type;
 
 import java.util.Map;
 import java.util.Objects;

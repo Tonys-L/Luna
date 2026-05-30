@@ -1,4 +1,4 @@
-package fun.efto.luna.core.common;
+package fun.efto.luna.core.infra;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

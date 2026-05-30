@@ -1,6 +1,6 @@
 package fun.efto.luna.core.bytecode.asm.assembler;
 
-import fun.efto.luna.core.common.type.Registry;
+import fun.efto.luna.core.infra.type.Registry;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.code.CodeType;
 

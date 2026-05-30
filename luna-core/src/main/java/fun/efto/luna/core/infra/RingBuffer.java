@@ -1,4 +1,4 @@
-package fun.efto.luna.core.common;
+package fun.efto.luna.core.infra;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceArray;

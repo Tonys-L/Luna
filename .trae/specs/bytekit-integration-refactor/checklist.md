@@ -12,7 +12,7 @@
 - [x] `mvn test` 通过
 - [x] `fun.efto.luna.core.bytekit` 包结构已创建（adapter/interceptor/bridge）
 
-## Phase 1: 核心层抽象接口 ✅ (1.4 未完成)
+## Phase 1: 核心层抽象接口 ✅
 
 - [x] `VariableInfo` 数据类已创建，equals/hashCode 正确
 - [x] `VariableSnapshotter` 接口已定义，零 ByteKit/ASM import
@@ -21,9 +21,9 @@
 - [x] `CodeInjector` 接口已定义，零 ByteKit/ASM import
 - [x] `AsmCodeInjector` 适配器已创建，委托 BytecodeInjector
 - [x] `CodeInjectorTest` 通过：inject() 返回 InjectionResult
-- [ ] `CoreLayerPurityTest` 通过：核心层无 ByteKit/ASM import ⚠️ **未创建**
+- [x] `CoreLayerPurityTest` 通过：核心层无 ByteKit/ASM import
 
-## Phase 2: ByteKit 适配器实现 ✅ (2.8 待修复)
+## Phase 2: ByteKit 适配器实现 ✅
 
 - [x] `ByteKitEnterInjectorTest` 通过：@AtEnter 增强后字节码合法（L1+L2）
 - [x] `ByteKitEnterInjectorTest` 通过：增强后方法可被反射调用（L3）
@@ -38,7 +38,7 @@
 - [x] `ByteKitInvokeInjectorTest` 通过：@AtInvoke 增强后字节码合法
 - [x] `ByteKitInvokeInjectorTest` 通过：子函数调用前后回调被触发
 - [x] `ByteKitSuppressSafetyTest` 通过：suppress 保护下注入代码抛异常不影响业务
-- [ ] 生产 Interceptor 补充 suppressHandler ⚠️ **BUG-001：suppress 保护未生效**
+- [x] 生产 Interceptor 补充 suppressHandler ✅ BUG-001 已修复
 
 ## Phase 3: 表达式引擎集成 ⚠️ 延后
 
@@ -63,13 +63,13 @@
 - [x] `mvn compile` 通过
 - [x] `mvn test` 全部通过（302 tests, 0 failures, 1 skipped）
 
-## Phase 6: 回归测试与性能验证 ✅ (代码未提交)
+## Phase 6: 回归测试与性能验证 ✅
 
 - [x] `ByteKitPerformanceTest` 通过：注入判定耗时 < 0.1ms（实测 ~430ns）
 - [x] `ByteKitRetransformTest` 通过：动态增删注入点正常
 - [x] 所有现有测试通过
 - [x] retransform 动态增删注入点正常工作
-- [ ] Phase 6 代码提交到 Git ⚠️ **待提交**
+- [x] Phase 6 代码提交到 Git
 
 ## 性能优化记录
 
@@ -84,6 +84,6 @@
 
 | ID | 描述 | 严重程度 | 状态 | 关联 Task |
 |----|------|---------|------|-----------|
-| BUG-001 | 生产 Interceptor 缺少 suppressHandler，suppress 保护未生效 | 高 | 待修复 | Task 2.8 |
-| TODO-001 | Phase 6 代码未提交到 Git | 中 | 待提交 | Task 6.1/6.2 |
-| TODO-002 | CoreLayerPurityTest 未创建 | 低 | 待补充 | Task 1.4 |
+| ~~BUG-001~~ | ~~生产 Interceptor 缺少 suppressHandler，suppress 保护未生效~~ | ~~高~~ | ✅ 已修复 | Task 2.8 |
+| ~~TODO-001~~ | ~~Phase 6 代码未提交到 Git~~ | ~~中~~ | ✅ 已提交 | Task 6.1/6.2 |
+| ~~TODO-002~~ | ~~CoreLayerPurityTest 未创建~~ | ~~低~~ | ✅ 已补充 | Task 1.4 |

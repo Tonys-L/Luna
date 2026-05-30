@@ -475,3 +475,72 @@ fun.efto.luna.core/
 | ByteKit 不支持 retransform 动态增删 | 保留 `GlobalClassFileTransformer` 作为入口，ByteKit 仅负责字节码生成 |
 | ByteKit @AtLine 精确度不足 | 精确场景保留 ASM `BeforeLineInjector` / `AfterLineInjector` |
 | ByteKit 项目维护活跃度低 | 依赖 shade ASM 隔离，必要时可 fork 维护；核心层接口不依赖 ByteKit |
+
+---
+
+## 九、实施发现与补充
+
+### 9.1 BUG-001: suppress 必须配合 suppressHandler
+
+**发现时间**：Task 2.7 实施期间
+
+**问题描述**：ByteKit 的 `suppress = Throwable.class` 注解属性**必须配合 `suppressHandler = XxxHandler.class`** 才能生成 try-catch 块。仅设置 `suppress = Throwable.class` 不指定 `suppressHandler` 不会生成 try-catch，suppress 保护实际不生效。
+
+**影响范围**：当前所有生产 Interceptor（EnterInterceptor、ExitInterceptor、AroundInterceptor、ExceptionExitInterceptor、InvokeInterceptor）均只有 `suppress = Throwable.class`，缺少 `suppressHandler`。
+
+**修复方案**：
+1. 创建 `SuppressHandler` 类，使用 `@ExceptionHandler(inline = true)` 注解
+2. 所有生产 Interceptor 添加 `suppressHandler = SuppressHandler.class`
+
+```java
+public class SuppressHandler {
+    @ExceptionHandler(inline = true)
+    public static void onSuppress(@Binding.Throwable Throwable t) {
+    }
+}
+```
+
+**验证方式**：`ByteKitSuppressSafetyTest` 已验证此机制正确性（使用 `BrokenInterceptor` + `SuppressHandler`）。
+
+### 9.2 性能优化记录
+
+**初始性能**：ByteKit 首次注入耗时 576,026ns（~0.58ms），超过 0.1ms 红线。
+
+**优化路径**：
+
+```mermaid
+flowchart LR
+    A[576,026ns<br/>首次注入] --> B[~2,000ns<br/>InterceptorProcessor 缓存]
+    B --> C[~430ns<br/>注入结果缓存]
+    
+    A -->|DCL 缓存| B
+    B -->|InjectionCacheEntry| C
+```
+
+**优化措施**：
+
+| # | 优化项 | 原理 | 效果 |
+|---|--------|------|------|
+| 1 | InterceptorProcessor DCL 缓存 | `DefaultInterceptorClassParser.parse()` 结果缓存到 `ConcurrentHashMap`，避免每次注入重复解析 | 576μs → 2μs |
+| 2 | 注入结果缓存（InjectionCacheEntry） | 相同类+相同注入点的字节码结果缓存，避免重复执行 InterceptorProcessor.process() | 2μs → 0.43μs |
+| 3 | ByteKitClassLoaderAwareClassWriter | 继承 ByteKit shade ClassWriter，解决 COMPUTE_FRAMES 时的 getCommonSuperClass 问题 | 消除 ClassNotFound 异常 |
+| 4 | getCommonSuperClass 静态缓存 | 缓存类继承关系查找结果，避免重复反射调用 | 减少反射开销 |
+
+**最终性能**：~430ns（0.00043ms），远低于 0.1ms 红线，性能余量 232x。
+
+### 9.3 ASM 版本隔离验证结果
+
+**验证结论**：ByteKit shade ASM（`com.alibaba.deps.org.objectweb.asm`）与 Luna ASM（`org.objectweb.asm`）可完全共存，无类冲突。
+
+**关键发现**：
+- 两个 ClassReader 的 ClassLoader 相同（都是 AppClassLoader），但类名不同，无 LinkageError
+- ByteKit 适配器内部使用 `com.alibaba.deps.org.objectweb.asm.*`，Luna 核心层使用 `org.objectweb.asm.*`
+- 两者之间通过 `byte[]` 字节码交换数据，不传递 ASM 对象
+
+### 9.4 双引擎调度实现
+
+**实际实现**：`DefaultClassTransformer` 无需修改代码，通过 `InjectionType` 名称自动路由：
+- 方法级注入类型（ENTER/EXIT/AROUND/EXCEPTION_EXIT/INVOKE）→ ByteKit 注入器
+- 行号注入类型（BEFORE/AFTER）→ ASM 注入器
+
+`CoreModuleInitializer` 注册 ByteKit 注入器时，方法级注入器的 `BytecodeInjectorRegistry.register()` 已自动完成路由。

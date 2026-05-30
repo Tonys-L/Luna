@@ -1,4 +1,4 @@
-package fun.efto.luna.core.config;
+package fun.efto.luna.core.infra.config;
 
 import java.io.*;
 import java.nio.file.*;

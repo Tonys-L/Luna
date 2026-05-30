@@ -6,7 +6,7 @@ import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
-import fun.efto.luna.core.config.ConfigManager;
+import fun.efto.luna.core.infra.config.ConfigManager;
 import fun.efto.luna.core.decompile.Decompiler;
 import fun.efto.luna.core.injection.CodeCompiler;
 import fun.efto.luna.core.injection.CodeCompilerStrategy;

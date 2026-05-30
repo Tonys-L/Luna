@@ -1,4 +1,4 @@
-package fun.efto.luna.core.buffer;
+package fun.efto.luna.core.common;
 
 import org.junit.jupiter.api.Test;
 

@@ -17,7 +17,7 @@ import com.alibaba.deps.org.objectweb.asm.tree.ClassNode;
 import com.alibaba.deps.org.objectweb.asm.tree.MethodNode;
 import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.probe.ProbeOutput;
-import fun.efto.luna.core.spy.LunaSpy;
+import fun.efto.luna.core.probe.LunaSpy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

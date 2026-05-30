@@ -1,7 +1,7 @@
 package fun.efto.luna.core.plugin.lifecycle;
 
 import fun.efto.luna.core.analyzer.ClassAnalyzer;
-import fun.efto.luna.core.buffer.RingBuffer;
+import fun.efto.luna.core.common.RingBuffer;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;

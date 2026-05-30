@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.buffer.RingBuffer;
+import fun.efto.luna.core.common.RingBuffer;
 import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
 import fun.efto.luna.core.plugin.lifecycle.ReadyGate;

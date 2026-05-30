@@ -33,9 +33,8 @@ public class LunaAgentClassLoader extends URLClassLoader {
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         // Spy 类及其依赖的 Buffer 类必须由 Bootstrap ClassLoader 加载以实现共享，不能隔离
-        if (name.startsWith("fun.efto.luna.core.spy.")
-                || name.startsWith("fun.efto.luna.core.buffer.")
-                || name.startsWith("fun.efto.luna.core.probe.")
+        if (name.startsWith("fun.efto.luna.core.probe.")
+                || name.startsWith("fun.efto.luna.core.common.")
                 || name.startsWith("fun.efto.luna.core.expression.context.")
                 || name.startsWith("fun.efto.luna.core.expression.ConditionRegistry")) {
             return super.loadClass(name, resolve);

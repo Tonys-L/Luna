@@ -1,4 +1,4 @@
-package fun.efto.luna.core.spy;
+package fun.efto.luna.core.probe;
 
 import fun.efto.luna.core.probe.ProbeMessage;
 import org.junit.jupiter.api.BeforeEach;

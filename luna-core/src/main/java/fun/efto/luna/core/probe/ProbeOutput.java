@@ -1,6 +1,6 @@
 package fun.efto.luna.core.probe;
 
-import fun.efto.luna.core.buffer.RingBuffer;
+import fun.efto.luna.core.common.RingBuffer;
 
 /**
  * @author : Tony.L(<286269159@qq.com>)

@@ -4,7 +4,7 @@
  */
 package fun.efto.luna.core.bytecode.bytekit.bridge;
 
-import fun.efto.luna.core.spy.LunaSpy;
+import fun.efto.luna.core.probe.LunaSpy;
 
 public class LunaSpyBridge {
 

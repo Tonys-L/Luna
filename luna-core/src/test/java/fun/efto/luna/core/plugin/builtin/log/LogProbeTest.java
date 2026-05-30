@@ -2,7 +2,7 @@ package fun.efto.luna.core.plugin.builtin.log;
 
 import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.probe.ProbeOutput;
-import fun.efto.luna.core.spy.LunaSpy;
+import fun.efto.luna.core.probe.LunaSpy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

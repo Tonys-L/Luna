@@ -1,6 +1,6 @@
-package fun.efto.luna.core.spy;
+package fun.efto.luna.core.probe;
 
-import fun.efto.luna.core.buffer.RingBuffer;
+import fun.efto.luna.core.common.RingBuffer;
 import fun.efto.luna.core.plugin.builtin.log.LogProbe;
 import fun.efto.luna.core.plugin.builtin.snapshot.SnapshotProbe;
 import fun.efto.luna.core.plugin.builtin.trace.TraceProbe;

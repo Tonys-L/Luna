@@ -1,4 +1,4 @@
-package fun.efto.luna.core.instrument;
+package fun.efto.luna.core.common;
 
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.UnmodifiableClassException;

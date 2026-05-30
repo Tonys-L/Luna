@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.spy.LunaSpy;
+import fun.efto.luna.core.probe.LunaSpy;
 
 /**
  * @author : Tony.L(<286269159@qq.com>)

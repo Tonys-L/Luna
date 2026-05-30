@@ -3,7 +3,7 @@
  * @author ：Tony.L(<286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
-package fun.efto.luna.core.cache;
+package fun.efto.luna.core.common;
 
 import java.util.concurrent.ConcurrentHashMap;
 

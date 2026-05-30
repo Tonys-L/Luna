@@ -1,11 +1,11 @@
-﻿package fun.efto.luna.agent;
+package fun.efto.luna.agent;
 
 import fun.efto.luna.agent.adapter.InjectionTestHarnessAdapter;
 import fun.efto.luna.agent.clazz.*;
 import fun.efto.luna.agent.log.LoggerInitializer;
 import fun.efto.luna.agent.web.JettyConfiguration;
 import fun.efto.luna.agent.web.JettyWebServer;
-import fun.efto.luna.core.instrument.InstrumentationHolder;
+import fun.efto.luna.core.common.InstrumentationHolder;
 import fun.efto.luna.core.init.InitializerManager;
 import fun.efto.luna.core.injection.InjectionManager;
 import fun.efto.luna.core.injection.InjectionPointRegistry;

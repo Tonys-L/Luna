@@ -1,7 +1,7 @@
 package fun.efto.luna.agent.web.ws;
 
 import fun.efto.luna.core.probe.ProbeMessage;
-import fun.efto.luna.core.spy.LunaSpy;
+import fun.efto.luna.core.probe.LunaSpy;
 import org.eclipse.jetty.websocket.api.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

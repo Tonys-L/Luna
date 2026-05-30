@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.loader;
 
-import fun.efto.luna.core.capability.CoreCapabilityRegistry;
+import fun.efto.luna.core.bootstrap.capability.CoreCapabilityRegistry;
 import fun.efto.luna.core.plugin.LunaPlugin;
 
 import java.util.*;

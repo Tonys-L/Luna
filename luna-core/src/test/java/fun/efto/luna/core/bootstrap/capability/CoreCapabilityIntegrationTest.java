@@ -1,6 +1,6 @@
-package fun.efto.luna.core.capability;
+package fun.efto.luna.core.bootstrap.capability;
 
-import fun.efto.luna.core.init.DefaultInitializer;
+import fun.efto.luna.core.bootstrap.init.DefaultInitializer;
 import fun.efto.luna.core.plugin.builtin.CoreModuleInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

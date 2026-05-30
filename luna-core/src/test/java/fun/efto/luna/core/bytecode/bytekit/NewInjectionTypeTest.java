@@ -5,7 +5,7 @@
 package fun.efto.luna.core.bytecode.bytekit;
 
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
-import fun.efto.luna.core.capability.CoreCapabilityRegistry;
+import fun.efto.luna.core.bootstrap.capability.CoreCapabilityRegistry;
 import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.injection.target.InjectionType;
 import fun.efto.luna.core.injection.target.MethodTarget;

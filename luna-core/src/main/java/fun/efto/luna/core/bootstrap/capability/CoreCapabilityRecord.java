@@ -1,4 +1,4 @@
-package fun.efto.luna.core.capability;
+package fun.efto.luna.core.bootstrap.capability;
 
 import java.util.ArrayList;
 import java.util.Collections;

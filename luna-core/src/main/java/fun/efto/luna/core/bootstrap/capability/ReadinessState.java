@@ -1,4 +1,4 @@
-package fun.efto.luna.core.capability;
+package fun.efto.luna.core.bootstrap.capability;
 
 /**
  * @author : Tony.L(286269159@qq.com)

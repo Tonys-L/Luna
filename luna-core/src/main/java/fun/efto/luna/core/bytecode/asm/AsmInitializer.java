@@ -3,7 +3,7 @@ package fun.efto.luna.core.bytecode.asm;
 import fun.efto.luna.core.analysis.analyzer.AnalyzerRegistry;
 import fun.efto.luna.core.analysis.analyzer.AnalyzerType;
 import fun.efto.luna.core.bytecode.asm.analyzer.AsmClassAnalyzer;
-import fun.efto.luna.core.init.Initializer;
+import fun.efto.luna.core.bootstrap.init.Initializer;
 
 /**
  * ASM 初始化器

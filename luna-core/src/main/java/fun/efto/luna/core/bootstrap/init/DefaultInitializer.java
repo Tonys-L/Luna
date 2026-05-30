@@ -1,13 +1,13 @@
-package fun.efto.luna.core.init;
+package fun.efto.luna.core.bootstrap.init;
 
 import fun.efto.luna.core.analysis.analyzer.AnalyzerRegistry;
 import fun.efto.luna.core.analysis.analyzer.AnalyzerType;
 import fun.efto.luna.core.bytecode.asm.analyzer.AsmClassAnalyzer;
-import fun.efto.luna.core.capability.CapabilityKind;
-import fun.efto.luna.core.capability.CoreCapabilityRecord;
-import fun.efto.luna.core.capability.CoreCapabilityRegistry;
-import fun.efto.luna.core.capability.LifecyclePolicy;
-import fun.efto.luna.core.capability.ReadinessState;
+import fun.efto.luna.core.bootstrap.capability.CapabilityKind;
+import fun.efto.luna.core.bootstrap.capability.CoreCapabilityRecord;
+import fun.efto.luna.core.bootstrap.capability.CoreCapabilityRegistry;
+import fun.efto.luna.core.bootstrap.capability.LifecyclePolicy;
+import fun.efto.luna.core.bootstrap.capability.ReadinessState;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.LunaPlugin;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;

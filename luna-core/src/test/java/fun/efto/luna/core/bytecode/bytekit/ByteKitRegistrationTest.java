@@ -11,7 +11,7 @@ import fun.efto.luna.core.bytecode.bytekit.adapter.ByteKitEnterInjector;
 import fun.efto.luna.core.bytecode.bytekit.adapter.ByteKitExceptionExitInjector;
 import fun.efto.luna.core.bytecode.bytekit.adapter.ByteKitExitInjector;
 import fun.efto.luna.core.bytecode.bytekit.adapter.ByteKitInvokeInjector;
-import fun.efto.luna.core.capability.CoreCapabilityRegistry;
+import fun.efto.luna.core.bootstrap.capability.CoreCapabilityRegistry;
 import fun.efto.luna.core.plugin.builtin.CoreModuleInitializer;
 import fun.efto.luna.core.plugin.builtin.line.AfterLineInjector;
 import fun.efto.luna.core.plugin.builtin.line.BeforeLineInjector;

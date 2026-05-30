@@ -1,4 +1,4 @@
-package fun.efto.luna.core.capability;
+package fun.efto.luna.core.bootstrap.capability;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

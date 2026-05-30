@@ -1,4 +1,4 @@
-package fun.efto.luna.agent;
+﻿package fun.efto.luna.agent;
 
 import fun.efto.luna.agent.adapter.InjectionTestHarnessAdapter;
 import fun.efto.luna.agent.clazz.*;
@@ -15,8 +15,8 @@ import fun.efto.luna.core.injection.port.InjectionStore;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.port.LocalVarValidator;
 import fun.efto.luna.core.injection.port.Retransformer;
-import fun.efto.luna.core.asm.AsmInjectionContext;
-import fun.efto.luna.core.asm.LocalVariableScanner;
+import fun.efto.luna.core.bytecode.asm.AsmInjectionContext;
+import fun.efto.luna.core.bytecode.asm.LocalVariableScanner;
 import fun.efto.luna.core.injection.InjectionValidator;
 import fun.efto.luna.core.injection.port.BytecodePreviewer;
 import fun.efto.luna.core.plugin.loader.LunaAgentClassLoader;

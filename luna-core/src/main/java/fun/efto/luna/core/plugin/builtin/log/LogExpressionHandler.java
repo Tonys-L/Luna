@@ -1,10 +1,10 @@
 package fun.efto.luna.core.plugin.builtin.log;
 
-import fun.efto.luna.core.asm.AsmInjectionContext;
-import fun.efto.luna.core.asm.AsmInjectionContext.LocalVarInfo;
-import fun.efto.luna.core.asm.AsmTypeHelper;
-import fun.efto.luna.core.asm.assembler.ReferenceExpressionParser;
-import fun.efto.luna.core.asm.assembler.ExpressionSegment;
+import fun.efto.luna.core.bytecode.asm.AsmInjectionContext;
+import fun.efto.luna.core.bytecode.asm.AsmInjectionContext.LocalVarInfo;
+import fun.efto.luna.core.bytecode.asm.AsmTypeHelper;
+import fun.efto.luna.core.bytecode.asm.assembler.ReferenceExpressionParser;
+import fun.efto.luna.core.bytecode.asm.assembler.ExpressionSegment;
 import fun.efto.luna.core.plugin.BytecodeHelper;
 import fun.efto.luna.core.plugin.ExpressionHandler;
 import fun.efto.luna.core.plugin.GenerateContext;

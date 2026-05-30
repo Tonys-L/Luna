@@ -1,7 +1,7 @@
 package fun.efto.luna.core.plugin.lifecycle;
 
-import fun.efto.luna.core.asm.assembler.BytecodeAssemblerRegistry;
-import fun.efto.luna.core.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
 import fun.efto.luna.core.injection.CodeCompiler;
 import fun.efto.luna.core.injection.CodeCompilerStrategy;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;

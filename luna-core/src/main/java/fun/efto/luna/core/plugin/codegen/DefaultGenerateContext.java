@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.codegen;
 
-import fun.efto.luna.core.asm.AsmInjectionContext;
+import fun.efto.luna.core.bytecode.asm.AsmInjectionContext;
 import fun.efto.luna.core.plugin.BytecodeHelper;
 import fun.efto.luna.core.plugin.GenerateContext;
 import org.objectweb.asm.MethodVisitor;

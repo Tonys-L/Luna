@@ -1,8 +1,8 @@
 package fun.efto.luna.core.injector;
 
 import fun.efto.luna.core.TestSetup;
-import fun.efto.luna.core.asm.injector.BytecodeInjector;
-import fun.efto.luna.core.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
 import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
 import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
 import org.junit.jupiter.api.BeforeAll;

@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.builtin.log;
 
-import fun.efto.luna.core.asm.assembler.ExpressionBytecodeAssembler;
+import fun.efto.luna.core.bytecode.asm.assembler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.plugin.*;
 

@@ -7,7 +7,7 @@ import fun.efto.luna.core.decompile.Decompiler;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.CodeCompilerStrategy;
 import fun.efto.luna.core.injection.target.InjectionType;
-import fun.efto.luna.core.asm.injector.BytecodeInjector;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.rule.template.RuleTemplate;
 

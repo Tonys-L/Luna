@@ -1,7 +1,7 @@
 package fun.efto.luna.core.plugin.lifecycle;
 
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
-import fun.efto.luna.core.asm.injector.BytecodeInjector;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.injection.CodeCompilerStrategy;
 import fun.efto.luna.core.injection.target.InjectionType;
 import fun.efto.luna.core.injection.code.type.CodeType;

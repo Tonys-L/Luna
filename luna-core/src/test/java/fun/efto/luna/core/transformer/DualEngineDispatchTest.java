@@ -4,11 +4,11 @@
  */
 package fun.efto.luna.core.transformer;
 
-import fun.efto.luna.core.asm.assembler.BytecodeAssemblerRegistry;
-import fun.efto.luna.core.asm.assembler.ExpressionBytecodeAssembler;
-import fun.efto.luna.core.asm.injector.BytecodeInjector;
-import fun.efto.luna.core.asm.injector.BytecodeInjectorRegistry;
-import fun.efto.luna.core.bytekit.adapter.ByteKitEnterInjector;
+import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
+import fun.efto.luna.core.bytecode.asm.assembler.ExpressionBytecodeAssembler;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.bytecode.bytekit.adapter.ByteKitEnterInjector;
 import fun.efto.luna.core.capability.CoreCapabilityRegistry;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;

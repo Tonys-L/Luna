@@ -2,7 +2,7 @@ package fun.efto.luna.core.init;
 
 import fun.efto.luna.core.analyzer.AnalyzerRegistry;
 import fun.efto.luna.core.analyzer.AnalyzerType;
-import fun.efto.luna.core.asm.analyzer.AsmClassAnalyzer;
+import fun.efto.luna.core.bytecode.asm.analyzer.AsmClassAnalyzer;
 import fun.efto.luna.core.capability.CapabilityKind;
 import fun.efto.luna.core.capability.CoreCapabilityRecord;
 import fun.efto.luna.core.capability.CoreCapabilityRegistry;

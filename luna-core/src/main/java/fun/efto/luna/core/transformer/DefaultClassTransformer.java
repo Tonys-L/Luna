@@ -2,10 +2,10 @@ package fun.efto.luna.core.transformer;
 
 import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
-import fun.efto.luna.core.asm.assembler.BytecodeAssemblerRegistry;
+import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.injection.InjectionPoint;
-import fun.efto.luna.core.asm.injector.BytecodeInjector;
-import fun.efto.luna.core.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

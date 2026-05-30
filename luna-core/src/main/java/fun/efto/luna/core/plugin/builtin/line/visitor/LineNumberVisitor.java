@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.builtin.line.visitor;
 
-import fun.efto.luna.core.asm.AsmInjectionContext;
+import fun.efto.luna.core.bytecode.asm.AsmInjectionContext;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
 import org.objectweb.asm.Label;

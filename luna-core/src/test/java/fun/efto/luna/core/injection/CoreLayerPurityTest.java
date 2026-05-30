@@ -32,8 +32,11 @@ public class CoreLayerPurityTest {
     };
 
     private static final String[] SCANNED_PACKAGES = {
-            "fun/efto/luna/core/injection",
-            "fun/efto/luna/core/bytecode"
+            "fun/efto/luna/core/injection"
+    };
+
+    private static final String[] SCANNED_FILES = {
+            "fun/efto/luna/core/bytecode/BytecodeAssembler.java"
     };
 
     private List<Path> findSourceFiles() throws IOException {
@@ -161,6 +164,19 @@ public class CoreLayerPurityTest {
         }
 
         assertFalse(sourceFiles.isEmpty(), "Should find at least one source file in core layer packages");
+
+        Path projectRoot = Paths.get(System.getProperty("user.dir"));
+        if (!projectRoot.getFileName().toString().equals("luna-core")) {
+            projectRoot = projectRoot.resolve("luna-core");
+        }
+        Path srcMainJava = projectRoot.resolve("src/main/java");
+
+        for (String file : SCANNED_FILES) {
+            Path filePath = srcMainJava.resolve(file);
+            if (Files.exists(filePath)) {
+                sourceFiles.add(filePath);
+            }
+        }
 
         List<String> allViolations = new ArrayList<>();
         for (Path file : sourceFiles) {

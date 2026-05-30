@@ -4,12 +4,12 @@
  */
 package fun.efto.luna.core.plugin.builtin;
 
-import fun.efto.luna.core.asm.injector.BytecodeInjectorRegistry;
-import fun.efto.luna.core.bytekit.adapter.ByteKitAroundInjector;
-import fun.efto.luna.core.bytekit.adapter.ByteKitEnterInjector;
-import fun.efto.luna.core.bytekit.adapter.ByteKitExceptionExitInjector;
-import fun.efto.luna.core.bytekit.adapter.ByteKitExitInjector;
-import fun.efto.luna.core.bytekit.adapter.ByteKitInvokeInjector;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.bytecode.bytekit.adapter.ByteKitAroundInjector;
+import fun.efto.luna.core.bytecode.bytekit.adapter.ByteKitEnterInjector;
+import fun.efto.luna.core.bytecode.bytekit.adapter.ByteKitExceptionExitInjector;
+import fun.efto.luna.core.bytecode.bytekit.adapter.ByteKitExitInjector;
+import fun.efto.luna.core.bytecode.bytekit.adapter.ByteKitInvokeInjector;
 import fun.efto.luna.core.capability.CapabilityKind;
 import fun.efto.luna.core.capability.CoreCapabilityRecord;
 import fun.efto.luna.core.capability.CoreCapabilityRegistry;

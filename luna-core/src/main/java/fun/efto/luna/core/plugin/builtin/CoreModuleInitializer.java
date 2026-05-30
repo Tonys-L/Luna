@@ -5,6 +5,11 @@
 package fun.efto.luna.core.plugin.builtin;
 
 import fun.efto.luna.core.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.bytekit.adapter.ByteKitAroundInjector;
+import fun.efto.luna.core.bytekit.adapter.ByteKitEnterInjector;
+import fun.efto.luna.core.bytekit.adapter.ByteKitExceptionExitInjector;
+import fun.efto.luna.core.bytekit.adapter.ByteKitExitInjector;
+import fun.efto.luna.core.bytekit.adapter.ByteKitInvokeInjector;
 import fun.efto.luna.core.capability.CapabilityKind;
 import fun.efto.luna.core.capability.CoreCapabilityRecord;
 import fun.efto.luna.core.capability.CoreCapabilityRegistry;
@@ -32,17 +37,21 @@ public final class CoreModuleInitializer {
         InjectionTypeRegistry.getInstance().register(MethodInjectionType.ENTER);
         InjectionTypeRegistry.getInstance().register(MethodInjectionType.EXIT);
         InjectionTypeRegistry.getInstance().register(MethodInjectionType.AROUND);
+        InjectionTypeRegistry.getInstance().register(ExceptionExitInjectionType.EXCEPTION_EXIT);
+        InjectionTypeRegistry.getInstance().register(InvokeInjectionType.INVOKE);
 
-        // Method injectors
-        BytecodeInjectorRegistry.getInstance().register(MethodInjectionType.ENTER, new EnterMethodInjector());
-        BytecodeInjectorRegistry.getInstance().register(MethodInjectionType.EXIT, new ExitMethodInjector());
-        BytecodeInjectorRegistry.getInstance().register(MethodInjectionType.AROUND, new AroundMethodInjector());
+        BytecodeInjectorRegistry.getInstance().register(MethodInjectionType.ENTER, new ByteKitEnterInjector());
+        BytecodeInjectorRegistry.getInstance().register(MethodInjectionType.EXIT, new ByteKitExitInjector());
+        BytecodeInjectorRegistry.getInstance().register(MethodInjectionType.AROUND, new ByteKitAroundInjector());
+        BytecodeInjectorRegistry.getInstance().register(ExceptionExitInjectionType.EXCEPTION_EXIT, new ByteKitExceptionExitInjector());
+        BytecodeInjectorRegistry.getInstance().register(InvokeInjectionType.INVOKE, new ByteKitInvokeInjector());
 
-        // Method rule converters
         MethodRuleConverter methodConverter = new MethodRuleConverter();
         RuleConverterRegistry.getInstance().register(MethodInjectionType.ENTER, methodConverter);
         RuleConverterRegistry.getInstance().register(MethodInjectionType.EXIT, methodConverter);
         RuleConverterRegistry.getInstance().register(MethodInjectionType.AROUND, methodConverter);
+        RuleConverterRegistry.getInstance().register(ExceptionExitInjectionType.EXCEPTION_EXIT, methodConverter);
+        RuleConverterRegistry.getInstance().register(InvokeInjectionType.INVOKE, methodConverter);
 
         // Line injection types
         InjectionTypeRegistry.getInstance().register(LineNumberInjectionType.BEFORE);
@@ -61,7 +70,7 @@ public final class CoreModuleInitializer {
 
         capRegistry.register(new CoreCapabilityRecord(
                 "method-target", "方法注入目标", CapabilityKind.KERNEL,
-                Arrays.asList("method_enter", "method_exit", "method_around"),
+                Arrays.asList("method_enter", "method_exit", "method_around", "exception_exit", "invoke"),
                 ReadinessState.READY, Collections.emptyList(), LifecyclePolicy.CORE_ONLY
         ));
 

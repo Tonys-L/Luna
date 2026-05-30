@@ -4,6 +4,7 @@ import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.code.ExpressBaseInjectableCode;
 import fun.efto.luna.core.injection.code.InjectableCode;
+import fun.efto.luna.core.injection.target.InjectionType;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.plugin.*;
 import fun.efto.luna.core.plugin.builtin.AbstractRuleConverter;
@@ -37,7 +38,7 @@ public class MethodRuleConverter extends AbstractRuleConverter {
     }
 
     private InjectionPoint convertFromPersistent(PersistentInjection injection) {
-        MethodInjectionType type = (MethodInjectionType) InjectionTypeRegistry.getInstance().resolve(injection.getInjectionType());
+        InjectionType type = InjectionTypeRegistry.getInstance().resolve(injection.getInjectionType());
         MethodTarget target = new MethodTarget(type, injection.getClazz(), injection.getMethodName(), injection.getMethodDescriptor() != null ? injection.getMethodDescriptor() : "");
         final CodeType codeType = injection.getCodeType() != null ? CodeType.fromName(injection.getCodeType()) : CodeType.EXPRESSION;
         final String condition = injection.getExpression();

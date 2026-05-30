@@ -55,10 +55,12 @@ public class CoreCapabilityIntegrationTest {
         CoreModuleInitializer.initialize();
 
         List<String> entries = registry.getProvidedEntries("method-target");
-        assertEquals(3, entries.size());
+        assertEquals(5, entries.size());
         assertTrue(entries.contains("method_enter"));
         assertTrue(entries.contains("method_exit"));
         assertTrue(entries.contains("method_around"));
+        assertTrue(entries.contains("exception_exit"));
+        assertTrue(entries.contains("invoke"));
     }
 
     @Test

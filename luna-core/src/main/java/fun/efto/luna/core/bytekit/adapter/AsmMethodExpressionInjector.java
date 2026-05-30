@@ -14,7 +14,9 @@ import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FrameNode;
@@ -89,7 +91,16 @@ public class AsmMethodExpressionInjector implements BytecodeInjector {
             if (methodDesc != null && !methodDesc.isEmpty() && !mn.desc.equals(methodDesc)) continue;
 
             List<AsmInjectionContext.LocalVarInfo> result = new ArrayList<>();
-            if (mn.localVariables != null) {
+            if (mn.localVariables == null) return result;
+
+            if (phase == Phase.ENTER) {
+                int paramSlotCount = computeParamSlotCount(mn.access, mn.desc);
+                for (LocalVariableNode lv : mn.localVariables) {
+                    if (lv.index < paramSlotCount) {
+                        result.add(new AsmInjectionContext.LocalVarInfo(lv.name, lv.desc, lv.index));
+                    }
+                }
+            } else {
                 for (LocalVariableNode lv : mn.localVariables) {
                     result.add(new AsmInjectionContext.LocalVarInfo(lv.name, lv.desc, lv.index));
                 }
@@ -97,6 +108,18 @@ public class AsmMethodExpressionInjector implements BytecodeInjector {
             return result;
         }
         return new ArrayList<>();
+    }
+
+    private int computeParamSlotCount(int access, String desc) {
+        int slot = 0;
+        if ((access & Opcodes.ACC_STATIC) == 0) {
+            slot++;
+        }
+        Type[] argTypes = Type.getArgumentTypes(desc);
+        for (Type argType : argTypes) {
+            slot += argType.getSize();
+        }
+        return slot;
     }
 
     private void insertBeforeReturns(MethodNode mn, InsnList code) {

@@ -7,12 +7,12 @@ import fun.efto.luna.agent.clazz.ClassResourceHelper;
 import fun.efto.luna.agent.web.MethodInvokeService;
 import fun.efto.luna.agent.web.vo.HealthVO;
 import fun.efto.luna.agent.web.vo.InvokeResultVO;
-import fun.efto.luna.core.web.ApiResult;
-import fun.efto.luna.core.web.Controller;
-import fun.efto.luna.core.web.GetMapping;
-import fun.efto.luna.core.web.PostMapping;
-import fun.efto.luna.core.web.RequestBody;
-import fun.efto.luna.core.web.RequestMapping;
+import fun.efto.luna.core.infra.web.ApiResult;
+import fun.efto.luna.core.infra.web.Controller;
+import fun.efto.luna.core.infra.web.GetMapping;
+import fun.efto.luna.core.infra.web.PostMapping;
+import fun.efto.luna.core.infra.web.RequestBody;
+import fun.efto.luna.core.infra.web.RequestMapping;
 
 import java.util.ArrayList;
 import java.util.List;

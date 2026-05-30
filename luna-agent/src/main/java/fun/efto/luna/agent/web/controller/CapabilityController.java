@@ -2,17 +2,17 @@ package fun.efto.luna.agent.web.controller;
 
 import fun.efto.luna.agent.Agent;
 import fun.efto.luna.agent.web.vo.CapabilityManifestVO;
-import fun.efto.luna.core.capability.CoreCapabilityRecord;
-import fun.efto.luna.core.capability.CoreCapabilityRegistry;
-import fun.efto.luna.core.capability.ReadinessState;
+import fun.efto.luna.core.bootstrap.capability.CoreCapabilityRecord;
+import fun.efto.luna.core.bootstrap.capability.CoreCapabilityRegistry;
+import fun.efto.luna.core.bootstrap.capability.ReadinessState;
 import fun.efto.luna.core.plugin.LunaPlugin;
 import fun.efto.luna.core.plugin.PluginState;
 import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
 import fun.efto.luna.core.plugin.lifecycle.PluginRegistrationRecord;
-import fun.efto.luna.core.web.ApiResult;
-import fun.efto.luna.core.web.Controller;
-import fun.efto.luna.core.web.GetMapping;
-import fun.efto.luna.core.web.RequestMapping;
+import fun.efto.luna.core.infra.web.ApiResult;
+import fun.efto.luna.core.infra.web.Controller;
+import fun.efto.luna.core.infra.web.GetMapping;
+import fun.efto.luna.core.infra.web.RequestMapping;
 
 import java.util.ArrayList;
 import java.util.List;

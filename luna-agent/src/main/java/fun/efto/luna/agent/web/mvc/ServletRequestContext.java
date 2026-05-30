@@ -1,6 +1,6 @@
 package fun.efto.luna.agent.web.mvc;
 
-import fun.efto.luna.core.web.RequestContext;
+import fun.efto.luna.core.infra.web.RequestContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

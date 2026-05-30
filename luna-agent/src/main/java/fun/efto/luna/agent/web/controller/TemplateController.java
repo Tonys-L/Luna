@@ -1,15 +1,15 @@
 package fun.efto.luna.agent.web.controller;
 
 import fun.efto.luna.agent.web.vo.TemplateApplyResultVO;
-import fun.efto.luna.core.web.ApiResult;
-import fun.efto.luna.core.web.Controller;
-import fun.efto.luna.core.web.GetMapping;
-import fun.efto.luna.core.web.PathVariable;
-import fun.efto.luna.core.web.PostMapping;
-import fun.efto.luna.core.web.RequestBody;
-import fun.efto.luna.core.web.RequestMapping;
-import fun.efto.luna.core.rule.template.RuleTemplate;
-import fun.efto.luna.core.rule.template.TemplateService;
+import fun.efto.luna.core.infra.web.ApiResult;
+import fun.efto.luna.core.infra.web.Controller;
+import fun.efto.luna.core.infra.web.GetMapping;
+import fun.efto.luna.core.infra.web.PathVariable;
+import fun.efto.luna.core.infra.web.PostMapping;
+import fun.efto.luna.core.infra.web.RequestBody;
+import fun.efto.luna.core.infra.web.RequestMapping;
+import fun.efto.luna.core.injection.rule.template.RuleTemplate;
+import fun.efto.luna.core.injection.rule.template.TemplateService;
 
 import java.util.HashMap;
 import java.util.List;

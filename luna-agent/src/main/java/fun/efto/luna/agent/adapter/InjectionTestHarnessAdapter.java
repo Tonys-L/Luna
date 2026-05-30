@@ -5,7 +5,7 @@ import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.common.InstrumentationHolder;
+import fun.efto.luna.core.infra.InstrumentationHolder;
 import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
 import fun.efto.luna.core.transformer.ClassFileTransformerAdapter;
 import fun.efto.luna.core.transformer.ClassTransformer;

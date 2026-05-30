@@ -1,7 +1,7 @@
 package fun.efto.luna.agent.web.vo;
 
-import fun.efto.luna.core.capability.CoreCapabilityRecord;
-import fun.efto.luna.core.capability.ReadinessState;
+import fun.efto.luna.core.bootstrap.capability.CoreCapabilityRecord;
+import fun.efto.luna.core.bootstrap.capability.ReadinessState;
 
 import java.util.List;
 

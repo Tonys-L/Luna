@@ -1,8 +1,8 @@
 package fun.efto.luna.agent.web.controller;
 
-import fun.efto.luna.core.web.ApiResult;
-import fun.efto.luna.core.web.Controller;
-import fun.efto.luna.core.web.GetMapping;
+import fun.efto.luna.core.infra.web.ApiResult;
+import fun.efto.luna.core.infra.web.Controller;
+import fun.efto.luna.core.infra.web.GetMapping;
 
 /**
  * @author ：Tony.L(286269159@qq.com)

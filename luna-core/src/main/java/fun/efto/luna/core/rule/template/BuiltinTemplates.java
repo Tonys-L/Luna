@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * 内置模板库 - 提供开箱即用的常用注入模式
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 10:00
  */
 public class BuiltinTemplates {

@@ -3,7 +3,7 @@ package fun.efto.luna.core.rule;
 import java.util.regex.Pattern;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/15 10:30
  */
 public final class ClassNameMatcher {

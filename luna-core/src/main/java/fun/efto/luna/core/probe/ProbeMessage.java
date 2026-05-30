@@ -3,7 +3,7 @@ package fun.efto.luna.core.probe;
 /**
  * Typed probe message with type discriminator for frontend rendering.
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/25 23:00
  */
 public class ProbeMessage {

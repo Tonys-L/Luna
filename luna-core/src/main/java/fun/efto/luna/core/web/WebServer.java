@@ -9,7 +9,7 @@ import java.util.List;
  * luna-core 定义此接口，luna-agent 的 JettyWebServer 提供实现。
  * PluginManagerImpl 通过此接口注册插件控制器，无需依赖具体服务器实现。
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 10:00
  */
 public interface WebServer {

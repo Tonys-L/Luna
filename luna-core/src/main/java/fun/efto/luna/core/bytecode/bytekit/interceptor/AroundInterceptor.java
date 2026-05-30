@@ -6,7 +6,7 @@ import com.alibaba.bytekit.asm.binding.Binding;
 import fun.efto.luna.core.bytecode.bytekit.bridge.LunaSpyBridge;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/31 22:30
  */
 public class AroundInterceptor {

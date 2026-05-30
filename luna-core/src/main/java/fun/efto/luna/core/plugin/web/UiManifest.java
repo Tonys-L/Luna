@@ -10,7 +10,7 @@ import fun.efto.luna.core.rule.template.TemplateRegistry;
 import java.util.*;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/25 20:00
  */
 public class UiManifest {

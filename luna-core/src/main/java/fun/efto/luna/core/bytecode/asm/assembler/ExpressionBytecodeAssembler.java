@@ -10,7 +10,7 @@ import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import org.objectweb.asm.MethodVisitor;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2025/10/3 18:04
  */
 public class ExpressionBytecodeAssembler extends BaseAsmBytecodeAssembler {

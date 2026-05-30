@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 22:35
  */
 public class PluginLoader {

@@ -5,7 +5,7 @@ import fun.efto.luna.core.injection.target.InjectionType;
 public class FieldAccessTarget extends BaseTarget {
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/25 23:00
  */
     public enum AccessType { READ, WRITE }

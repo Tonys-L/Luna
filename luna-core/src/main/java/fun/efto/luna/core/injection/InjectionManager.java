@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * 只负责注入的生命周期管理（CRUD + 持久化 + 缓存 + retransform 触发）。
  * 校验、预览、验证等编排逻辑由 InjectionService 负责。
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/17 19:00
  */
 public class InjectionManager implements InjectionQuery, InjectionLifecycle {

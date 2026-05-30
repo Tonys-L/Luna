@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 用于在注入点被触发时，提供高性能的 AST 求值。
  * 避免每次运行时重新解析表达式字符串。
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:00
  */
 public class ConditionRegistry {

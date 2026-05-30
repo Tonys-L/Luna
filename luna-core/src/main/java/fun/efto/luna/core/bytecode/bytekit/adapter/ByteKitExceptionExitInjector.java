@@ -9,7 +9,7 @@ import fun.efto.luna.core.bytecode.bytekit.interceptor.ExceptionExitInterceptor;
 import java.util.List;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/06/01 00:00
  */
 public class ByteKitExceptionExitInjector extends ByteKitInjectorBase {

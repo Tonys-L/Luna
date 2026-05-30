@@ -4,7 +4,7 @@ package fun.efto.luna.core.analyzer;
  * 异常表条目
  * 对应字节码中 try-catch 块的异常处理信息
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/26 00:00
  */
 public class ExceptionTableEntry {

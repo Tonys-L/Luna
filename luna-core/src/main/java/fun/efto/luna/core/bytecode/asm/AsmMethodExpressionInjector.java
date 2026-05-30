@@ -28,7 +28,7 @@ import java.util.List;
 public class AsmMethodExpressionInjector implements BytecodeInjector {
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/06/01 00:20
  */
     public enum Phase {

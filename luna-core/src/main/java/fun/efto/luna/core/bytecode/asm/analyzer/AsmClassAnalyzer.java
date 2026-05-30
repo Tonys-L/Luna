@@ -27,7 +27,7 @@ import java.util.Map;
  * ASM 类分析器
  * 使用 ASM ClassReader/ClassVisitor 解析字节码，提取类结构信息
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/03/29 02:30
  */
 public class AsmClassAnalyzer implements ClassAnalyzer {

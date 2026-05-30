@@ -6,7 +6,7 @@ import com.alibaba.deps.org.objectweb.asm.ClassWriter;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/31 22:00
  */
 public class ByteKitClassLoaderAwareClassWriter extends ClassWriter {

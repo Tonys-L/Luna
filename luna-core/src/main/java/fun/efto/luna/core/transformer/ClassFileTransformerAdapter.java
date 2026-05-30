@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/4 14:17
  */
 public class ClassFileTransformerAdapter implements ClassFileTransformer {

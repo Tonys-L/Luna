@@ -3,7 +3,7 @@ package fun.efto.luna.core.injection;
 import java.util.List;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/17 18:45
  */
 public interface InjectionQuery {

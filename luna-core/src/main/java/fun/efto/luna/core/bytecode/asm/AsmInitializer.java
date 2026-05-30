@@ -7,7 +7,7 @@ import fun.efto.luna.core.init.Initializer;
 
 /**
  * ASM 初始化器
- * @author ：Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
 public class AsmInitializer implements Initializer {

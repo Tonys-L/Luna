@@ -4,7 +4,7 @@ import fun.efto.luna.core.injection.code.CodeType;
 
 /**
  * 表达式基础可注入代码
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/4 4:25
  */
 public class ExpressBaseInjectableCode implements InjectableCode {

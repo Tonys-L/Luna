@@ -13,7 +13,7 @@ import fun.efto.luna.core.injection.PersistentInjection;
 import fun.efto.luna.core.rule.InjectionRule;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/16 10:00
  */
 public class MethodRuleConverter extends AbstractRuleConverter {

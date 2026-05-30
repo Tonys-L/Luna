@@ -2,7 +2,7 @@ package fun.efto.luna.core.injection.code;
 
 /**
  * 代码类型
- * @author ：Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
 public enum CodeType {

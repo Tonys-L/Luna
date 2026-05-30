@@ -4,7 +4,7 @@ package fun.efto.luna.core.injection.port;
  * BytecodePreviewer（出站端口）。
  * 领域层需要"预览字节码变换效果"的能力，不直接依赖 ASM 或 ClassTransformer。
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 18:00
  */
 public interface BytecodePreviewer {

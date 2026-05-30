@@ -1,7 +1,7 @@
 package fun.efto.luna.core.analyzer;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/23 23:22
  */
 public abstract class AbstractAnalyzer implements ClassAnalyzer {

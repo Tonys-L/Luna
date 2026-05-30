@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2025/10/4 17:36
  */
 public class DefaultInitializer implements Initializer {

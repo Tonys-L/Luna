@@ -3,7 +3,7 @@ package fun.efto.luna.core.bytecode;
 import fun.efto.luna.core.injection.InjectionContext;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/2 21:07
  */
 public interface BytecodeAssembler {

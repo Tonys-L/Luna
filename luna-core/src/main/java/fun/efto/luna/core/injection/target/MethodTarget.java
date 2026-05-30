@@ -1,7 +1,7 @@
 package fun.efto.luna.core.injection.target;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/4 4:29
  */
 public class MethodTarget extends BaseTarget {

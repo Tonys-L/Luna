@@ -2,7 +2,7 @@ package fun.efto.luna.core.expression.ast;
 
 /**
  * 二元表达式节点，用于表示二元运算符
- * @author ：Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
 public class BinaryExpressionNode implements ExpressionNode {

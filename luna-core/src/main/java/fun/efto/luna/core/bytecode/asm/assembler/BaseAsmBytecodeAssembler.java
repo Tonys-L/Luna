@@ -5,7 +5,7 @@ import fun.efto.luna.core.bytecode.asm.AsmInjectionContext;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2025/10/5 15:29
  */
 public abstract class BaseAsmBytecodeAssembler implements BytecodeAssembler {

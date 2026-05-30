@@ -24,7 +24,7 @@ import java.util.Collections;
  * without going through the PluginManager lifecycle.
  * These modules are fundamental infrastructure that cannot be unloaded.
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/25 22:00
  */
 public final class CoreModuleInitializer {

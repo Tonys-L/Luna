@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * 字段访问注入类型
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/26 16:00
  */
 public class FieldAccessType extends InjectionType {

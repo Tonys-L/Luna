@@ -6,7 +6,7 @@ import fun.efto.luna.core.plugin.GenerateContext;
 import org.objectweb.asm.MethodVisitor;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 22:00
  */
 public class DefaultGenerateContext implements GenerateContext {

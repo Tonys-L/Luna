@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * 标记仅用于测试的方法，表明其可见性高于正常需要。
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/17 18:50
  */
 @Documented

@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/4 14:23
  */
 public class DefaultClassTransformer implements ClassTransformer {

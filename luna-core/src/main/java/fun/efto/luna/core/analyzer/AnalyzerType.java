@@ -4,7 +4,7 @@ import fun.efto.luna.core.common.type.TypeRegistry;
 import fun.efto.luna.core.common.type.RegisterableType;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/4 15:59
  */
 public class AnalyzerType extends RegisterableType<AnalyzerType> {

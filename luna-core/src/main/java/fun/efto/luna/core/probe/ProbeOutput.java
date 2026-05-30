@@ -3,7 +3,7 @@ package fun.efto.luna.core.probe;
 import fun.efto.luna.core.common.RingBuffer;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/16 20:00
  */
 public final class ProbeOutput {

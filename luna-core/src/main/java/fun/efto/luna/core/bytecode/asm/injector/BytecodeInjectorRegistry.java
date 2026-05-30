@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2025/10/2 21:16
  */
 public final class BytecodeInjectorRegistry implements Registry<InjectionType, BytecodeInjector> {

@@ -16,7 +16,7 @@ import org.objectweb.asm.Type;
 import java.util.List;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/16 10:00
  */
 public class SnapshotExpressionHandler implements ExpressionHandler {

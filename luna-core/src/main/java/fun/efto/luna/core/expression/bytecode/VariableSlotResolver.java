@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * 变量槽位解析器，用于解析变量名到槽位的映射
- * @author ：Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
 public class VariableSlotResolver {

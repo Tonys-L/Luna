@@ -1,7 +1,7 @@
 package fun.efto.luna.core.common.type;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2026/01/25
  */
 public abstract class RegisterableType<T extends BaseType> extends BaseType {

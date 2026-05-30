@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * 插件 UI 清单 VO，描述前端可用的注入类型、表达式协议和模板。
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 17:00
  */
 public class UiManifestVO {

@@ -4,7 +4,7 @@ package fun.efto.luna.core.injection;
  * 持久化注入描述（纯领域模型，不依赖任何序列化框架）。
  * 字段名与 JSON 协议一致，无需 @JSONField 映射。
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/17 18:12
  */
 public class PersistentInjection {

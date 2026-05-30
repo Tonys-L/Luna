@@ -7,7 +7,7 @@ import java.util.Map;
  * 统一 API 响应结果。
  * 字段名与前端约定一致：error（而非 message）。
  *
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 22:00
  */
 public class ApiResult {

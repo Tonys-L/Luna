@@ -4,7 +4,7 @@ import fun.efto.luna.core.injection.target.InjectionType;
 
 /**
  * 基础注入目标
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/4 4:41
  */
 public abstract class BaseTarget implements InjectionTarget {

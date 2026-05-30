@@ -1,7 +1,7 @@
 package fun.efto.luna.core.common.type;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/3 18:03
  */
 public class BaseType {

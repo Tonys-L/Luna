@@ -2,7 +2,7 @@ package fun.efto.luna.core.expression.ast;
 
 /**
  * 变量表达式节点，用于表示变量引用
- * @author ：Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
 public class VariableNode implements ExpressionNode {

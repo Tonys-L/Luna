@@ -32,6 +32,7 @@ public class SnapshotExpressionHandler implements ExpressionHandler {
         boolean isStatic = isStaticMethod(asmContext);
         List<ExpressionSegment.ParameterSegment> params = ReferenceExpressionParser.parseMethodParams(methodDesc, isStatic);
         List<LocalVarInfo> localVars = asmContext.getLocalVariables();
+        List<LocalVarInfo> excludedVars = asmContext.getExcludedSameLineVariables();
 
         Label endLabel = null;
         if (ctx.hasCondition()) {
@@ -39,7 +40,17 @@ public class SnapshotExpressionHandler implements ExpressionHandler {
             generateConditionCheck(mv, asmContext, params, isStatic, endLabel);
         }
 
-        int totalVars = params.size() + (localVars != null ? localVars.size() : 0);
+        int safeLocalCount = 0;
+        if (localVars != null) {
+            for (LocalVarInfo lv : localVars) {
+                if (excludedVars != null && excludedVars.stream().anyMatch(e -> e.getName().equals(lv.getName()))) {
+                    continue;
+                }
+                safeLocalCount++;
+            }
+        }
+
+        int totalVars = params.size() + safeLocalCount;
         String pointId = asmContext.getInjectionPoint().getId();
 
         h.loadString(pointId);
@@ -53,6 +64,9 @@ public class SnapshotExpressionHandler implements ExpressionHandler {
         }
         if (localVars != null) {
             for (LocalVarInfo lv : localVars) {
+                if (excludedVars != null && excludedVars.stream().anyMatch(e -> e.getName().equals(lv.getName()))) {
+                    continue;
+                }
                 emitArrayStore(mv, arrayIndex++, () -> AsmTypeHelper.loadAndBox(mv, Type.getType(lv.getDescriptor()), lv.getSlot()));
             }
         }
@@ -69,6 +83,9 @@ public class SnapshotExpressionHandler implements ExpressionHandler {
         }
         if (localVars != null) {
             for (LocalVarInfo lv : localVars) {
+                if (excludedVars != null && excludedVars.stream().anyMatch(e -> e.getName().equals(lv.getName()))) {
+                    continue;
+                }
                 mv.visitInsn(Opcodes.DUP);
                 AsmTypeHelper.emitIntConstant(mv, arrayIndex++);
                 h.loadString(lv.getName());
@@ -97,7 +114,11 @@ public class SnapshotExpressionHandler implements ExpressionHandler {
             maxSlot = Math.max(maxSlot, p.getSlot() + p.getType().getSize());
         }
         if (asmContext.getLocalVariables() != null) {
+            List<LocalVarInfo> excluded = asmContext.getExcludedSameLineVariables();
             for (LocalVarInfo lv : asmContext.getLocalVariables()) {
+                if (excluded != null && excluded.stream().anyMatch(e -> e.getName().equals(lv.getName()))) {
+                    continue;
+                }
                 maxSlot = Math.max(maxSlot, lv.getSlot() + Type.getType(lv.getDescriptor()).getSize());
             }
         }
@@ -116,7 +137,11 @@ public class SnapshotExpressionHandler implements ExpressionHandler {
             mv.visitInsn(Opcodes.POP);
         }
         if (asmContext.getLocalVariables() != null) {
+            List<LocalVarInfo> excluded = asmContext.getExcludedSameLineVariables();
             for (LocalVarInfo lv : asmContext.getLocalVariables()) {
+                if (excluded != null && excluded.stream().anyMatch(e -> e.getName().equals(lv.getName()))) {
+                    continue;
+                }
                 mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);
                 mv.visitLdcInsn(lv.getName());
                 AsmTypeHelper.loadAndBox(mv, Type.getType(lv.getDescriptor()), lv.getSlot());

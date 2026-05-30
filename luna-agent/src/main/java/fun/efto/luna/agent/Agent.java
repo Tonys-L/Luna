@@ -27,7 +27,7 @@ import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
 import fun.efto.luna.core.rule.RuleManager;
 import fun.efto.luna.core.rule.template.TemplateRegistry;
 import fun.efto.luna.core.rule.template.TemplateService;
-import fun.efto.luna.core.transformer.RuleClassFileTransformer;
+import fun.efto.luna.core.transformer.GlobalClassFileTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +48,7 @@ import java.net.URL;
 public class Agent {
     private static Logger logger;
     private static volatile ClassLoader lunaAgentClassLoader;
+    private static volatile PluginManagerImpl pluginManager;
 
     private Agent() {
     }
@@ -95,7 +96,11 @@ public class Agent {
 
             InjectionService injectionService = assembleInjectionService(classResourceHelper, inst);
 
+            inst.addTransformer(new GlobalClassFileTransformer(InjectionManager.getInstance()), true);
+
             RuleManager ruleManager = RuleManager.getInstance();
+            ruleManager.syncRulesToInjectionManager();
+
             TemplateService templateService = new TemplateService(
                     TemplateRegistry.getInstance(), ruleManager);
 
@@ -107,8 +112,7 @@ public class Agent {
             jettyWebServer.start();
             logger.info("Luna agent started successfully, web server on port 8421");
 
-            inst.addTransformer(new RuleClassFileTransformer(), true);
-            applyRulesToLoadedClasses(inst);
+            applyActiveInjectionsToLoadedClasses(inst);
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
@@ -158,6 +162,23 @@ public class Agent {
                     throw new RuntimeException("Batch retransform failed", e);
                 }
             }
+
+            @Override
+            public void retransformByPattern(String pattern) {
+                if (pattern == null || pattern.isEmpty()) return;
+                try {
+                    String regex = pattern.replace(".", "\\.").replace("*", ".*").replace("?", ".");
+                    java.util.regex.Pattern compiled = java.util.regex.Pattern.compile(regex);
+                    List<Class<?>> targets = InstrumentationHolder.findModifiableClasses(
+                            className -> compiled.matcher(className).matches()
+                                    && !className.startsWith("java.lang.invoke."));
+                    if (!targets.isEmpty()) {
+                        InstrumentationHolder.retransformClasses(targets.toArray(new Class<?>[0]));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Pattern retransform failed for: " + pattern, e);
+                }
+            }
         };
 
         // InjectionStore 适配器
@@ -205,8 +226,8 @@ public class Agent {
                 localVarValidator, injectionVerifier);
     }
 
-    private static void applyRulesToLoadedClasses(Instrumentation inst) {
-        logger.info("Scanning already loaded classes for matching rules...");
+    private static void applyActiveInjectionsToLoadedClasses(Instrumentation inst) {
+        logger.info("Scanning already loaded classes for active injections...");
         Class<?>[] allLoadedClasses = inst.getAllLoadedClasses();
         List<Class<?>> targets = new ArrayList<>();
 
@@ -216,7 +237,7 @@ public class Agent {
                 continue;
             }
 
-            if (!RuleManager.getInstance().findRulesForClass(className).isEmpty()) {
+            if (!InjectionManager.getInstance().getActivePointsForClass(className).isEmpty()) {
                 if (inst.isModifiableClass(clazz)) {
                     targets.add(clazz);
                 }
@@ -225,13 +246,13 @@ public class Agent {
 
         if (!targets.isEmpty()) {
             try {
-                logger.info("Applying rules to {} classes via retransform...", targets.size());
+                logger.info("Applying injections to {} classes via retransform...", targets.size());
                 inst.retransformClasses(targets.toArray(new Class<?>[0]));
             } catch (Exception e) {
                 logger.error("Initial retransform failed", e);
             }
         }
-        logger.info("Initial rule application completed.");
+        logger.info("Initial injection application completed.");
     }
 
     private static CompositeExcludeClassFilter createExcludeClassFilter() {
@@ -268,23 +289,27 @@ public class Agent {
             return;
         }
 
-        PluginManagerImpl pluginManager = new PluginManagerImpl(
+        pluginManager = new PluginManagerImpl(
                 new ReadyGate(),
                 new DefaultLogEmitter(),
-                new fun.efto.luna.core.buffer.RingBuffer<>(4096),
+                fun.efto.luna.core.probe.ProbeOutput.BUFFER,
                 null,
                 null,
                 null
         );
 
-        for (LunaPlugin plugin : builtinPlugins) {
-            try {
-                pluginManager.initializeAll(java.util.Collections.singletonList(plugin));
+        try {
+            pluginManager.initializeAll(builtinPlugins);
+            for (LunaPlugin plugin : builtinPlugins) {
                 logger.info("Initialized builtin plugin: {} ({})", plugin.getId(), plugin.getDisplayName());
-            } catch (Exception e) {
-                logger.warn("Skipped builtin plugin {} due to unmet dependencies: {}", plugin.getId(), e.getMessage());
             }
+        } catch (Exception e) {
+            logger.warn("Failed to initialize builtin plugins: {}", e.getMessage());
         }
+    }
+
+    public static PluginManagerImpl getPluginManager() {
+        return pluginManager;
     }
 
     private static void initializeAgentEnvironment() {

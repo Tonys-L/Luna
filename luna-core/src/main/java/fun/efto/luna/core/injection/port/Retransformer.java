@@ -29,4 +29,8 @@ public interface Retransformer {
             retransform(className);
         }
     }
+
+    default void retransformByPattern(String pattern) {
+        retransform(pattern);
+    }
 }

@@ -13,6 +13,7 @@ import fun.efto.luna.core.injection.CodeCompilerStrategy;
 import fun.efto.luna.core.injection.target.InjectionType;
 import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.plugin.*;
+import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
@@ -31,13 +32,13 @@ import java.util.Map;
 class PluginContextImpl implements PluginContext {
     private final PluginRegistrationRecord record;
     private final LogEmitter logEmitter;
-    private final RingBuffer<String> logBuffer;
+    private final RingBuffer<ProbeMessage> logBuffer;
     private final Retransformer retransformer;
     private final ClassAnalyzer classAnalyzer;
     private final Decompiler decompiler;
 
     PluginContextImpl(PluginRegistrationRecord record, LogEmitter logEmitter,
-                      RingBuffer<String> logBuffer, Retransformer retransformer,
+                      RingBuffer<ProbeMessage> logBuffer, Retransformer retransformer,
                       ClassAnalyzer classAnalyzer, Decompiler decompiler) {
         this.record = record;
         this.logEmitter = logEmitter;
@@ -115,7 +116,7 @@ class PluginContextImpl implements PluginContext {
     }
 
     @Override
-    public RingBuffer<String> getLogBuffer() {
+    public RingBuffer<ProbeMessage> getLogBuffer() {
         return logBuffer;
     }
 

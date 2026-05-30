@@ -1,5 +1,7 @@
 package fun.efto.luna.core.expression.context;
 
+import fun.efto.luna.core.probe.BootstrapClassRegistry;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +18,10 @@ import java.util.Map;
  * @since  : 2026/05/10 00:00
  */
 public class EvaluationContext {
+
+    static {
+        BootstrapClassRegistry.register(EvaluationContext.class.getName());
+    }
 
     private static final ThreadLocal<EvaluationContext> THREAD_LOCAL = ThreadLocal.withInitial(EvaluationContext::new);
 

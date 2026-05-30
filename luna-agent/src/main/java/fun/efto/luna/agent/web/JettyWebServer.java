@@ -9,6 +9,7 @@ import fun.efto.luna.agent.web.controller.StatusController;
 import fun.efto.luna.agent.web.controller.TemplateController;
 import fun.efto.luna.agent.web.controller.TestController;
 import fun.efto.luna.agent.web.controller.MetricsController;
+import fun.efto.luna.agent.web.controller.CapabilityController;
 import fun.efto.luna.agent.web.mvc.DispatcherServlet;
 import fun.efto.luna.agent.web.ws.LogDispatcher;
 import fun.efto.luna.agent.web.ws.LogWebSocketServlet;
@@ -97,6 +98,7 @@ public class JettyWebServer implements WebServer {
         dispatcher.registerController(new TemplateController(templateService));
         dispatcher.registerController(new TestController(classScanner, classResourceHelper));
         dispatcher.registerController(new MetricsController());
+        dispatcher.registerController(new CapabilityController());
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");

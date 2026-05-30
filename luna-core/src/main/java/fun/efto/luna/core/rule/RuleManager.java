@@ -12,8 +12,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import fun.efto.luna.core.instrument.InstrumentationHolder;
-import fun.efto.luna.core.injection.InjectionPoint;
+import fun.efto.luna.core.injection.InjectionManager;
+import fun.efto.luna.core.injection.PersistentInjection;
 
 public class RuleManager {
     private static final RuleManager INSTANCE = new RuleManager();
@@ -61,7 +61,9 @@ public class RuleManager {
         rule.setId(id);
         rules.put(id, rule);
         saveRules();
-        retransformMatchedClasses(rule.getTargetClass());
+        if (rule.getTargetClass() != null && !rule.getTargetClass().isEmpty()) {
+            InjectionManager.getInstance().addInjection(toPersistentInjection(rule));
+        }
         return id;
     }
 
@@ -70,7 +72,7 @@ public class RuleManager {
             rule.setId(id);
             rules.put(id, rule);
             saveRules();
-            retransformMatchedClasses(rule.getTargetClass());
+            InjectionManager.getInstance().updateInjection("rule-" + id, toPersistentInjection(rule));
         }
     }
 
@@ -78,7 +80,7 @@ public class RuleManager {
         InjectionRule rule = rules.remove(id);
         if (rule != null) {
             saveRules();
-            retransformMatchedClasses(rule.getTargetClass());
+            InjectionManager.getInstance().removeInjection("rule-" + id);
         }
     }
 
@@ -116,20 +118,28 @@ public class RuleManager {
         // 此方法通常用于初次加载，retransform 会走 Transformer 路径
     }
 
-    private void retransformMatchedClasses(String classPattern) {
-        if (classPattern == null || classPattern.isEmpty()) return;
-        
-        try {
-            List<Class<?>> targets = InstrumentationHolder.findModifiableClasses(
-                    className -> ClassNameMatcher.matches(className, classPattern)
-                            && !className.startsWith("java.lang.invoke."));
-
-            if (!targets.isEmpty()) {
-                InstrumentationHolder.retransformClasses(targets.toArray(new Class<?>[0]));
+    public void syncRulesToInjectionManager() {
+        for (InjectionRule rule : rules.values()) {
+            if (rule.isEnabled() && rule.getTargetClass() != null && !rule.getTargetClass().isEmpty()) {
+                InjectionManager.getInstance().addInjection(toPersistentInjection(rule));
             }
-        } catch (Exception e) {
-            System.err.println("Retransform failed: " + e.getMessage());
         }
+    }
+
+    private PersistentInjection toPersistentInjection(InjectionRule rule) {
+        PersistentInjection injection = new PersistentInjection();
+        injection.setId("rule-" + rule.getId());
+        injection.setClazz(rule.getTargetClass());
+        injection.setMethodName(rule.getTargetMethod());
+        injection.setMethodDescriptor(rule.getMethodDescriptor());
+        injection.setInjectionType(rule.getInjectionType());
+        injection.setLineNumber(rule.getLineNumber());
+        injection.setExpression(rule.getExpression());
+        injection.setCode(rule.getLogContent());
+        injection.setCodeType(rule.getCodeType());
+        injection.setEnabled(rule.isEnabled());
+        injection.setEphemeral(true);
+        return injection;
     }
 
     private void saveRules() {

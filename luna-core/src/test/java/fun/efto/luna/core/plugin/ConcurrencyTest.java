@@ -4,6 +4,7 @@ import fun.efto.luna.core.buffer.RingBuffer;
 import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
 import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
+import fun.efto.luna.core.probe.ProbeOutput;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ public class ConcurrencyTest {
         pluginManager = new PluginManagerImpl(
             readyGate,
             new DefaultLogEmitter(),
-            new RingBuffer<>(1024),
+            ProbeOutput.BUFFER,
             (Retransformer) className -> {},
             null,
             null

@@ -5,6 +5,7 @@ import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.plugin.lifecycle.AffectedClassTracker;
 import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
 import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
+import fun.efto.luna.core.probe.ProbeOutput;
 import fun.efto.luna.core.rule.InjectionRule;
 import fun.efto.luna.core.rule.RuleManager;
 import fun.efto.luna.core.rule.RuleStatus;
@@ -33,7 +34,7 @@ public class UnloadTest {
         pluginManager = new PluginManagerImpl(
             readyGate,
             new DefaultLogEmitter(),
-            new RingBuffer<>(1024),
+            ProbeOutput.BUFFER,
             (Retransformer) className -> {},
             null,
             null

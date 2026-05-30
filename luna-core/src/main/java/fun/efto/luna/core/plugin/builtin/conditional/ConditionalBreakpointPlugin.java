@@ -20,7 +20,7 @@ public class ConditionalBreakpointPlugin implements LunaPlugin {
 
     @Override
     public List<String> getDependencies() {
-        return Arrays.asList("snapshot", "line-injection");
+        return Arrays.asList("snapshot", "line-target");
     }
 
     @Override

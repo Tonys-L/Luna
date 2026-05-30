@@ -9,6 +9,7 @@ import fun.efto.luna.core.injection.code.type.CodeType;
 import fun.efto.luna.core.injection.target.InjectionType;
 import fun.efto.luna.core.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.plugin.*;
+import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.rule.template.RuleTemplate;
 
 import fun.efto.luna.core.injection.port.Retransformer;
@@ -89,7 +90,7 @@ public class TestPluginContext implements PluginContext {
     public LogEmitter getLogEmitter() { return null; }
 
     @Override
-    public RingBuffer<String> getLogBuffer() { return null; }
+    public RingBuffer<ProbeMessage> getLogBuffer() { return null; }
 
     @Override
     public Retransformer getRetransformer() { return className -> {}; }

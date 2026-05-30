@@ -42,6 +42,11 @@ public class AfterLineInjector implements BytecodeInjector {
             if (target.getMethodDescriptor() != null && !target.getMethodDescriptor().isEmpty()
                     && !mn.desc.equals(target.getMethodDescriptor())) continue;
 
+            if (!hasLineNumberTable(mn)) {
+                throw new RuntimeException("类缺少调试信息(LineNumberTable)，请使用 -g 或 -g:lines 编译。"
+                        + "方法: " + mn.name + mn.desc);
+            }
+
             asmContext.setMethodAccess(mn.access);
             asmContext.setMaxLocals(mn.maxLocals);
 
@@ -52,7 +57,7 @@ public class AfterLineInjector implements BytecodeInjector {
                 if (insn instanceof LineNumberNode) {
                     LineNumberNode lnn = (LineNumberNode) insn;
                     if (lnn.line == target.getLineNumber()) {
-                        AbstractInsnNode insertAfter = findLastInsnOfLine(mn, lnn);
+                        AbstractInsnNode lastInsn = findLastInsnOfLine(mn, lnn);
                         InsnList injectedCode = TreeApiBytecodeHelper.assemble(asmContext, bytecode, bytecodeAssembler);
 
                         int maxVarInCode = computeMaxLocalIndex(asmContext, injectedCode);
@@ -62,7 +67,16 @@ public class AfterLineInjector implements BytecodeInjector {
                             mn.maxLocals = neededLocals;
                         }
 
-                        mn.instructions.insert(insertAfter, injectedCode);
+                        if (lastInsn != null && isReturnOrThrow(lastInsn.getOpcode())) {
+                            mn.instructions.insertBefore(lastInsn, injectedCode);
+                            LOGGER.debug("[AfterLine] Inserted BEFORE return/throw at line {}", target.getLineNumber());
+                        } else if (lastInsn != null) {
+                            mn.instructions.insert(lastInsn, injectedCode);
+                            LOGGER.debug("[AfterLine] Inserted AFTER last instruction at line {}", target.getLineNumber());
+                        } else {
+                            mn.instructions.insertBefore(lnn, injectedCode);
+                            LOGGER.debug("[AfterLine] Inserted before LineNumberNode at line {}", target.getLineNumber());
+                        }
                         injected = true;
                         break;
                     }
@@ -119,13 +133,10 @@ public class AfterLineInjector implements BytecodeInjector {
             if (!(insn instanceof LineNumberNode) && insn.getOpcode() != -1) {
                 lastRealInsn = insn;
             }
-            if (isReturnOrThrow(insn.getOpcode())) {
-                break;
-            }
             insn = insn.getNext();
         }
 
-        return lastRealInsn != null ? lastRealInsn : startLnn;
+        return lastRealInsn;
     }
 
     private boolean isReturnOrThrow(int opcode) {
@@ -146,5 +157,14 @@ public class AfterLineInjector implements BytecodeInjector {
                 insn = next;
             }
         }
+    }
+
+    private boolean hasLineNumberTable(MethodNode mn) {
+        for (AbstractInsnNode insn = mn.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+            if (insn instanceof LineNumberNode) {
+                return true;
+            }
+        }
+        return false;
     }
 }

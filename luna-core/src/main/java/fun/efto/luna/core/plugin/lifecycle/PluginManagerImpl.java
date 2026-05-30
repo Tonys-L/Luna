@@ -8,6 +8,7 @@ import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.injection.target.InjectionType;
 import fun.efto.luna.core.config.ConfigManager;
 import fun.efto.luna.core.plugin.*;
+import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
@@ -40,20 +41,20 @@ public class PluginManagerImpl implements PluginManager {
     private final StampedLock transformLock = new StampedLock();
     private final ReadyGate readyGate;
     private final LogEmitter logEmitter;
-    private final RingBuffer<String> logBuffer;
+    private final RingBuffer<ProbeMessage> logBuffer;
     private final Retransformer retransformer;
     private final ClassAnalyzer classAnalyzer;
     private final Decompiler decompiler;
     private final WebServer webServer;
 
     public PluginManagerImpl(ReadyGate readyGate, LogEmitter logEmitter,
-                              RingBuffer<String> logBuffer, Retransformer retransformer,
+                              RingBuffer<ProbeMessage> logBuffer, Retransformer retransformer,
                               ClassAnalyzer classAnalyzer, Decompiler decompiler) {
         this(readyGate, logEmitter, logBuffer, retransformer, classAnalyzer, decompiler, null);
     }
 
     public PluginManagerImpl(ReadyGate readyGate, LogEmitter logEmitter,
-                              RingBuffer<String> logBuffer, Retransformer retransformer,
+                              RingBuffer<ProbeMessage> logBuffer, Retransformer retransformer,
                               ClassAnalyzer classAnalyzer, Decompiler decompiler,
                               WebServer webServer) {
         this.readyGate = readyGate;

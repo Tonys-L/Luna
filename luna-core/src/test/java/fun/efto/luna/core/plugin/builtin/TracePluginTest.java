@@ -41,11 +41,11 @@ public class TracePluginTest {
     }
 
     @Test
-    @DisplayName("依赖 method-injection 插件")
+    @DisplayName("依赖 method-target 核心能力")
     void testDependencies() {
         List<String> deps = plugin.getDependencies();
         assertEquals(1, deps.size());
-        assertEquals("method-injection", deps.get(0));
+        assertEquals("method-target", deps.get(0));
     }
 
     @Test

@@ -7,9 +7,12 @@ package fun.efto.luna.core.injection;
 import fun.efto.luna.core.injection.port.InjectionStore;
 import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.util.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -18,6 +21,8 @@ import java.util.stream.Collectors;
  * 校验、预览、验证等编排逻辑由 InjectionService 负责。
  */
 public class InjectionManager implements InjectionQuery, InjectionLifecycle {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InjectionManager.class);
 
     private static volatile InjectionManager instance;
 
@@ -30,6 +35,8 @@ public class InjectionManager implements InjectionQuery, InjectionLifecycle {
     private final Map<String, List<PersistentInjection>> classIndex = new ConcurrentHashMap<>();
 
     private final Map<String, List<InjectionPoint>> pointCache = new ConcurrentHashMap<>();
+
+    private volatile List<PatternInjectionEntry> patternPoints = Collections.emptyList();
 
     private final InjectionPersistenceService persistenceService = new InjectionPersistenceService();
 
@@ -74,7 +81,33 @@ public class InjectionManager implements InjectionQuery, InjectionLifecycle {
 
     @Override
     public List<InjectionPoint> getActivePointsForClass(String className) {
-        return pointCache.getOrDefault(className, Collections.emptyList());
+        List<InjectionPoint> exactMatches = pointCache.getOrDefault(className, Collections.emptyList());
+        List<PatternInjectionEntry> currentPatterns = patternPoints;
+        if (currentPatterns.isEmpty()) {
+            return exactMatches;
+        }
+
+        List<InjectionPoint> patternMatches = null;
+        for (PatternInjectionEntry entry : currentPatterns) {
+            if (entry.pattern.matcher(className).matches()) {
+                if (patternMatches == null) {
+                    patternMatches = new ArrayList<>();
+                }
+                patternMatches.addAll(entry.points);
+            }
+        }
+
+        if (patternMatches == null) {
+            return exactMatches;
+        }
+        if (exactMatches.isEmpty()) {
+            return patternMatches;
+        }
+
+        List<InjectionPoint> result = new ArrayList<>(exactMatches.size() + patternMatches.size());
+        result.addAll(exactMatches);
+        result.addAll(patternMatches);
+        return result;
     }
 
     public synchronized List<PersistentInjection> getInjections() {
@@ -87,18 +120,28 @@ public class InjectionManager implements InjectionQuery, InjectionLifecycle {
 
     @Override
     public List<InjectionPoint> getInjectionPoints(String className) {
-        return requireInjectionStore().findByClassName(className);
+        if (injectionStore == null) {
+            return getActivePointsForClass(className);
+        }
+        return injectionStore.findByClassName(className);
     }
 
     @Override
     public int getInjectionCount(String className) {
-        return requireInjectionStore().countByClassName(className);
+        if (injectionStore == null) {
+            List<InjectionPoint> points = getActivePointsForClass(className);
+            return points.size();
+        }
+        return injectionStore.countByClassName(className);
     }
 
     // ==================== InjectionLifecycle ====================
 
     @Override
     public synchronized String addInjection(PersistentInjection injection) {
+        if (injection.getClazz() == null || injection.getClazz().isEmpty()) {
+            throw new IllegalArgumentException("Injection clazz must not be null or empty");
+        }
         if (injection.getId() == null) {
             injection.setId(UUID.randomUUID().toString());
         }
@@ -233,7 +276,20 @@ public class InjectionManager implements InjectionQuery, InjectionLifecycle {
     // ==================== retransform 触发 ====================
 
     public void triggerRetransform(String className) {
-        requireRetransformer().retransform(className);
+        if (retransformer == null) {
+            LOGGER.warn("Retransformer is null, skipping retransform for class [{}]", className);
+            return;
+        }
+        try {
+            if (isPattern(className)) {
+                retransformer.retransformByPattern(className);
+            } else {
+                retransformer.retransform(className);
+            }
+            LOGGER.info("Retransform triggered for class [{}]", className);
+        } catch (Throwable e) {
+            LOGGER.error("Retransform failed for class [{}]: {} - {}", className, e.getClass().getSimpleName(), e.getMessage());
+        }
     }
 
     // ==================== 内部方法 ====================
@@ -242,7 +298,10 @@ public class InjectionManager implements InjectionQuery, InjectionLifecycle {
         List<PersistentInjection> list = classIndex.get(className);
         if (list == null || list.isEmpty()) {
             pointCache.remove(className);
-            requireInjectionStore().clear(className);
+            removePatternEntry(className);
+            if (injectionStore != null) {
+                injectionStore.clear(className);
+            }
             return;
         }
 
@@ -260,11 +319,21 @@ public class InjectionManager implements InjectionQuery, InjectionLifecycle {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-        pointCache.put(className, compiledPoints);
-
-        InjectionStore store = requireInjectionStore();
-        store.clear(className);
-        compiledPoints.forEach(store::save);
+        if (isPattern(className)) {
+            removePatternEntry(className);
+            if (!compiledPoints.isEmpty()) {
+                List<PatternInjectionEntry> updated = new ArrayList<>(patternPoints);
+                updated.add(new PatternInjectionEntry(className, compiledPoints));
+                patternPoints = Collections.unmodifiableList(updated);
+            }
+            pointCache.remove(className);
+        } else {
+            pointCache.put(className, compiledPoints);
+            if (injectionStore != null) {
+                injectionStore.clear(className);
+                compiledPoints.forEach(injectionStore::save);
+            }
+        }
     }
 
     private void markDirty() {
@@ -294,5 +363,40 @@ public class InjectionManager implements InjectionQuery, InjectionLifecycle {
             throw new IllegalStateException("InjectionStore port not configured");
         }
         return injectionStore;
+    }
+
+    private static boolean isPattern(String className) {
+        return className != null && (className.contains("*") || className.contains("?"));
+    }
+
+    private static Pattern compilePattern(String pattern) {
+        String regex = pattern.replace(".", "\\.").replace("*", ".*").replace("?", ".");
+        return Pattern.compile(regex);
+    }
+
+    private void removePatternEntry(String className) {
+        if (!isPattern(className)) return;
+        List<PatternInjectionEntry> current = patternPoints;
+        if (current.isEmpty()) return;
+        Pattern toRemove = compilePattern(className);
+        List<PatternInjectionEntry> updated = new ArrayList<>();
+        for (PatternInjectionEntry entry : current) {
+            if (!entry.pattern.pattern().equals(toRemove.pattern())) {
+                updated.add(entry);
+            }
+        }
+        if (updated.size() != current.size()) {
+            patternPoints = Collections.unmodifiableList(updated);
+        }
+    }
+
+    private static class PatternInjectionEntry {
+        final Pattern pattern;
+        final List<InjectionPoint> points;
+
+        PatternInjectionEntry(String patternStr, List<InjectionPoint> points) {
+            this.pattern = compilePattern(patternStr);
+            this.points = Collections.unmodifiableList(new ArrayList<>(points));
+        }
     }
 }

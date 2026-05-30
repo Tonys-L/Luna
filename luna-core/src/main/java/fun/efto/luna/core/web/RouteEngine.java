@@ -80,10 +80,13 @@ public class RouteEngine {
         } catch (Exception e) {
             LOGGER.error("Handler invocation failed: {} {}", httpMethod, path, e);
             Throwable cause = e.getCause();
+            LOGGER.error("Exception cause: type={}, message={}", cause != null ? cause.getClass().getName() : "null", cause != null ? cause.getMessage() : "null");
             if (cause instanceof IllegalArgumentException) {
                 writeError(ctx, 400, cause.getMessage());
             } else {
-                writeError(ctx, 500, "服务器内部错误: " + (cause != null ? cause.getMessage() : e.getMessage()));
+                String errorMsg = cause != null ? cause.getMessage() : e.getMessage();
+                String errorDetail = cause != null ? cause.getClass().getSimpleName() : e.getClass().getSimpleName();
+                writeError(ctx, 500, "服务器内部错误: [" + errorDetail + "] " + errorMsg);
             }
         }
         return true;

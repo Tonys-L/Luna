@@ -112,7 +112,11 @@ public class LogExpressionHandler implements ExpressionHandler {
             maxSlot = Math.max(maxSlot, p.getSlot() + p.getType().getSize());
         }
         if (asmContext.getLocalVariables() != null) {
+            List<LocalVarInfo> excluded = asmContext.getExcludedSameLineVariables();
             for (LocalVarInfo lv : asmContext.getLocalVariables()) {
+                if (excluded != null && excluded.stream().anyMatch(e -> e.getName().equals(lv.getName()))) {
+                    continue;
+                }
                 maxSlot = Math.max(maxSlot, lv.getSlot() + Type.getType(lv.getDescriptor()).getSize());
             }
         }
@@ -131,7 +135,11 @@ public class LogExpressionHandler implements ExpressionHandler {
             mv.visitInsn(Opcodes.POP);
         }
         if (asmContext.getLocalVariables() != null) {
+            List<LocalVarInfo> excluded = asmContext.getExcludedSameLineVariables();
             for (LocalVarInfo lv : asmContext.getLocalVariables()) {
+                if (excluded != null && excluded.stream().anyMatch(e -> e.getName().equals(lv.getName()))) {
+                    continue;
+                }
                 mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);
                 mv.visitLdcInsn(lv.getName());
                 AsmTypeHelper.loadAndBox(mv, Type.getType(lv.getDescriptor()), lv.getSlot());
@@ -162,14 +170,14 @@ public class LogExpressionHandler implements ExpressionHandler {
     private static String resolveLogPrefix(AsmInjectionContext asmContext) {
         if (asmContext.getInjectionPoint().getInjectionType() instanceof MethodInjectionType) {
             MethodInjectionType type = (MethodInjectionType) asmContext.getInjectionPoint().getInjectionType();
-            if (type == MethodInjectionType.EXIT) {
+            if (type.getName().equals(MethodInjectionType.EXIT.getName())) {
                 return "method exit: ";
-            } else if (type == MethodInjectionType.AROUND) {
+            } else if (type.getName().equals(MethodInjectionType.AROUND.getName())) {
                 return "method around: ";
             }
         } else if (asmContext.getInjectionPoint().getInjectionType() instanceof LineNumberInjectionType) {
             LineNumberInjectionType type = (LineNumberInjectionType) asmContext.getInjectionPoint().getInjectionType();
-            if (type == LineNumberInjectionType.AFTER) {
+            if (type.getName().equals(LineNumberInjectionType.AFTER.getName())) {
                 return "line after: ";
             }
             return "line before: ";

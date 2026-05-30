@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,8 +53,6 @@ public final class LocalVariableScanner {
     }
 
     private static List<AsmInjectionContext.LocalVarInfo> scanMethod(MethodNode mn, int lineNumber, boolean excludeSameLineStart) {
-        Map<LabelNode, Integer> labelLines = buildLabelLineMap(mn);
-
         List<AsmInjectionContext.LocalVarInfo> result = new ArrayList<>();
 
         if (mn.localVariables == null || mn.localVariables.isEmpty()) {
@@ -62,22 +60,32 @@ public final class LocalVariableScanner {
             return result;
         }
 
-        LOGGER.debug("[LocalVarScanner] method={} line={} excludeSameLineStart={} totalVarsInTable={}",
-                mn.name, lineNumber, excludeSameLineStart, mn.localVariables.size());
+        Map<LabelNode, Integer> labelPosMap = new IdentityHashMap<>();
+        List<int[]> lineNodePositions = new ArrayList<>();
+        int pos = 0;
+        for (AbstractInsnNode insn = mn.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+            if (insn instanceof LabelNode) {
+                labelPosMap.put((LabelNode) insn, pos);
+            } else if (insn instanceof LineNumberNode) {
+                lineNodePositions.add(new int[]{pos, ((LineNumberNode) insn).line});
+            }
+            pos++;
+        }
+
+        LOGGER.debug("[LocalVarScanner] method={} line={} excludeSameLineStart={} totalVars={} lineNodeCount={}",
+                mn.name, lineNumber, excludeSameLineStart, mn.localVariables.size(), lineNodePositions.size());
 
         for (LocalVariableNode lv : mn.localVariables) {
             if (lv.start == null || lv.end == null) continue;
 
-            LabelNode startLabel = (lv.start instanceof LabelNode) ? (LabelNode) lv.start : null;
-            LabelNode endLabel = (lv.end instanceof LabelNode) ? (LabelNode) lv.end : null;
+            int startLine = resolveStartLine(labelPosMap, lineNodePositions, lv.start);
+            int endLine = resolveEndLine(labelPosMap, lineNodePositions, lv.end);
+            int startPos = labelPosMap.containsKey(lv.start) ? labelPosMap.get(lv.start) : -1;
 
-            if (startLabel == null) continue;
+            boolean visible = checkVisibility(lineNumber, startPos, startLine, endLine, excludeSameLineStart);
 
-            boolean visible = isVariableVisibleAtLine(mn, labelLines, startLabel, endLabel, lineNumber, excludeSameLineStart);
-            Integer startLine = resolveStartLine(mn, labelLines, startLabel);
-
-            LOGGER.debug("[LocalVarScanner]   var={} slot={} desc={} startLine={} visible={}",
-                    lv.name, lv.index, lv.desc, startLine, visible);
+            LOGGER.debug("[LocalVarScanner]   var={} slot={} startLine={} endLine={} queryLine={} visible={}",
+                    lv.name, lv.index, startLine, endLine, lineNumber, visible);
 
             if (visible) {
                 result.add(new AsmInjectionContext.LocalVarInfo(lv.name, lv.desc, lv.index));
@@ -88,75 +96,66 @@ public final class LocalVariableScanner {
         return result;
     }
 
-    private static Integer resolveStartLine(MethodNode mn, Map<LabelNode, Integer> labelLines, LabelNode start) {
-        Integer startLine = labelLines.get(start);
-        if (startLine == null) {
-            startLine = findNearestPrecedingLine(mn, labelLines, start);
+    private static int resolveStartLine(Map<LabelNode, Integer> labelPosMap,
+                                         List<int[]> lineNodePositions,
+                                         LabelNode label) {
+        Integer labelPos = labelPosMap.get(label);
+        if (labelPos == null) {
+            return -1;
         }
-        return startLine;
+        return findLineAtOrBefore(lineNodePositions, labelPos);
     }
 
-    private static Map<LabelNode, Integer> buildLabelLineMap(MethodNode mn) {
-        Map<LabelNode, Integer> labelLines = new LinkedHashMap<>();
-        AbstractInsnNode insn = mn.instructions.getFirst();
-        while (insn != null) {
-            if (insn instanceof LineNumberNode) {
-                LineNumberNode lnn = (LineNumberNode) insn;
-                labelLines.put(lnn.start, lnn.line);
-            }
-            insn = insn.getNext();
+    private static int resolveEndLine(Map<LabelNode, Integer> labelPosMap,
+                                       List<int[]> lineNodePositions,
+                                       LabelNode label) {
+        Integer labelPos = labelPosMap.get(label);
+        if (labelPos == null) {
+            return -1;
         }
-        return labelLines;
+        return findLineAtOrAfter(lineNodePositions, labelPos);
     }
 
-    private static boolean isVariableVisibleAtLine(MethodNode mn, Map<LabelNode, Integer> labelLines,
-                                                    LabelNode start, LabelNode end, int line,
-                                                    boolean excludeSameLineStart) {
-        Integer startLine = labelLines.get(start);
-        Integer endLine = (end != null) ? labelLines.get(end) : null;
-
-        if (startLine == null) {
-            startLine = findNearestPrecedingLine(mn, labelLines, start);
-        }
-
-        if (startLine == null) {
+    private static boolean checkVisibility(int queryLine, int startPos, int startLine, int endLine, boolean excludeSameLineStart) {
+        if (startPos < 0) {
             return true;
         }
-        if (line < startLine) {
-            return false;
-        }
-        if (excludeSameLineStart && line == startLine) {
-            return false;
-        }
-        if (endLine == null || endLine <= startLine) {
+        if (startLine < 0) {
             return true;
         }
-        return line <= endLine;
+        if (queryLine < startLine) {
+            return false;
+        }
+        if (excludeSameLineStart && queryLine == startLine) {
+            return false;
+        }
+        if (endLine < 0 || endLine <= startLine) {
+            return true;
+        }
+        return queryLine < endLine;
     }
 
-    private static Integer findNearestPrecedingLine(MethodNode mn, Map<LabelNode, Integer> labelLines, LabelNode target) {
-        int targetPos = getPosition(mn, target);
-        if (targetPos < 0) return null;
+    private static int findLineAtOrBefore(List<int[]> lineNodePositions, int pos) {
+        if (pos < 0) return -1;
 
-        Integer nearestLine = null;
-        int nearestPos = -1;
-
-        for (Map.Entry<LabelNode, Integer> entry : labelLines.entrySet()) {
-            int pos = getPosition(mn, entry.getKey());
-            if (pos >= 0 && pos <= targetPos && pos > nearestPos) {
-                nearestPos = pos;
-                nearestLine = entry.getValue();
+        int bestLine = -1;
+        for (int[] entry : lineNodePositions) {
+            if (entry[0] <= pos) {
+                bestLine = entry[1];
+            } else {
+                break;
             }
         }
-
-        return nearestLine;
+        return bestLine;
     }
 
-    private static int getPosition(MethodNode mn, LabelNode label) {
-        int pos = 0;
-        for (AbstractInsnNode insn = mn.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-            if (insn == label) return pos;
-            pos++;
+    private static int findLineAtOrAfter(List<int[]> lineNodePositions, int pos) {
+        if (pos < 0) return -1;
+
+        for (int[] entry : lineNodePositions) {
+            if (entry[0] >= pos) {
+                return entry[1];
+            }
         }
         return -1;
     }

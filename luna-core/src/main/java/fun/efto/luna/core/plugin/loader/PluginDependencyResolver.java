@@ -1,9 +1,9 @@
 package fun.efto.luna.core.plugin.loader;
 
+import fun.efto.luna.core.capability.CoreCapabilityRegistry;
 import fun.efto.luna.core.plugin.LunaPlugin;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author : Tony.L(<286269159@qq.com>)
@@ -21,11 +21,12 @@ public class PluginDependencyResolver {
             graph.putIfAbsent(p.getId(), new HashSet<>());
             inDegree.putIfAbsent(p.getId(), 0);
             for (String dep : p.getDependencies()) {
-                if (!byId.containsKey(dep)) {
+                if (byId.containsKey(dep)) {
+                    graph.computeIfAbsent(dep, k -> new HashSet<>()).add(p.getId());
+                    inDegree.merge(p.getId(), 1, Integer::sum);
+                } else if (!CoreCapabilityRegistry.getInstance().isReady(dep)) {
                     throw new IllegalStateException("Plugin [" + p.getId() + "] depends on [" + dep + "] which is not found");
                 }
-                graph.computeIfAbsent(dep, k -> new HashSet<>()).add(p.getId());
-                inDegree.merge(p.getId(), 1, Integer::sum);
             }
         }
         Queue<String> queue = new LinkedList<>();

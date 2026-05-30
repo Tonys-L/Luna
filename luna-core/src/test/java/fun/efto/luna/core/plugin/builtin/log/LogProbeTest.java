@@ -2,6 +2,7 @@ package fun.efto.luna.core.plugin.builtin.log;
 
 import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.probe.ProbeOutput;
+import fun.efto.luna.core.spy.LunaSpy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -63,5 +64,23 @@ public class LogProbeTest {
         assertEquals("msg1", messages.get(0).getPayload());
         assertEquals("msg2", messages.get(1).getPayload());
         assertEquals("msg3", messages.get(2).getPayload());
+    }
+
+    @Test
+    void testBufferUnification_LogProbeWritesToLunaSpyBuffer() {
+        while (LunaSpy.LOG_BUFFER.poll() != null) {}
+
+        LogProbe.onLog("via-log-probe");
+
+        ProbeMessage msg = LunaSpy.LOG_BUFFER.poll();
+        assertNotNull(msg, "LogProbe.onLog() 写入的消息必须能从 LunaSpy.LOG_BUFFER 读取到");
+        assertEquals("LOG", msg.getType());
+        assertEquals("via-log-probe", msg.getPayload());
+    }
+
+    @Test
+    void testBufferUnification_SameInstance() {
+        assertSame(ProbeOutput.BUFFER, LunaSpy.LOG_BUFFER,
+                "ProbeOutput.BUFFER 和 LunaSpy.LOG_BUFFER 必须是同一个 RingBuffer 实例");
     }
 }

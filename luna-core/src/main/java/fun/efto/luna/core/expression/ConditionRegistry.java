@@ -3,6 +3,7 @@ package fun.efto.luna.core.expression;
 import fun.efto.luna.core.expression.ast.ExpressionNode;
 import fun.efto.luna.core.expression.context.EvaluationContext;
 import fun.efto.luna.core.expression.parser.ConditionalExpressionParser;
+import fun.efto.luna.core.probe.BootstrapClassRegistry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since  : 2026/05/10 00:00
  */
 public class ConditionRegistry {
+
+    static {
+        BootstrapClassRegistry.register(ConditionRegistry.class.getName());
+    }
 
     private static final Map<String, ExpressionNode> AST_CACHE = new ConcurrentHashMap<>();
     private static final ConditionalExpressionParser PARSER = new ConditionalExpressionParser();

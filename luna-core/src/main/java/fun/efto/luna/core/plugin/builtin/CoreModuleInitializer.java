@@ -5,10 +5,18 @@
 package fun.efto.luna.core.plugin.builtin;
 
 import fun.efto.luna.core.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.capability.CapabilityKind;
+import fun.efto.luna.core.capability.CoreCapabilityRecord;
+import fun.efto.luna.core.capability.CoreCapabilityRegistry;
+import fun.efto.luna.core.capability.LifecyclePolicy;
+import fun.efto.luna.core.capability.ReadinessState;
 import fun.efto.luna.core.plugin.builtin.line.*;
 import fun.efto.luna.core.plugin.builtin.method.*;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Initializes core injection modules (Method/Line) directly,
@@ -48,5 +56,19 @@ public final class CoreModuleInitializer {
         LineRuleConverter lineConverter = new LineRuleConverter();
         RuleConverterRegistry.getInstance().register(LineNumberInjectionType.BEFORE, lineConverter);
         RuleConverterRegistry.getInstance().register(LineNumberInjectionType.AFTER, lineConverter);
+
+        CoreCapabilityRegistry capRegistry = CoreCapabilityRegistry.getInstance();
+
+        capRegistry.register(new CoreCapabilityRecord(
+                "method-target", "方法注入目标", CapabilityKind.KERNEL,
+                Arrays.asList("method_enter", "method_exit", "method_around"),
+                ReadinessState.READY, Collections.emptyList(), LifecyclePolicy.CORE_ONLY
+        ));
+
+        capRegistry.register(new CoreCapabilityRecord(
+                "line-target", "行号注入目标", CapabilityKind.KERNEL,
+                Arrays.asList("line_before", "line_after"),
+                ReadinessState.READY, Collections.emptyList(), LifecyclePolicy.CORE_ONLY
+        ));
     }
 }

@@ -28,7 +28,7 @@ public class PluginManagerTest {
         pluginManager = new PluginManagerImpl(
             readyGate,
             new DefaultLogEmitter(),
-            new fun.efto.luna.core.buffer.RingBuffer<>(1024),
+            fun.efto.luna.core.probe.ProbeOutput.BUFFER,
             (Retransformer) className -> {},
             null,
             null

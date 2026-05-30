@@ -33,6 +33,24 @@ public class LocalVariableScannerTest {
         }
     }
 
+    public static class ServiceWithForLoop {
+        public void createUser(String name, int age) {
+            long id = 1L;
+            int count = 0;
+            for (int i = 0; i < 100; i++) {
+                int a = 0;
+                int b = 0;
+                if (i % 2 == 0) {
+                    int c = a + b;
+                    count++;
+                } else {
+                    int d = a - b;
+                }
+            }
+            System.out.println(name);
+        }
+    }
+
     private byte[] getClassBytecode(Class<?> clazz) throws Exception {
         String internalName = clazz.getName().replace('.', '/');
         InputStream is = getClass().getClassLoader().getResourceAsStream(internalName + ".class");
@@ -89,7 +107,7 @@ public class LocalVariableScannerTest {
         @DisplayName("excludeSameLineStart=true 排除同行声明的变量")
         void testExcludeSameLineStart() throws Exception {
             byte[] bytecode = getClassBytecode(ServiceWithLocals.class);
-            int idLine = findLineNumber(bytecode, "process", 1);
+            int idLine = findLineNumber(bytecode, "process", 0);
 
             List<LocalVarInfo> varsExclude = LocalVariableScanner.scanVisibleLocalVariables(
                     bytecode, "process", "(Ljava/lang/String;I)V", idLine, true);
@@ -121,7 +139,7 @@ public class LocalVariableScannerTest {
         @DisplayName("long 类型变量占用两个 slot")
         void testLongVariableSlotSize() throws Exception {
             byte[] bytecode = getClassBytecode(ServiceWithLocals.class);
-            int idLine = findLineNumber(bytecode, "process", 1);
+            int idLine = findLineNumber(bytecode, "process", 0);
 
             List<LocalVarInfo> vars = LocalVariableScanner.scanVisibleLocalVariables(
                     bytecode, "process", "(Ljava/lang/String;I)V", idLine, false);
@@ -153,6 +171,55 @@ public class LocalVariableScannerTest {
                     bytecode, "nonExistent", "()V", 1);
 
             assertTrue(result.isEmpty(), "Non-existent method should return empty list");
+        }
+
+        @Test
+        @DisplayName("for 循环变量 i 在 count=0 行不可见（与 UserService 第21行场景一致）")
+        void testLoopVarNotVisibleAtCountLine() throws Exception {
+            byte[] bytecode = getClassBytecode(ServiceWithForLoop.class);
+
+            int countLineNum = findLineNumber(bytecode, "createUser", 1);
+
+            List<LocalVarInfo> vars = LocalVariableScanner.scanVisibleLocalVariables(
+                    bytecode, "createUser", "(Ljava/lang/String;I)V", countLineNum, true);
+
+            assertFalse(vars.stream().anyMatch(v -> v.getName().equals("i")),
+                    "Loop variable 'i' should NOT be visible at 'int count = 0' line (before the for loop)");
+            assertFalse(vars.stream().anyMatch(v -> v.getName().equals("a")),
+                    "Variable 'a' inside the loop should NOT be visible at 'int count = 0' line");
+            assertFalse(vars.stream().anyMatch(v -> v.getName().equals("count")),
+                    "Variable 'count' declared on same line should be excluded when excludeSameLineStart=true");
+
+            List<LocalVarInfo> varsInclude = LocalVariableScanner.scanVisibleLocalVariables(
+                    bytecode, "createUser", "(Ljava/lang/String;I)V", countLineNum, false);
+            assertTrue(varsInclude.stream().anyMatch(v -> v.getName().equals("count")),
+                    "Variable 'count' should be visible when excludeSameLineStart=false");
+            assertFalse(varsInclude.stream().anyMatch(v -> v.getName().equals("i")),
+                    "Loop variable 'i' should NOT be visible even when excludeSameLineStart=false");
+        }
+
+        @Test
+        @DisplayName("UserService 场景：for 循环变量 i 在 count=0 行不可见，在 for 行可见")
+        void testUserServiceLoopVarIssue() throws Exception {
+            byte[] bytecode = getClassBytecode(ServiceWithForLoop.class);
+
+            int countLineNum = findLineNumber(bytecode, "createUser", 1);
+            int forLoopLineNum = findLineNumber(bytecode, "createUser", 2);
+
+            assertTrue(countLineNum < forLoopLineNum,
+                    "count line (" + countLineNum + ") should be before for loop line (" + forLoopLineNum + ")");
+
+            List<LocalVarInfo> varsAtCountLine = LocalVariableScanner.scanVisibleLocalVariables(
+                    bytecode, "createUser", "(Ljava/lang/String;I)V", countLineNum, false);
+
+            assertFalse(varsAtCountLine.stream().anyMatch(v -> v.getName().equals("i")),
+                    "Loop variable 'i' should NOT be visible at 'int count = 0' line");
+
+            List<LocalVarInfo> varsAtForLine = LocalVariableScanner.scanVisibleLocalVariables(
+                    bytecode, "createUser", "(Ljava/lang/String;I)V", forLoopLineNum, false);
+
+            assertTrue(varsAtForLine.stream().anyMatch(v -> v.getName().equals("i")),
+                    "Loop variable 'i' SHOULD be visible at the for loop line");
         }
     }
 }

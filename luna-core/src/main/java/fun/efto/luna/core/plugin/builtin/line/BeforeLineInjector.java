@@ -60,6 +60,11 @@ public class BeforeLineInjector implements BytecodeInjector {
             if (target.getMethodDescriptor() != null && !target.getMethodDescriptor().isEmpty()
                     && !mn.desc.equals(target.getMethodDescriptor())) continue;
 
+            if (!hasLineNumberTable(mn)) {
+                throw new RuntimeException("类缺少调试信息(LineNumberTable)，请使用 -g 或 -g:lines 编译。"
+                        + "方法: " + mn.name + mn.desc);
+            }
+
             asmContext.setMethodAccess(mn.access);
             asmContext.setMaxLocals(mn.maxLocals);
 
@@ -142,5 +147,14 @@ public class BeforeLineInjector implements BytecodeInjector {
                 insn = next;
             }
         }
+    }
+
+    private boolean hasLineNumberTable(MethodNode mn) {
+        for (AbstractInsnNode insn = mn.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+            if (insn instanceof LineNumberNode) {
+                return true;
+            }
+        }
+        return false;
     }
 }

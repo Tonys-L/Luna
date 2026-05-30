@@ -19,7 +19,7 @@ public class TracePlugin implements LunaPlugin {
 
     @Override
     public List<String> getDependencies() {
-        return Arrays.asList("method-injection");
+        return Arrays.asList("method-target");
     }
 
     @Override

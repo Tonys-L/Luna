@@ -1,4 +1,4 @@
-package fun.efto.luna.core.web;
+package fun.efto.luna.core.infra.web;
 
 /**
  * 容器无关的请求上下文接口。

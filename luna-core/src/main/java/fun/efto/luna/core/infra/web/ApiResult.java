@@ -1,4 +1,4 @@
-package fun.efto.luna.core.web;
+package fun.efto.luna.core.infra.web;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

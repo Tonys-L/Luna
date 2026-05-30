@@ -1,4 +1,4 @@
-package fun.efto.luna.core.web;
+package fun.efto.luna.core.infra.web;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,5 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RequestBody {
+public @interface RequestParam {
+    String value();
+    boolean required() default true;
 }

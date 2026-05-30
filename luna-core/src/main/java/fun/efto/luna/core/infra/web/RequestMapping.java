@@ -1,4 +1,4 @@
-package fun.efto.luna.core.web;
+package fun.efto.luna.core.infra.web;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -10,9 +10,9 @@ import java.lang.annotation.Target;
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 22:00
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface DeleteMapping {
+public @interface RequestMapping {
     String value() default "";
 }

@@ -1,4 +1,4 @@
-package fun.efto.luna.core.web;
+package fun.efto.luna.core.infra.web;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

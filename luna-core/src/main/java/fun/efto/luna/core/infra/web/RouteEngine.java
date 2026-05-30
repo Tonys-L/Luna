@@ -1,4 +1,4 @@
-package fun.efto.luna.core.web;
+package fun.efto.luna.core.infra.web;
 
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;

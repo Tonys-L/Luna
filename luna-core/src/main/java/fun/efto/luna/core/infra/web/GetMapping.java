@@ -1,5 +1,6 @@
-package fun.efto.luna.core.web;
+package fun.efto.luna.core.infra.web;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -9,9 +10,9 @@ import java.lang.annotation.Target;
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 22:00
  */
-@Target(ElementType.PARAMETER)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RequestParam {
-    String value();
-    boolean required() default true;
+@Documented
+public @interface GetMapping {
+    String value() default "";
 }

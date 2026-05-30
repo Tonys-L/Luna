@@ -8,7 +8,7 @@ import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import fun.efto.luna.core.rule.template.TemplateRegistry;
-import fun.efto.luna.core.web.WebServer;
+import fun.efto.luna.core.infra.web.WebServer;
 
 /**
  * @author : Tony.L(286269159@qq.com)

@@ -1,4 +1,4 @@
-package fun.efto.luna.core.web;
+package fun.efto.luna.core.infra.web;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface PutMapping {
+public @interface PostMapping {
     String value() default "";
 }

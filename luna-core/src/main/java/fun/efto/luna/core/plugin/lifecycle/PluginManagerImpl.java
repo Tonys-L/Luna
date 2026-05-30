@@ -16,7 +16,7 @@ import fun.efto.luna.core.plugin.loader.PluginClassLoader;
 import fun.efto.luna.core.plugin.loader.PluginDependencyResolver;
 import fun.efto.luna.core.plugin.loader.LunaAgentClassLoader;
 import fun.efto.luna.core.rule.template.RuleTemplate;
-import fun.efto.luna.core.web.WebServer;
+import fun.efto.luna.core.infra.web.WebServer;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;

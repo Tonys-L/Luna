@@ -387,9 +387,9 @@
 
 - [x] REFACTOR: 无需重构
 
-- [ ] COMMIT: `test: ByteKit 注入性能验证` ⚠️ **待提交**
+- [x] COMMIT: `test: ByteKit performance test + retransform verification + InterceptorProcessor cache optimization` (c81dd00)
 
-### Task 6.2: retransform 动态增删验证 ✅（代码未提交）
+### Task 6.2: retransform 动态增删验证 ✅
 
 - [x] RED: 编写 `ByteKitRetransformTest`
   - 测试：动态新增注入点后 retransform 正常
@@ -399,11 +399,7 @@
 
 - [x] REFACTOR: 无需重构
 
-- [ ] COMMIT: `test: ByteKit retransform 动态增删验证` ⚠️ **待提交**
-
-> ⚠️ **注意**：Phase 6 的代码（ByteKitPerformanceTest.java、ByteKitRetransformTest.java、
-> ByteKitInjectorBase.java 修改、ByteKitClassLoaderAwareClassWriter.java 修改）
-> 尚未提交到 Git，需尽快提交。
+- [x] COMMIT: 合并到 Task 6.1 提交 (c81dd00)
 
 ---
 

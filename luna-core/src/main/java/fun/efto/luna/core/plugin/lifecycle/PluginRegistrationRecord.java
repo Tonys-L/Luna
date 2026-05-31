@@ -36,6 +36,7 @@ public final class PluginRegistrationRecord {
     public Map<InjectionLocation, BytecodeInjector> getInjectors() { return Collections.unmodifiableMap(injectors); }
     public Map<CodeType, BytecodeAssembler> getAssemblers() { return Collections.unmodifiableMap(assemblers); }
     public List<ExpressionHandler> getExpressionHandlers() { return Collections.unmodifiableList(expressionHandlers); }
+    public List<ProbeHandler> getProbeHandlers() { return Collections.unmodifiableList(probeHandlers); }
     public Map<InjectionLocation, InjectionRuleConverter> getRuleConverters() { return Collections.unmodifiableMap(ruleConverters); }
     public List<RuleTemplate> getTemplates() { return Collections.unmodifiableList(templates); }
     public List<LunaController> getControllers() { return Collections.unmodifiableList(controllers); }

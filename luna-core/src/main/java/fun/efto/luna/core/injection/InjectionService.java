@@ -4,6 +4,9 @@ import fun.efto.luna.core.injection.port.BytecodeLoader;
 import fun.efto.luna.core.injection.port.BytecodePreviewer;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.port.LocalVarValidator;
+import fun.efto.luna.core.plugin.ProbeHandler;
+import fun.efto.luna.core.plugin.ValidationResult;
+import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
 import fun.efto.luna.core.transformer.ClassTransformer;
 import fun.efto.luna.core.transformer.DefaultClassTransformer;
 import fun.efto.luna.core.transformer.TransformerResult;
@@ -36,6 +39,11 @@ public class InjectionService implements InjectionQuery {
     }
 
     public InjectResult inject(InjectionCommand cmd) {
+        String probeValidationError = validateProbeHandler(cmd);
+        if (probeValidationError != null) {
+            return InjectResult.failure(probeValidationError);
+        }
+
         String paramError = InjectionValidator.validateParamReferences(cmd.getCode(), cmd.getDesc());
         if (paramError != null) {
             return InjectResult.failure(paramError);
@@ -60,6 +68,11 @@ public class InjectionService implements InjectionQuery {
     }
 
     public InjectTestResult injectWithTest(InjectionCommand cmd) {
+        String probeValidationError = validateProbeHandler(cmd);
+        if (probeValidationError != null) {
+            return InjectTestResult.failure("probeValidation", probeValidationError);
+        }
+
         String paramError = InjectionValidator.validateParamReferences(cmd.getCode(), cmd.getDesc());
         if (paramError != null) {
             return InjectTestResult.failure("validateLocalVar", paramError);
@@ -186,6 +199,21 @@ public class InjectionService implements InjectionQuery {
     private boolean isLineInjection(InjectionCommand cmd) {
         if (cmd.getInjectionLocation() == null) return false;
         return cmd.getLineNumber() != null && cmd.getLineNumber() > 0;
+    }
+
+    private String validateProbeHandler(InjectionCommand cmd) {
+        if (cmd.getProbeType() == null || cmd.getProbeType().isEmpty()) {
+            return null;
+        }
+        ProbeHandler handler = ProbeHandlerRegistry.getInstance().get(cmd.getProbeType()).orElse(null);
+        if (handler == null) {
+            return null;
+        }
+        ValidationResult result = handler.validate(cmd);
+        if (!result.isValid()) {
+            return result.getErrorMessage();
+        }
+        return null;
     }
 
     public static class InjectResult {

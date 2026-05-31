@@ -29,6 +29,8 @@ public interface PluginContext {
 
     void registerExpressionHandler(ExpressionHandler handler);
 
+    void registerProbeHandler(ProbeHandler handler);
+
     void registerRuleConverter(InjectionRuleConverter converter);
 
     void registerRuleConverter(InjectionLocation location, InjectionRuleConverter converter);

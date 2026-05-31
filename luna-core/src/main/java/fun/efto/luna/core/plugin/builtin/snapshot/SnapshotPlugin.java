@@ -18,6 +18,7 @@ public class SnapshotPlugin implements LunaPlugin {
     @Override
     public void initialize(PluginContext ctx) {
         ctx.registerExpressionHandler(new SnapshotExpressionHandler());
+        ctx.registerProbeHandler(new SnapshotProbeHandler());
         ctx.registerAssembler(CodeType.SNAPSHOT, new ExpressionBytecodeAssembler());
         ctx.registerCodeCompilerStrategy(new SnapshotCodeCompilerStrategy());
         ctx.registerTemplate(SnapshotTemplates.lineSnapshot());

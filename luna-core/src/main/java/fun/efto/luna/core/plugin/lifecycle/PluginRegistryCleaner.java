@@ -6,6 +6,7 @@ import fun.efto.luna.core.injection.CodeCompiler;
 import fun.efto.luna.core.injection.CodeCompilerStrategy;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
+import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import fun.efto.luna.core.injection.rule.template.TemplateRegistry;
 import fun.efto.luna.core.infra.web.WebServer;

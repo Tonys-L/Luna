@@ -47,6 +47,10 @@ public interface PluginManager {
         return Collections.emptySet();
     }
 
+    default Set<ProbeHandler> getProbeHandlersForPlugin(String pluginId) {
+        return Collections.emptySet();
+    }
+
     default Set<RuleTemplate> getTemplatesForPlugin(String pluginId) {
         return Collections.emptySet();
     }

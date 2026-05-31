@@ -25,6 +25,7 @@ public class TracePlugin implements LunaPlugin {
     @Override
     public void initialize(PluginContext ctx) {
         ctx.registerExpressionHandler(new TraceExpressionHandler());
+        ctx.registerProbeHandler(new TraceProbeHandler());
         for (RuleTemplate t : TraceTemplates.all()) ctx.registerTemplate(t);
     }
 }

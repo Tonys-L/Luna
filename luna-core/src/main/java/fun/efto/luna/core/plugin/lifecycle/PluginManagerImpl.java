@@ -1,4 +1,4 @@
-package fun.efto.luna.core.plugin.lifecycle;
+﻿package fun.efto.luna.core.plugin.lifecycle;
 
 import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.infra.RingBuffer;
@@ -462,6 +462,12 @@ public class PluginManagerImpl implements PluginManager {
     public Set<ExpressionHandler> getExpressionHandlersForPlugin(String pluginId) {
         PluginRegistrationRecord record = records.get(pluginId);
         return record != null ? new HashSet<>(record.getExpressionHandlers()) : Collections.emptySet();
+    }
+
+    @Override
+    public Set<ProbeHandler> getProbeHandlersForPlugin(String pluginId) {
+        PluginRegistrationRecord record = records.get(pluginId);
+        return record != null ? new HashSet<>(record.getProbeHandlers()) : Collections.emptySet();
     }
 
     @Override

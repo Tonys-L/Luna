@@ -72,6 +72,12 @@ class PluginContextImpl implements PluginContext {
     }
 
     @Override
+    public void registerProbeHandler(ProbeHandler handler) {
+        ProbeHandlerRegistry.getInstance().register(handler);
+        record.addProbeHandler(handler);
+    }
+
+    @Override
     public void registerRuleConverter(InjectionRuleConverter converter) {
     }
 

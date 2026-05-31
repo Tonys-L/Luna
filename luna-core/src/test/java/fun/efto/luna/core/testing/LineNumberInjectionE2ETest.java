@@ -5,7 +5,7 @@ import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
 import fun.efto.luna.core.bytecode.asm.assembler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
@@ -48,14 +48,14 @@ public class LineNumberInjectionE2ETest {
             int line = findFirstMethodLine(bytecode, "processWithLoop");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TARGET_CLASS, line, 0,
+                    LineNumberInjectionLocation.BEFORE, TARGET_CLASS, line, 0,
                     "processWithLoop", "(I)V");
             InjectableCode code = createCode("log:check loop");
             InjectionPoint ip = new InjectionPoint(target, code);
             InjectionContext ctx = new InjectionContext(ip);
 
             BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                    .get(LineNumberInjectionType.BEFORE).get();
+                    .get(LineNumberInjectionLocation.BEFORE).get();
             byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
             Class<?> loaded = injectAndLoad(result, TARGET_CLASS);
@@ -78,14 +78,14 @@ public class LineNumberInjectionE2ETest {
             int line = findFirstMethodLine(bytecode, "processWithPrimitives");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TARGET_CLASS, line, 0,
+                    LineNumberInjectionLocation.BEFORE, TARGET_CLASS, line, 0,
                     "processWithPrimitives", "(BSIJFDCZ)V");
             InjectableCode code = createCode("snapshot:true");
             InjectionPoint ip = new InjectionPoint(target, code);
             InjectionContext ctx = new InjectionContext(ip);
 
             BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                    .get(LineNumberInjectionType.BEFORE).get();
+                    .get(LineNumberInjectionLocation.BEFORE).get();
             byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
             Class<?> loaded = injectAndLoad(result, TARGET_CLASS);
@@ -109,14 +109,14 @@ public class LineNumberInjectionE2ETest {
             int line = findFirstMethodLine(bytecode, "processWithPrimitives");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TARGET_CLASS, line, 0,
+                    LineNumberInjectionLocation.BEFORE, TARGET_CLASS, line, 0,
                     "processWithPrimitives", "(BSIJFDCZ)V");
             InjectableCode code = createCode("snapshot:true");
             InjectionPoint ip = new InjectionPoint(target, code);
             InjectionContext ctx = new InjectionContext(ip);
 
             BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                    .get(LineNumberInjectionType.BEFORE).get();
+                    .get(LineNumberInjectionLocation.BEFORE).get();
             byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
             Class<?> loaded = injectAndLoad(result, TARGET_CLASS);
@@ -143,14 +143,14 @@ public class LineNumberInjectionE2ETest {
             int lastLine = lines.get(lines.size() - 1);
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TARGET_CLASS, lastLine, 0,
+                    LineNumberInjectionLocation.BEFORE, TARGET_CLASS, lastLine, 0,
                     "processWithMultiReturn", "(I)I");
             InjectableCode code = createCode("log:before return");
             InjectionPoint ip = new InjectionPoint(target, code);
             InjectionContext ctx = new InjectionContext(ip);
 
             BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                    .get(LineNumberInjectionType.BEFORE).get();
+                    .get(LineNumberInjectionLocation.BEFORE).get();
             byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
             Class<?> loaded = injectAndLoad(result, TARGET_CLASS);
@@ -173,18 +173,18 @@ public class LineNumberInjectionE2ETest {
             int line = findFirstMethodLine(bytecode, "processWithLoop");
 
             LineNumberTarget target1 = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TARGET_CLASS, line, 0,
+                    LineNumberInjectionLocation.BEFORE, TARGET_CLASS, line, 0,
                     "processWithLoop", "(I)V");
             InjectableCode code1 = createCode("log:first injection");
             InjectionPoint ip1 = new InjectionPoint(target1, code1);
             InjectionContext ctx1 = new InjectionContext(ip1);
 
             BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                    .get(LineNumberInjectionType.BEFORE).get();
+                    .get(LineNumberInjectionLocation.BEFORE).get();
             byte[] result1 = injector.inject(ctx1, bytecode, new ExpressionBytecodeAssembler());
 
             LineNumberTarget target2 = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TARGET_CLASS, line, 0,
+                    LineNumberInjectionLocation.BEFORE, TARGET_CLASS, line, 0,
                     "processWithLoop", "(I)V");
             InjectableCode code2 = createCode("log:second injection");
             InjectionPoint ip2 = new InjectionPoint(target2, code2);
@@ -211,14 +211,14 @@ public class LineNumberInjectionE2ETest {
             int line = findFirstMethodLine(bytecode, "processWithPrimitives");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TARGET_CLASS, line, 0,
+                    LineNumberInjectionLocation.BEFORE, TARGET_CLASS, line, 0,
                     "processWithPrimitives", "(BSIJFDCZ)V");
             InjectableCode code = createCode("${param[2] >= 18}::log:Adult user");
             InjectionPoint ip = new InjectionPoint(target, code);
             InjectionContext ctx = new InjectionContext(ip);
 
             BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                    .get(LineNumberInjectionType.BEFORE).get();
+                    .get(LineNumberInjectionLocation.BEFORE).get();
             byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
             Class<?> loaded = injectAndLoad(result, TARGET_CLASS);
@@ -239,14 +239,14 @@ public class LineNumberInjectionE2ETest {
             int line = findLineByOffset(bytecode, "processWithLoop", 1);
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.AFTER, TARGET_CLASS, line, 0,
+                    LineNumberInjectionLocation.AFTER, TARGET_CLASS, line, 0,
                     "processWithLoop", "(I)V");
             InjectableCode code = createCode("log:after execution");
             InjectionPoint ip = new InjectionPoint(target, code);
             InjectionContext ctx = new InjectionContext(ip);
 
             BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                    .get(LineNumberInjectionType.AFTER).get();
+                    .get(LineNumberInjectionLocation.AFTER).get();
             byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
             Class<?> loaded = injectAndLoad(result, TARGET_CLASS);

@@ -7,11 +7,11 @@ package fun.efto.luna.core.bytecode.bytekit;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
 import fun.efto.luna.core.bootstrap.capability.CoreCapabilityRegistry;
 import fun.efto.luna.core.injection.target.InjectionTarget;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.plugin.builtin.CoreModuleInitializer;
-import fun.efto.luna.core.plugin.builtin.method.ExceptionExitInjectionType;
-import fun.efto.luna.core.plugin.builtin.method.InvokeInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.ExceptionExitInjectionLocation;
+import fun.efto.luna.core.plugin.builtin.method.InvokeInjectionLocation;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,23 +32,23 @@ public class NewInjectionTypeTest {
     }
 
     @Test
-    @DisplayName("resolve('exception_exit') 返回 ExceptionExitInjectionType")
+    @DisplayName("resolve('exception_exit') 返回 ExceptionExitInjectionLocation")
     void testResolveExceptionExit() {
-        InjectionType type = InjectionTypeRegistry.getInstance().resolve("exception_exit");
-        assertSame(ExceptionExitInjectionType.EXCEPTION_EXIT, type);
+        InjectionLocation location = InjectionTypeRegistry.getInstance().resolve("exception_exit");
+        assertSame(ExceptionExitInjectionLocation.EXCEPTION_EXIT, location);
     }
 
     @Test
-    @DisplayName("resolve('invoke') 返回 InvokeInjectionType")
+    @DisplayName("resolve('invoke') 返回 InvokeInjectionLocation")
     void testResolveInvoke() {
-        InjectionType type = InjectionTypeRegistry.getInstance().resolve("invoke");
-        assertSame(InvokeInjectionType.INVOKE, type);
+        InjectionLocation location = InjectionTypeRegistry.getInstance().resolve("invoke");
+        assertSame(InvokeInjectionLocation.INVOKE, location);
     }
 
     @Test
-    @DisplayName("ExceptionExitInjectionType.createTarget() 返回 MethodTarget")
+    @DisplayName("ExceptionExitInjectionLocation.createTarget() 返回 MethodTarget")
     void testExceptionExitCreateTarget() {
-        InjectionTarget target = ExceptionExitInjectionType.EXCEPTION_EXIT.createTarget(
+        InjectionTarget target = ExceptionExitInjectionLocation.EXCEPTION_EXIT.createTarget(
                 "com.example.Service", "process", "(I)V", null);
         assertInstanceOf(MethodTarget.class, target);
         assertEquals("com.example.Service", target.getTargetClass());
@@ -57,9 +57,9 @@ public class NewInjectionTypeTest {
     }
 
     @Test
-    @DisplayName("InvokeInjectionType.createTarget() 返回 MethodTarget")
+    @DisplayName("InvokeInjectionLocation.createTarget() 返回 MethodTarget")
     void testInvokeCreateTarget() {
-        InjectionTarget target = InvokeInjectionType.INVOKE.createTarget(
+        InjectionTarget target = InvokeInjectionLocation.INVOKE.createTarget(
                 "com.example.Service", "execute", "()V", null);
         assertInstanceOf(MethodTarget.class, target);
         assertEquals("com.example.Service", target.getTargetClass());

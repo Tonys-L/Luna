@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 全局规则转换器：在类初次加载时根据策略自动注入代码
+ * @author : Tony.L(286269159@qq.com)
+ * @since  : 2026/05/02 16:00
  */
 public class RuleClassFileTransformer implements ClassFileTransformer {
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleClassFileTransformer.class);
@@ -27,7 +28,6 @@ public class RuleClassFileTransformer implements ClassFileTransformer {
         
         String normalizedClassName = className.replace('/', '.');
         
-        // 1. 查找匹配的规则
         List<InjectionRule> matchedRules = RuleManager.getInstance().findRulesForClass(normalizedClassName);
         if (matchedRules.isEmpty()) {
             return null;
@@ -35,7 +35,6 @@ public class RuleClassFileTransformer implements ClassFileTransformer {
 
         LOGGER.info("Applying {} rule(s) to newly loaded class: {}", matchedRules.size(), normalizedClassName);
 
-        // 2. 将规则转换为注入点
         List<InjectionPoint> points = new ArrayList<>();
         for (InjectionRule rule : matchedRules) {
             try {
@@ -47,7 +46,6 @@ public class RuleClassFileTransformer implements ClassFileTransformer {
 
         if (points.isEmpty()) return null;
 
-        // 3. 逐个执行字节码转换
         byte[] currentBytecode = classfileBuffer;
         for (InjectionPoint point : points) {
             try {
@@ -68,7 +66,7 @@ public class RuleClassFileTransformer implements ClassFileTransformer {
         injection.setClazz(rule.getTargetClass());
         injection.setMethodName(rule.getTargetMethod());
         injection.setMethodDescriptor(rule.getMethodDescriptor());
-        injection.setInjectionType(rule.getInjectionType());
+        injection.setInjectionLocation(rule.getInjectionLocation());
         injection.setLineNumber(rule.getLineNumber());
         injection.setExpression(rule.getExpression());
         injection.setCode(rule.getLogContent());

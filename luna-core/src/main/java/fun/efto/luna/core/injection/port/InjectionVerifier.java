@@ -15,12 +15,12 @@ public interface InjectionVerifier {
      * @param className     类名
      * @param methodName    方法名
      * @param descriptor    方法描述符
-     * @param injectionType 注入类型
+     * @param InjectionLocation 注入类型
      * @param code          注入代码
      * @return 验证结果
      */
     VerifyResult testInjection(String className, String methodName, String descriptor,
-                               String injectionType, String code);
+                               String injectionLocation, String code);
 
     /**
      * 仅验证已注入的方法（反射调用 → 捕获输出）

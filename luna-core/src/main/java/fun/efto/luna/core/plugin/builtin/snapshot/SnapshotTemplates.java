@@ -30,7 +30,7 @@ public class SnapshotTemplates {
         t.setParameters(Arrays.asList(lineParam));
 
         RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
-        rule.setInjectionType("LINE_BEFORE");
+        rule.setInjectionLocation("LINE_BEFORE");
         rule.setCodeType("SNAPSHOT");
         rule.setCode("snapshot:true");
         rule.setLineNumber(0);

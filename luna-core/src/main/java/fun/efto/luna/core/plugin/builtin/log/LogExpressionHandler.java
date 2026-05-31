@@ -8,8 +8,8 @@ import fun.efto.luna.core.bytecode.asm.assembler.ExpressionSegment;
 import fun.efto.luna.core.plugin.BytecodeHelper;
 import fun.efto.luna.core.plugin.ExpressionHandler;
 import fun.efto.luna.core.plugin.GenerateContext;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -168,16 +168,16 @@ public class LogExpressionHandler implements ExpressionHandler {
     }
 
     private static String resolveLogPrefix(AsmInjectionContext asmContext) {
-        if (asmContext.getInjectionPoint().getInjectionType() instanceof MethodInjectionType) {
-            MethodInjectionType type = (MethodInjectionType) asmContext.getInjectionPoint().getInjectionType();
-            if (type.getName().equals(MethodInjectionType.EXIT.getName())) {
+        if (asmContext.getInjectionPoint().getInjectionLocation() instanceof MethodInjectionLocation) {
+            MethodInjectionLocation type = (MethodInjectionLocation) asmContext.getInjectionPoint().getInjectionLocation();
+            if (type.getName().equals(MethodInjectionLocation.EXIT.getName())) {
                 return "method exit: ";
-            } else if (type.getName().equals(MethodInjectionType.AROUND.getName())) {
+            } else if (type.getName().equals(MethodInjectionLocation.AROUND.getName())) {
                 return "method around: ";
             }
-        } else if (asmContext.getInjectionPoint().getInjectionType() instanceof LineNumberInjectionType) {
-            LineNumberInjectionType type = (LineNumberInjectionType) asmContext.getInjectionPoint().getInjectionType();
-            if (type.getName().equals(LineNumberInjectionType.AFTER.getName())) {
+        } else if (asmContext.getInjectionPoint().getInjectionLocation() instanceof LineNumberInjectionLocation) {
+            LineNumberInjectionLocation type = (LineNumberInjectionLocation) asmContext.getInjectionPoint().getInjectionLocation();
+            if (type.getName().equals(LineNumberInjectionLocation.AFTER.getName())) {
                 return "line after: ";
             }
             return "line before: ";

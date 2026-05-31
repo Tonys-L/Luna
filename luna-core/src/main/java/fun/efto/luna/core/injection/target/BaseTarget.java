@@ -1,27 +1,24 @@
 package fun.efto.luna.core.injection.target;
 
-import fun.efto.luna.core.injection.target.InjectionType;
-
 /**
- * 基础注入目标
  * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/4 4:41
  */
 public abstract class BaseTarget implements InjectionTarget {
-    private InjectionType type;
+    private InjectionLocation location;
     private String targetClass;
 
     protected BaseTarget() {
     }
 
-    protected BaseTarget(InjectionType type, String targetClass) {
-        this.type = type;
+    protected BaseTarget(InjectionLocation location, String targetClass) {
+        this.location = location;
         this.targetClass = targetClass;
     }
 
     @Override
-    public InjectionType getType() {
-        return type;
+    public InjectionLocation getLocation() {
+        return location;
     }
 
     @Override
@@ -44,8 +41,8 @@ public abstract class BaseTarget implements InjectionTarget {
         return "";
     }
 
-    public void setType(InjectionType type) {
-        this.type = type;
+    public void setLocation(InjectionLocation location) {
+        this.location = location;
     }
 
     public void setTargetClass(String targetClass) {

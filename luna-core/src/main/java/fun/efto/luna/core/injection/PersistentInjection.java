@@ -1,9 +1,6 @@
 package fun.efto.luna.core.injection;
 
 /**
- * 持久化注入描述（纯领域模型，不依赖任何序列化框架）。
- * 字段名与 JSON 协议一致，无需 @JSONField 映射。
- *
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/17 18:12
  */
@@ -12,7 +9,6 @@ public class PersistentInjection {
     private String clazz;
     private String methodName;
     private String methodDescriptor;
-    private String injectionType;
     private String probeType;
     private String injectionLocation;
     private String codeType;
@@ -41,9 +37,6 @@ public class PersistentInjection {
 
     public String getMethodDescriptor() { return methodDescriptor; }
     public void setMethodDescriptor(String methodDescriptor) { this.methodDescriptor = methodDescriptor; }
-
-    public String getInjectionType() { return injectionType; }
-    public void setInjectionType(String injectionType) { this.injectionType = injectionType; }
 
     public String getProbeType() { return probeType; }
     public void setProbeType(String probeType) { this.probeType = probeType; }

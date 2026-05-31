@@ -5,7 +5,7 @@ import fun.efto.luna.core.injection.PersistentInjection;
 import fun.efto.luna.core.injection.InjectionManager;
 import fun.efto.luna.core.injection.InjectionStatus;
 import fun.efto.luna.core.injection.port.Retransformer;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.lifecycle.AffectedClassTracker;
 import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
 import fun.efto.luna.core.plugin.lifecycle.PluginRegistrationRecord;
@@ -93,36 +93,36 @@ public class PluginIntegrationTest {
     class DualWriteTests {
 
         @Test
-        @DisplayName("插件注册 InjectionType 时同时写入 Registry 和 Record")
-        void testInjectionTypeDualWrite() {
-            final InjectionType testType = InjectionType.of("test-type", "Test Type", "TEST");
+        @DisplayName("插件注册 InjectionLocation 时同时写入 Registry 和 Record")
+        void testInjectionLocationDualWrite() {
+            final InjectionLocation testLocation = InjectionLocation.of("test-type", "Test Type", "TEST");
             LunaPlugin plugin = new StubPlugin("test-plugin", Collections.emptyList()) {
                 @Override
                 public void initialize(PluginContext context) {
-                    context.registerInjectionType(testType);
+                    context.registerInjectionLocation(testLocation);
                 }
             };
 
             pluginManager.initializeAll(Arrays.asList(plugin));
 
-            InjectionType resolved = InjectionTypeRegistry.getInstance().get("test-type").orElse(null);
-            assertNotNull(resolved, "InjectionType should be registered in Registry");
+            InjectionLocation resolved = InjectionTypeRegistry.getInstance().get("test-type").orElse(null);
+            assertNotNull(resolved, "InjectionLocation should be registered in Registry");
             assertEquals("test-type", resolved.getName());
 
             PluginRegistrationRecord record = pluginManager.getRecords().get("test-plugin");
             assertNotNull(record);
-            assertTrue(record.getInjectionTypes().stream().anyMatch(t -> t.getName().equals("test-type")),
-                "InjectionType should be in PluginRegistrationRecord");
+            assertTrue(record.getInjectionLocations().stream().anyMatch(t -> t.getName().equals("test-type")),
+                "InjectionLocation should be in PluginRegistrationRecord");
         }
 
         @Test
         @DisplayName("卸载插件后 Registry 中的注册被清除")
         void testRegistryCleanupOnUnload() {
-            final InjectionType testType = InjectionType.of("cleanup-type", "Cleanup Type", "CLEANUP");
+            final InjectionLocation testLocation = InjectionLocation.of("cleanup-type", "Cleanup Type", "CLEANUP");
             LunaPlugin plugin = new StubPlugin("cleanup-plugin", Collections.emptyList()) {
                 @Override
                 public void initialize(PluginContext context) {
-                    context.registerInjectionType(testType);
+                    context.registerInjectionLocation(testLocation);
                 }
             };
 
@@ -133,7 +133,7 @@ public class PluginIntegrationTest {
             assertTrue(result.isSuccess());
 
             assertNull(InjectionTypeRegistry.getInstance().get("cleanup-type").orElse(null),
-                "InjectionType should be removed from Registry after unload");
+                "InjectionLocation should be removed from Registry after unload");
         }
     }
 
@@ -168,13 +168,13 @@ public class PluginIntegrationTest {
     class RuleSuspendResumeTests {
 
         @Test
-        @DisplayName("卸载插件后引用其 InjectionType 的规则被挂起")
+        @DisplayName("卸载插件后引用其 InjectionLocation 的规则被挂起")
         void testRulesSuspendedOnUnload() {
-            final InjectionType customType = InjectionType.of("custom-type", "Custom Type", "CUSTOM");
+            final InjectionLocation customLocation = InjectionLocation.of("custom-type", "Custom Type", "CUSTOM");
             LunaPlugin plugin = new StubPlugin("type-provider", Collections.emptyList()) {
                 @Override
                 public void initialize(PluginContext context) {
-                    context.registerInjectionType(customType);
+                    context.registerInjectionLocation(customLocation);
                 }
             };
 
@@ -183,14 +183,14 @@ public class PluginIntegrationTest {
             PersistentInjection injection = new PersistentInjection();
             injection.setClazz("com.example.TestService");
             injection.setMethodName("someMethod");
-            injection.setInjectionType("custom-type");
+            injection.setInjectionLocation("custom-type");
             injection.setStatus(InjectionStatus.ACTIVE);
             InjectionManager.getInstance().addInjection(injection);
 
             PluginUnloadResult result = pluginManager.unload("type-provider");
             assertTrue(result.isSuccess());
             assertFalse(result.getSuspendedRuleIds().isEmpty(),
-                "Should have suspended rules referencing the unloaded plugin's types");
+                "Should have suspended rules referencing the unloaded plugin's locations");
 
             assertEquals(InjectionStatus.SUSPENDED, injection.getStatus());
             assertNotNull(injection.getSuspendReason());
@@ -199,12 +199,12 @@ public class PluginIntegrationTest {
         @Test
         @DisplayName("重新加载同 ID 插件后挂起规则自动恢复")
         void testRulesResumedOnReload() {
-            final InjectionType customType = InjectionType.of("resume-type", "Resume Type", "RESUME");
+            final InjectionLocation customLocation = InjectionLocation.of("resume-type", "Resume Type", "RESUME");
 
             LunaPlugin plugin = new StubPlugin("reload-provider", Collections.emptyList()) {
                 @Override
                 public void initialize(PluginContext context) {
-                    context.registerInjectionType(customType);
+                    context.registerInjectionLocation(customLocation);
                 }
             };
 
@@ -213,7 +213,7 @@ public class PluginIntegrationTest {
             PersistentInjection injection = new PersistentInjection();
             injection.setClazz("com.example.ResumeService");
             injection.setMethodName("resumeMethod");
-            injection.setInjectionType("resume-type");
+            injection.setInjectionLocation("resume-type");
             injection.setStatus(InjectionStatus.ACTIVE);
             InjectionManager.getInstance().addInjection(injection);
 
@@ -223,13 +223,13 @@ public class PluginIntegrationTest {
             LunaPlugin reloadedPlugin = new StubPlugin("reload-provider", Collections.emptyList()) {
                 @Override
                 public void initialize(PluginContext context) {
-                    context.registerInjectionType(customType);
+                    context.registerInjectionLocation(customLocation);
                 }
             };
             pluginManager.initializeAll(Arrays.asList(reloadedPlugin));
 
-            InjectionType resolved = InjectionTypeRegistry.getInstance().get("resume-type").orElse(null);
-            assertNotNull(resolved, "InjectionType should be re-registered");
+            InjectionLocation resolved = InjectionTypeRegistry.getInstance().get("resume-type").orElse(null);
+            assertNotNull(resolved, "InjectionLocation should be re-registered");
         }
     }
 

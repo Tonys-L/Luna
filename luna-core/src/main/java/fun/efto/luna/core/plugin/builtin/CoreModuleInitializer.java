@@ -20,10 +20,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
- * Initializes core injection modules (Method/Line) directly,
- * without going through the PluginManager lifecycle.
- * These modules are fundamental infrastructure that cannot be unloaded.
- *
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/25 22:00
  */
@@ -32,38 +28,34 @@ public final class CoreModuleInitializer {
     private CoreModuleInitializer() {}
 
     public static void initialize() {
-        // Method injection types
-        InjectionTypeRegistry.getInstance().register(MethodInjectionType.ENTER);
-        InjectionTypeRegistry.getInstance().register(MethodInjectionType.EXIT);
-        InjectionTypeRegistry.getInstance().register(MethodInjectionType.AROUND);
-        InjectionTypeRegistry.getInstance().register(ExceptionExitInjectionType.EXCEPTION_EXIT);
-        InjectionTypeRegistry.getInstance().register(InvokeInjectionType.INVOKE);
+        InjectionTypeRegistry.getInstance().register(MethodInjectionLocation.ENTER);
+        InjectionTypeRegistry.getInstance().register(MethodInjectionLocation.EXIT);
+        InjectionTypeRegistry.getInstance().register(MethodInjectionLocation.AROUND);
+        InjectionTypeRegistry.getInstance().register(ExceptionExitInjectionLocation.EXCEPTION_EXIT);
+        InjectionTypeRegistry.getInstance().register(InvokeInjectionLocation.INVOKE);
 
-        BytecodeInjectorRegistry.getInstance().register(MethodInjectionType.ENTER, new ByteKitEnterInjector());
-        BytecodeInjectorRegistry.getInstance().register(MethodInjectionType.EXIT, new ByteKitExitInjector());
-        BytecodeInjectorRegistry.getInstance().register(MethodInjectionType.AROUND, new ByteKitAroundInjector());
-        BytecodeInjectorRegistry.getInstance().register(ExceptionExitInjectionType.EXCEPTION_EXIT, new ByteKitExceptionExitInjector());
-        BytecodeInjectorRegistry.getInstance().register(InvokeInjectionType.INVOKE, new ByteKitInvokeInjector());
+        BytecodeInjectorRegistry.getInstance().register(MethodInjectionLocation.ENTER, new ByteKitEnterInjector());
+        BytecodeInjectorRegistry.getInstance().register(MethodInjectionLocation.EXIT, new ByteKitExitInjector());
+        BytecodeInjectorRegistry.getInstance().register(MethodInjectionLocation.AROUND, new ByteKitAroundInjector());
+        BytecodeInjectorRegistry.getInstance().register(ExceptionExitInjectionLocation.EXCEPTION_EXIT, new ByteKitExceptionExitInjector());
+        BytecodeInjectorRegistry.getInstance().register(InvokeInjectionLocation.INVOKE, new ByteKitInvokeInjector());
 
         MethodRuleConverter methodConverter = new MethodRuleConverter();
-        RuleConverterRegistry.getInstance().register(MethodInjectionType.ENTER, methodConverter);
-        RuleConverterRegistry.getInstance().register(MethodInjectionType.EXIT, methodConverter);
-        RuleConverterRegistry.getInstance().register(MethodInjectionType.AROUND, methodConverter);
-        RuleConverterRegistry.getInstance().register(ExceptionExitInjectionType.EXCEPTION_EXIT, methodConverter);
-        RuleConverterRegistry.getInstance().register(InvokeInjectionType.INVOKE, methodConverter);
+        RuleConverterRegistry.getInstance().register(MethodInjectionLocation.ENTER, methodConverter);
+        RuleConverterRegistry.getInstance().register(MethodInjectionLocation.EXIT, methodConverter);
+        RuleConverterRegistry.getInstance().register(MethodInjectionLocation.AROUND, methodConverter);
+        RuleConverterRegistry.getInstance().register(ExceptionExitInjectionLocation.EXCEPTION_EXIT, methodConverter);
+        RuleConverterRegistry.getInstance().register(InvokeInjectionLocation.INVOKE, methodConverter);
 
-        // Line injection types
-        InjectionTypeRegistry.getInstance().register(LineNumberInjectionType.BEFORE);
-        InjectionTypeRegistry.getInstance().register(LineNumberInjectionType.AFTER);
+        InjectionTypeRegistry.getInstance().register(LineNumberInjectionLocation.BEFORE);
+        InjectionTypeRegistry.getInstance().register(LineNumberInjectionLocation.AFTER);
 
-        // Line injectors
-        BytecodeInjectorRegistry.getInstance().register(LineNumberInjectionType.BEFORE, new BeforeLineInjector());
-        BytecodeInjectorRegistry.getInstance().register(LineNumberInjectionType.AFTER, new AfterLineInjector());
+        BytecodeInjectorRegistry.getInstance().register(LineNumberInjectionLocation.BEFORE, new BeforeLineInjector());
+        BytecodeInjectorRegistry.getInstance().register(LineNumberInjectionLocation.AFTER, new AfterLineInjector());
 
-        // Line rule converters
         LineRuleConverter lineConverter = new LineRuleConverter();
-        RuleConverterRegistry.getInstance().register(LineNumberInjectionType.BEFORE, lineConverter);
-        RuleConverterRegistry.getInstance().register(LineNumberInjectionType.AFTER, lineConverter);
+        RuleConverterRegistry.getInstance().register(LineNumberInjectionLocation.BEFORE, lineConverter);
+        RuleConverterRegistry.getInstance().register(LineNumberInjectionLocation.AFTER, lineConverter);
 
         CoreCapabilityRegistry capRegistry = CoreCapabilityRegistry.getInstance();
 

@@ -46,12 +46,11 @@ public class InjectionPersistenceService {
             if (list == null) {
                 return new ArrayList<>();
             }
-            // Filter out old format records with null method field
             list.removeIf(inj -> {
-                if (inj.getMethodName() == null && inj.getInjectionType() != null
-                        && !inj.getInjectionType().contains("line")) {
+                if (inj.getMethodName() == null && inj.getInjectionLocation() != null
+                        && !inj.getInjectionLocation().contains("line")) {
                     System.err.println("[Luna] WARN: Skipping legacy injection record with null method: id="
-                        + inj.getId() + ", type=" + inj.getInjectionType() + ", class=" + inj.getClazz());
+                        + inj.getId() + ", location=" + inj.getInjectionLocation() + ", class=" + inj.getClazz());
                     return true;
                 }
                 return false;

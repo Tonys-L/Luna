@@ -47,7 +47,7 @@ public class IntegrationTest {
         InjectionRule rule = new InjectionRule();
         rule.setTargetClass("TestApp");
         rule.setTargetMethod("main");
-        rule.setInjectionType("method");
+        rule.setInjectionLocation("method");
         rule.setExpression("true");
         rule.setLogContent("Injected log");
         

@@ -2,7 +2,7 @@ package fun.efto.luna.core.injection;
 
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.target.InjectionTarget;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 
 /**
@@ -12,15 +12,15 @@ import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 public class InjectionPointFactory {
 
     public static InjectionPoint create(PersistentInjection persistent) {
-        InjectionType type = InjectionTypeRegistry.getInstance().resolve(persistent.getInjectionType());
-        if (type == null) {
-            throw new IllegalArgumentException("Unknown injection type: " + persistent.getInjectionType());
+        InjectionLocation location = InjectionTypeRegistry.getInstance().resolve(persistent.getInjectionLocation());
+        if (location == null) {
+            throw new IllegalArgumentException("Unknown injection location: " + persistent.getInjectionLocation());
         }
         if (persistent.getClazz() == null || persistent.getClazz().isEmpty()) {
             throw new IllegalArgumentException("Missing className for injection: " + persistent.getId());
         }
 
-        InjectionTarget target = type.createTarget(
+        InjectionTarget target = location.createTarget(
             persistent.getClazz(),
             persistent.getMethodName(),
             persistent.getMethodDescriptor() != null ? persistent.getMethodDescriptor() : "",

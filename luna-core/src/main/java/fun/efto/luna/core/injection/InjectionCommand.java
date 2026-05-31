@@ -7,7 +7,6 @@ package fun.efto.luna.core.injection;
 public class InjectionCommand {
     private String clazz;
     private String method;
-    private String injectionType;
     private String probeType;
     private String injectionLocation;
     private String desc;
@@ -29,14 +28,6 @@ public class InjectionCommand {
 
     public void setMethod(String method) {
         this.method = method;
-    }
-
-    public String getInjectionType() {
-        return injectionType;
-    }
-
-    public void setInjectionType(String injectionType) {
-        this.injectionType = injectionType;
     }
 
     public String getProbeType() {
@@ -80,7 +71,7 @@ public class InjectionCommand {
     }
 
     public boolean isValid() {
-        return clazz != null && method != null && injectionType != null && codeType != null && code != null;
+        return clazz != null && method != null && injectionLocation != null && codeType != null && code != null;
     }
 
     public Integer getLineNumber() {

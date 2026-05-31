@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.web;
 
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.ExpressionHandler;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
@@ -15,22 +15,22 @@ import java.util.*;
  */
 public class UiManifest {
 
-    private List<Map<String, Object>> injectionTypes;
+    private List<Map<String, Object>> injectionLocations;
     private List<Map<String, Object>> expressionProtocols;
     private List<Map<String, Object>> templates;
 
     public static UiManifest collect() {
         UiManifest manifest = new UiManifest();
 
-        List<Map<String, Object>> types = new ArrayList<>();
-        for (InjectionType type : InjectionTypeRegistry.getInstance().getAll()) {
+        List<Map<String, Object>> locations = new ArrayList<>();
+        for (InjectionLocation location : InjectionTypeRegistry.getInstance().getAll()) {
             Map<String, Object> info = new LinkedHashMap<>();
-            info.put("name", type.getName());
-            info.put("description", type.getDescription());
-            info.put("aliases", type.getAliases());
-            types.add(info);
+            info.put("name", location.getName());
+            info.put("description", location.getDescription());
+            info.put("aliases", location.getAliases());
+            locations.add(info);
         }
-        manifest.injectionTypes = types;
+        manifest.injectionLocations = locations;
 
         List<Map<String, Object>> protocols = new ArrayList<>();
         for (ExpressionHandler handler : ExpressionHandlerRegistry.getInstance().getAll()) {
@@ -56,7 +56,7 @@ public class UiManifest {
         return manifest;
     }
 
-    public List<Map<String, Object>> getInjectionTypes() { return injectionTypes; }
+    public List<Map<String, Object>> getInjectionLocations() { return injectionLocations; }
     public List<Map<String, Object>> getExpressionProtocols() { return expressionProtocols; }
     public List<Map<String, Object>> getTemplates() { return templates; }
 }

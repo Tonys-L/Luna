@@ -132,7 +132,7 @@ public class RuleManager {
         injection.setClazz(rule.getTargetClass());
         injection.setMethodName(rule.getTargetMethod());
         injection.setMethodDescriptor(rule.getMethodDescriptor());
-        injection.setInjectionType(rule.getInjectionType());
+        injection.setInjectionLocation(rule.getInjectionLocation());
         injection.setLineNumber(rule.getLineNumber());
         injection.setExpression(rule.getExpression());
         injection.setCode(rule.getLogContent());

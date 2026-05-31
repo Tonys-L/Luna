@@ -4,9 +4,9 @@ import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.injection.target.InjectionType;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +20,8 @@ public class InjectionPointTest {
 
     private InjectableCode injectableCode;
     private InjectionTarget injectionTarget;
-    private InjectionType methodInjectionType;
-    private InjectionType lineNumberInjectionType;
+    private InjectionLocation methodInjectionLocation;
+    private InjectionLocation lineNumberInjectionLocation;
 
     @BeforeEach
     public void setUp() {
@@ -37,9 +37,9 @@ public class InjectionPointTest {
             }
         };
 
-        methodInjectionType = MethodInjectionType.ENTER;
-        injectionTarget = new MethodTarget((MethodInjectionType) methodInjectionType, "com.example.TestClass", "testMethod", "()V");
-        lineNumberInjectionType = LineNumberInjectionType.BEFORE.withLineNumber(10);
+        methodInjectionLocation = MethodInjectionLocation.ENTER;
+        injectionTarget = new MethodTarget((MethodInjectionLocation) methodInjectionLocation, "com.example.TestClass", "testMethod", "()V");
+        lineNumberInjectionLocation = LineNumberInjectionLocation.BEFORE.withLineNumber(10);
     }
 
     @Test
@@ -58,38 +58,38 @@ public class InjectionPointTest {
     }
 
     @Test
-    public void testMethodInjectionTypeUniqueNames() {
-        assertNotEquals(MethodInjectionType.ENTER.getName(), MethodInjectionType.EXIT.getName(),
+    public void testMethodInjectionLocationUniqueNames() {
+        assertNotEquals(MethodInjectionLocation.ENTER.getName(), MethodInjectionLocation.EXIT.getName(),
                 "ENTER 和 EXIT 的名称应该不同");
-        assertNotEquals(MethodInjectionType.ENTER.getName(), MethodInjectionType.AROUND.getName(),
+        assertNotEquals(MethodInjectionLocation.ENTER.getName(), MethodInjectionLocation.AROUND.getName(),
                 "ENTER 和 AROUND 的名称应该不同");
-        assertNotEquals(MethodInjectionType.EXIT.getName(), MethodInjectionType.AROUND.getName(),
+        assertNotEquals(MethodInjectionLocation.EXIT.getName(), MethodInjectionLocation.AROUND.getName(),
                 "EXIT 和 AROUND 的名称应该不同");
-        assertEquals("method_enter", MethodInjectionType.ENTER.getName());
-        assertEquals("method_exit", MethodInjectionType.EXIT.getName());
-        assertEquals("method_around", MethodInjectionType.AROUND.getName());
+        assertEquals("method_enter", MethodInjectionLocation.ENTER.getName());
+        assertEquals("method_exit", MethodInjectionLocation.EXIT.getName());
+        assertEquals("method_around", MethodInjectionLocation.AROUND.getName());
     }
 
     @Test
-    public void testLineNumberInjectionTypeUniqueNames() {
-        assertNotEquals(LineNumberInjectionType.BEFORE.getName(), LineNumberInjectionType.AFTER.getName(),
+    public void testLineNumberInjectionLocationUniqueNames() {
+        assertNotEquals(LineNumberInjectionLocation.BEFORE.getName(), LineNumberInjectionLocation.AFTER.getName(),
                 "BEFORE 和 AFTER 的名称应该不同");
-        assertEquals("line_before", LineNumberInjectionType.BEFORE.getName());
-        assertEquals("line_after", LineNumberInjectionType.AFTER.getName());
+        assertEquals("line_before", LineNumberInjectionLocation.BEFORE.getName());
+        assertEquals("line_after", LineNumberInjectionLocation.AFTER.getName());
     }
 
     @Test
-    public void testLineNumberInjectionTypeWithLineNumber() {
-        LineNumberInjectionType lineType = LineNumberInjectionType.BEFORE.withLineNumber(10);
+    public void testLineNumberInjectionLocationWithLineNumber() {
+        LineNumberInjectionLocation lineType = LineNumberInjectionLocation.BEFORE.withLineNumber(10);
         assertEquals("line_before", lineType.getName());
         assertEquals(10, lineType.getLineNumber());
     }
 
     @Test
-    public void testInjectionTypeNotEqual() {
-        assertNotEquals(MethodInjectionType.ENTER, MethodInjectionType.EXIT,
-                "不同的 InjectionType 不应该相等");
-        assertNotEquals(MethodInjectionType.ENTER, LineNumberInjectionType.BEFORE,
-                "不同类型的 InjectionType 不应该相等");
+    public void testInjectionLocationNotEqual() {
+        assertNotEquals(MethodInjectionLocation.ENTER, MethodInjectionLocation.EXIT,
+                "不同的 InjectionLocation 不应该相等");
+        assertNotEquals(MethodInjectionLocation.ENTER, LineNumberInjectionLocation.BEFORE,
+                "不同类型的 InjectionLocation 不应该相等");
     }
 }

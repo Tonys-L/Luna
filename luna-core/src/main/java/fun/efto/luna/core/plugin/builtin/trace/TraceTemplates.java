@@ -22,12 +22,12 @@ public class TraceTemplates {
         t.setParameters(Arrays.asList());
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
-        enterRule.setInjectionType("METHOD_ENTER");
+        enterRule.setInjectionLocation("METHOD_ENTER");
         enterRule.setCodeType("EXPRESSION");
         enterRule.setCode("trace:start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
-        exitRule.setInjectionType("METHOD_EXIT");
+        exitRule.setInjectionLocation("METHOD_EXIT");
         exitRule.setCodeType("EXPRESSION");
         exitRule.setCode("trace:end:0");
 
@@ -55,12 +55,12 @@ public class TraceTemplates {
         t.setParameters(Arrays.asList(thresholdParam));
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
-        enterRule.setInjectionType("METHOD_ENTER");
+        enterRule.setInjectionLocation("METHOD_ENTER");
         enterRule.setCodeType("EXPRESSION");
         enterRule.setCode("trace:start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
-        exitRule.setInjectionType("METHOD_EXIT");
+        exitRule.setInjectionLocation("METHOD_EXIT");
         exitRule.setCodeType("EXPRESSION");
         exitRule.setCode("trace:end:${threshold}");
 
@@ -88,12 +88,12 @@ public class TraceTemplates {
         t.setParameters(Arrays.asList(thresholdParam));
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
-        enterRule.setInjectionType("METHOD_ENTER");
+        enterRule.setInjectionLocation("METHOD_ENTER");
         enterRule.setCodeType("EXPRESSION");
         enterRule.setCode("trace:start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
-        exitRule.setInjectionType("METHOD_EXIT");
+        exitRule.setInjectionLocation("METHOD_EXIT");
         exitRule.setCodeType("EXPRESSION");
         exitRule.setCode("trace:alert:${threshold}");
 

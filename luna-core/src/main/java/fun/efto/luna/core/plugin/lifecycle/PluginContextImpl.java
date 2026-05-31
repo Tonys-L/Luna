@@ -2,7 +2,6 @@ package fun.efto.luna.core.plugin.lifecycle;
 
 import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.infra.RingBuffer;
-import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
@@ -10,7 +9,7 @@ import fun.efto.luna.core.infra.config.ConfigManager;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
 import fun.efto.luna.core.injection.CodeCompiler;
 import fun.efto.luna.core.injection.CodeCompilerStrategy;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.plugin.*;
 import fun.efto.luna.core.probe.ProbeMessage;
@@ -49,15 +48,15 @@ class PluginContextImpl implements PluginContext {
     }
 
     @Override
-    public void registerInjectionType(InjectionType type) {
-        InjectionTypeRegistry.getInstance().register(type);
-        record.addInjectionType(type);
+    public void registerInjectionLocation(InjectionLocation location) {
+        InjectionTypeRegistry.getInstance().register(location);
+        record.addInjectionLocation(location);
     }
 
     @Override
-    public void registerInjector(InjectionType type, BytecodeInjector injector) {
-        BytecodeInjectorRegistry.getInstance().register(type, injector);
-        record.addInjector(type, injector);
+    public void registerInjector(InjectionLocation location, BytecodeInjector injector) {
+        BytecodeInjectorRegistry.getInstance().register(location, injector);
+        record.addInjector(location, injector);
     }
 
     @Override
@@ -74,13 +73,12 @@ class PluginContextImpl implements PluginContext {
 
     @Override
     public void registerRuleConverter(InjectionRuleConverter converter) {
-        // Default implementation - no type-specific registration
     }
 
     @Override
-    public void registerRuleConverter(InjectionType type, InjectionRuleConverter converter) {
-        RuleConverterRegistry.getInstance().register(type, converter);
-        record.addRuleConverter(type, converter);
+    public void registerRuleConverter(InjectionLocation location, InjectionRuleConverter converter) {
+        RuleConverterRegistry.getInstance().register(location, converter);
+        record.addRuleConverter(location, converter);
     }
 
     @Override

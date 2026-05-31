@@ -16,7 +16,7 @@ import fun.efto.luna.core.infra.web.WebServer;
  */
 public class PluginRegistryCleaner {
     public static void cleanup(PluginRegistrationRecord record, WebServer webServer) {
-        InjectionTypeRegistry.getInstance().unregisterAll(record.getInjectionTypes());
+        InjectionTypeRegistry.getInstance().unregisterAll(record.getInjectionLocations());
         BytecodeInjectorRegistry.getInstance().getRegistry().keySet().removeAll(record.getInjectors().keySet());
         BytecodeAssemblerRegistry.getInstance().getRegistry().keySet().removeAll(record.getAssemblers().keySet());
         ExpressionHandlerRegistry.getInstance().unregisterAll(record.getExpressionHandlers());

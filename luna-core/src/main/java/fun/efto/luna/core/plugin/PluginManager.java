@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 
 import java.util.Collections;
@@ -39,7 +39,7 @@ public interface PluginManager {
 
     StampedLock getTransformLock();
 
-    default Set<InjectionType> getInjectionTypesForPlugin(String pluginId) {
+    default Set<InjectionLocation> getInjectionLocationsForPlugin(String pluginId) {
         return Collections.emptySet();
     }
 

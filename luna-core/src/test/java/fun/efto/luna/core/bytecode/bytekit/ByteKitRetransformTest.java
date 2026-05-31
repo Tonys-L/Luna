@@ -15,7 +15,7 @@ import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.plugin.builtin.CoreModuleInitializer;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
@@ -142,7 +142,7 @@ public class ByteKitRetransformTest {
         @Test
         @DisplayName("有激活注入点时 transform 返回增强字节码")
         void testActiveInjectionPointsReturnsEnhancedBytecode() {
-            MethodTarget target = new MethodTarget(MethodInjectionType.ENTER, TARGET_CLASS, "doWork", "()V");
+            MethodTarget target = new MethodTarget(MethodInjectionLocation.ENTER, TARGET_CLASS, "doWork", "()V");
             InjectableCode code = createExpressionCode("log:test");
             InjectionPoint point = new InjectionPoint(target, code);
             activePoints.add(point);

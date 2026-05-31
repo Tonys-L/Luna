@@ -31,7 +31,7 @@ public class TemplateEngine {
             InjectionRule rule = new InjectionRule();
             rule.setTargetClass(targetClass);
             rule.setTargetMethod(targetMethod);
-            rule.setInjectionType(templateRule.getInjectionType());
+            rule.setInjectionLocation(templateRule.getInjectionLocation());
             rule.setCodeType(templateRule.getCodeType() != null ? templateRule.getCodeType() : "EXPRESSION");
             rule.setLineNumber(templateRule.getLineNumber());
             rule.setEnabled(true);

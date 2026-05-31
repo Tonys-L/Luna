@@ -1,7 +1,7 @@
 package fun.efto.luna.core.plugin.builtin.method;
 
 import fun.efto.luna.core.injection.target.InjectionTarget;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.injection.target.MethodTarget;
 
 import java.util.Arrays;
@@ -11,13 +11,13 @@ import java.util.List;
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/06/01 00:00
  */
-public class ExceptionExitInjectionType extends InjectionType {
+public class InvokeInjectionLocation extends InjectionLocation {
 
-    public static final ExceptionExitInjectionType EXCEPTION_EXIT = new ExceptionExitInjectionType("exception_exit", "方法异常退出注入", "exception_exit", "EXCEPTION_EXIT_METHOD");
+    public static final InvokeInjectionLocation INVOKE = new InvokeInjectionLocation("invoke", "子函数调用拦截注入", "invoke", "INVOKE_METHOD");
 
     private final List<String> aliases;
 
-    private ExceptionExitInjectionType(String name, String description, String... aliases) {
+    private InvokeInjectionLocation(String name, String description, String... aliases) {
         super(name, description);
         this.aliases = Arrays.asList(aliases);
     }

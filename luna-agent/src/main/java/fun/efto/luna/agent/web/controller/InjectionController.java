@@ -56,7 +56,7 @@ public class InjectionController {
         for (InjectionPoint point : points) {
             InjectionPointVO vo = new InjectionPointVO();
             vo.setId(point.getId());
-            vo.setType(point.getInjectionType().toString());
+            vo.setInjectionLocation(point.getInjectionLocation().toString());
             vo.setMethod(point.getTarget().getMethodName());
             vo.setCode(point.getCode().getCode());
             vo.setCodeType(point.getCodeType().toString());
@@ -76,7 +76,7 @@ public class InjectionController {
 
         InjectionService.InjectResult result = injectionService.inject(cmd);
         if (result.isSuccess()) {
-            InjectionResultVO resultVO = new InjectionResultVO(true, cmd.getInjectionType(),
+            InjectionResultVO resultVO = new InjectionResultVO(true, cmd.getInjectionLocation(),
                     cmd.getMethod(), "Retransform completed", result.getInjectionId());
             List<InjectionResultVO> results = new ArrayList<>();
             results.add(resultVO);

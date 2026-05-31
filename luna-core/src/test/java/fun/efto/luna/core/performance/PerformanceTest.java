@@ -59,7 +59,7 @@ public class PerformanceTest {
             InjectionRule rule = new InjectionRule();
             rule.setTargetClass("WarmupApp");
             rule.setTargetMethod("warmup");
-            rule.setInjectionType("method");
+            rule.setInjectionLocation("method");
             rule.setExpression("true");
             rule.setLogContent("warmup");
             long ruleId = ruleManager.addRule(rule);
@@ -72,7 +72,7 @@ public class PerformanceTest {
             InjectionRule rule = new InjectionRule();
             rule.setTargetClass("TestApp");
             rule.setTargetMethod("main");
-            rule.setInjectionType("method");
+            rule.setInjectionLocation("method");
             rule.setExpression("true");
             rule.setLogContent("Injected log");
             long ruleId = ruleManager.addRule(rule);

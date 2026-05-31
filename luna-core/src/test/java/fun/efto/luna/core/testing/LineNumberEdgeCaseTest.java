@@ -7,7 +7,7 @@ import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
 import fun.efto.luna.core.plugin.builtin.line.AfterLineInjector;
 import fun.efto.luna.core.plugin.builtin.line.BeforeLineInjector;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
 import fun.efto.luna.core.bytecode.asm.assembler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.probe.ProbeOutput;
@@ -48,7 +48,7 @@ public class LineNumberEdgeCaseTest {
         int outOfRangeLine = 99999;
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, TestTargetService.class.getName(),
+                LineNumberInjectionLocation.BEFORE, TestTargetService.class.getName(),
                 outOfRangeLine, 0, "processWithLoop", "(I)V");
         InjectableCode code = LineInjectionTestHelper.createCode("log:test");
         InjectionPoint ip = new InjectionPoint(target, code);
@@ -85,7 +85,7 @@ public class LineNumberEdgeCaseTest {
         byte[] noDebugBytecode = cw.toByteArray();
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, "com.test.NoDebugClass",
+                LineNumberInjectionLocation.BEFORE, "com.test.NoDebugClass",
                 1, 0, "test", "()V");
         InjectableCode code = LineInjectionTestHelper.createCode("log:test");
         InjectionPoint ip = new InjectionPoint(target, code);
@@ -103,7 +103,7 @@ public class LineNumberEdgeCaseTest {
         int returnLine = LineInjectionTestHelper.findLineByOffset(bytecode, "processWithMultiReturn", 3);
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.AFTER, TestTargetService.class.getName(),
+                LineNumberInjectionLocation.AFTER, TestTargetService.class.getName(),
                 returnLine, 0, "processWithMultiReturn", "(I)I");
         InjectableCode code = LineInjectionTestHelper.createCode("log:test");
         InjectionPoint ip = new InjectionPoint(target, code);
@@ -122,7 +122,7 @@ public class LineNumberEdgeCaseTest {
         int line = LineInjectionTestHelper.findFirstMethodLine(bytecode, "processWithSync");
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, TestTargetService.class.getName(),
+                LineNumberInjectionLocation.BEFORE, TestTargetService.class.getName(),
                 line, 0, "processWithSync", "()V");
         InjectableCode code = LineInjectionTestHelper.createCode("log:sync-test");
         InjectionPoint ip = new InjectionPoint(target, code);
@@ -144,7 +144,7 @@ public class LineNumberEdgeCaseTest {
         int line = LineInjectionTestHelper.findFirstMethodLine(bytecode, "staticMethod");
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, TestTargetService.class.getName(),
+                LineNumberInjectionLocation.BEFORE, TestTargetService.class.getName(),
                 line, 0, "staticMethod", "(I)I");
         InjectableCode code = LineInjectionTestHelper.createCode("log:static-test");
         InjectionPoint ip = new InjectionPoint(target, code);

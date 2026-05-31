@@ -11,7 +11,7 @@ import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
 import fun.efto.luna.core.plugin.builtin.line.BeforeLineInjector;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.ClassReader;
@@ -74,7 +74,7 @@ public class LineBeforeInjectionVerifyTest {
         byte[] originalBytecode = baos.toByteArray();
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, targetClassName, 45, 0,
+                LineNumberInjectionLocation.BEFORE, targetClassName, 45, 0,
                 "createUser", "(Ljava/lang/String;I)V");
 
         InjectableCode code = new InjectableCode() {
@@ -125,7 +125,7 @@ public class LineBeforeInjectionVerifyTest {
         byte[] originalBytecode = baos.toByteArray();
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, targetClassName, 45, 0,
+                LineNumberInjectionLocation.BEFORE, targetClassName, 45, 0,
                 "createUser", "(Ljava/lang/String;I)V");
 
         InjectableCode code = new InjectableCode() {
@@ -175,7 +175,7 @@ public class LineBeforeInjectionVerifyTest {
         byte[] originalBytecode = baos.toByteArray();
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, targetClassName, 45, 0,
+                LineNumberInjectionLocation.BEFORE, targetClassName, 45, 0,
                 "createUser", "(Ljava/lang/String;I)V");
 
         InjectableCode code = new InjectableCode() {
@@ -305,7 +305,7 @@ public class LineBeforeInjectionVerifyTest {
         }
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, targetClassName, countLine, 0,
+                LineNumberInjectionLocation.BEFORE, targetClassName, countLine, 0,
                 "createUser", "");
 
         InjectableCode code = new InjectableCode() {

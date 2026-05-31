@@ -1,7 +1,7 @@
 package fun.efto.luna.core.bytecode.asm.injector;
 
 import fun.efto.luna.core.infra.type.Registry;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2025/10/2 21:16
  */
-public final class BytecodeInjectorRegistry implements Registry<InjectionType, BytecodeInjector> {
-    private static final Map<InjectionType, BytecodeInjector> INJECTOR_REGISTRY = new ConcurrentHashMap<>();
+public final class BytecodeInjectorRegistry implements Registry<InjectionLocation, BytecodeInjector> {
+    private static final Map<InjectionLocation, BytecodeInjector> INJECTOR_REGISTRY = new ConcurrentHashMap<>();
     private static final BytecodeInjectorRegistry INSTANCE = new BytecodeInjectorRegistry();
 
     private BytecodeInjectorRegistry() {
@@ -22,13 +22,13 @@ public final class BytecodeInjectorRegistry implements Registry<InjectionType, B
     }
 
     @Override
-    public Map<InjectionType, BytecodeInjector> getRegistry() {
+    public Map<InjectionLocation, BytecodeInjector> getRegistry() {
         return INJECTOR_REGISTRY;
     }
 
     @Override
-    public BytecodeInjector register(InjectionType type, BytecodeInjector injector) {
-        INJECTOR_REGISTRY.put(type, injector);
+    public BytecodeInjector register(InjectionLocation location, BytecodeInjector injector) {
+        INJECTOR_REGISTRY.put(location, injector);
         return injector;
     }
 }

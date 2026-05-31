@@ -88,7 +88,7 @@ public class UnloadTest {
         pluginManager.initializeAll(Arrays.asList(plugin));
 
         InjectionRule rule = new InjectionRule();
-        rule.setInjectionType("method-enter");
+        rule.setInjectionLocation("method-enter");
         rule.setStatus(RuleStatus.ACTIVE);
         RuleManager.getInstance().addRule(rule);
 

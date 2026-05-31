@@ -29,9 +29,9 @@ public class DefaultClassTransformer implements ClassTransformer {
     @Override
     public TransformerResult transform(InjectionPoint injectionPoint, String className, byte[] bytecode) {
         try {
-            Optional<BytecodeInjector> injectorOptional = BytecodeInjectorRegistry.getInstance().get(injectionPoint.getInjectionType());
+            Optional<BytecodeInjector> injectorOptional = BytecodeInjectorRegistry.getInstance().get(injectionPoint.getInjectionLocation());
             if (!injectorOptional.isPresent()) {
-                return buildErrorResult(bytecode, "未找到对应的字节码注入器: " + injectionPoint.getInjectionType());
+                return buildErrorResult(bytecode, "未找到对应的字节码注入器: " + injectionPoint.getInjectionLocation());
             }
 
             Optional<BytecodeAssembler> assemblerOptional = BytecodeAssemblerRegistry.getInstance().get(injectionPoint.getCodeType());

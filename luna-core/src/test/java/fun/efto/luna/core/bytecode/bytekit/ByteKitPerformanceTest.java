@@ -15,7 +15,7 @@ import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,11 +48,11 @@ public class ByteKitPerformanceTest {
 
         targetBytecode = getClassBytecode(SimpleTarget.class);
 
-        injector = BytecodeInjectorRegistry.getInstance().get(MethodInjectionType.ENTER).orElse(null);
+        injector = BytecodeInjectorRegistry.getInstance().get(MethodInjectionLocation.ENTER).orElse(null);
         assertNotNull(injector, "ByteKit ENTER injector should be registered");
         assertInstanceOf(ByteKitEnterInjector.class, injector);
 
-        MethodTarget target = new MethodTarget(MethodInjectionType.ENTER, SimpleTarget.class.getName(), "simpleMethod", "()Ljava/lang/String;");
+        MethodTarget target = new MethodTarget(MethodInjectionLocation.ENTER, SimpleTarget.class.getName(), "simpleMethod", "()Ljava/lang/String;");
         InjectableCode code = new InjectableCode() {
             @Override
             public String getCode() {

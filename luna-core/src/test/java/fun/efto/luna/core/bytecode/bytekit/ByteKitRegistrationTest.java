@@ -15,10 +15,10 @@ import fun.efto.luna.core.bootstrap.capability.CoreCapabilityRegistry;
 import fun.efto.luna.core.plugin.builtin.CoreModuleInitializer;
 import fun.efto.luna.core.plugin.builtin.line.AfterLineInjector;
 import fun.efto.luna.core.plugin.builtin.line.BeforeLineInjector;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
-import fun.efto.luna.core.plugin.builtin.method.ExceptionExitInjectionType;
-import fun.efto.luna.core.plugin.builtin.method.InvokeInjectionType;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
+import fun.efto.luna.core.plugin.builtin.method.ExceptionExitInjectionLocation;
+import fun.efto.luna.core.plugin.builtin.method.InvokeInjectionLocation;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ public class ByteKitRegistrationTest {
     @DisplayName("ENTER 注入器应为 ByteKitEnterInjector 实例")
     void testEnterInjectorIsByteKit() {
         CoreModuleInitializer.initialize();
-        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(MethodInjectionType.ENTER);
+        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(MethodInjectionLocation.ENTER);
         assertTrue(injector.isPresent());
         assertInstanceOf(ByteKitEnterInjector.class, injector.get());
     }
@@ -52,7 +52,7 @@ public class ByteKitRegistrationTest {
     @DisplayName("EXIT 注入器应为 ByteKitExitInjector 实例")
     void testExitInjectorIsByteKit() {
         CoreModuleInitializer.initialize();
-        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(MethodInjectionType.EXIT);
+        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(MethodInjectionLocation.EXIT);
         assertTrue(injector.isPresent());
         assertInstanceOf(ByteKitExitInjector.class, injector.get());
     }
@@ -61,7 +61,7 @@ public class ByteKitRegistrationTest {
     @DisplayName("AROUND 注入器应为 ByteKitAroundInjector 实例")
     void testAroundInjectorIsByteKit() {
         CoreModuleInitializer.initialize();
-        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(MethodInjectionType.AROUND);
+        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(MethodInjectionLocation.AROUND);
         assertTrue(injector.isPresent());
         assertInstanceOf(ByteKitAroundInjector.class, injector.get());
     }
@@ -70,7 +70,7 @@ public class ByteKitRegistrationTest {
     @DisplayName("EXCEPTION_EXIT 注入器应为 ByteKitExceptionExitInjector 实例")
     void testExceptionExitInjectorIsByteKit() {
         CoreModuleInitializer.initialize();
-        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(ExceptionExitInjectionType.EXCEPTION_EXIT);
+        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(ExceptionExitInjectionLocation.EXCEPTION_EXIT);
         assertTrue(injector.isPresent());
         assertInstanceOf(ByteKitExceptionExitInjector.class, injector.get());
     }
@@ -79,7 +79,7 @@ public class ByteKitRegistrationTest {
     @DisplayName("INVOKE 注入器应为 ByteKitInvokeInjector 实例")
     void testInvokeInjectorIsByteKit() {
         CoreModuleInitializer.initialize();
-        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(InvokeInjectionType.INVOKE);
+        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(InvokeInjectionLocation.INVOKE);
         assertTrue(injector.isPresent());
         assertInstanceOf(ByteKitInvokeInjector.class, injector.get());
     }
@@ -88,7 +88,7 @@ public class ByteKitRegistrationTest {
     @DisplayName("BEFORE 行号注入器仍使用 ASM 实现")
     void testBeforeLineInjectorIsAsm() {
         CoreModuleInitializer.initialize();
-        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(LineNumberInjectionType.BEFORE);
+        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(LineNumberInjectionLocation.BEFORE);
         assertTrue(injector.isPresent());
         assertInstanceOf(BeforeLineInjector.class, injector.get());
     }
@@ -97,7 +97,7 @@ public class ByteKitRegistrationTest {
     @DisplayName("AFTER 行号注入器仍使用 ASM 实现")
     void testAfterLineInjectorIsAsm() {
         CoreModuleInitializer.initialize();
-        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(LineNumberInjectionType.AFTER);
+        Optional<BytecodeInjector> injector = BytecodeInjectorRegistry.getInstance().get(LineNumberInjectionLocation.AFTER);
         assertTrue(injector.isPresent());
         assertInstanceOf(AfterLineInjector.class, injector.get());
     }

@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 规则模板 - 可分享、可组合、社区可贡献的注入模式
- *
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 10:00
  */
@@ -84,9 +82,6 @@ public class RuleTemplate {
         this.rules = rules;
     }
 
-    /**
-     * 模板参数定义
-     */
     public static class TemplateParameter {
         private String name;
         private String displayName;
@@ -109,11 +104,7 @@ public class RuleTemplate {
         public void setRequired(boolean required) { this.required = required; }
     }
 
-    /**
-     * 模板中的单条规则定义
-     */
     public static class TemplateRule {
-        private String injectionType;
         private String probeType;
         private String injectionLocation;
         private String codeType;
@@ -121,8 +112,6 @@ public class RuleTemplate {
         private String condition;
         private int lineNumber;
 
-        public String getInjectionType() { return injectionType; }
-        public void setInjectionType(String injectionType) { this.injectionType = injectionType; }
         public String getProbeType() { return probeType; }
         public void setProbeType(String probeType) { this.probeType = probeType; }
         public String getInjectionLocation() { return injectionLocation; }

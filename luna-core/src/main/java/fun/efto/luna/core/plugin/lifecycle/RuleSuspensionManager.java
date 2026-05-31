@@ -16,17 +16,16 @@ import java.util.stream.Collectors;
 public class RuleSuspensionManager {
     public static List<String> suspendOrphanedRules(PluginRegistrationRecord record) {
         List<String> suspendedIds = new ArrayList<>();
-        Set<String> typeNames = record.getInjectionTypes().stream()
+        Set<String> locationNames = record.getInjectionLocations().stream()
             .map(t -> t.getName())
             .collect(Collectors.toSet());
 
         InjectionManager injectionManager = InjectionManager.getInstance();
         for (PersistentInjection injection : injectionManager.getInjections()) {
-            if (injection.getStatus() == InjectionStatus.ACTIVE && typeNames.contains(injection.getInjectionType())) {
+            if (injection.getStatus() == InjectionStatus.ACTIVE && locationNames.contains(injection.getInjectionLocation())) {
                 injection.setStatus(InjectionStatus.SUSPENDED);
                 injection.setSuspendReason("Plugin " + record.getPluginId() + " unloaded");
                 suspendedIds.add(injection.getId());
-                // 重建缓存并触发 retransform
                 injectionManager.rebuildCache(injection.getClazz());
                 injectionManager.triggerRetransform(injection.getClazz());
             }
@@ -34,13 +33,12 @@ public class RuleSuspensionManager {
         return suspendedIds;
     }
 
-    public static void resumeSuspendedRules(String pluginId, Set<String> restoredTypeNames) {
+    public static void resumeSuspendedRules(String pluginId, Set<String> restoredLocationNames) {
         InjectionManager injectionManager = InjectionManager.getInstance();
         for (PersistentInjection injection : injectionManager.getInjections()) {
-            if (injection.getStatus() == InjectionStatus.SUSPENDED && restoredTypeNames.contains(injection.getInjectionType())) {
+            if (injection.getStatus() == InjectionStatus.SUSPENDED && restoredLocationNames.contains(injection.getInjectionLocation())) {
                 injection.setStatus(InjectionStatus.ACTIVE);
                 injection.setSuspendReason(null);
-                // 重建缓存并触发 retransform
                 injectionManager.rebuildCache(injection.getClazz());
                 injectionManager.triggerRetransform(injection.getClazz());
             }

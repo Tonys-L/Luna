@@ -14,7 +14,7 @@ import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.probe.ProbeOutput;
 import fun.efto.luna.core.testing.LineInjectionTestHelper;
@@ -79,7 +79,7 @@ public class ByteKitSnapshotExpressionTest {
         void testSnapshotExpressionThroughByteKitEnter() throws Exception {
             BytecodeInjector injector = new ByteKitEnterInjector();
             InjectableCode code = LineInjectionTestHelper.createCode("snapshot:true");
-            MethodTarget target = new MethodTarget(MethodInjectionType.ENTER, Calculator.class.getName(), "add", "(II)I");
+            MethodTarget target = new MethodTarget(MethodInjectionLocation.ENTER, Calculator.class.getName(), "add", "(II)I");
             InjectionPoint point = new InjectionPoint(target, code);
             InjectionContext context = new InjectionContext(point);
 

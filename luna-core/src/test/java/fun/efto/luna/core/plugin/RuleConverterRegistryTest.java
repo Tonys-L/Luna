@@ -2,16 +2,11 @@ package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.PersistentInjection;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
-import fun.efto.luna.core.injection.rule.InjectionRule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,27 +24,17 @@ public class RuleConverterRegistryTest {
 
     @Test
     void testRegisterAndConvert() {
-        InjectionType type = new InjectionType() {
-            @Override
-            public String getName() {
-                return "method_enter";
-            }
-
-            @Override
-            public String getDescription() {
-                return "test";
-            }
-        };
+        InjectionLocation location = InjectionLocation.of("method_enter", "test");
 
         InjectionPoint expectedPoint = new InjectionPoint(null, null);
 
         InjectionRuleConverter converter = rule -> expectedPoint;
 
-        InjectionTypeRegistry.getInstance().register(type);
-        RuleConverterRegistry.getInstance().register(type, converter);
+        InjectionTypeRegistry.getInstance().register(location);
+        RuleConverterRegistry.getInstance().register(location, converter);
 
         PersistentInjection injection = new PersistentInjection();
-        injection.setInjectionType("method_enter");
+        injection.setInjectionLocation("method_enter");
 
         InjectionPoint result = RuleConverterRegistry.getInstance().convert(injection);
         assertSame(expectedPoint, result);
@@ -57,22 +42,12 @@ public class RuleConverterRegistryTest {
 
     @Test
     void testConvertNoConverter() {
-        InjectionType type = new InjectionType() {
-            @Override
-            public String getName() {
-                return "method_enter";
-            }
+        InjectionLocation location = InjectionLocation.of("method_enter", "test");
 
-            @Override
-            public String getDescription() {
-                return "test";
-            }
-        };
-
-        InjectionTypeRegistry.getInstance().register(type);
+        InjectionTypeRegistry.getInstance().register(location);
 
         PersistentInjection injection = new PersistentInjection();
-        injection.setInjectionType("method_enter");
+        injection.setInjectionLocation("method_enter");
 
         assertThrows(IllegalStateException.class, () -> RuleConverterRegistry.getInstance().convert(injection));
     }

@@ -13,9 +13,9 @@ import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.CodeType;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.probe.ProbeOutput;
 import fun.efto.luna.core.testing.LineInjectionTestHelper;
@@ -76,13 +76,13 @@ public class ByteKitLogExpressionTest {
 
     private InjectionPoint createEnterInjectionPoint(String className, String methodName, String methodDesc, String expression) {
         InjectableCode code = LineInjectionTestHelper.createCode(expression);
-        MethodTarget target = new MethodTarget(MethodInjectionType.ENTER, className, methodName, methodDesc);
+        MethodTarget target = new MethodTarget(MethodInjectionLocation.ENTER, className, methodName, methodDesc);
         return new InjectionPoint(target, code);
     }
 
     private InjectionPoint createExitInjectionPoint(String className, String methodName, String methodDesc, String expression) {
         InjectableCode code = LineInjectionTestHelper.createCode(expression);
-        MethodTarget target = new MethodTarget(MethodInjectionType.EXIT, className, methodName, methodDesc);
+        MethodTarget target = new MethodTarget(MethodInjectionLocation.EXIT, className, methodName, methodDesc);
         return new InjectionPoint(target, code);
     }
 

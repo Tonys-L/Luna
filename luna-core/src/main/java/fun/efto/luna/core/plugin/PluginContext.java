@@ -6,7 +6,7 @@ import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.CodeCompilerStrategy;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.injection.rule.template.RuleTemplate;
@@ -21,9 +21,9 @@ import java.util.Map;
  */
 public interface PluginContext {
 
-    void registerInjectionType(InjectionType type);
+    void registerInjectionLocation(InjectionLocation location);
 
-    void registerInjector(InjectionType type, BytecodeInjector injector);
+    void registerInjector(InjectionLocation location, BytecodeInjector injector);
 
     void registerAssembler(CodeType type, BytecodeAssembler assembler);
 
@@ -31,7 +31,7 @@ public interface PluginContext {
 
     void registerRuleConverter(InjectionRuleConverter converter);
 
-    void registerRuleConverter(InjectionType type, InjectionRuleConverter converter);
+    void registerRuleConverter(InjectionLocation location, InjectionRuleConverter converter);
 
     void registerTemplate(RuleTemplate template);
 

@@ -23,12 +23,12 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.emptyList());
 
         RuleTemplate.TemplateRule rule1 = new RuleTemplate.TemplateRule();
-        rule1.setInjectionType("METHOD_ENTER");
+        rule1.setInjectionLocation("METHOD_ENTER");
         rule1.setCodeType("EXPRESSION");
         rule1.setCode("trace:start");
 
         RuleTemplate.TemplateRule rule2 = new RuleTemplate.TemplateRule();
-        rule2.setInjectionType("METHOD_EXIT");
+        rule2.setInjectionLocation("METHOD_EXIT");
         rule2.setCodeType("EXPRESSION");
         rule2.setCode("trace:end:0");
 
@@ -51,12 +51,12 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.singletonList(param));
 
         RuleTemplate.TemplateRule rule1 = new RuleTemplate.TemplateRule();
-        rule1.setInjectionType("METHOD_ENTER");
+        rule1.setInjectionLocation("METHOD_ENTER");
         rule1.setCodeType("EXPRESSION");
         rule1.setCode("trace:start");
 
         RuleTemplate.TemplateRule rule2 = new RuleTemplate.TemplateRule();
-        rule2.setInjectionType("METHOD_EXIT");
+        rule2.setInjectionLocation("METHOD_EXIT");
         rule2.setCodeType("EXPRESSION");
         rule2.setCode("trace:end:${threshold}");
 
@@ -75,12 +75,12 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.emptyList());
 
         RuleTemplate.TemplateRule rule1 = new RuleTemplate.TemplateRule();
-        rule1.setInjectionType("METHOD_ENTER");
+        rule1.setInjectionLocation("METHOD_ENTER");
         rule1.setCodeType("EXPRESSION");
         rule1.setCode("log:→ call: $0");
 
         RuleTemplate.TemplateRule rule2 = new RuleTemplate.TemplateRule();
-        rule2.setInjectionType("METHOD_EXIT");
+        rule2.setInjectionLocation("METHOD_EXIT");
         rule2.setCodeType("EXPRESSION");
         rule2.setCode("log:← return");
 
@@ -103,12 +103,12 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.singletonList(param));
 
         RuleTemplate.TemplateRule rule1 = new RuleTemplate.TemplateRule();
-        rule1.setInjectionType("METHOD_ENTER");
+        rule1.setInjectionLocation("METHOD_ENTER");
         rule1.setCodeType("EXPRESSION");
         rule1.setCode("trace:start");
 
         RuleTemplate.TemplateRule rule2 = new RuleTemplate.TemplateRule();
-        rule2.setInjectionType("METHOD_EXIT");
+        rule2.setInjectionLocation("METHOD_EXIT");
         rule2.setCodeType("EXPRESSION");
         rule2.setCode("trace:alert:${threshold}");
 
@@ -127,7 +127,7 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.emptyList());
 
         RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
-        rule.setInjectionType("LINE_BEFORE");
+        rule.setInjectionLocation("LINE_BEFORE");
         rule.setCodeType("SNAPSHOT");
         rule.setCode("snapshot:true");
 
@@ -150,7 +150,7 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.singletonList(param));
 
         RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
-        rule.setInjectionType("LINE_BEFORE");
+        rule.setInjectionLocation("LINE_BEFORE");
         rule.setCodeType("SNAPSHOT");
         rule.setCode("snapshot:true");
         rule.setCondition("${condition}");

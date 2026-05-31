@@ -3,8 +3,8 @@ package fun.efto.luna.core.injector;
 import fun.efto.luna.core.TestSetup;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -32,35 +32,35 @@ public class BytecodeInjectorRegistryTest {
     @Test
     public void testGetEnterInjector() {
         BytecodeInjectorRegistry registry = BytecodeInjectorRegistry.getInstance();
-        Optional<BytecodeInjector> injector = registry.get(MethodInjectionType.ENTER);
+        Optional<BytecodeInjector> injector = registry.get(MethodInjectionLocation.ENTER);
         assertTrue(injector.isPresent(), "ENTER injector should be present");
     }
 
     @Test
     public void testGetExitInjector() {
         BytecodeInjectorRegistry registry = BytecodeInjectorRegistry.getInstance();
-        Optional<BytecodeInjector> injector = registry.get(MethodInjectionType.EXIT);
+        Optional<BytecodeInjector> injector = registry.get(MethodInjectionLocation.EXIT);
         assertTrue(injector.isPresent(), "EXIT injector should be present");
     }
 
     @Test
     public void testGetAroundInjector() {
         BytecodeInjectorRegistry registry = BytecodeInjectorRegistry.getInstance();
-        Optional<BytecodeInjector> injector = registry.get(MethodInjectionType.AROUND);
+        Optional<BytecodeInjector> injector = registry.get(MethodInjectionLocation.AROUND);
         assertTrue(injector.isPresent(), "AROUND injector should be present");
     }
 
     @Test
     public void testGetBeforeLineInjector() {
         BytecodeInjectorRegistry registry = BytecodeInjectorRegistry.getInstance();
-        Optional<BytecodeInjector> injector = registry.get(LineNumberInjectionType.BEFORE);
+        Optional<BytecodeInjector> injector = registry.get(LineNumberInjectionLocation.BEFORE);
         assertTrue(injector.isPresent(), "BEFORE line injector should be present");
     }
 
     @Test
     public void testGetAfterLineInjector() {
         BytecodeInjectorRegistry registry = BytecodeInjectorRegistry.getInstance();
-        Optional<BytecodeInjector> injector = registry.get(LineNumberInjectionType.AFTER);
+        Optional<BytecodeInjector> injector = registry.get(LineNumberInjectionLocation.AFTER);
         assertTrue(injector.isPresent(), "AFTER line injector should be present");
     }
 }

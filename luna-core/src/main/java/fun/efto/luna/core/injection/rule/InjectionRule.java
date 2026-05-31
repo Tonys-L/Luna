@@ -1,7 +1,6 @@
 package fun.efto.luna.core.injection.rule;
 
 /**
- * 注入规则
  * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
@@ -10,7 +9,6 @@ public class InjectionRule {
     private String targetClass;
     private String targetMethod;
     private String methodDescriptor;
-    private String injectionType;
     private String probeType;
     private String injectionLocation;
     private int lineNumber;
@@ -60,14 +58,6 @@ public class InjectionRule {
 
     public void setMethodDescriptor(String methodDescriptor) {
         this.methodDescriptor = methodDescriptor;
-    }
-
-    public String getInjectionType() {
-        return injectionType;
-    }
-
-    public void setInjectionType(String injectionType) {
-        this.injectionType = injectionType;
     }
 
     public String getProbeType() {

@@ -16,8 +16,8 @@ import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.plugin.builtin.CoreModuleInitializer;
 import fun.efto.luna.core.plugin.builtin.line.BeforeLineInjector;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
@@ -53,12 +53,12 @@ public class DualEngineDispatchTest {
     @Test
     @DisplayName("方法级注入点 (ENTER) 使用 ByteKit 注入器")
     void testMethodLevelUsesByteKitInjector() {
-        BytecodeInjector injector = BytecodeInjectorRegistry.getInstance().get(MethodInjectionType.ENTER).orElse(null);
+        BytecodeInjector injector = BytecodeInjectorRegistry.getInstance().get(MethodInjectionLocation.ENTER).orElse(null);
         assertNotNull(injector);
         assertInstanceOf(ByteKitEnterInjector.class, injector);
 
         byte[] bytecode = generateSimpleTestClass();
-        MethodTarget target = new MethodTarget(MethodInjectionType.ENTER, "TestService", "doWork", "()V");
+        MethodTarget target = new MethodTarget(MethodInjectionLocation.ENTER, "TestService", "doWork", "()V");
         InjectableCode code = createExpressionCode("log:test");
         InjectionPoint point = new InjectionPoint(target, code);
 
@@ -70,13 +70,13 @@ public class DualEngineDispatchTest {
     @Test
     @DisplayName("行级注入点 (BEFORE) 使用 ASM 注入器")
     void testLineLevelUsesAsmInjector() {
-        BytecodeInjector injector = BytecodeInjectorRegistry.getInstance().get(LineNumberInjectionType.BEFORE).orElse(null);
+        BytecodeInjector injector = BytecodeInjectorRegistry.getInstance().get(LineNumberInjectionLocation.BEFORE).orElse(null);
         assertNotNull(injector);
         assertInstanceOf(BeforeLineInjector.class, injector);
 
         byte[] bytecode = generateTestClassWithLineNumber();
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, "TestService", 12, 0, "doWork", "()V");
+                LineNumberInjectionLocation.BEFORE, "TestService", 12, 0, "doWork", "()V");
         InjectableCode code = createExpressionCode("log:test");
         InjectionPoint point = new InjectionPoint(target, code);
 

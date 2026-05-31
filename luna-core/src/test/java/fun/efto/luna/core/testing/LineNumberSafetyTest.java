@@ -8,7 +8,7 @@ import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
 import fun.efto.luna.core.probe.ProbeMessage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,14 +41,14 @@ public class LineNumberSafetyTest {
         byte[] bytecode = getClassBytecode(LineInjectionTestHelper.TestTargetService.class);
         int line = findFirstMethodLine(bytecode, "processWithLoop");
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE,
+                LineNumberInjectionLocation.BEFORE,
                 LineInjectionTestHelper.TestTargetService.class.getName(),
                 line, 0, "processWithLoop", "(I)V");
         InjectableCode code = createCode("log:test");
         InjectionPoint ip = new InjectionPoint(target, code);
         InjectionContext ctx = new InjectionContext(ip);
         BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                .get(LineNumberInjectionType.BEFORE).get();
+                .get(LineNumberInjectionLocation.BEFORE).get();
         byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
         Class<?> loaded = injectAndLoad(result, LineInjectionTestHelper.TestTargetService.class.getName());
         Object instance = loaded.getDeclaredConstructor().newInstance();
@@ -61,14 +61,14 @@ public class LineNumberSafetyTest {
         byte[] bytecode = getClassBytecode(LineInjectionTestHelper.TestTargetService.class);
         int loopLine = findLineByOffset(bytecode, "processWithLoop", 2);
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE,
+                LineNumberInjectionLocation.BEFORE,
                 LineInjectionTestHelper.TestTargetService.class.getName(),
                 loopLine, 0, "processWithLoop", "(I)V");
         InjectableCode code = createCode("log:loop iteration");
         InjectionPoint ip = new InjectionPoint(target, code);
         InjectionContext ctx = new InjectionContext(ip);
         BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                .get(LineNumberInjectionType.BEFORE).get();
+                .get(LineNumberInjectionLocation.BEFORE).get();
         byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
         Class<?> loaded = injectAndLoad(result, LineInjectionTestHelper.TestTargetService.class.getName());
         Object instance = loaded.getDeclaredConstructor().newInstance();
@@ -86,14 +86,14 @@ public class LineNumberSafetyTest {
         byte[] bytecode = getClassBytecode(LineInjectionTestHelper.TestTargetService.class);
         int finallyLine = findLineByOffset(bytecode, "processWithException", 4);
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE,
+                LineNumberInjectionLocation.BEFORE,
                 LineInjectionTestHelper.TestTargetService.class.getName(),
                 finallyLine, 0, "processWithException", "()V");
         InjectableCode code = createCode("log:finally executed");
         InjectionPoint ip = new InjectionPoint(target, code);
         InjectionContext ctx = new InjectionContext(ip);
         BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                .get(LineNumberInjectionType.BEFORE).get();
+                .get(LineNumberInjectionLocation.BEFORE).get();
         byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
         assertNotNull(result, "Injection should succeed");
         Class<?> loaded = injectAndLoad(result, LineInjectionTestHelper.TestTargetService.class.getName());
@@ -109,14 +109,14 @@ public class LineNumberSafetyTest {
         byte[] bytecode = getClassBytecode(LineInjectionTestHelper.TestTargetService.class);
         int line = findFirstMethodLine(bytecode, "processWithLoop");
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE,
+                LineNumberInjectionLocation.BEFORE,
                 LineInjectionTestHelper.TestTargetService.class.getName(),
                 line, 0, "processWithLoop", "(I)V");
         InjectableCode code = createCode("log:try block entry");
         InjectionPoint ip = new InjectionPoint(target, code);
         InjectionContext ctx = new InjectionContext(ip);
         BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                .get(LineNumberInjectionType.BEFORE).get();
+                .get(LineNumberInjectionLocation.BEFORE).get();
         byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
         Class<?> loaded = injectAndLoad(result, LineInjectionTestHelper.TestTargetService.class.getName());
         Object instance = loaded.getDeclaredConstructor().newInstance();

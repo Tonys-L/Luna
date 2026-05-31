@@ -1,7 +1,7 @@
 package fun.efto.luna.core.plugin.registry;
 
 import fun.efto.luna.core.infra.type.Registry;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 
 import java.util.Collection;
 import java.util.Map;
@@ -12,9 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 22:00
  */
-public final class InjectionTypeRegistry implements Registry<String, InjectionType> {
+public final class InjectionTypeRegistry implements Registry<String, InjectionLocation> {
 
-    private static final Map<String, InjectionType> REGISTRY = new ConcurrentHashMap<>();
+    private static final Map<String, InjectionLocation> REGISTRY = new ConcurrentHashMap<>();
     private static final InjectionTypeRegistry INSTANCE = new InjectionTypeRegistry();
 
     private InjectionTypeRegistry() {}
@@ -24,39 +24,39 @@ public final class InjectionTypeRegistry implements Registry<String, InjectionTy
     }
 
     @Override
-    public Map<String, InjectionType> getRegistry() {
+    public Map<String, InjectionLocation> getRegistry() {
         return REGISTRY;
     }
 
     @Override
-    public Optional<InjectionType> get(String name) {
+    public Optional<InjectionLocation> get(String name) {
         return Optional.ofNullable(REGISTRY.get(name.toLowerCase()));
     }
 
     @Override
-    public InjectionType register(String key, InjectionType type) {
-        REGISTRY.put(key.toLowerCase(), type);
-        return type;
+    public InjectionLocation register(String key, InjectionLocation location) {
+        REGISTRY.put(key.toLowerCase(), location);
+        return location;
     }
 
-    public InjectionType register(InjectionType type) {
-        REGISTRY.put(type.getName().toLowerCase(), type);
-        for (String alias : type.getAliases()) {
-            REGISTRY.put(alias.toLowerCase(), type);
+    public InjectionLocation register(InjectionLocation location) {
+        REGISTRY.put(location.getName().toLowerCase(), location);
+        for (String alias : location.getAliases()) {
+            REGISTRY.put(alias.toLowerCase(), location);
         }
-        return type;
+        return location;
     }
 
-    public InjectionType resolve(String name) {
-        InjectionType type = REGISTRY.get(name.toLowerCase());
-        if (type == null) {
-            throw new IllegalArgumentException("Unknown injection type: " + name + ", registered: " + REGISTRY.keySet());
+    public InjectionLocation resolve(String name) {
+        InjectionLocation location = REGISTRY.get(name.toLowerCase());
+        if (location == null) {
+            throw new IllegalArgumentException("Unknown injection location: " + name + ", registered: " + REGISTRY.keySet());
         }
-        return type;
+        return location;
     }
 
-    public void unregisterAll(Collection<InjectionType> types) {
-        types.forEach(t -> {
+    public void unregisterAll(Collection<InjectionLocation> locations) {
+        locations.forEach(t -> {
             REGISTRY.remove(t.getName().toLowerCase());
             for (String alias : t.getAliases()) {
                 REGISTRY.remove(alias.toLowerCase());
@@ -64,7 +64,7 @@ public final class InjectionTypeRegistry implements Registry<String, InjectionTy
         });
     }
 
-    public Collection<InjectionType> getAll() {
+    public Collection<InjectionLocation> getAll() {
         return REGISTRY.values();
     }
 

@@ -8,7 +8,7 @@ import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
 import fun.efto.luna.core.probe.ProbeMessage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,14 +43,14 @@ class LineNumberCaptureTest {
         int line = findFirstMethodLine(bytecode, "processWithPrimitives");
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, TestTargetService.class.getName(), line, 0,
+                LineNumberInjectionLocation.BEFORE, TestTargetService.class.getName(), line, 0,
                 "processWithPrimitives", "(BSIJFDCZ)V");
         InjectableCode code = createCode("snapshot:true");
         InjectionPoint ip = new InjectionPoint(target, code);
         InjectionContext ctx = new InjectionContext(ip);
 
         BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                .get(LineNumberInjectionType.BEFORE).get();
+                .get(LineNumberInjectionLocation.BEFORE).get();
         byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
         Class<?> loaded = injectAndLoad(result, TestTargetService.class.getName());
@@ -72,14 +72,14 @@ class LineNumberCaptureTest {
         int line = findFirstMethodLine(bytecode, "processWithReferences");
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, TestTargetService.class.getName(), line, 0,
+                LineNumberInjectionLocation.BEFORE, TestTargetService.class.getName(), line, 0,
                 "processWithReferences", "(Ljava/lang/String;Ljava/lang/Object;[Ljava/lang/String;)V");
         InjectableCode code = createCode("snapshot:true");
         InjectionPoint ip = new InjectionPoint(target, code);
         InjectionContext ctx = new InjectionContext(ip);
 
         BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                .get(LineNumberInjectionType.BEFORE).get();
+                .get(LineNumberInjectionLocation.BEFORE).get();
         byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
         Class<?> loaded = injectAndLoad(result, TestTargetService.class.getName());
@@ -100,14 +100,14 @@ class LineNumberCaptureTest {
         int line = findLineByOffset(bytecode, "processWithLoop", 2);
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, TestTargetService.class.getName(), line, 0,
+                LineNumberInjectionLocation.BEFORE, TestTargetService.class.getName(), line, 0,
                 "processWithLoop", "(I)V");
         InjectableCode code = createCode("snapshot:true");
         InjectionPoint ip = new InjectionPoint(target, code);
         InjectionContext ctx = new InjectionContext(ip);
 
         BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                .get(LineNumberInjectionType.BEFORE).get();
+                .get(LineNumberInjectionLocation.BEFORE).get();
         byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
         Class<?> loaded = injectAndLoad(result, TestTargetService.class.getName());
@@ -129,14 +129,14 @@ class LineNumberCaptureTest {
         int line = findLineByOffset(bytecode, "processWithBranch", 2);
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, TestTargetService.class.getName(), line, 0,
+                LineNumberInjectionLocation.BEFORE, TestTargetService.class.getName(), line, 0,
                 "processWithBranch", "(I)V");
         InjectableCode code = createCode("snapshot:true");
         InjectionPoint ip = new InjectionPoint(target, code);
         InjectionContext ctx = new InjectionContext(ip);
 
         BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                .get(LineNumberInjectionType.BEFORE).get();
+                .get(LineNumberInjectionLocation.BEFORE).get();
         byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
         Class<?> loaded = injectAndLoad(result, TestTargetService.class.getName());
@@ -157,14 +157,14 @@ class LineNumberCaptureTest {
         int line = findLineByOffset(bytecode, "processWithException", 3);
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, TestTargetService.class.getName(), line, 0,
+                LineNumberInjectionLocation.BEFORE, TestTargetService.class.getName(), line, 0,
                 "processWithException", "()V");
         InjectableCode code = createCode("snapshot:true");
         InjectionPoint ip = new InjectionPoint(target, code);
         InjectionContext ctx = new InjectionContext(ip);
 
         BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                .get(LineNumberInjectionType.BEFORE).get();
+                .get(LineNumberInjectionLocation.BEFORE).get();
         byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
         Class<?> loaded = injectAndLoad(result, TestTargetService.class.getName());
@@ -184,14 +184,14 @@ class LineNumberCaptureTest {
         int line = findLineByOffset(bytecode, "processWithLongDouble", 4);
 
         LineNumberTarget target = new LineNumberTarget(
-                LineNumberInjectionType.BEFORE, TestTargetService.class.getName(), line, 0,
+                LineNumberInjectionLocation.BEFORE, TestTargetService.class.getName(), line, 0,
                 "processWithLongDouble", "()V");
         InjectableCode code = createCode("snapshot:true");
         InjectionPoint ip = new InjectionPoint(target, code);
         InjectionContext ctx = new InjectionContext(ip);
 
         BytecodeInjector injector = BytecodeInjectorRegistry.getInstance()
-                .get(LineNumberInjectionType.BEFORE).get();
+                .get(LineNumberInjectionLocation.BEFORE).get();
         byte[] result = injector.inject(ctx, bytecode, new ExpressionBytecodeAssembler());
 
         Class<?> loaded = injectAndLoad(result, TestTargetService.class.getName());

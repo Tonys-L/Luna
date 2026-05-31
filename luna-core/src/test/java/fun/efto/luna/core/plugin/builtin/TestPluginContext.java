@@ -6,7 +6,7 @@ import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
 import fun.efto.luna.core.injection.CodeCompilerStrategy;
 import fun.efto.luna.core.injection.code.CodeType;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.plugin.*;
 import fun.efto.luna.core.probe.ProbeMessage;
@@ -25,24 +25,24 @@ import java.util.Map;
  */
 public class TestPluginContext implements PluginContext {
 
-    private final List<InjectionType> injectionTypes = new ArrayList<>();
-    private final Map<InjectionType, BytecodeInjector> injectors = new HashMap<>();
+    private final List<InjectionLocation> injectionLocations = new ArrayList<>();
+    private final Map<InjectionLocation, BytecodeInjector> injectors = new HashMap<>();
     private final Map<CodeType, BytecodeAssembler> assemblers = new HashMap<>();
     private final List<ExpressionHandler> expressionHandlers = new ArrayList<>();
     private final List<InjectionRuleConverter> ruleConverters = new ArrayList<>();
-    private final Map<InjectionType, InjectionRuleConverter> typedRuleConverters = new HashMap<>();
+    private final Map<InjectionLocation, InjectionRuleConverter> typedRuleConverters = new HashMap<>();
     private final List<RuleTemplate> templates = new ArrayList<>();
     private final List<CodeCompilerStrategy> codeCompilerStrategies = new ArrayList<>();
     private final List<String> bootstrapClasses = new ArrayList<>();
 
     @Override
-    public void registerInjectionType(InjectionType type) {
-        injectionTypes.add(type);
+    public void registerInjectionLocation(InjectionLocation location) {
+        injectionLocations.add(location);
     }
 
     @Override
-    public void registerInjector(InjectionType type, BytecodeInjector injector) {
-        injectors.put(type, injector);
+    public void registerInjector(InjectionLocation location, BytecodeInjector injector) {
+        injectors.put(location, injector);
     }
 
     @Override
@@ -61,8 +61,8 @@ public class TestPluginContext implements PluginContext {
     }
 
     @Override
-    public void registerRuleConverter(InjectionType type, InjectionRuleConverter converter) {
-        typedRuleConverters.put(type, converter);
+    public void registerRuleConverter(InjectionLocation location, InjectionRuleConverter converter) {
+        typedRuleConverters.put(location, converter);
     }
 
     @Override
@@ -101,11 +101,11 @@ public class TestPluginContext implements PluginContext {
     @Override
     public void savePluginConfig(Map<String, String> config) {}
 
-    public List<InjectionType> getInjectionTypes() { return injectionTypes; }
-    public Map<InjectionType, BytecodeInjector> getInjectors() { return injectors; }
+    public List<InjectionLocation> getInjectionLocations() { return injectionLocations; }
+    public Map<InjectionLocation, BytecodeInjector> getInjectors() { return injectors; }
     public Map<CodeType, BytecodeAssembler> getAssemblers() { return assemblers; }
     public List<ExpressionHandler> getExpressionHandlers() { return expressionHandlers; }
     public List<InjectionRuleConverter> getRuleConverters() { return ruleConverters; }
-    public Map<InjectionType, InjectionRuleConverter> getTypedRuleConverters() { return typedRuleConverters; }
+    public Map<InjectionLocation, InjectionRuleConverter> getTypedRuleConverters() { return typedRuleConverters; }
     public List<RuleTemplate> getTemplates() { return templates; }
 }

@@ -4,16 +4,17 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 构造函数注入类型
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/26 16:00
  */
-public class ConstructorType extends InjectionType {
+public class FieldAccessLocation extends InjectionLocation {
 
     private final List<String> aliases;
+    private final FieldAccessTarget.AccessType accessType;
 
-    public ConstructorType(String name, String description, String... aliases) {
+    public FieldAccessLocation(String name, String description, FieldAccessTarget.AccessType accessType, String... aliases) {
         super(name, description);
+        this.accessType = accessType;
         this.aliases = Arrays.asList(aliases);
     }
 
@@ -24,7 +25,8 @@ public class ConstructorType extends InjectionType {
 
     @Override
     public InjectionTarget createTarget(String className, String methodName, String methodDescriptor, Integer lineNumber) {
-        String descriptor = methodDescriptor != null ? methodDescriptor : "";
-        return new ConstructorTarget(this, className, descriptor);
+        String fieldName = methodName != null ? methodName : "";
+        String fieldDescriptor = methodDescriptor != null ? methodDescriptor : "";
+        return new FieldAccessTarget(this, className, fieldName, fieldDescriptor, accessType);
     }
 }

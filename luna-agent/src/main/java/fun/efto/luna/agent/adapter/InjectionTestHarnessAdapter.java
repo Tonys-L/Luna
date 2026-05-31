@@ -6,7 +6,7 @@ import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.infra.InstrumentationHolder;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import fun.efto.luna.core.transformer.ClassFileTransformerAdapter;
 import fun.efto.luna.core.transformer.ClassTransformer;
 import fun.efto.luna.core.transformer.DefaultClassTransformer;
@@ -21,9 +21,6 @@ import java.lang.reflect.Modifier;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * InjectionVerifier 适配器实现。
- * 通过反射调用 + 临时 Transformer 注入来验证注入效果。
- *
  * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 21:00
  */
@@ -40,10 +37,10 @@ public class InjectionTestHarnessAdapter implements InjectionVerifier {
 
     @Override
     public VerifyResult testInjection(String className, String methodName, String descriptor,
-                                       String injectionTypeStr, String code) {
+                                       String injectionLocationStr, String code) {
         lock.lock();
         try {
-            return doTestInjection(className, methodName, descriptor, injectionTypeStr, code);
+            return doTestInjection(className, methodName, descriptor, injectionLocationStr, code);
         } finally {
             lock.unlock();
         }
@@ -91,7 +88,6 @@ public class InjectionTestHarnessAdapter implements InjectionVerifier {
             try {
                 targetMethod.invoke(instance, args);
             } catch (Exception e) {
-                // method threw exception, but injected code may have already printed output
             } finally {
                 System.setOut(originalOut);
             }
@@ -105,9 +101,9 @@ public class InjectionTestHarnessAdapter implements InjectionVerifier {
     }
 
     private VerifyResult doTestInjection(String className, String methodName, String descriptor,
-                                          String injectionTypeStr, String code) {
-        MethodInjectionType injectionType = resolveInjectionType(injectionTypeStr);
-        MethodTarget target = new MethodTarget(injectionType, className, methodName, descriptor);
+                                          String injectionLocationStr, String code) {
+        MethodInjectionLocation injectionLocation = resolveInjectionLocation(injectionLocationStr);
+        MethodTarget target = new MethodTarget(injectionLocation, className, methodName, descriptor);
 
         InjectableCode injectableCode = new InjectableCode() {
             @Override
@@ -164,7 +160,6 @@ public class InjectionTestHarnessAdapter implements InjectionVerifier {
             try {
                 targetMethod.invoke(instance, args);
             } catch (Exception e) {
-                // method threw exception, but injected code may have already printed output
             } finally {
                 System.setOut(originalOut);
             }
@@ -218,22 +213,22 @@ public class InjectionTestHarnessAdapter implements InjectionVerifier {
         return null;
     }
 
-    private MethodInjectionType resolveInjectionType(String injectionTypeStr) {
-        if (injectionTypeStr == null || injectionTypeStr.isEmpty()) {
-            return MethodInjectionType.ENTER;
+    private MethodInjectionLocation resolveInjectionLocation(String injectionLocationStr) {
+        if (injectionLocationStr == null || injectionLocationStr.isEmpty()) {
+            return MethodInjectionLocation.ENTER;
         }
-        switch (injectionTypeStr.toUpperCase()) {
+        switch (injectionLocationStr.toUpperCase()) {
             case "METHOD_ENTER":
             case "ENTER":
-                return MethodInjectionType.ENTER;
+                return MethodInjectionLocation.ENTER;
             case "METHOD_EXIT":
             case "EXIT":
-                return MethodInjectionType.EXIT;
+                return MethodInjectionLocation.EXIT;
             case "METHOD_AROUND":
             case "AROUND":
-                return MethodInjectionType.AROUND;
+                return MethodInjectionLocation.AROUND;
             default:
-                return MethodInjectionType.ENTER;
+                return MethodInjectionLocation.ENTER;
         }
     }
 }

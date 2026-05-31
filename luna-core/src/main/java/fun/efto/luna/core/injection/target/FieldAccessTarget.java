@@ -1,22 +1,20 @@
 package fun.efto.luna.core.injection.target;
 
-import fun.efto.luna.core.injection.target.InjectionType;
-
-public class FieldAccessTarget extends BaseTarget {
-
 /**
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/25 23:00
  */
+public class FieldAccessTarget extends BaseTarget {
+
     public enum AccessType { READ, WRITE }
 
     private final String fieldName;
     private final String fieldDescriptor;
     private final AccessType accessType;
 
-    public FieldAccessTarget(InjectionType type, String className,
+    public FieldAccessTarget(InjectionLocation location, String className,
                              String fieldName, String fieldDescriptor, AccessType accessType) {
-        super(type, className);
+        super(location, className);
         this.fieldName = fieldName;
         this.fieldDescriptor = fieldDescriptor;
         this.accessType = accessType;

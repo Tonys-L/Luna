@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.web;
 
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.LunaController;
 import fun.efto.luna.core.plugin.PluginInfo;
 import fun.efto.luna.core.plugin.PluginManager;
@@ -34,7 +34,7 @@ public class PluginUIController implements LunaController {
     public ApiResult getUiManifest() {
         Set<String> disabledPluginIds = collectDisabledPluginIds();
         return ApiResult.ok(new UiManifestVO(
-                buildInjectionTypes(disabledPluginIds),
+                buildInjectionLocations(disabledPluginIds),
                 buildExpressionProtocols(disabledPluginIds),
                 buildTemplates(disabledPluginIds)));
     }
@@ -49,11 +49,11 @@ public class PluginUIController implements LunaController {
         return disabled;
     }
 
-    private List<UiManifestVO.InjectionTypeEntry> buildInjectionTypes(Set<String> disabledPluginIds) {
-        Set<String> disabledTypeNames = collectDisabledTypeNames(disabledPluginIds);
+    private List<UiManifestVO.InjectionLocationEntry> buildInjectionLocations(Set<String> disabledPluginIds) {
+        Set<String> disabledLocationNames = collectDisabledLocationNames(disabledPluginIds);
         return InjectionTypeRegistry.getInstance().getAll().stream()
-                .filter(t -> !disabledTypeNames.contains(t.getName()))
-                .map(t -> new UiManifestVO.InjectionTypeEntry(t.getName(), t.getName(), t.getDescription()))
+                .filter(t -> !disabledLocationNames.contains(t.getName()))
+                .map(t -> new UiManifestVO.InjectionLocationEntry(t.getName(), t.getName(), t.getDescription()))
                 .collect(Collectors.toList());
     }
 
@@ -75,13 +75,13 @@ public class PluginUIController implements LunaController {
                 .collect(Collectors.toList());
     }
 
-    private Set<String> collectDisabledTypeNames(Set<String> disabledPluginIds) {
-        Set<String> typeNames = new HashSet<>();
+    private Set<String> collectDisabledLocationNames(Set<String> disabledPluginIds) {
+        Set<String> locationNames = new HashSet<>();
         for (String pluginId : disabledPluginIds) {
-            pluginManager.getInjectionTypesForPlugin(pluginId)
-                    .forEach(t -> typeNames.add(t.getName()));
+            pluginManager.getInjectionLocationsForPlugin(pluginId)
+                    .forEach(t -> locationNames.add(t.getName()));
         }
-        return typeNames;
+        return locationNames;
     }
 
     private Set<String> collectDisabledProtocols(Set<String> disabledPluginIds) {

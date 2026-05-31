@@ -11,8 +11,8 @@ public class MethodTarget extends BaseTarget {
     public MethodTarget() {
     }
 
-    public MethodTarget(InjectionType injectionType, String targetClass, String methodName, String methodDescriptor) {
-        super(injectionType, targetClass);
+    public MethodTarget(InjectionLocation location, String targetClass, String methodName, String methodDescriptor) {
+        super(location, targetClass);
         this.methodName = methodName;
         this.methodDescriptor = methodDescriptor;
     }

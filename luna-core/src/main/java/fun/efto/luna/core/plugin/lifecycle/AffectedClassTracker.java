@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.lifecycle;
 
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,21 +13,21 @@ public final class AffectedClassTracker {
 
     private AffectedClassTracker() {}
 
-    public static void record(String injectionTypeName, String className) {
-        TYPE_TO_CLASSES.computeIfAbsent(injectionTypeName, k -> ConcurrentHashMap.newKeySet()).add(className);
+    public static void record(String injectionLocationName, String className) {
+        TYPE_TO_CLASSES.computeIfAbsent(injectionLocationName, k -> ConcurrentHashMap.newKeySet()).add(className);
     }
 
     public static Set<String> getAffectedClasses(PluginRegistrationRecord record) {
         Set<String> affected = new HashSet<>();
-        for (InjectionType type : record.getInjectionTypes()) {
-            Set<String> classes = TYPE_TO_CLASSES.get(type.getName());
+        for (InjectionLocation location : record.getInjectionLocations()) {
+            Set<String> classes = TYPE_TO_CLASSES.get(location.getName());
             if (classes != null) affected.addAll(classes);
         }
         return affected;
     }
 
-    public static void remove(String injectionTypeName, String className) {
-        Set<String> classes = TYPE_TO_CLASSES.get(injectionTypeName);
+    public static void remove(String injectionLocationName, String className) {
+        Set<String> classes = TYPE_TO_CLASSES.get(injectionLocationName);
         if (classes != null) classes.remove(className);
     }
 

@@ -9,7 +9,7 @@ import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
 import fun.efto.luna.core.testing.LineInjectionTestHelper;
 import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.CodeInjector;
@@ -65,7 +65,7 @@ class AsmCodeInjectorTest {
             CodeInjector injector = new AsmCodeInjector(bytecodeInjector, new ExpressionBytecodeAssembler());
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE,
+                    LineNumberInjectionLocation.BEFORE,
                     LineInjectionTestHelper.TestTargetService.class.getName(),
                     firstLine, 0, "processWithLoop", "(I)V");
             InjectionPoint point = new InjectionPoint(target, createCode("log:test"));
@@ -80,12 +80,12 @@ class AsmCodeInjectorTest {
         @DisplayName("inject 使用真实 BytecodeInjector 产生有效字节码")
         void testInjectWithRealInjector() {
             BytecodeInjector realInjector = BytecodeInjectorRegistry.getInstance()
-                    .get(LineNumberInjectionType.BEFORE).get();
+                    .get(LineNumberInjectionLocation.BEFORE).get();
 
             CodeInjector injector = new AsmCodeInjector(realInjector, new ExpressionBytecodeAssembler());
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE,
+                    LineNumberInjectionLocation.BEFORE,
                     LineInjectionTestHelper.TestTargetService.class.getName(),
                     firstLine, 0, "processWithLoop", "(I)V");
             InjectionPoint point = new InjectionPoint(target, createCode("log:test"));

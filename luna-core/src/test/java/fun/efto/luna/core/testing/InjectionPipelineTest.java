@@ -5,7 +5,7 @@ import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.code.InjectableCode;
 import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.MethodTarget;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionType;
+import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import fun.efto.luna.core.transformer.DefaultClassTransformer;
 import fun.efto.luna.core.transformer.TransformerResult;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,8 +58,8 @@ public class InjectionPipelineTest {
         return cw.toByteArray();
     }
 
-    private InjectionPoint createInjectionPoint(MethodInjectionType injectionType, String code) {
-        MethodTarget target = new MethodTarget(injectionType, TEST_CLASS, TEST_METHOD, TEST_DESCRIPTOR);
+    private InjectionPoint createInjectionPoint(MethodInjectionLocation InjectionLocation, String code) {
+        MethodTarget target = new MethodTarget(InjectionLocation, TEST_CLASS, TEST_METHOD, TEST_DESCRIPTOR);
         InjectableCode injectableCode = new InjectableCode() {
             @Override
             public String getCode() {
@@ -86,7 +86,7 @@ public class InjectionPipelineTest {
     @Test
     public void testLogExpressionBytecodeGeneration() {
         byte[] originalBytecode = generateTestClassBytecode(TEST_CLASS);
-        InjectionPoint injectionPoint = createInjectionPoint(MethodInjectionType.ENTER, "log:hello");
+        InjectionPoint injectionPoint = createInjectionPoint(MethodInjectionLocation.ENTER, "log:hello");
 
         DefaultClassTransformer transformer = new DefaultClassTransformer();
         TransformerResult result = transformer.transform(injectionPoint, TEST_CLASS, originalBytecode);
@@ -100,7 +100,7 @@ public class InjectionPipelineTest {
     @Test
     public void testEnterMethodVisitorBytecodeValid() {
         byte[] originalBytecode = generateTestClassBytecode(TEST_CLASS);
-        InjectionPoint injectionPoint = createInjectionPoint(MethodInjectionType.ENTER, "log:hello");
+        InjectionPoint injectionPoint = createInjectionPoint(MethodInjectionLocation.ENTER, "log:hello");
 
         DefaultClassTransformer transformer = new DefaultClassTransformer();
         TransformerResult result = transformer.transform(injectionPoint, TEST_CLASS, originalBytecode);
@@ -112,7 +112,7 @@ public class InjectionPipelineTest {
     @Test
     public void testDefaultClassTransformerFlow() {
         byte[] originalBytecode = generateTestClassBytecode(TEST_CLASS);
-        InjectionPoint injectionPoint = createInjectionPoint(MethodInjectionType.ENTER, "log:test-flow");
+        InjectionPoint injectionPoint = createInjectionPoint(MethodInjectionLocation.ENTER, "log:test-flow");
 
         DefaultClassTransformer transformer = new DefaultClassTransformer();
         TransformerResult result = transformer.transform(injectionPoint, TEST_CLASS, originalBytecode);
@@ -128,14 +128,14 @@ public class InjectionPipelineTest {
     public void testMultipleInjectionOnSameClass() {
         byte[] originalBytecode = generateTestClassBytecode(TEST_CLASS);
 
-        InjectionPoint enterPoint = createInjectionPoint(MethodInjectionType.ENTER, "log:enter-msg");
+        InjectionPoint enterPoint = createInjectionPoint(MethodInjectionLocation.ENTER, "log:enter-msg");
         DefaultClassTransformer transformer = new DefaultClassTransformer();
         TransformerResult enterResult = transformer.transform(enterPoint, TEST_CLASS, originalBytecode);
 
         assertTrue(enterResult.isTransformed(), "ENTER transformation should succeed");
         assertBytecodeValid(enterResult.getBytecode(), "Bytecode after ENTER injection should be valid");
 
-        InjectionPoint exitPoint = createInjectionPoint(MethodInjectionType.EXIT, "log:exit-msg");
+        InjectionPoint exitPoint = createInjectionPoint(MethodInjectionLocation.EXIT, "log:exit-msg");
         TransformerResult exitResult = transformer.transform(exitPoint, TEST_CLASS, enterResult.getBytecode());
 
         assertTrue(exitResult.isTransformed(), "EXIT transformation should succeed");
@@ -145,7 +145,7 @@ public class InjectionPipelineTest {
     @Test
     public void testExpressionWithColon() {
         byte[] originalBytecode = generateTestClassBytecode(TEST_CLASS);
-        InjectionPoint injectionPoint = createInjectionPoint(MethodInjectionType.ENTER, "log:time=12:30:00");
+        InjectionPoint injectionPoint = createInjectionPoint(MethodInjectionLocation.ENTER, "log:time=12:30:00");
 
         DefaultClassTransformer transformer = new DefaultClassTransformer();
         TransformerResult result = transformer.transform(injectionPoint, TEST_CLASS, originalBytecode);
@@ -159,7 +159,7 @@ public class InjectionPipelineTest {
     public void testChineseExpressionBytecodeEncoding() {
         byte[] originalBytecode = generateTestClassBytecode(TEST_CLASS);
         String chineseMessage = "执行方法: com.example.TestSubject.greet";
-        InjectionPoint injectionPoint = createInjectionPoint(MethodInjectionType.ENTER, "log:" + chineseMessage);
+        InjectionPoint injectionPoint = createInjectionPoint(MethodInjectionLocation.ENTER, "log:" + chineseMessage);
 
         DefaultClassTransformer transformer = new DefaultClassTransformer();
         TransformerResult result = transformer.transform(injectionPoint, TEST_CLASS, originalBytecode);

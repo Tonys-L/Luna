@@ -35,13 +35,13 @@ public class TemplateEngineTest {
         assertEquals(2, rules.size());
 
         InjectionRule enterRule = rules.get(0);
-        assertEquals("METHOD_ENTER", enterRule.getInjectionType());
+        assertEquals("METHOD_ENTER", enterRule.getInjectionLocation());
         assertEquals("EXPRESSION", enterRule.getCodeType());
         assertEquals("trace:start", enterRule.getLogContent());
         assertNull(enterRule.getExpression());
 
         InjectionRule exitRule = rules.get(1);
-        assertEquals("METHOD_EXIT", exitRule.getInjectionType());
+        assertEquals("METHOD_EXIT", exitRule.getInjectionLocation());
         assertEquals("EXPRESSION", exitRule.getCodeType());
         assertEquals("trace:end:0", exitRule.getLogContent());
         assertNull(exitRule.getExpression());
@@ -84,7 +84,7 @@ public class TemplateEngineTest {
         assertEquals(1, rules.size());
 
         InjectionRule rule = rules.get(0);
-        assertEquals("LINE_BEFORE", rule.getInjectionType());
+        assertEquals("LINE_BEFORE", rule.getInjectionLocation());
         assertEquals("SNAPSHOT", rule.getCodeType());
         assertEquals("snapshot:true", rule.getLogContent());
         assertEquals("param[2] >= 18", rule.getExpression());

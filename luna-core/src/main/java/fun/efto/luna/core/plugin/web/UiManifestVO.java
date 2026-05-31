@@ -3,35 +3,33 @@ package fun.efto.luna.core.plugin.web;
 import java.util.List;
 
 /**
- * 插件 UI 清单 VO，描述前端可用的注入类型、表达式协议和模板。
- *
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 17:00
  */
 public class UiManifestVO {
 
-    private final List<InjectionTypeEntry> injectionTypes;
+    private final List<InjectionLocationEntry> injectionLocations;
     private final List<ExpressionProtocolEntry> expressionProtocols;
     private final List<TemplateEntry> templates;
 
-    public UiManifestVO(List<InjectionTypeEntry> injectionTypes,
+    public UiManifestVO(List<InjectionLocationEntry> injectionLocations,
                         List<ExpressionProtocolEntry> expressionProtocols,
                         List<TemplateEntry> templates) {
-        this.injectionTypes = injectionTypes;
+        this.injectionLocations = injectionLocations;
         this.expressionProtocols = expressionProtocols;
         this.templates = templates;
     }
 
-    public List<InjectionTypeEntry> getInjectionTypes() { return injectionTypes; }
+    public List<InjectionLocationEntry> getInjectionLocations() { return injectionLocations; }
     public List<ExpressionProtocolEntry> getExpressionProtocols() { return expressionProtocols; }
     public List<TemplateEntry> getTemplates() { return templates; }
 
-    public static class InjectionTypeEntry {
+    public static class InjectionLocationEntry {
         private final String name;
         private final String displayName;
         private final String category;
 
-        public InjectionTypeEntry(String name, String displayName, String category) {
+        public InjectionLocationEntry(String name, String displayName, String category) {
             this.name = name;
             this.displayName = displayName;
             this.category = category;

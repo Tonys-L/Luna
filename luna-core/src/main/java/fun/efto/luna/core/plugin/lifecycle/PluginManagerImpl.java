@@ -5,7 +5,7 @@ import fun.efto.luna.core.infra.RingBuffer;
 import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
 import fun.efto.luna.core.injection.port.Retransformer;
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.infra.config.ConfigManager;
 import fun.efto.luna.core.plugin.*;
 import fun.efto.luna.core.probe.ProbeMessage;
@@ -185,11 +185,11 @@ public class PluginManagerImpl implements PluginManager {
             records.put(id, record);
             initPlugin(plugin, record);
 
-            Set<String> restoredTypeNames = new HashSet<>();
-            for (InjectionType type : record.getInjectionTypes()) {
-                restoredTypeNames.add(type.getName());
+            Set<String> restoredLocationNames = new HashSet<>();
+            for (InjectionLocation location : record.getInjectionLocations()) {
+                restoredLocationNames.add(location.getName());
             }
-            RuleSuspensionManager.resumeSuspendedRules(id, restoredTypeNames);
+            RuleSuspensionManager.resumeSuspendedRules(id, restoredLocationNames);
         } catch (Exception e) {
             states.put(id, PluginState.UNLOADED);
             records.remove(id);
@@ -249,8 +249,8 @@ public class PluginManagerImpl implements PluginManager {
         Set<String> affectedClasses = AffectedClassTracker.getAffectedClasses(record);
         retransformAffectedClasses(affectedClasses);
 
-        for (InjectionType type : record.getInjectionTypes()) {
-            AffectedClassTracker.remove(type.getName(), affectedClasses.toString());
+        for (InjectionLocation location : record.getInjectionLocations()) {
+            AffectedClassTracker.remove(location.getName(), affectedClasses.toString());
         }
 
         plugins.remove(pluginId);
@@ -427,10 +427,10 @@ public class PluginManagerImpl implements PluginManager {
         }
 
         PluginRegistrationRecord record = records.get(pluginId);
-        Set<String> restoredTypeNames = record.getInjectionTypes().stream()
-            .map(InjectionType::getName)
+        Set<String> restoredLocationNames = record.getInjectionLocations().stream()
+            .map(InjectionLocation::getName)
             .collect(Collectors.toSet());
-        RuleSuspensionManager.resumeSuspendedRules(pluginId, restoredTypeNames);
+        RuleSuspensionManager.resumeSuspendedRules(pluginId, restoredLocationNames);
 
         states.put(pluginId, PluginState.ACTIVE);
 
@@ -453,9 +453,9 @@ public class PluginManagerImpl implements PluginManager {
     public Map<String, PluginRegistrationRecord> getRecords() { return records; }
 
     @Override
-    public Set<InjectionType> getInjectionTypesForPlugin(String pluginId) {
+    public Set<InjectionLocation> getInjectionLocationsForPlugin(String pluginId) {
         PluginRegistrationRecord record = records.get(pluginId);
-        return record != null ? new HashSet<>(record.getInjectionTypes()) : Collections.emptySet();
+        return record != null ? new HashSet<>(record.getInjectionLocations()) : Collections.emptySet();
     }
 
     @Override

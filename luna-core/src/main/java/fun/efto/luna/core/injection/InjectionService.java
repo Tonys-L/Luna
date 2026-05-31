@@ -11,10 +11,6 @@ import fun.efto.luna.core.transformer.TransformerResult;
 import java.util.List;
 
 /**
- * 注入应用服务。
- * 编排校验→预览→注入→验证流程，Controller 的唯一入口。
- * 纯生命周期操作（查询、删除）委托给 InjectionManager。
- *
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 20:00
  */
@@ -38,8 +34,6 @@ public class InjectionService implements InjectionQuery {
         this.localVarValidator = localVarValidator;
         this.injectionVerifier = injectionVerifier;
     }
-
-    // ==================== 编排型操作 ====================
 
     public InjectResult inject(InjectionCommand cmd) {
         String paramError = InjectionValidator.validateParamReferences(cmd.getCode(), cmd.getDesc());
@@ -139,10 +133,8 @@ public class InjectionService implements InjectionQuery {
     public InjectionVerifier.VerifyResult verify(InjectionCommand cmd) {
         return injectionVerifier.testInjection(
                 cmd.getClazz(), cmd.getMethod(), cmd.getDesc(),
-                cmd.getInjectionType(), cmd.getCode());
+                cmd.getInjectionLocation(), cmd.getCode());
     }
-
-    // ==================== 委托型操作 ====================
 
     @Override
     public List<InjectionPoint> getActivePointsForClass(String className) {
@@ -167,8 +159,6 @@ public class InjectionService implements InjectionQuery {
         injectionManager.removeInjection(id);
     }
 
-    // ==================== 内部方法 ====================
-
     private String validateLocalVarReferences(InjectionCommand cmd) {
         try {
             byte[] bytecode = bytecodeLoader.loadBytecode(cmd.getClazz());
@@ -185,7 +175,7 @@ public class InjectionService implements InjectionQuery {
         pi.setClazz(cmd.getClazz());
         pi.setMethodName(cmd.getMethod());
         pi.setMethodDescriptor(cmd.getDesc());
-        pi.setInjectionType(cmd.getInjectionType());
+        pi.setInjectionLocation(cmd.getInjectionLocation());
         pi.setCodeType(cmd.getCodeType());
         pi.setCode(cmd.getCode());
         pi.setLineNumber(cmd.getLineNumber() != null ? cmd.getLineNumber() : 0);
@@ -194,11 +184,9 @@ public class InjectionService implements InjectionQuery {
     }
 
     private boolean isLineInjection(InjectionCommand cmd) {
-        if (cmd.getInjectionType() == null) return false;
+        if (cmd.getInjectionLocation() == null) return false;
         return cmd.getLineNumber() != null && cmd.getLineNumber() > 0;
     }
-
-    // ==================== 结果对象 ====================
 
     public static class InjectResult {
         private final boolean success;

@@ -23,12 +23,12 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList());
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
-        enterRule.setInjectionType("METHOD_ENTER");
+        enterRule.setInjectionLocation("METHOD_ENTER");
         enterRule.setCodeType("EXPRESSION");
         enterRule.setCode("trace:start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
-        exitRule.setInjectionType("METHOD_EXIT");
+        exitRule.setInjectionLocation("METHOD_EXIT");
         exitRule.setCodeType("EXPRESSION");
         exitRule.setCode("trace:end:0");
 
@@ -56,12 +56,12 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList(thresholdParam));
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
-        enterRule.setInjectionType("METHOD_ENTER");
+        enterRule.setInjectionLocation("METHOD_ENTER");
         enterRule.setCodeType("EXPRESSION");
         enterRule.setCode("trace:start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
-        exitRule.setInjectionType("METHOD_EXIT");
+        exitRule.setInjectionLocation("METHOD_EXIT");
         exitRule.setCodeType("EXPRESSION");
         exitRule.setCode("trace:end:${threshold}");
 
@@ -81,12 +81,12 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList());
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
-        enterRule.setInjectionType("METHOD_ENTER");
+        enterRule.setInjectionLocation("METHOD_ENTER");
         enterRule.setCodeType("EXPRESSION");
         enterRule.setCode("log:→ call: $0");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
-        exitRule.setInjectionType("METHOD_EXIT");
+        exitRule.setInjectionLocation("METHOD_EXIT");
         exitRule.setCodeType("EXPRESSION");
         exitRule.setCode("log:← return");
 
@@ -114,12 +114,12 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList(thresholdParam));
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
-        enterRule.setInjectionType("METHOD_ENTER");
+        enterRule.setInjectionLocation("METHOD_ENTER");
         enterRule.setCodeType("EXPRESSION");
         enterRule.setCode("trace:start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
-        exitRule.setInjectionType("METHOD_EXIT");
+        exitRule.setInjectionLocation("METHOD_EXIT");
         exitRule.setCodeType("EXPRESSION");
         exitRule.setCode("trace:alert:${threshold}");
 
@@ -147,7 +147,7 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList(lineParam));
 
         RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
-        rule.setInjectionType("LINE_BEFORE");
+        rule.setInjectionLocation("LINE_BEFORE");
         rule.setCodeType("SNAPSHOT");
         rule.setCode("snapshot:true");
         rule.setLineNumber(0);
@@ -184,7 +184,7 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList(lineParam, condParam));
 
         RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
-        rule.setInjectionType("LINE_BEFORE");
+        rule.setInjectionLocation("LINE_BEFORE");
         rule.setCodeType("SNAPSHOT");
         rule.setCode("snapshot:true");
         rule.setCondition("${condition}");

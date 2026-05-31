@@ -14,14 +14,14 @@ public class LineNumberTarget extends BaseTarget {
 
     }
 
-    public LineNumberTarget(InjectionType type, String targetClass, int lineNumber, int lineNumberOffset) {
-        super(type, targetClass);
+    public LineNumberTarget(InjectionLocation location, String targetClass, int lineNumber, int lineNumberOffset) {
+        super(location, targetClass);
         this.lineNumber = lineNumber;
         this.lineNumberOffset = lineNumberOffset;
     }
 
-    public LineNumberTarget(InjectionType type, String targetClass, int lineNumber, int lineNumberOffset, String methodName, String methodDescriptor) {
-        super(type, targetClass);
+    public LineNumberTarget(InjectionLocation location, String targetClass, int lineNumber, int lineNumberOffset, String methodName, String methodDescriptor) {
+        super(location, targetClass);
         this.lineNumber = lineNumber;
         this.lineNumberOffset = lineNumberOffset;
         this.methodName = methodName;

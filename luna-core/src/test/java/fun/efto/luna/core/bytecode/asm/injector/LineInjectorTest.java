@@ -9,7 +9,7 @@ import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
 import fun.efto.luna.core.plugin.builtin.line.AfterLineInjector;
 import fun.efto.luna.core.plugin.builtin.line.BeforeLineInjector;
-import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionType;
+import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -109,7 +109,7 @@ public class LineInjectorTest {
             int line = findFirstMethodLine(bytecode, "createUser");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TargetService.class.getName(), line, 0,
+                    LineNumberInjectionLocation.BEFORE, TargetService.class.getName(), line, 0,
                     "createUser", "(Ljava/lang/String;I)V");
 
             InjectableCode code = createCode("log:User created: $1, age: $2");
@@ -129,7 +129,7 @@ public class LineInjectorTest {
             int line = findFirstMethodLine(bytecode, "createUser");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TargetService.class.getName(), line, 0,
+                    LineNumberInjectionLocation.BEFORE, TargetService.class.getName(), line, 0,
                     "createUser", "(Ljava/lang/String;I)V");
 
             InjectableCode code = createCode("snapshot:true");
@@ -149,7 +149,7 @@ public class LineInjectorTest {
             int line = findFirstMethodLine(bytecode, "createUser");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TargetService.class.getName(), line, 0,
+                    LineNumberInjectionLocation.BEFORE, TargetService.class.getName(), line, 0,
                     "createUser", "(Ljava/lang/String;I)V");
 
             InjectableCode code = createCode("${param[2] >= 18}::log:Adult user: $1");
@@ -169,7 +169,7 @@ public class LineInjectorTest {
             int line = findFirstMethodLine(bytecode, "calculate");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TargetService.class.getName(), line, 0,
+                    LineNumberInjectionLocation.BEFORE, TargetService.class.getName(), line, 0,
                     "calculate", "(II)I");
 
             InjectableCode code = createCode("log:Calculating: $1 + $2");
@@ -189,7 +189,7 @@ public class LineInjectorTest {
             int line = findFirstMethodLine(bytecode, "emptyMethod");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.BEFORE, TargetService.class.getName(), line, 0,
+                    LineNumberInjectionLocation.BEFORE, TargetService.class.getName(), line, 0,
                     "emptyMethod", "()V");
 
             InjectableCode code = createCode("log:Empty method called");
@@ -214,7 +214,7 @@ public class LineInjectorTest {
             int line = findFirstMethodLine(bytecode, "createUser");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.AFTER, TargetService.class.getName(), line, 0,
+                    LineNumberInjectionLocation.AFTER, TargetService.class.getName(), line, 0,
                     "createUser", "(Ljava/lang/String;I)V");
 
             InjectableCode code = createCode("log:After line execution");
@@ -234,7 +234,7 @@ public class LineInjectorTest {
             int line = findFirstMethodLine(bytecode, "calculate");
 
             LineNumberTarget target = new LineNumberTarget(
-                    LineNumberInjectionType.AFTER, TargetService.class.getName(), line, 0,
+                    LineNumberInjectionLocation.AFTER, TargetService.class.getName(), line, 0,
                     "calculate", "(II)I");
 
             InjectableCode code = createCode("snapshot:true");

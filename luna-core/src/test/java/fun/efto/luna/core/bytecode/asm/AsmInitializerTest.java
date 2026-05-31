@@ -29,7 +29,7 @@ public class AsmInitializerTest {
         boolean hasAsmAnalyzer = AnalyzerRegistry.getInstance().getRegistry().size() > 0;
         assertTrue(hasAsmAnalyzer, "ASM 分析器应该被注册");
 
-        // 验证字节码注入器是否被注册（暂时注释，等待 InjectionType 实现）
+        // 验证字节码注入器是否被注册（暂时注释，等待 InjectionLocation 实现）
         // boolean hasBytecodeInjector = BytecodeInjectorRegistry.getInstance().getRegistry().size() > 0;
         // assertTrue(hasBytecodeInjector, "字节码注入器应该被注册");
     }

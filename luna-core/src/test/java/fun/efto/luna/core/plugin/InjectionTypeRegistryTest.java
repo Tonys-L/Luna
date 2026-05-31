@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.injection.target.InjectionType;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -24,20 +24,10 @@ public class InjectionTypeRegistryTest {
 
     @Test
     void testRegisterAndResolve() {
-        InjectionType type = new InjectionType() {
-            @Override
-            public String getName() {
-                return "method_enter";
-            }
+        InjectionLocation location = InjectionLocation.of("method_enter", "test");
 
-            @Override
-            public String getDescription() {
-                return "test";
-            }
-        };
-
-        InjectionTypeRegistry.getInstance().register(type);
-        assertSame(type, InjectionTypeRegistry.getInstance().resolve("method_enter"));
+        InjectionTypeRegistry.getInstance().register(location);
+        assertSame(location, InjectionTypeRegistry.getInstance().resolve("method_enter"));
     }
 
     @Test
@@ -47,44 +37,19 @@ public class InjectionTypeRegistryTest {
 
     @Test
     void testAliasSupport() {
-        InjectionType type = new InjectionType() {
-            @Override
-            public String getName() {
-                return "method_enter";
-            }
+        InjectionLocation location = InjectionLocation.of("method_enter", "test", "enter", "ENTER");
 
-            @Override
-            public String getDescription() {
-                return "test";
-            }
-
-            @Override
-            public List<String> getAliases() {
-                return Arrays.asList("enter", "ENTER");
-            }
-        };
-
-        InjectionTypeRegistry.getInstance().register(type);
-        assertSame(type, InjectionTypeRegistry.getInstance().resolve("enter"));
-        assertSame(type, InjectionTypeRegistry.getInstance().resolve("ENTER"));
+        InjectionTypeRegistry.getInstance().register(location);
+        assertSame(location, InjectionTypeRegistry.getInstance().resolve("enter"));
+        assertSame(location, InjectionTypeRegistry.getInstance().resolve("ENTER"));
     }
 
     @Test
     void testUnregisterAll() {
-        InjectionType type = new InjectionType() {
-            @Override
-            public String getName() {
-                return "method_enter";
-            }
+        InjectionLocation location = InjectionLocation.of("method_enter", "test");
 
-            @Override
-            public String getDescription() {
-                return "test";
-            }
-        };
-
-        InjectionTypeRegistry.getInstance().register(type);
-        InjectionTypeRegistry.getInstance().unregisterAll(Collections.singletonList(type));
+        InjectionTypeRegistry.getInstance().register(location);
+        InjectionTypeRegistry.getInstance().unregisterAll(Collections.singletonList(location));
         assertThrows(IllegalArgumentException.class, () -> InjectionTypeRegistry.getInstance().resolve("method_enter"));
     }
 }

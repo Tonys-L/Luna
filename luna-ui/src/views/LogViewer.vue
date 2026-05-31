@@ -162,20 +162,18 @@ export default {
       }
     },
     appendLog(message) {
-      console.log('[Luna] Appending log:', message)
       let logObj = { type: 'TEXT', text: message }
 
-      // 尝试解析为 ProbeMessage JSON 格式
       let parsed = null
       try {
         parsed = JSON.parse(message)
       } catch (e) {
+        console.warn('[Luna] JSON parse failed:', e.message, 'raw:', message.substring(0, 100))
         parsed = null
       }
 
       if (parsed && parsed.type) {
-        // ProbeMessage 格式: { type, payload, timestamp }
-        const msgType = parsed.type // "LOG", "SNAPSHOT", "TRACE", "CALL_CHAIN"
+        const msgType = parsed.type
         if (msgType === 'SNAPSHOT') {
           logObj = { type: 'SNAPSHOT', data: parsed }
         } else if (msgType === 'TRACE') {

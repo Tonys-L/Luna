@@ -87,15 +87,15 @@ class InjectionLocationRenameTest {
     }
 
     @Test
-    @DisplayName("InjectionCommand 使用 injectionLocation 字段（不再有 injectionType）")
-    void injectionCommandUsesInjectionLocation() throws NoSuchMethodException {
-        InjectionCommand cmd = new InjectionCommand();
+    @DisplayName("InjectRequest 使用 injectionLocation 字段（不再有 injectionType）")
+    void injectRequestUsesInjectionLocation() throws NoSuchMethodException {
+        InjectRequest cmd = new InjectRequest();
         cmd.setInjectionLocation("method_enter");
         assertEquals("method_enter", cmd.getInjectionLocation());
 
         assertThrows(NoSuchMethodException.class, () ->
-            InjectionCommand.class.getMethod("getInjectionType"));
+            InjectRequest.class.getMethod("getInjectionType"));
         assertThrows(NoSuchMethodException.class, () ->
-            InjectionCommand.class.getMethod("setInjectionType", String.class));
+            InjectRequest.class.getMethod("setInjectionType", String.class));
     }
 }

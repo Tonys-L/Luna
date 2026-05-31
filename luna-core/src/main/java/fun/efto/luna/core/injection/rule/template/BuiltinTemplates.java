@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 内置模板库 - 提供开箱即用的常用注入模式
- *
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 10:00
  */
@@ -23,14 +21,14 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList());
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
+        enterRule.setProbeType("TRACE");
         enterRule.setInjectionLocation("METHOD_ENTER");
-        enterRule.setCodeType("EXPRESSION");
-        enterRule.setCode("trace:start");
+        enterRule.setCode("start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
+        exitRule.setProbeType("TRACE");
         exitRule.setInjectionLocation("METHOD_EXIT");
-        exitRule.setCodeType("EXPRESSION");
-        exitRule.setCode("trace:end:0");
+        exitRule.setCode("end:0");
 
         t.setRules(Arrays.asList(enterRule, exitRule));
         return t;
@@ -56,14 +54,14 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList(thresholdParam));
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
+        enterRule.setProbeType("TRACE");
         enterRule.setInjectionLocation("METHOD_ENTER");
-        enterRule.setCodeType("EXPRESSION");
-        enterRule.setCode("trace:start");
+        enterRule.setCode("start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
+        exitRule.setProbeType("TRACE");
         exitRule.setInjectionLocation("METHOD_EXIT");
-        exitRule.setCodeType("EXPRESSION");
-        exitRule.setCode("trace:end:${threshold}");
+        exitRule.setCode("end:${threshold}");
 
         t.setRules(Arrays.asList(enterRule, exitRule));
         return t;
@@ -81,14 +79,16 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList());
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
+        enterRule.setProbeType("LOG");
         enterRule.setInjectionLocation("METHOD_ENTER");
         enterRule.setCodeType("EXPRESSION");
-        enterRule.setCode("log:→ call: $0");
+        enterRule.setCode("→ call: $0");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
+        exitRule.setProbeType("LOG");
         exitRule.setInjectionLocation("METHOD_EXIT");
         exitRule.setCodeType("EXPRESSION");
-        exitRule.setCode("log:← return");
+        exitRule.setCode("← return");
 
         t.setRules(Arrays.asList(enterRule, exitRule));
         return t;
@@ -114,14 +114,14 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList(thresholdParam));
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
+        enterRule.setProbeType("TRACE");
         enterRule.setInjectionLocation("METHOD_ENTER");
-        enterRule.setCodeType("EXPRESSION");
-        enterRule.setCode("trace:start");
+        enterRule.setCode("start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
+        exitRule.setProbeType("TRACE");
         exitRule.setInjectionLocation("METHOD_EXIT");
-        exitRule.setCodeType("EXPRESSION");
-        exitRule.setCode("trace:alert:${threshold}");
+        exitRule.setCode("alert:${threshold}");
 
         t.setRules(Arrays.asList(enterRule, exitRule));
         return t;
@@ -147,9 +147,8 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList(lineParam));
 
         RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
+        rule.setProbeType("SNAPSHOT");
         rule.setInjectionLocation("LINE_BEFORE");
-        rule.setCodeType("SNAPSHOT");
-        rule.setCode("snapshot:true");
         rule.setLineNumber(0);
 
         t.setRules(Arrays.asList(rule));
@@ -184,9 +183,8 @@ public class BuiltinTemplates {
         t.setParameters(Arrays.asList(lineParam, condParam));
 
         RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
+        rule.setProbeType("SNAPSHOT");
         rule.setInjectionLocation("LINE_BEFORE");
-        rule.setCodeType("SNAPSHOT");
-        rule.setCode("snapshot:true");
         rule.setCondition("${condition}");
         rule.setLineNumber(0);
 

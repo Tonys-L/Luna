@@ -49,7 +49,7 @@ public class IntegrationTest {
         rule.setTargetMethod("main");
         rule.setInjectionLocation("method");
         rule.setExpression("true");
-        rule.setLogContent("Injected log");
+        rule.setCode("Injected log");
         
         // 添加规则
         long ruleId = ruleManager.addRule(rule);

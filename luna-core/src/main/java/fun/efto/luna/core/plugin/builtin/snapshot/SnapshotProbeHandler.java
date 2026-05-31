@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.builtin.snapshot;
 
-import fun.efto.luna.core.injection.InjectionCommand;
+import fun.efto.luna.core.injection.InjectRequest;
 import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.plugin.AbstractProbeHandler;
 import fun.efto.luna.core.plugin.GenerateContext;
@@ -35,7 +35,7 @@ public class SnapshotProbeHandler extends AbstractProbeHandler {
     }
 
     @Override
-    protected ValidationResult doValidate(InjectionCommand request) {
+    protected ValidationResult doValidate(InjectRequest request) {
         if (request.getCodeType() != null) {
             return ValidationResult.okWithWarnings(Collections.singletonList("SNAPSHOT probe ignores codeType"));
         }

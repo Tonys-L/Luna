@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.builtin.trace;
 
-import fun.efto.luna.core.injection.InjectionCommand;
+import fun.efto.luna.core.injection.InjectRequest;
 import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.plugin.AbstractProbeHandler;
 import fun.efto.luna.core.plugin.GenerateContext;
@@ -34,7 +34,7 @@ public class TraceProbeHandler extends AbstractProbeHandler {
     }
 
     @Override
-    protected ValidationResult doValidate(InjectionCommand request) {
+    protected ValidationResult doValidate(InjectRequest request) {
         if ("method_around".equals(request.getInjectionLocation())) {
             return ValidationResult.fail("TRACE probe does not support method_around location");
         }

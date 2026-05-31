@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.injection.InjectionCommand;
+import fun.efto.luna.core.injection.InjectRequest;
 import fun.efto.luna.core.injection.code.CompiledCode;
 
 import java.util.Set;
@@ -17,7 +17,7 @@ public interface ProbeHandler {
 
     Set<String> supportedInjectionLocations();
 
-    ValidationResult validate(InjectionCommand request);
+    ValidationResult validate(InjectRequest request);
 
     void handle(CompiledCode code, GenerateContext ctx);
 }

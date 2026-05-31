@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.injection.InjectionCommand;
+import fun.efto.luna.core.injection.InjectRequest;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class AbstractProbeHandler implements ProbeHandler {
 
     @Override
-    public ValidationResult validate(InjectionCommand request) {
+    public ValidationResult validate(InjectRequest request) {
         String locationName = request.getInjectionLocation();
         if (locationName == null || locationName.isEmpty()) {
             return ValidationResult.fail("injectionLocation is required");
@@ -36,7 +36,7 @@ public abstract class AbstractProbeHandler implements ProbeHandler {
         return doValidate(request);
     }
 
-    protected ValidationResult doValidate(InjectionCommand request) {
+    protected ValidationResult doValidate(InjectRequest request) {
         return ValidationResult.ok();
     }
 }

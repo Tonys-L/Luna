@@ -12,9 +12,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 性能测试类，测试系统性能是否满足 < 0.1ms 要求
- * @author ：Tony.L(<286269159@qq.com>)
- * @since ：2026/03/29 02:30
+ * @author : Tony.L(286269159@qq.com)
+ * @since  : 2026/03/29 02:30
  */
 public class PerformanceTest {
 
@@ -61,7 +60,7 @@ public class PerformanceTest {
             rule.setTargetMethod("warmup");
             rule.setInjectionLocation("method");
             rule.setExpression("true");
-            rule.setLogContent("warmup");
+            rule.setCode("warmup");
             long ruleId = ruleManager.addRule(rule);
             ruleManager.deleteRule(ruleId);
         }
@@ -74,7 +73,7 @@ public class PerformanceTest {
             rule.setTargetMethod("main");
             rule.setInjectionLocation("method");
             rule.setExpression("true");
-            rule.setLogContent("Injected log");
+            rule.setCode("Injected log");
             long ruleId = ruleManager.addRule(rule);
             ruleManager.deleteRule(ruleId);
             totalTime += System.nanoTime() - startTime;

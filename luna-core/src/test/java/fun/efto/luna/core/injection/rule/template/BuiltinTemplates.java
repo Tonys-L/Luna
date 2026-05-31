@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
- * 测试专用的内置规则模板定义工具类
- *
  * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/17 18:00
  */
@@ -23,14 +21,14 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.emptyList());
 
         RuleTemplate.TemplateRule rule1 = new RuleTemplate.TemplateRule();
+        rule1.setProbeType("TRACE");
         rule1.setInjectionLocation("METHOD_ENTER");
-        rule1.setCodeType("EXPRESSION");
-        rule1.setCode("trace:start");
+        rule1.setCode("start");
 
         RuleTemplate.TemplateRule rule2 = new RuleTemplate.TemplateRule();
+        rule2.setProbeType("TRACE");
         rule2.setInjectionLocation("METHOD_EXIT");
-        rule2.setCodeType("EXPRESSION");
-        rule2.setCode("trace:end:0");
+        rule2.setCode("end:0");
 
         t.setRules(Arrays.asList(rule1, rule2));
         return t;
@@ -51,14 +49,14 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.singletonList(param));
 
         RuleTemplate.TemplateRule rule1 = new RuleTemplate.TemplateRule();
+        rule1.setProbeType("TRACE");
         rule1.setInjectionLocation("METHOD_ENTER");
-        rule1.setCodeType("EXPRESSION");
-        rule1.setCode("trace:start");
+        rule1.setCode("start");
 
         RuleTemplate.TemplateRule rule2 = new RuleTemplate.TemplateRule();
+        rule2.setProbeType("TRACE");
         rule2.setInjectionLocation("METHOD_EXIT");
-        rule2.setCodeType("EXPRESSION");
-        rule2.setCode("trace:end:${threshold}");
+        rule2.setCode("end:${threshold}");
 
         t.setRules(Arrays.asList(rule1, rule2));
         return t;
@@ -75,14 +73,16 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.emptyList());
 
         RuleTemplate.TemplateRule rule1 = new RuleTemplate.TemplateRule();
+        rule1.setProbeType("LOG");
         rule1.setInjectionLocation("METHOD_ENTER");
         rule1.setCodeType("EXPRESSION");
-        rule1.setCode("log:→ call: $0");
+        rule1.setCode("→ call: $0");
 
         RuleTemplate.TemplateRule rule2 = new RuleTemplate.TemplateRule();
+        rule2.setProbeType("LOG");
         rule2.setInjectionLocation("METHOD_EXIT");
         rule2.setCodeType("EXPRESSION");
-        rule2.setCode("log:← return");
+        rule2.setCode("← return");
 
         t.setRules(Arrays.asList(rule1, rule2));
         return t;
@@ -103,14 +103,14 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.singletonList(param));
 
         RuleTemplate.TemplateRule rule1 = new RuleTemplate.TemplateRule();
+        rule1.setProbeType("TRACE");
         rule1.setInjectionLocation("METHOD_ENTER");
-        rule1.setCodeType("EXPRESSION");
-        rule1.setCode("trace:start");
+        rule1.setCode("start");
 
         RuleTemplate.TemplateRule rule2 = new RuleTemplate.TemplateRule();
+        rule2.setProbeType("TRACE");
         rule2.setInjectionLocation("METHOD_EXIT");
-        rule2.setCodeType("EXPRESSION");
-        rule2.setCode("trace:alert:${threshold}");
+        rule2.setCode("alert:${threshold}");
 
         t.setRules(Arrays.asList(rule1, rule2));
         return t;
@@ -127,9 +127,8 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.emptyList());
 
         RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
+        rule.setProbeType("SNAPSHOT");
         rule.setInjectionLocation("LINE_BEFORE");
-        rule.setCodeType("SNAPSHOT");
-        rule.setCode("snapshot:true");
 
         t.setRules(Collections.singletonList(rule));
         return t;
@@ -150,9 +149,8 @@ public final class BuiltinTemplates {
         t.setParameters(Collections.singletonList(param));
 
         RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
+        rule.setProbeType("SNAPSHOT");
         rule.setInjectionLocation("LINE_BEFORE");
-        rule.setCodeType("SNAPSHOT");
-        rule.setCode("snapshot:true");
         rule.setCondition("${condition}");
 
         t.setRules(Collections.singletonList(rule));

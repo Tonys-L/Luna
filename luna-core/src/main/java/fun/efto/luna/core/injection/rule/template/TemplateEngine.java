@@ -11,8 +11,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 模板引擎 - 解析模板、替换参数、生成规则列表
- *
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/11 10:00
  */
@@ -36,10 +34,13 @@ public class TemplateEngine {
             rule.setLineNumber(templateRule.getLineNumber());
             rule.setEnabled(true);
             rule.setGroupId(groupId);
+            rule.setProbeType(templateRule.getProbeType());
 
             String code = templateRule.getCode();
-            code = substituteParams(code, resolvedParams);
-            rule.setLogContent(code);
+            if (code != null) {
+                code = substituteParams(code, resolvedParams);
+            }
+            rule.setCode(code);
 
             String condition = templateRule.getCondition();
             if (condition != null && !condition.trim().isEmpty()) {

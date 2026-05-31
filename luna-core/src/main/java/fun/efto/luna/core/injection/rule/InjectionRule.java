@@ -13,7 +13,7 @@ public class InjectionRule {
     private String injectionLocation;
     private int lineNumber;
     private String expression;
-    private String logContent;
+    private String code;
     private String codeType;
     private boolean enabled = true;
     private String groupId;
@@ -92,12 +92,12 @@ public class InjectionRule {
         this.expression = expression;
     }
 
-    public String getLogContent() {
-        return logContent;
+    public String getCode() {
+        return code;
     }
 
-    public void setLogContent(String logContent) {
-        this.logContent = logContent;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getCodeType() {

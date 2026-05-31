@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin.builtin.log;
 
-import fun.efto.luna.core.injection.InjectionCommand;
+import fun.efto.luna.core.injection.InjectRequest;
 import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.plugin.AbstractProbeHandler;
 import fun.efto.luna.core.plugin.GenerateContext;
@@ -34,7 +34,7 @@ public class LogProbeHandler extends AbstractProbeHandler {
     }
 
     @Override
-    protected ValidationResult doValidate(InjectionCommand request) {
+    protected ValidationResult doValidate(InjectRequest request) {
         if (request.getCode() == null || request.getCode().isEmpty()) {
             return ValidationResult.fail("code is required for LOG probe");
         }

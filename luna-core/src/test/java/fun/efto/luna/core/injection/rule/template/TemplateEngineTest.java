@@ -36,14 +36,14 @@ public class TemplateEngineTest {
 
         InjectionRule enterRule = rules.get(0);
         assertEquals("METHOD_ENTER", enterRule.getInjectionLocation());
-        assertEquals("EXPRESSION", enterRule.getCodeType());
-        assertEquals("trace:start", enterRule.getLogContent());
+        assertEquals("TRACE", enterRule.getProbeType());
+        assertEquals("start", enterRule.getCode());
         assertNull(enterRule.getExpression());
 
         InjectionRule exitRule = rules.get(1);
         assertEquals("METHOD_EXIT", exitRule.getInjectionLocation());
-        assertEquals("EXPRESSION", exitRule.getCodeType());
-        assertEquals("trace:end:0", exitRule.getLogContent());
+        assertEquals("TRACE", exitRule.getProbeType());
+        assertEquals("end:0", exitRule.getCode());
         assertNull(exitRule.getExpression());
     }
 
@@ -58,10 +58,10 @@ public class TemplateEngineTest {
         assertEquals(2, rules.size());
 
         InjectionRule enterRule = rules.get(0);
-        assertEquals("trace:start", enterRule.getLogContent());
+        assertEquals("start", enterRule.getCode());
 
         InjectionRule exitRule = rules.get(1);
-        assertEquals("trace:end:200", exitRule.getLogContent());
+        assertEquals("end:200", exitRule.getCode());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class TemplateEngineTest {
                 thresholdTemplate, "com.example.OrderService", "process", "()V", null);
 
         InjectionRule exitRule = rules.get(1);
-        assertEquals("trace:end:100", exitRule.getLogContent());
+        assertEquals("end:100", exitRule.getCode());
     }
 
     @Test
@@ -85,8 +85,8 @@ public class TemplateEngineTest {
 
         InjectionRule rule = rules.get(0);
         assertEquals("LINE_BEFORE", rule.getInjectionLocation());
-        assertEquals("SNAPSHOT", rule.getCodeType());
-        assertEquals("snapshot:true", rule.getLogContent());
+        assertEquals("SNAPSHOT", rule.getProbeType());
+        assertNull(rule.getCode());
         assertEquals("param[2] >= 18", rule.getExpression());
     }
 
@@ -121,8 +121,8 @@ public class TemplateEngineTest {
                 template, "com.example.SlowService", "process", "()V", params);
 
         assertEquals(2, rules.size());
-        assertEquals("trace:start", rules.get(0).getLogContent());
-        assertEquals("trace:alert:1000", rules.get(1).getLogContent());
+        assertEquals("start", rules.get(0).getCode());
+        assertEquals("alert:1000", rules.get(1).getCode());
     }
 
     @Test
@@ -133,7 +133,9 @@ public class TemplateEngineTest {
                 template, "com.example.ApiController", "handleRequest", "()V", null);
 
         assertEquals(2, rules.size());
-        assertEquals("log:→ call: $0", rules.get(0).getLogContent());
-        assertEquals("log:← return", rules.get(1).getLogContent());
+        assertEquals("LOG", rules.get(0).getProbeType());
+        assertEquals("→ call: $0", rules.get(0).getCode());
+        assertEquals("LOG", rules.get(1).getProbeType());
+        assertEquals("← return", rules.get(1).getCode());
     }
 }

@@ -19,7 +19,9 @@ public class MethodRuleConverter implements InjectionRuleConverter {
     public InjectionPoint convert(PersistentInjection injection) {
         InjectionLocation location = InjectionTypeRegistry.getInstance().resolve(injection.getInjectionLocation());
         InjectionTarget target = new MethodTarget(location, injection.getClazz(), injection.getMethodName(), injection.getMethodDescriptor());
-        CompiledCode code = new CompiledCode(null, injection.getCode());
+        String condition = injection.getExpression() != null && !injection.getExpression().trim().isEmpty()
+                ? "${" + injection.getExpression().trim() + "}" : null;
+        CompiledCode code = new CompiledCode(condition, injection.getCode());
         return new InjectionPoint(injection.getId(), target, code, injection.getCodeType(), injection.getProbeType(), injection);
     }
 }

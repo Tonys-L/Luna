@@ -27,9 +27,9 @@ class CodeEngineTest {
         @Test
         @DisplayName("constructor with condition and content")
         void constructorWithConditionAndContent() {
-            CompiledCode code = new CompiledCode("${params[0] > 0}", "log:hello");
+            CompiledCode code = new CompiledCode("${params[0] > 0}", "hello");
             assertEquals("${params[0] > 0}", code.getCondition());
-            assertEquals("log:hello", code.getContent());
+            assertEquals("hello", code.getContent());
             assertNull(code.getSegments());
         }
 
@@ -37,37 +37,37 @@ class CodeEngineTest {
         @DisplayName("constructor with segments")
         void constructorWithSegments() {
             java.util.List<ExpressionSegment> segments = Collections.singletonList(new ExpressionSegment.StringSegment("hello"));
-            CompiledCode code = new CompiledCode(null, "log:hello", segments);
+            CompiledCode code = new CompiledCode(null, "hello", segments);
             assertNull(code.getCondition());
-            assertEquals("log:hello", code.getContent());
+            assertEquals("hello", code.getContent());
             assertEquals(1, code.getSegments().size());
         }
 
         @Test
         @DisplayName("hasCondition returns true when condition is non-empty")
         void hasConditionTrue() {
-            CompiledCode code = new CompiledCode("${params[0] > 0}", "log:hello");
+            CompiledCode code = new CompiledCode("${params[0] > 0}", "hello");
             assertTrue(code.hasCondition());
         }
 
         @Test
         @DisplayName("hasCondition returns false when condition is null")
         void hasConditionFalseNull() {
-            CompiledCode code = new CompiledCode(null, "log:hello");
+            CompiledCode code = new CompiledCode(null, "hello");
             assertFalse(code.hasCondition());
         }
 
         @Test
         @DisplayName("hasCondition returns false when condition is empty")
         void hasConditionFalseEmpty() {
-            CompiledCode code = new CompiledCode("", "log:hello");
+            CompiledCode code = new CompiledCode("", "hello");
             assertFalse(code.hasCondition());
         }
 
         @Test
         @DisplayName("hasCondition returns false when condition is whitespace")
         void hasConditionFalseWhitespace() {
-            CompiledCode code = new CompiledCode("   ", "log:hello");
+            CompiledCode code = new CompiledCode("   ", "hello");
             assertFalse(code.hasCondition());
         }
     }
@@ -152,14 +152,14 @@ class CodeEngineTest {
         @DisplayName("compile returns CompiledCode with condition and content")
         void compileWithCondition() {
             PersistentInjection pi = new PersistentInjection();
-            pi.setCodeType("LOG");
+            pi.setCodeType("EXPRESSION");
             pi.setCode("hello world");
             pi.setExpression("params[0] > 0");
 
             CompiledCode compiled = engine.compile(pi);
 
             assertEquals("${params[0] > 0}", compiled.getCondition());
-            assertTrue(compiled.getContent().contains("log:hello world"));
+            assertEquals("hello world", compiled.getContent());
             assertTrue(compiled.hasCondition());
         }
 
@@ -167,25 +167,25 @@ class CodeEngineTest {
         @DisplayName("compile without condition")
         void compileWithoutCondition() {
             PersistentInjection pi = new PersistentInjection();
-            pi.setCodeType("LOG");
+            pi.setCodeType("EXPRESSION");
             pi.setCode("hello world");
 
             CompiledCode compiled = engine.compile(pi);
 
             assertFalse(compiled.hasCondition());
-            assertEquals("log:hello world", compiled.getContent());
+            assertEquals("hello world", compiled.getContent());
         }
 
         @Test
-        @DisplayName("compile with null code defaults to log:")
+        @DisplayName("compile with null code defaults to empty string")
         void compileWithNullCode() {
             PersistentInjection pi = new PersistentInjection();
-            pi.setCodeType("LOG");
+            pi.setCodeType("EXPRESSION");
             pi.setCode(null);
 
             CompiledCode compiled = engine.compile(pi);
 
-            assertEquals("log:", compiled.getContent());
+            assertEquals("", compiled.getContent());
         }
     }
 }

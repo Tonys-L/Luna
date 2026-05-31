@@ -21,14 +21,16 @@ public class LogTemplates {
         t.setParameters(Arrays.asList());
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
+        enterRule.setProbeType("LOG");
         enterRule.setInjectionLocation("METHOD_ENTER");
         enterRule.setCodeType("EXPRESSION");
-        enterRule.setCode("log:→ call: $0");
+        enterRule.setCode("→ call: $0");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
+        exitRule.setProbeType("LOG");
         exitRule.setInjectionLocation("METHOD_EXIT");
         exitRule.setCodeType("EXPRESSION");
-        exitRule.setCode("log:← return");
+        exitRule.setCode("← return");
 
         t.setRules(Arrays.asList(enterRule, exitRule));
         return t;

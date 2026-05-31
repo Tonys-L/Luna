@@ -135,8 +135,9 @@ public class RuleManager {
         injection.setInjectionLocation(rule.getInjectionLocation());
         injection.setLineNumber(rule.getLineNumber());
         injection.setExpression(rule.getExpression());
-        injection.setCode(rule.getLogContent());
+        injection.setCode(rule.getCode());
         injection.setCodeType(rule.getCodeType());
+        injection.setProbeType(rule.getProbeType());
         injection.setEnabled(rule.isEnabled());
         injection.setEphemeral(true);
         return injection;

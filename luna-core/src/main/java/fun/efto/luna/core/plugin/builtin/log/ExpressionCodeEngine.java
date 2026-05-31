@@ -18,17 +18,11 @@ public class ExpressionCodeEngine implements CodeEngine {
     @Override
     public CompiledCode compile(PersistentInjection persistent) {
         String condition = persistent.getExpression();
-        String content = persistent.getCode();
-
-        StringBuilder sb = new StringBuilder();
-        if (condition != null && !condition.trim().isEmpty()) {
-            sb.append("${").append(condition.trim()).append("}::");
-        }
-        sb.append("log:").append(content != null ? content : "");
+        String content = persistent.getCode() != null ? persistent.getCode() : "";
 
         return new CompiledCode(
             condition != null && !condition.trim().isEmpty() ? "${" + condition.trim() + "}" : null,
-            sb.toString()
+            content
         );
     }
 }

@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.injection.InjectionCommand;
+import fun.efto.luna.core.injection.InjectRequest;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.builtin.log.LogProbeHandler;
 import fun.efto.luna.core.plugin.builtin.snapshot.SnapshotProbeHandler;
@@ -100,7 +100,7 @@ public class ProbeHandlerTest {
         @Test
         @DisplayName("validate() 拒绝空 code")
         void rejectEmptyCode() {
-            InjectionCommand cmd = new InjectionCommand();
+            InjectRequest cmd = new InjectRequest();
             cmd.setProbeType("LOG");
             cmd.setInjectionLocation("method_enter");
             cmd.setCode(null);
@@ -113,7 +113,7 @@ public class ProbeHandlerTest {
         @Test
         @DisplayName("validate() 拒绝空 codeType（当 usesCode=true）")
         void rejectEmptyCodeTypeWhenUsesCode() {
-            InjectionCommand cmd = new InjectionCommand();
+            InjectRequest cmd = new InjectRequest();
             cmd.setProbeType("LOG");
             cmd.setInjectionLocation("method_enter");
             cmd.setCode("hello");
@@ -126,7 +126,7 @@ public class ProbeHandlerTest {
         @Test
         @DisplayName("validate() 通过合法请求")
         void acceptValidRequest() {
-            InjectionCommand cmd = new InjectionCommand();
+            InjectRequest cmd = new InjectRequest();
             cmd.setProbeType("LOG");
             cmd.setInjectionLocation("method_enter");
             cmd.setCode("hello");
@@ -159,7 +159,7 @@ public class ProbeHandlerTest {
         @Test
         @DisplayName("validate() 对 codeType 给出警告")
         void warnOnCodeType() {
-            InjectionCommand cmd = new InjectionCommand();
+            InjectRequest cmd = new InjectRequest();
             cmd.setProbeType("SNAPSHOT");
             cmd.setInjectionLocation("method_enter");
             cmd.setCodeType("EXPRESSION");
@@ -172,7 +172,7 @@ public class ProbeHandlerTest {
         @Test
         @DisplayName("validate() 无 codeType 时通过")
         void acceptWithoutCodeType() {
-            InjectionCommand cmd = new InjectionCommand();
+            InjectRequest cmd = new InjectRequest();
             cmd.setProbeType("SNAPSHOT");
             cmd.setInjectionLocation("method_enter");
 
@@ -202,7 +202,7 @@ public class ProbeHandlerTest {
         @Test
         @DisplayName("validate() 拒绝 method_around")
         void rejectMethodAround() {
-            InjectionCommand cmd = new InjectionCommand();
+            InjectRequest cmd = new InjectRequest();
             cmd.setProbeType("TRACE");
             cmd.setInjectionLocation("method_around");
 
@@ -213,7 +213,7 @@ public class ProbeHandlerTest {
         @Test
         @DisplayName("validate() 通过合法请求")
         void acceptValidRequest() {
-            InjectionCommand cmd = new InjectionCommand();
+            InjectRequest cmd = new InjectRequest();
             cmd.setProbeType("TRACE");
             cmd.setInjectionLocation("method_enter");
 
@@ -260,7 +260,7 @@ public class ProbeHandlerTest {
         @Test
         @DisplayName("位置不支持时拒绝")
         void rejectUnsupportedLocation() {
-            InjectionCommand cmd = new InjectionCommand();
+            InjectRequest cmd = new InjectRequest();
             cmd.setProbeType("LOG");
             cmd.setInjectionLocation("unknown_location");
             cmd.setCode("hello");

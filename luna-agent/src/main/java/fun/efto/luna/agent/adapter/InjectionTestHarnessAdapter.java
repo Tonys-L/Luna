@@ -1,8 +1,7 @@
 package fun.efto.luna.agent.adapter;
 
 import fun.efto.luna.core.injection.InjectionPoint;
-import fun.efto.luna.core.injection.code.InjectableCode;
-import fun.efto.luna.core.injection.code.CodeType;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.target.MethodTarget;
 import fun.efto.luna.core.infra.InstrumentationHolder;
@@ -105,15 +104,9 @@ public class InjectionTestHarnessAdapter implements InjectionVerifier {
         MethodInjectionLocation injectionLocation = resolveInjectionLocation(injectionLocationStr);
         MethodTarget target = new MethodTarget(injectionLocation, className, methodName, descriptor);
 
-        InjectableCode injectableCode = new InjectableCode() {
-            @Override
-            public String getCode() { return code; }
+        CompiledCode compiledCode = new CompiledCode(null, code);
 
-            @Override
-            public CodeType getCodeType() { return CodeType.EXPRESSION; }
-        };
-
-        InjectionPoint injectionPoint = new InjectionPoint(target, injectableCode);
+        InjectionPoint injectionPoint = new InjectionPoint(target, compiledCode, "EXPRESSION", null, null);
         ClassTransformer classTransformer = new DefaultClassTransformer();
         ClassFileTransformerAdapter adapter = new ClassFileTransformerAdapter(injectionPoint, classTransformer);
 

@@ -22,14 +22,14 @@ public class TraceTemplates {
         t.setParameters(Arrays.asList());
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
+        enterRule.setProbeType("TRACE");
         enterRule.setInjectionLocation("METHOD_ENTER");
-        enterRule.setCodeType("EXPRESSION");
-        enterRule.setCode("trace:start");
+        enterRule.setCode("start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
+        exitRule.setProbeType("TRACE");
         exitRule.setInjectionLocation("METHOD_EXIT");
-        exitRule.setCodeType("EXPRESSION");
-        exitRule.setCode("trace:end:0");
+        exitRule.setCode("end:0");
 
         t.setRules(Arrays.asList(enterRule, exitRule));
         return t;
@@ -55,14 +55,14 @@ public class TraceTemplates {
         t.setParameters(Arrays.asList(thresholdParam));
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
+        enterRule.setProbeType("TRACE");
         enterRule.setInjectionLocation("METHOD_ENTER");
-        enterRule.setCodeType("EXPRESSION");
-        enterRule.setCode("trace:start");
+        enterRule.setCode("start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
+        exitRule.setProbeType("TRACE");
         exitRule.setInjectionLocation("METHOD_EXIT");
-        exitRule.setCodeType("EXPRESSION");
-        exitRule.setCode("trace:end:${threshold}");
+        exitRule.setCode("end:${threshold}");
 
         t.setRules(Arrays.asList(enterRule, exitRule));
         return t;
@@ -88,14 +88,14 @@ public class TraceTemplates {
         t.setParameters(Arrays.asList(thresholdParam));
 
         RuleTemplate.TemplateRule enterRule = new RuleTemplate.TemplateRule();
+        enterRule.setProbeType("TRACE");
         enterRule.setInjectionLocation("METHOD_ENTER");
-        enterRule.setCodeType("EXPRESSION");
-        enterRule.setCode("trace:start");
+        enterRule.setCode("start");
 
         RuleTemplate.TemplateRule exitRule = new RuleTemplate.TemplateRule();
+        exitRule.setProbeType("TRACE");
         exitRule.setInjectionLocation("METHOD_EXIT");
-        exitRule.setCodeType("EXPRESSION");
-        exitRule.setCode("trace:alert:${threshold}");
+        exitRule.setCode("alert:${threshold}");
 
         t.setRules(Arrays.asList(enterRule, exitRule));
         return t;

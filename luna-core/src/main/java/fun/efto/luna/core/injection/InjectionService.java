@@ -38,7 +38,7 @@ public class InjectionService implements InjectionQuery {
         this.injectionVerifier = injectionVerifier;
     }
 
-    public InjectResult inject(InjectionCommand cmd) {
+    public InjectResult inject(InjectRequest cmd) {
         String probeValidationError = validateProbeHandler(cmd);
         if (probeValidationError != null) {
             return InjectResult.failure(probeValidationError);
@@ -67,7 +67,7 @@ public class InjectionService implements InjectionQuery {
         }
     }
 
-    public InjectTestResult injectWithTest(InjectionCommand cmd) {
+    public InjectTestResult injectWithTest(InjectRequest cmd) {
         String probeValidationError = validateProbeHandler(cmd);
         if (probeValidationError != null) {
             return InjectTestResult.failure("probeValidation", probeValidationError);
@@ -106,9 +106,6 @@ public class InjectionService implements InjectionQuery {
         }
 
         String expectedContent = cmd.getCode();
-        if (expectedContent.startsWith("log:")) {
-            expectedContent = expectedContent.substring(4);
-        }
         boolean found = verifyResult.getOutput() != null
                 && verifyResult.getOutput().contains(expectedContent);
 
@@ -122,7 +119,7 @@ public class InjectionService implements InjectionQuery {
         );
     }
 
-    public BytecodePreviewer.PreviewResult preview(InjectionCommand cmd) {
+    public BytecodePreviewer.PreviewResult preview(InjectRequest cmd) {
         String paramError = InjectionValidator.validateParamReferences(cmd.getCode(), cmd.getDesc());
         if (paramError != null) {
             return new BytecodePreviewer.PreviewResult(false, 0, 0, paramError);
@@ -143,7 +140,7 @@ public class InjectionService implements InjectionQuery {
         }
     }
 
-    public InjectionVerifier.VerifyResult verify(InjectionCommand cmd) {
+    public InjectionVerifier.VerifyResult verify(InjectRequest cmd) {
         return injectionVerifier.testInjection(
                 cmd.getClazz(), cmd.getMethod(), cmd.getDesc(),
                 cmd.getInjectionLocation(), cmd.getCode());
@@ -172,7 +169,7 @@ public class InjectionService implements InjectionQuery {
         injectionManager.removeInjection(id);
     }
 
-    private String validateLocalVarReferences(InjectionCommand cmd) {
+    private String validateLocalVarReferences(InjectRequest cmd) {
         try {
             byte[] bytecode = bytecodeLoader.loadBytecode(cmd.getClazz());
             return localVarValidator.validateLocalVarReferences(
@@ -183,12 +180,13 @@ public class InjectionService implements InjectionQuery {
         }
     }
 
-    private PersistentInjection toPersistentInjection(InjectionCommand cmd) {
+    private PersistentInjection toPersistentInjection(InjectRequest cmd) {
         PersistentInjection pi = new PersistentInjection();
         pi.setClazz(cmd.getClazz());
         pi.setMethodName(cmd.getMethod());
         pi.setMethodDescriptor(cmd.getDesc());
         pi.setInjectionLocation(cmd.getInjectionLocation());
+        pi.setProbeType(cmd.getProbeType());
         pi.setCodeType(cmd.getCodeType());
         pi.setCode(cmd.getCode());
         pi.setLineNumber(cmd.getLineNumber() != null ? cmd.getLineNumber() : 0);
@@ -196,12 +194,12 @@ public class InjectionService implements InjectionQuery {
         return pi;
     }
 
-    private boolean isLineInjection(InjectionCommand cmd) {
+    private boolean isLineInjection(InjectRequest cmd) {
         if (cmd.getInjectionLocation() == null) return false;
         return cmd.getLineNumber() != null && cmd.getLineNumber() > 0;
     }
 
-    private String validateProbeHandler(InjectionCommand cmd) {
+    private String validateProbeHandler(InjectRequest cmd) {
         if (cmd.getProbeType() == null || cmd.getProbeType().isEmpty()) {
             return null;
         }

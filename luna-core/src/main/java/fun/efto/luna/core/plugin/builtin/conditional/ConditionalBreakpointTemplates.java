@@ -38,9 +38,8 @@ public class ConditionalBreakpointTemplates {
         t.setParameters(Arrays.asList(lineParam, condParam));
 
         RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
+        rule.setProbeType("SNAPSHOT");
         rule.setInjectionLocation("LINE_BEFORE");
-        rule.setCodeType("SNAPSHOT");
-        rule.setCode("snapshot:true");
         rule.setCondition("${condition}");
         rule.setLineNumber(0);
 

@@ -31,20 +31,11 @@ public class TreeApiBytecodeHelper {
         MethodVisitor originalMv = asmContext.getMethodVisitor();
         asmContext.setMethodVisitor(collector);
 
-        String content = compiledCode.getContent();
-        String condition = null;
-        String trimmed = content.trim();
-        if (trimmed.startsWith("${") && trimmed.contains("}::")) {
-            int idx = trimmed.indexOf("}::");
-            condition = trimmed.substring(0, idx + 1).trim();
-            content = trimmed.substring(idx + 3).trim();
-        }
+        String content = compiledCode.getContent() != null ? compiledCode.getContent() : "";
+        String condition = compiledCode.getCondition();
+        boolean hasCondition = compiledCode.hasCondition();
 
-        String[] split = content.split(":", 2);
-        String expression = split.length > 1 ? split[1] : "";
-        boolean hasCondition = condition != null;
-
-        GenerateContext ctx = new DefaultGenerateContext(expression, asmContext, false, collector);
+        GenerateContext ctx = new DefaultGenerateContext(content, asmContext, hasCondition, collector);
 
         if (hasCondition) {
             String methodDesc = asmContext.getInjectionPoint().getTarget().getMethodDescriptor();
@@ -64,31 +55,23 @@ public class TreeApiBytecodeHelper {
     }
 
     private static void generateConditionCheck(MethodVisitor mv, AsmInjectionContext asmContext,
-                                                List<ExpressionSegment.ParameterSegment> params,
-                                                boolean isStatic, Label skipLabel) {
+                                                List<ExpressionSegment.ParameterSegment> params, boolean isStatic,
+                                                Label skipLabel) {
         String injectionId = asmContext.getInjectionPoint().getId();
 
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "fun/efto/luna/core/expression/context/EvaluationContext",
-                "getThreadLocal", "()Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
-
-        int maxSlot = isStatic ? 0 : 1;
-        for (ExpressionSegment.ParameterSegment p : params) {
-            maxSlot = Math.max(maxSlot, p.getSlot() + p.getType().getSize());
-        }
-        if (asmContext.getLocalVariables() != null) {
-            List<LocalVarInfo> excluded = asmContext.getExcludedSameLineVariables();
-            for (LocalVarInfo lv : asmContext.getLocalVariables()) {
-                if (excluded != null && excluded.stream().anyMatch(e -> e.getName().equals(lv.getName()))) {
-                    continue;
-                }
-                maxSlot = Math.max(maxSlot, lv.getSlot() + Type.getType(lv.getDescriptor()).getSize());
-            }
-        }
-        int contextVarIndex = asmContext.getMaxLocals() > 0
-                ? asmContext.getMaxLocals()
-                : maxSlot + 1;
-
+                "create", "()Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
+        int contextVarIndex = asmContext.getMaxLocals();
         mv.visitVarInsn(Opcodes.ASTORE, contextVarIndex);
+
+        if (!isStatic) {
+            mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);
+            mv.visitLdcInsn("this");
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "fun/efto/luna/core/expression/context/EvaluationContext",
+                    "bind", "(Ljava/lang/String;Ljava/lang/Object;)Lfun/efto/luna/core/expression/context/EvaluationContext;", false);
+            mv.visitInsn(Opcodes.POP);
+        }
 
         for (int i = 0; i < params.size(); i++) {
             mv.visitVarInsn(Opcodes.ALOAD, contextVarIndex);

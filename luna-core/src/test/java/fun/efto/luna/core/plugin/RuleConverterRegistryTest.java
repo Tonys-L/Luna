@@ -27,7 +27,7 @@ public class RuleConverterRegistryTest {
     void testRegisterAndConvert() {
         InjectionLocation location = InjectionLocation.of("method_enter", "test");
 
-        InjectionPoint expectedPoint = new InjectionPoint(null, new CompiledCode(null, "log:test"), "EXPRESSION", "LOG", null);
+        InjectionPoint expectedPoint = new InjectionPoint(null, new CompiledCode(null, "test"), "EXPRESSION", "LOG", null);
 
         InjectionRuleConverter converter = rule -> expectedPoint;
 

@@ -1,4 +1,4 @@
-package fun.efto.luna.agent.web.controller;
+﻿package fun.efto.luna.agent.web.controller;
 
 import fun.efto.luna.core.infra.web.ApiResult;
 import fun.efto.luna.core.infra.web.Controller;
@@ -18,7 +18,7 @@ import fun.efto.luna.agent.web.vo.TestStepVO;
 import fun.efto.luna.agent.web.vo.DryRunResultVO;
 import fun.efto.luna.agent.web.vo.VerifyResultVO;
 import fun.efto.luna.agent.web.vo.RemoveResultVO;
-import fun.efto.luna.core.injection.InjectionCommand;
+import fun.efto.luna.core.injection.InjectRequest;
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.InjectionService;
 import fun.efto.luna.core.injection.PersistentInjection;
@@ -69,7 +69,7 @@ public class InjectionController {
     }
 
     @PostMapping
-    public ApiResult inject(@RequestBody InjectionCommand cmd) {
+    public ApiResult inject(@RequestBody InjectRequest cmd) {
         if (cmd == null || !cmd.isValid()) {
             return ApiResult.fail("缺少必要参数");
         }
@@ -87,7 +87,7 @@ public class InjectionController {
     }
 
     @PostMapping("/test")
-    public ApiResult injectTest(@RequestBody InjectionCommand cmd) {
+    public ApiResult injectTest(@RequestBody InjectRequest cmd) {
         if (cmd == null || !cmd.isValid()) {
             return ApiResult.fail("缺少必要参数");
         }
@@ -132,26 +132,19 @@ public class InjectionController {
 
         steps.put("verify", TestStepVO.verifySuccess(result.getOutput()));
 
+        String expectedContent = cmd.getCode();
         if (!result.isSuccess()) {
-            String expectedContent = cmd.getCode();
-            if (expectedContent.startsWith("log:")) {
-                expectedContent = expectedContent.substring(4);
-            }
             steps.put("validate", TestStepVO.validateResult(false, expectedContent, result.getOutput()));
             return failWith("One or more steps failed",
                     new InjectionTestResultVO(false, steps, "验证失败: 输出中未找到期望内容"));
         }
 
-        String expectedContent = cmd.getCode();
-        if (expectedContent.startsWith("log:")) {
-            expectedContent = expectedContent.substring(4);
-        }
         steps.put("validate", TestStepVO.validateResult(true, expectedContent, result.getOutput()));
         return ApiResult.ok(new InjectionTestResultVO(true, steps, null));
     }
 
     @PostMapping("/dry-run")
-    public ApiResult dryRun(@RequestBody InjectionCommand cmd) {
+    public ApiResult dryRun(@RequestBody InjectRequest cmd) {
         if (cmd == null || !cmd.isValid()) {
             return ApiResult.fail("缺少必要参数");
         }
@@ -166,7 +159,7 @@ public class InjectionController {
     }
 
     @PostMapping("/verify")
-    public ApiResult verify(@RequestBody InjectionCommand cmd) {
+    public ApiResult verify(@RequestBody InjectRequest cmd) {
         if (cmd == null || !cmd.isValid()) {
             return ApiResult.fail("缺少必要参数");
         }

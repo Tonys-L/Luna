@@ -2,9 +2,9 @@ package fun.efto.luna.core.injection;
 
 /**
  * @author : Tony.L(286269159@qq.com)
- * @since  : 2026/01/25
+ * @since  : 2026/06/01 14:00
  */
-public class InjectionCommand {
+public class InjectRequest {
     private String clazz;
     private String method;
     private String probeType;

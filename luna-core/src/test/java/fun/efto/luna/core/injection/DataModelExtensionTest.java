@@ -62,13 +62,13 @@ class DataModelExtensionTest {
     }
 
     @Nested
-    @DisplayName("InjectionCommand 新字段测试")
-    class InjectionCommandTest {
+    @DisplayName("InjectRequest 新字段测试")
+    class InjectRequestTest {
 
         @Test
         @DisplayName("probeType getter/setter")
         void probeTypeGetterSetter() {
-            InjectionCommand command = new InjectionCommand();
+            InjectRequest command = new InjectRequest();
             assertNull(command.getProbeType());
             command.setProbeType("SNAPSHOT");
             assertEquals("SNAPSHOT", command.getProbeType());
@@ -77,7 +77,7 @@ class DataModelExtensionTest {
         @Test
         @DisplayName("injectionLocation getter/setter")
         void injectionLocationGetterSetter() {
-            InjectionCommand command = new InjectionCommand();
+            InjectRequest command = new InjectRequest();
             assertNull(command.getInjectionLocation());
             command.setInjectionLocation("line_before");
             assertEquals("line_before", command.getInjectionLocation());

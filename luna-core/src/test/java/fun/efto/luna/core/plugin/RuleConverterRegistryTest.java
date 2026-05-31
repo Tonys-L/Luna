@@ -2,6 +2,7 @@ package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.PersistentInjection;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
@@ -26,7 +27,7 @@ public class RuleConverterRegistryTest {
     void testRegisterAndConvert() {
         InjectionLocation location = InjectionLocation.of("method_enter", "test");
 
-        InjectionPoint expectedPoint = new InjectionPoint(null, null);
+        InjectionPoint expectedPoint = new InjectionPoint(null, new CompiledCode(null, "log:test"), "EXPRESSION", "LOG", null);
 
         InjectionRuleConverter converter = rule -> expectedPoint;
 

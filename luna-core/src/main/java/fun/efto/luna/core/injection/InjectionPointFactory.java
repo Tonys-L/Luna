@@ -1,6 +1,6 @@
 package fun.efto.luna.core.injection;
 
-import fun.efto.luna.core.injection.code.InjectableCode;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
@@ -27,7 +27,20 @@ public class InjectionPointFactory {
             persistent.getLineNumber()
         );
 
-        InjectableCode code = CodeCompiler.compile(persistent);
-        return new InjectionPoint(persistent.getId(), target, code);
+        CompiledCode code = compileCode(persistent);
+        return new InjectionPoint(persistent.getId(), target, code, persistent.getCodeType(), persistent.getProbeType(), persistent);
+    }
+
+    private static CompiledCode compileCode(PersistentInjection persistent) {
+        String codeType = persistent.getCodeType();
+        if (codeType == null || codeType.isEmpty()) {
+            return null;
+        }
+
+        CodeEngine engine = CodeEngineRegistry.getInstance().get(codeType).orElse(null);
+        if (engine == null) {
+            return null;
+        }
+        return engine.compile(persistent);
     }
 }

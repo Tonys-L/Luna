@@ -2,10 +2,8 @@ package fun.efto.luna.core.plugin.builtin;
 
 import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.infra.RingBuffer;
-import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
-import fun.efto.luna.core.injection.CodeCompilerStrategy;
-import fun.efto.luna.core.injection.code.CodeType;
+import fun.efto.luna.core.injection.CodeEngine;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.plugin.*;
@@ -27,12 +25,11 @@ public class TestPluginContext implements PluginContext {
 
     private final List<InjectionLocation> injectionLocations = new ArrayList<>();
     private final Map<InjectionLocation, BytecodeInjector> injectors = new HashMap<>();
-    private final Map<CodeType, BytecodeAssembler> assemblers = new HashMap<>();
-    private final List<ExpressionHandler> expressionHandlers = new ArrayList<>();
     private final List<InjectionRuleConverter> ruleConverters = new ArrayList<>();
     private final Map<InjectionLocation, InjectionRuleConverter> typedRuleConverters = new HashMap<>();
     private final List<RuleTemplate> templates = new ArrayList<>();
-    private final List<CodeCompilerStrategy> codeCompilerStrategies = new ArrayList<>();
+    private final List<CodeEngine> codeEngines = new ArrayList<>();
+    private final List<ProbeHandler> probeHandlers = new ArrayList<>();
     private final List<String> bootstrapClasses = new ArrayList<>();
 
     @Override
@@ -46,13 +43,13 @@ public class TestPluginContext implements PluginContext {
     }
 
     @Override
-    public void registerAssembler(CodeType type, BytecodeAssembler assembler) {
-        assemblers.put(type, assembler);
+    public void registerProbeHandler(ProbeHandler handler) {
+        probeHandlers.add(handler);
     }
 
     @Override
-    public void registerExpressionHandler(ExpressionHandler handler) {
-        expressionHandlers.add(handler);
+    public void registerCodeEngine(CodeEngine engine) {
+        codeEngines.add(engine);
     }
 
     @Override
@@ -68,11 +65,6 @@ public class TestPluginContext implements PluginContext {
     @Override
     public void registerTemplate(RuleTemplate template) {
         templates.add(template);
-    }
-
-    @Override
-    public void registerCodeCompilerStrategy(CodeCompilerStrategy strategy) {
-        codeCompilerStrategies.add(strategy);
     }
 
     @Override
@@ -103,9 +95,9 @@ public class TestPluginContext implements PluginContext {
 
     public List<InjectionLocation> getInjectionLocations() { return injectionLocations; }
     public Map<InjectionLocation, BytecodeInjector> getInjectors() { return injectors; }
-    public Map<CodeType, BytecodeAssembler> getAssemblers() { return assemblers; }
-    public List<ExpressionHandler> getExpressionHandlers() { return expressionHandlers; }
     public List<InjectionRuleConverter> getRuleConverters() { return ruleConverters; }
     public Map<InjectionLocation, InjectionRuleConverter> getTypedRuleConverters() { return typedRuleConverters; }
     public List<RuleTemplate> getTemplates() { return templates; }
+    public List<CodeEngine> getCodeEngines() { return codeEngines; }
+    public List<ProbeHandler> getProbeHandlers() { return probeHandlers; }
 }

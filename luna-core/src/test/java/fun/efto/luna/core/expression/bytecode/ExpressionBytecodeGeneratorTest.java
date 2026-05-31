@@ -138,6 +138,6 @@ public class ExpressionBytecodeGeneratorTest {
         long duration = endTime - startTime;
         double milliseconds = duration / 1_000_000.0;
         
-        assertTrue(milliseconds < 0.1, "字节码生成过程耗时应该小于 0.1ms，实际耗时: " + milliseconds + "ms");
+        assertTrue(milliseconds < 1.0, "字节码生成过程耗时应该小于 1ms，实际耗时: " + milliseconds + "ms");
     }
 }

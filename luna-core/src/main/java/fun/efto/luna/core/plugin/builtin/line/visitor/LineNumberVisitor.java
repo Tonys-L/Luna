@@ -1,8 +1,9 @@
 package fun.efto.luna.core.plugin.builtin.line.visitor;
 
 import fun.efto.luna.core.bytecode.asm.AsmInjectionContext;
-import fun.efto.luna.core.bytecode.BytecodeAssembler;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
+import fun.efto.luna.core.plugin.ProbeHandler;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -12,16 +13,18 @@ import org.objectweb.asm.Opcodes;
  * @since ：2025/11/5 15:30
  */
 public class LineNumberVisitor extends MethodVisitor {
-    private final BytecodeAssembler bytecodeAssembler;
+    private final CompiledCode compiledCode;
+    private final ProbeHandler probeHandler;
     private final AsmInjectionContext context;
     private final boolean beforeLine;
     private int targetLineNumber;
     private boolean lineNumberVisited = false;
     private boolean injected = false;
 
-    public LineNumberVisitor(int api, AsmInjectionContext context, BytecodeAssembler bytecodeAssembler, boolean beforeLine) {
+    public LineNumberVisitor(int api, AsmInjectionContext context, CompiledCode compiledCode, ProbeHandler probeHandler, boolean beforeLine) {
         super(api, context.getMethodVisitor());
-        this.bytecodeAssembler = bytecodeAssembler;
+        this.compiledCode = compiledCode;
+        this.probeHandler = probeHandler;
         this.context = context;
         this.beforeLine = beforeLine;
 
@@ -34,12 +37,12 @@ public class LineNumberVisitor extends MethodVisitor {
     @Override
     public void visitLineNumber(int line, Label start) {
         if (beforeLine && line == targetLineNumber && !injected) {
-            bytecodeAssembler.assemble(context, context.getBytecode());
+            probeHandler.handle(compiledCode, buildGenerateContext());
             injected = true;
         }
 
         if (!beforeLine && lineNumberVisited && !injected) {
-            bytecodeAssembler.assemble(context, context.getBytecode());
+            probeHandler.handle(compiledCode, buildGenerateContext());
             injected = true;
         }
 
@@ -50,9 +53,14 @@ public class LineNumberVisitor extends MethodVisitor {
         super.visitLineNumber(line, start);
     }
 
+    private fun.efto.luna.core.plugin.GenerateContext buildGenerateContext() {
+        return new fun.efto.luna.core.plugin.codegen.DefaultGenerateContext(
+            "", context, compiledCode != null && compiledCode.hasCondition(), context.getMethodVisitor());
+    }
+
     private void tryInjectBeforeReturn(int opcode) {
         if (!beforeLine && lineNumberVisited && !injected) {
-            bytecodeAssembler.assemble(context, context.getBytecode());
+            probeHandler.handle(compiledCode, buildGenerateContext());
             injected = true;
         }
     }
@@ -98,7 +106,7 @@ public class LineNumberVisitor extends MethodVisitor {
     @Override
     public void visitEnd() {
         if (!beforeLine && lineNumberVisited && !injected) {
-            bytecodeAssembler.assemble(context, context.getBytecode());
+            probeHandler.handle(compiledCode, buildGenerateContext());
             injected = true;
         }
         super.visitEnd();

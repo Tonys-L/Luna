@@ -1,17 +1,14 @@
 package fun.efto.luna.core.plugin.builtin.trace;
 
 import fun.efto.luna.core.plugin.BytecodeHelper;
-import fun.efto.luna.core.plugin.ExpressionHandler;
 import fun.efto.luna.core.plugin.GenerateContext;
 
 /**
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/16 10:00
  */
-public class TraceExpressionHandler implements ExpressionHandler {
-    @Override public String getProtocol() { return "trace"; }
+public class TraceExpressionHandler {
 
-    @Override
     public void generateBytecode(GenerateContext ctx) {
         String expr = ctx.expression();
         BytecodeHelper h = ctx.helper();

@@ -2,19 +2,17 @@ package fun.efto.luna.core.plugin.lifecycle;
 
 import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.infra.RingBuffer;
-import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
 import fun.efto.luna.core.infra.config.ConfigManager;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
-import fun.efto.luna.core.injection.CodeCompiler;
-import fun.efto.luna.core.injection.CodeCompilerStrategy;
+import fun.efto.luna.core.injection.CodeEngine;
+import fun.efto.luna.core.injection.CodeEngineRegistry;
 import fun.efto.luna.core.injection.target.InjectionLocation;
-import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.plugin.*;
 import fun.efto.luna.core.probe.ProbeMessage;
-import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
+import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 import fun.efto.luna.core.injection.rule.template.TemplateRegistry;
@@ -60,18 +58,6 @@ class PluginContextImpl implements PluginContext {
     }
 
     @Override
-    public void registerAssembler(CodeType type, BytecodeAssembler assembler) {
-        BytecodeAssemblerRegistry.getInstance().register(type, assembler);
-        record.addAssembler(type, assembler);
-    }
-
-    @Override
-    public void registerExpressionHandler(ExpressionHandler handler) {
-        ExpressionHandlerRegistry.getInstance().register(handler);
-        record.addExpressionHandler(handler);
-    }
-
-    @Override
     public void registerProbeHandler(ProbeHandler handler) {
         ProbeHandlerRegistry.getInstance().register(handler);
         record.addProbeHandler(handler);
@@ -94,9 +80,9 @@ class PluginContextImpl implements PluginContext {
     }
 
     @Override
-    public void registerCodeCompilerStrategy(CodeCompilerStrategy strategy) {
-        CodeCompiler.register(strategy);
-        record.addCodeCompilerStrategy(strategy);
+    public void registerCodeEngine(CodeEngine engine) {
+        CodeEngineRegistry.getInstance().register(engine);
+        record.addCodeEngine(engine);
     }
 
     @Override

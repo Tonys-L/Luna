@@ -1,11 +1,14 @@
 package fun.efto.luna.core.transformer;
 
+import fun.efto.luna.core.injection.CodeEngine;
+import fun.efto.luna.core.injection.CodeEngineRegistry;
 import fun.efto.luna.core.injection.InjectionContext;
-import fun.efto.luna.core.bytecode.BytecodeAssembler;
-import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.injection.InjectionPoint;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.plugin.ProbeHandler;
+import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +37,27 @@ public class DefaultClassTransformer implements ClassTransformer {
                 return buildErrorResult(bytecode, "未找到对应的字节码注入器: " + injectionPoint.getInjectionLocation());
             }
 
-            Optional<BytecodeAssembler> assemblerOptional = BytecodeAssemblerRegistry.getInstance().get(injectionPoint.getCodeType());
-            if (!assemblerOptional.isPresent()) {
-                return buildErrorResult(bytecode, "未找到对应的字节码组装器: " + injectionPoint.getCodeType());
+            BytecodeInjector injector = injectorOptional.get();
+
+            String probeType = injectionPoint.getProbeType();
+            String codeType = injectionPoint.getCodeType();
+
+            ProbeHandler probeHandler = null;
+            if (probeType != null && !probeType.isEmpty()) {
+                probeHandler = ProbeHandlerRegistry.getInstance().get(probeType).orElse(null);
             }
 
-            BytecodeInjector injector = injectorOptional.get();
-            byte[] transformedBytecode = injector.inject(new InjectionContext(injectionPoint), bytecode, assemblerOptional.get());
+            CompiledCode compiledCode = null;
+            if (probeHandler != null && probeHandler.usesCode() && codeType != null && !codeType.isEmpty()) {
+                Optional<CodeEngine> engineOptional = CodeEngineRegistry.getInstance().get(codeType);
+                if (!engineOptional.isPresent()) {
+                    return buildErrorResult(bytecode, "未找到对应的代码引擎: " + codeType);
+                }
+                CodeEngine engine = engineOptional.get();
+                compiledCode = engine.compile(injectionPoint.toPersistentInjection());
+            }
+
+            byte[] transformedBytecode = injector.inject(compiledCode, probeHandler, new InjectionContext(injectionPoint), bytecode);
 
             return new TransformerResult(
                     transformedBytecode,

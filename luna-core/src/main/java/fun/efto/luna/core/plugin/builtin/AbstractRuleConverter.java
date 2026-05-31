@@ -2,7 +2,6 @@ package fun.efto.luna.core.plugin.builtin;
 
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.PersistentInjection;
-import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.plugin.InjectionRuleConverter;
 
 /**
@@ -12,13 +11,6 @@ import fun.efto.luna.core.plugin.InjectionRuleConverter;
 public abstract class AbstractRuleConverter implements InjectionRuleConverter {
 
     protected String buildExpression(String condition, String content) {
-        if (condition != null && !condition.isEmpty()) {
-            return "${" + condition + "}::" + content;
-        }
-        return content;
-    }
-
-    protected String buildExpression(String condition, String content, CodeType codeType) {
         if (condition != null && !condition.isEmpty()) {
             return "${" + condition + "}::" + content;
         }

@@ -1,7 +1,7 @@
 package fun.efto.luna.core.plugin.builtin;
 
 import fun.efto.luna.core.plugin.builtin.trace.TracePlugin;
-import fun.efto.luna.core.plugin.builtin.trace.TraceExpressionHandler;
+import fun.efto.luna.core.plugin.builtin.trace.TraceProbeHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,11 +33,11 @@ public class TracePluginTest {
     }
 
     @Test
-    @DisplayName("注册了 1 个 ExpressionHandler")
-    void testRegisteredExpressionHandler() {
+    @DisplayName("注册了1个ProbeHandler")
+    void testRegisteredProbeHandler() {
         plugin.initialize(ctx);
-        assertEquals(1, ctx.getExpressionHandlers().size());
-        assertInstanceOf(TraceExpressionHandler.class, ctx.getExpressionHandlers().get(0));
+        assertEquals(1, ctx.getProbeHandlers().size());
+        assertInstanceOf(TraceProbeHandler.class, ctx.getProbeHandlers().get(0));
     }
 
     @Test

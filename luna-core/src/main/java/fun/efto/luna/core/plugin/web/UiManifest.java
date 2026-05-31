@@ -1,9 +1,8 @@
 package fun.efto.luna.core.plugin.web;
 
 import fun.efto.luna.core.injection.target.InjectionLocation;
-import fun.efto.luna.core.plugin.ExpressionHandler;
-import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
+import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
 import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 import fun.efto.luna.core.injection.rule.template.TemplateRegistry;
 
@@ -16,7 +15,7 @@ import java.util.*;
 public class UiManifest {
 
     private List<Map<String, Object>> injectionLocations;
-    private List<Map<String, Object>> expressionProtocols;
+    private List<Map<String, Object>> probeTypes;
     private List<Map<String, Object>> templates;
 
     public static UiManifest collect() {
@@ -32,13 +31,13 @@ public class UiManifest {
         }
         manifest.injectionLocations = locations;
 
-        List<Map<String, Object>> protocols = new ArrayList<>();
-        for (ExpressionHandler handler : ExpressionHandlerRegistry.getInstance().getAll()) {
+        List<Map<String, Object>> probes = new ArrayList<>();
+        for (fun.efto.luna.core.plugin.ProbeHandler handler : ProbeHandlerRegistry.getInstance().getAll()) {
             Map<String, Object> info = new LinkedHashMap<>();
-            info.put("protocol", handler.getProtocol());
-            protocols.add(info);
+            info.put("probeType", handler.getProbeType());
+            probes.add(info);
         }
-        manifest.expressionProtocols = protocols;
+        manifest.probeTypes = probes;
 
         List<Map<String, Object>> tmpls = new ArrayList<>();
         for (RuleTemplate tmpl : TemplateRegistry.getInstance().getAllTemplates()) {
@@ -57,6 +56,6 @@ public class UiManifest {
     }
 
     public List<Map<String, Object>> getInjectionLocations() { return injectionLocations; }
-    public List<Map<String, Object>> getExpressionProtocols() { return expressionProtocols; }
+    public List<Map<String, Object>> getProbeTypes() { return probeTypes; }
     public List<Map<String, Object>> getTemplates() { return templates; }
 }

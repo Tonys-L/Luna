@@ -1,8 +1,7 @@
 package fun.efto.luna.core.plugin.builtin.snapshot;
 
-import fun.efto.luna.core.bytecode.asm.assembler.ExpressionBytecodeAssembler;
-import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.plugin.*;
+import fun.efto.luna.core.plugin.builtin.log.ExpressionCodeEngine;
 
 /**
  * @author : Tony.L(286269159@qq.com)
@@ -17,10 +16,8 @@ public class SnapshotPlugin implements LunaPlugin {
 
     @Override
     public void initialize(PluginContext ctx) {
-        ctx.registerExpressionHandler(new SnapshotExpressionHandler());
         ctx.registerProbeHandler(new SnapshotProbeHandler());
-        ctx.registerAssembler(CodeType.SNAPSHOT, new ExpressionBytecodeAssembler());
-        ctx.registerCodeCompilerStrategy(new SnapshotCodeCompilerStrategy());
+        ctx.registerCodeEngine(new ExpressionCodeEngine());
         ctx.registerTemplate(SnapshotTemplates.lineSnapshot());
     }
 }

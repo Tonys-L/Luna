@@ -1,13 +1,14 @@
 package fun.efto.luna.core.plugin.builtin.line;
 
 import fun.efto.luna.core.injection.InjectionContext;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.bytecode.asm.AsmInjectionContext;
 import fun.efto.luna.core.bytecode.asm.ClassLoaderAwareClassWriter;
 import fun.efto.luna.core.bytecode.asm.LocalVariableScanner;
-import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.bytecode.asm.injector.TreeApiBytecodeHelper;
+import fun.efto.luna.core.plugin.ProbeHandler;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -21,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,7 +32,7 @@ public class BeforeLineInjector implements BytecodeInjector {
     private static final Logger LOGGER = LoggerFactory.getLogger(BeforeLineInjector.class);
 
     @Override
-    public byte[] inject(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
+    public byte[] inject(CompiledCode compiledCode, ProbeHandler probeHandler, InjectionContext injectionContext, byte[] bytecode) {
         AsmInjectionContext asmContext = new AsmInjectionContext(injectionContext, bytecode);
 
         LineNumberTarget target = (LineNumberTarget) asmContext.getInjectionTarget();
@@ -81,7 +81,7 @@ public class BeforeLineInjector implements BytecodeInjector {
                 if (insn instanceof LineNumberNode) {
                     LineNumberNode lnn = (LineNumberNode) insn;
                     if (lnn.line == target.getLineNumber()) {
-                        InsnList injectedCode = TreeApiBytecodeHelper.assemble(asmContext, bytecode, bytecodeAssembler);
+                        InsnList injectedCode = TreeApiBytecodeHelper.assemble(asmContext, compiledCode, probeHandler, bytecode);
 
                         int maxVarInCode = computeMaxLocalIndex(asmContext, injectedCode);
                         int neededLocals = Math.max(mn.maxLocals, maxVarInCode + 1);

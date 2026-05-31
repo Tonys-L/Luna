@@ -5,8 +5,8 @@ import fun.efto.luna.core.plugin.LunaController;
 import fun.efto.luna.core.plugin.PluginInfo;
 import fun.efto.luna.core.plugin.PluginManager;
 import fun.efto.luna.core.plugin.PluginState;
-import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
+import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
 import fun.efto.luna.core.injection.rule.template.TemplateRegistry;
 import fun.efto.luna.core.infra.web.ApiResult;
 import fun.efto.luna.core.infra.web.Controller;
@@ -35,7 +35,7 @@ public class PluginUIController implements LunaController {
         Set<String> disabledPluginIds = collectDisabledPluginIds();
         return ApiResult.ok(new UiManifestVO(
                 buildInjectionLocations(disabledPluginIds),
-                buildExpressionProtocols(disabledPluginIds),
+                buildProbeTypes(disabledPluginIds),
                 buildTemplates(disabledPluginIds)));
     }
 
@@ -57,12 +57,12 @@ public class PluginUIController implements LunaController {
                 .collect(Collectors.toList());
     }
 
-    private List<UiManifestVO.ExpressionProtocolEntry> buildExpressionProtocols(Set<String> disabledPluginIds) {
-        Set<String> disabledProtocols = collectDisabledProtocols(disabledPluginIds);
-        return ExpressionHandlerRegistry.getInstance().getAll().stream()
-                .filter(h -> !disabledProtocols.contains(h.getProtocol()))
+    private List<UiManifestVO.ExpressionProtocolEntry> buildProbeTypes(Set<String> disabledPluginIds) {
+        Set<String> disabledProbeTypes = collectDisabledProbeTypes(disabledPluginIds);
+        return ProbeHandlerRegistry.getInstance().getAll().stream()
+                .filter(h -> !disabledProbeTypes.contains(h.getProbeType()))
                 .map(h -> new UiManifestVO.ExpressionProtocolEntry(
-                        h.getProtocol(), h.getProtocol(), h.getProtocol() + ":<expression>"))
+                        h.getProbeType(), h.getProbeType(), h.getProbeType() + " probe"))
                 .collect(Collectors.toList());
     }
 
@@ -84,13 +84,13 @@ public class PluginUIController implements LunaController {
         return locationNames;
     }
 
-    private Set<String> collectDisabledProtocols(Set<String> disabledPluginIds) {
-        Set<String> protocols = new HashSet<>();
+    private Set<String> collectDisabledProbeTypes(Set<String> disabledPluginIds) {
+        Set<String> probeTypes = new HashSet<>();
         for (String pluginId : disabledPluginIds) {
-            pluginManager.getExpressionHandlersForPlugin(pluginId)
-                    .forEach(h -> protocols.add(h.getProtocol()));
+            pluginManager.getProbeHandlersForPlugin(pluginId)
+                    .forEach(h -> probeTypes.add(h.getProbeType()));
         }
-        return protocols;
+        return probeTypes;
     }
 
     private Set<String> collectDisabledTemplateNames(Set<String> disabledPluginIds) {

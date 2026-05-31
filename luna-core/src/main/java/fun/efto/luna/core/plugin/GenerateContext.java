@@ -9,8 +9,6 @@ import org.objectweb.asm.MethodVisitor;
  */
 public interface GenerateContext {
 
-    enum Phase { ENTER, EXIT }
-
     String expression();
 
     AsmInjectionContext asmContext();
@@ -20,6 +18,4 @@ public interface GenerateContext {
     BytecodeHelper helper();
 
     MethodVisitor mv();
-
-    Phase injectionPhase();
 }

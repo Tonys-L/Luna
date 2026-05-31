@@ -5,9 +5,10 @@ import fun.efto.luna.core.bytecode.asm.ClassLoaderAwareClassWriter;
 import fun.efto.luna.core.bytecode.asm.LocalVariableScanner;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.bytecode.asm.injector.TreeApiBytecodeHelper;
-import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.InjectionContext;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.injection.target.MethodTarget;
+import fun.efto.luna.core.plugin.ProbeHandler;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
@@ -42,7 +43,7 @@ public class AsmMethodExpressionInjector implements BytecodeInjector {
     }
 
     @Override
-    public byte[] inject(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
+    public byte[] inject(CompiledCode compiledCode, ProbeHandler probeHandler, InjectionContext injectionContext, byte[] bytecode) {
         AsmInjectionContext asmContext = new AsmInjectionContext(injectionContext, bytecode);
 
         MethodTarget target = (MethodTarget) asmContext.getInjectionTarget();
@@ -63,12 +64,12 @@ public class AsmMethodExpressionInjector implements BytecodeInjector {
             asmContext.setMaxLocals(mn.maxLocals);
 
             if (phase == Phase.ENTER || phase == Phase.AROUND) {
-                InsnList code = TreeApiBytecodeHelper.assemble(asmContext, bytecode, bytecodeAssembler);
+                InsnList code = TreeApiBytecodeHelper.assemble(asmContext, compiledCode, probeHandler, bytecode);
                 updateMaxLocals(mn, code, asmContext);
                 mn.instructions.insert(code);
             }
             if (phase == Phase.EXIT || phase == Phase.AROUND) {
-                InsnList code = TreeApiBytecodeHelper.assemble(asmContext, bytecode, bytecodeAssembler);
+                InsnList code = TreeApiBytecodeHelper.assemble(asmContext, compiledCode, probeHandler, bytecode);
                 updateMaxLocals(mn, code, asmContext);
                 insertBeforeReturns(mn, code);
             }

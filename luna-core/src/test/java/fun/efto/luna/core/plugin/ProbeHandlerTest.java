@@ -1,16 +1,20 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.injection.InjectionCommand;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.builtin.log.LogProbeHandler;
 import fun.efto.luna.core.plugin.builtin.snapshot.SnapshotProbeHandler;
 import fun.efto.luna.core.plugin.builtin.trace.TraceProbeHandler;
+import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,9 +25,21 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class ProbeHandlerTest {
 
+    @BeforeEach
+    void setUp() {
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("method_enter", "test"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("method_exit", "test"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("method_around", "test"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("line_before", "test"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("line_after", "test"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("invoke", "test"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("exception_exit", "test"));
+    }
+
     @AfterEach
     void tearDown() {
         ProbeHandlerRegistry.getInstance().clear();
+        InjectionTypeRegistry.getInstance().clear();
     }
 
     @Nested
@@ -51,7 +67,7 @@ public class ProbeHandlerTest {
         @Test
         @DisplayName("okWithWarnings() 返回有效但有警告")
         void okWithWarningsReturnsValidWithWarnings() {
-            ValidationResult result = ValidationResult.okWithWarnings(List.of("warning1", "warning2"));
+            ValidationResult result = ValidationResult.okWithWarnings(Arrays.asList("warning1", "warning2"));
             assertTrue(result.isValid());
             assertNull(result.getErrorMessage());
             assertEquals(2, result.getWarnings().size());
@@ -219,7 +235,7 @@ public class ProbeHandlerTest {
             assertTrue(ProbeHandlerRegistry.getInstance().get("LOG").isPresent());
             assertSame(handler, ProbeHandlerRegistry.getInstance().get("LOG").orElse(null));
 
-            ProbeHandlerRegistry.getInstance().unregisterAll(List.of(handler));
+            ProbeHandlerRegistry.getInstance().unregisterAll(Collections.singletonList(handler));
             assertFalse(ProbeHandlerRegistry.getInstance().get("LOG").isPresent());
         }
 

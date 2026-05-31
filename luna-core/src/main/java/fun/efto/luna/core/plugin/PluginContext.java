@@ -2,10 +2,8 @@ package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.infra.RingBuffer;
-import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
-import fun.efto.luna.core.injection.code.CodeType;
-import fun.efto.luna.core.injection.CodeCompilerStrategy;
+import fun.efto.luna.core.injection.CodeEngine;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.probe.ProbeMessage;
@@ -25,19 +23,15 @@ public interface PluginContext {
 
     void registerInjector(InjectionLocation location, BytecodeInjector injector);
 
-    void registerAssembler(CodeType type, BytecodeAssembler assembler);
-
-    void registerExpressionHandler(ExpressionHandler handler);
-
     void registerProbeHandler(ProbeHandler handler);
+
+    void registerCodeEngine(CodeEngine engine);
 
     void registerRuleConverter(InjectionRuleConverter converter);
 
     void registerRuleConverter(InjectionLocation location, InjectionRuleConverter converter);
 
     void registerTemplate(RuleTemplate template);
-
-    void registerCodeCompilerStrategy(CodeCompilerStrategy strategy);
 
     void registerBootstrapClass(String internalName);
 

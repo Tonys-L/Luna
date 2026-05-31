@@ -2,7 +2,7 @@ package fun.efto.luna.core.plugin.builtin.method;
 
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.PersistentInjection;
-import fun.efto.luna.core.injection.code.InjectableCode;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.injection.target.MethodTarget;
@@ -19,7 +19,7 @@ public class MethodRuleConverter implements InjectionRuleConverter {
     public InjectionPoint convert(PersistentInjection injection) {
         InjectionLocation location = InjectionTypeRegistry.getInstance().resolve(injection.getInjectionLocation());
         InjectionTarget target = new MethodTarget(location, injection.getClazz(), injection.getMethodName(), injection.getMethodDescriptor());
-        InjectableCode code = InjectableCode.of(injection.getCode(), injection.getCodeType());
-        return new InjectionPoint(injection.getId(), target, code);
+        CompiledCode code = new CompiledCode(null, injection.getCode());
+        return new InjectionPoint(injection.getId(), target, code, injection.getCodeType(), injection.getProbeType(), injection);
     }
 }

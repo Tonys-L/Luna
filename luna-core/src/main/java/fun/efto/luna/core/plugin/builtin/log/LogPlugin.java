@@ -1,7 +1,5 @@
 package fun.efto.luna.core.plugin.builtin.log;
 
-import fun.efto.luna.core.bytecode.asm.assembler.ExpressionBytecodeAssembler;
-import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.plugin.*;
 
 /**
@@ -17,10 +15,8 @@ public class LogPlugin implements LunaPlugin {
 
     @Override
     public void initialize(PluginContext ctx) {
-        ctx.registerExpressionHandler(new LogExpressionHandler());
         ctx.registerProbeHandler(new LogProbeHandler());
-        ctx.registerAssembler(CodeType.EXPRESSION, new ExpressionBytecodeAssembler());
-        ctx.registerCodeCompilerStrategy(new LogCodeCompilerStrategy());
+        ctx.registerCodeEngine(new ExpressionCodeEngine());
         ctx.registerTemplate(LogTemplates.methodAccessLog());
     }
 }

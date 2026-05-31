@@ -1,15 +1,13 @@
-﻿package fun.efto.luna.core.plugin.lifecycle;
+package fun.efto.luna.core.plugin.lifecycle;
 
 import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.infra.RingBuffer;
-import fun.efto.luna.core.bytecode.asm.assembler.BytecodeAssemblerRegistry;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
 import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.infra.config.ConfigManager;
 import fun.efto.luna.core.plugin.*;
 import fun.efto.luna.core.probe.ProbeMessage;
-import fun.efto.luna.core.plugin.registry.ExpressionHandlerRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import fun.efto.luna.core.plugin.loader.PluginClassLoader;
@@ -456,12 +454,6 @@ public class PluginManagerImpl implements PluginManager {
     public Set<InjectionLocation> getInjectionLocationsForPlugin(String pluginId) {
         PluginRegistrationRecord record = records.get(pluginId);
         return record != null ? new HashSet<>(record.getInjectionLocations()) : Collections.emptySet();
-    }
-
-    @Override
-    public Set<ExpressionHandler> getExpressionHandlersForPlugin(String pluginId) {
-        PluginRegistrationRecord record = records.get(pluginId);
-        return record != null ? new HashSet<>(record.getExpressionHandlers()) : Collections.emptySet();
     }
 
     @Override

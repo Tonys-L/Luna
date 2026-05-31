@@ -1,8 +1,7 @@
 package fun.efto.luna.core.plugin.builtin;
 
-import fun.efto.luna.core.injection.code.CodeType;
 import fun.efto.luna.core.plugin.builtin.log.LogPlugin;
-import fun.efto.luna.core.plugin.builtin.log.LogExpressionHandler;
+import fun.efto.luna.core.plugin.builtin.log.LogProbeHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,18 +31,18 @@ public class LogPluginTest {
     }
 
     @Test
-    @DisplayName("注册了1个ExpressionHandler")
-    void testRegisteredExpressionHandler() {
+    @DisplayName("注册了1个ProbeHandler")
+    void testRegisteredProbeHandler() {
         plugin.initialize(ctx);
-        assertEquals(1, ctx.getExpressionHandlers().size());
-        assertInstanceOf(LogExpressionHandler.class, ctx.getExpressionHandlers().get(0));
+        assertEquals(1, ctx.getProbeHandlers().size());
+        assertInstanceOf(LogProbeHandler.class, ctx.getProbeHandlers().get(0));
     }
 
     @Test
-    @DisplayName("注册了EXPRESSION Assembler")
-    void testRegisteredAssembler() {
+    @DisplayName("注册了EXPRESSION CodeEngine")
+    void testRegisteredCodeEngine() {
         plugin.initialize(ctx);
-        assertNotNull(ctx.getAssemblers().get(CodeType.EXPRESSION));
+        assertFalse(ctx.getCodeEngines().isEmpty());
     }
 
     @Test

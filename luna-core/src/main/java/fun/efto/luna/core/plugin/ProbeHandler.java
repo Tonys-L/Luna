@@ -1,6 +1,7 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.injection.InjectionCommand;
+import fun.efto.luna.core.injection.code.CompiledCode;
 
 import java.util.Set;
 
@@ -18,5 +19,5 @@ public interface ProbeHandler {
 
     ValidationResult validate(InjectionCommand request);
 
-    void handle(Object code, GenerateContext ctx);
+    void handle(CompiledCode code, GenerateContext ctx);
 }

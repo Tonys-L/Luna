@@ -1,5 +1,6 @@
 package fun.efto.luna.core.plugin;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ public class ValidationResult {
     private ValidationResult(boolean valid, String errorMessage, List<String> warnings) {
         this.valid = valid;
         this.errorMessage = errorMessage;
-        this.warnings = warnings != null ? warnings : List.of();
+        this.warnings = warnings != null ? warnings : new ArrayList<>();
     }
 
     public static ValidationResult ok() {

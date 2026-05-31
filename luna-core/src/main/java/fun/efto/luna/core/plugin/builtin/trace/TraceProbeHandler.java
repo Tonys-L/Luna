@@ -1,10 +1,13 @@
 package fun.efto.luna.core.plugin.builtin.trace;
 
 import fun.efto.luna.core.injection.InjectionCommand;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.plugin.AbstractProbeHandler;
 import fun.efto.luna.core.plugin.GenerateContext;
 import fun.efto.luna.core.plugin.ValidationResult;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -27,7 +30,7 @@ public class TraceProbeHandler extends AbstractProbeHandler {
 
     @Override
     public Set<String> supportedInjectionLocations() {
-        return Set.of("method_enter", "method_exit");
+        return new HashSet<>(Arrays.asList("method_enter", "method_exit"));
     }
 
     @Override
@@ -39,7 +42,7 @@ public class TraceProbeHandler extends AbstractProbeHandler {
     }
 
     @Override
-    public void handle(Object code, GenerateContext ctx) {
+    public void handle(CompiledCode code, GenerateContext ctx) {
         delegate.generateBytecode(ctx);
     }
 }

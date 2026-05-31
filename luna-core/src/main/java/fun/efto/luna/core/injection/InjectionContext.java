@@ -1,7 +1,7 @@
 package fun.efto.luna.core.injection;
 
 import fun.efto.luna.core.injection.InjectionPoint;
-import fun.efto.luna.core.injection.code.InjectableCode;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.injection.target.InjectionTarget;
 
 import java.util.Map;
@@ -28,7 +28,7 @@ public class InjectionContext {
         return injectionPoint.getTarget();
     }
 
-    public InjectableCode getInjectableCode() {
+    public CompiledCode getCompiledCode() {
         return injectionPoint.getCode();
     }
 

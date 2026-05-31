@@ -1,7 +1,6 @@
 package fun.efto.luna.core.injection;
 
-import fun.efto.luna.core.injection.code.InjectableCode;
-import fun.efto.luna.core.injection.code.CodeType;
+import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 
@@ -14,18 +13,22 @@ import java.util.UUID;
 public class InjectionPoint {
     private final String id;
     private final InjectionTarget target;
-    private final InjectableCode code;
+    private final CompiledCode code;
+    private final String codeType;
+    private final String probeType;
+    private final PersistentInjection source;
 
-    public InjectionPoint(InjectionTarget target, InjectableCode code) {
-        this.id = UUID.randomUUID().toString();
-        this.target = target;
-        this.code = code;
+    public InjectionPoint(InjectionTarget target, CompiledCode code, String codeType, String probeType, PersistentInjection source) {
+        this(UUID.randomUUID().toString(), target, code, codeType, probeType, source);
     }
 
-    public InjectionPoint(String id, InjectionTarget target, InjectableCode code) {
+    public InjectionPoint(String id, InjectionTarget target, CompiledCode code, String codeType, String probeType, PersistentInjection source) {
         this.id = id != null ? id : UUID.randomUUID().toString();
         this.target = target;
         this.code = code;
+        this.codeType = codeType;
+        this.probeType = probeType;
+        this.source = source;
     }
 
     public String getId() {
@@ -36,7 +39,7 @@ public class InjectionPoint {
         return target;
     }
 
-    public InjectableCode getCode() {
+    public CompiledCode getCode() {
         return code;
     }
 
@@ -44,7 +47,15 @@ public class InjectionPoint {
         return target.getLocation();
     }
 
-    public CodeType getCodeType() {
-        return code.getCodeType();
+    public String getCodeType() {
+        return codeType;
+    }
+
+    public String getProbeType() {
+        return probeType;
+    }
+
+    public PersistentInjection toPersistentInjection() {
+        return source;
     }
 }

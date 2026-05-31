@@ -9,10 +9,10 @@ import com.alibaba.deps.org.objectweb.asm.tree.ClassNode;
 import com.alibaba.deps.org.objectweb.asm.tree.MethodNode;
 import fun.efto.luna.core.bytecode.asm.AsmInjectionContext;
 import fun.efto.luna.core.bytecode.asm.AsmMethodExpressionInjector;
-import fun.efto.luna.core.bytecode.asm.assembler.ExpressionBytecodeAssembler;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
-import fun.efto.luna.core.bytecode.BytecodeAssembler;
 import fun.efto.luna.core.injection.InjectionContext;
+import fun.efto.luna.core.injection.code.CompiledCode;
+import fun.efto.luna.core.plugin.ProbeHandler;
 
 import java.util.List;
 
@@ -46,16 +46,16 @@ public abstract class ByteKitInjectorBase implements BytecodeInjector {
     }
 
     @Override
-    public byte[] inject(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
-        if (bytecodeAssembler instanceof ExpressionBytecodeAssembler) {
-            return injectWithExpression(injectionContext, bytecode, bytecodeAssembler);
+    public byte[] inject(CompiledCode compiledCode, ProbeHandler probeHandler, InjectionContext injectionContext, byte[] bytecode) {
+        if (probeHandler != null && probeHandler.usesCode()) {
+            return injectWithExpression(compiledCode, probeHandler, injectionContext, bytecode);
         }
         return injectWithByteKit(injectionContext, bytecode);
     }
 
-    private byte[] injectWithExpression(InjectionContext injectionContext, byte[] bytecode, BytecodeAssembler bytecodeAssembler) {
+    private byte[] injectWithExpression(CompiledCode compiledCode, ProbeHandler probeHandler, InjectionContext injectionContext, byte[] bytecode) {
         AsmMethodExpressionInjector asmInjector = new AsmMethodExpressionInjector(getExpressionPhase());
-        return asmInjector.inject(injectionContext, bytecode, bytecodeAssembler);
+        return asmInjector.inject(compiledCode, probeHandler, injectionContext, bytecode);
     }
 
     protected AsmMethodExpressionInjector.Phase getExpressionPhase() {

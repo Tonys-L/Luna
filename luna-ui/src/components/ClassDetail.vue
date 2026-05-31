@@ -61,6 +61,7 @@
       :initial-line-number="initialLineNumber"
       :initial-injection-type="initialInjectionType"
       :initial-code-type="initialCodeType"
+      :initial-probe-type="initialProbeType"
       :available-lines="Object.values(sourceLineMapping)"
       @close="injectDialogVisible = false"
       @submit="handleInjectLog"
@@ -134,6 +135,7 @@ export default {
       initialLineNumber: null,
       initialInjectionType: 'ENTER_METHOD',
       initialCodeType: 'EXPRESSION',
+      initialProbeType: 'LOG',
       quickActionMenu: {
         visible: false,
         x: 0,
@@ -379,34 +381,28 @@ export default {
       // 注意：这里需要等弹窗 mount 后修改内部状态，或者通过 prop 传递更多初始状态
       // 稍后我会修改 InjectionDialog 支持 initialType
     },
-    handleQuickAction(type, codeType = 'EXPRESSION') {
+    handleQuickAction(type, probeType = 'LOG') {
       this.initialInjectionType = type
-      this.initialCodeType = codeType
+      this.initialProbeType = probeType
       this.showInjectDialog(this.quickActionMenu.method, this.quickActionMenu.line)
     },
     async handleInjectLog(formData) {
       this.injecting = true
       try {
-        let code = formData.logContent || ''
-        if (formData.codeType === 'EXPRESSION' && !code.startsWith('log:')) {
-          code = 'log:' + code
-        } else if (formData.codeType === 'SNAPSHOT') {
-          code = 'snapshot:'
-        }
-
         const payload = {
           clazz: this.classInfo.className,
           method: this.currentMethod.name,
           desc: this.currentMethod.descriptor,
-          injectionType: formData.injectionType,
+          injectionLocation: formData.injectionType,
+          probeType: formData.probeType || 'LOG',
           codeType: formData.codeType,
-          code: code,
+          code: formData.logContent || '',
           lineNumber: formData.lineNumber,
-          expression: formData.condition
+          condition: formData.condition
         }
         const result = await injectMethodLog(payload)
         this.injectDialogVisible = false
-        this.loadDecompiledCode() // 刷新以同步状态
+        this.loadDecompiledCode()
       } catch (e) {
         alert('注入失败: ' + (e.response?.data?.message || e.message))
       } finally {

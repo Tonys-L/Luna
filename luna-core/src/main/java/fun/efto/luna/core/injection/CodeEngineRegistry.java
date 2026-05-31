@@ -3,6 +3,7 @@ package fun.efto.luna.core.injection;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -40,6 +41,10 @@ public final class CodeEngineRegistry {
 
     public Collection<CodeEngine> getAll() {
         return REGISTRY.values();
+    }
+
+    public Set<String> getRegisteredTypes() {
+        return REGISTRY.keySet();
     }
 
     public void clear() {

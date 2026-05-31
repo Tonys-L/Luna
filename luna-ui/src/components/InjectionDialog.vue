@@ -12,6 +12,16 @@
       </div>
 
       <div class="dialog-body">
+        <!-- 探针类型 -->
+        <div class="form-group">
+          <label class="form-label">探针类型</label>
+          <select v-model="form.probeType" class="form-select" @change="onProbeTypeChange">
+            <option v-for="handler in probeHandlers" :key="handler.probeType" :value="handler.probeType">
+              {{ getProbeDisplayName(handler.probeType) }}
+            </option>
+          </select>
+        </div>
+
         <!-- 注入位置 -->
         <div class="form-group">
           <label class="form-label">注入位置</label>
@@ -60,12 +70,12 @@
           </div>
         </div>
 
-        <!-- 动作类型 -->
-        <div class="form-group">
+        <!-- 代码类型 (仅 usesCode=true 时可见) -->
+        <div class="form-group" v-if="currentProbeUsesCode">
           <label class="form-label">动作类型</label>
-          <select v-model="form.codeType" class="form-select" @change="onCodeTypeChange">
-            <option v-for="proto in expressionProtocols" :key="proto.codeType" :value="proto.codeType">
-              {{ proto.displayName }}
+          <select v-model="form.codeType" class="form-select">
+            <option v-for="engine in codeEngines" :key="engine.codeType" :value="engine.codeType">
+              {{ engine.codeType }}
             </option>
           </select>
         </div>
@@ -81,8 +91,8 @@
           />
         </div>
 
-        <!-- 日志模板 -->
-        <div class="form-group" v-if="form.codeType === 'EXPRESSION'">
+        <!-- 日志模板 (仅 usesCode=true 时可见) -->
+        <div class="form-group" v-if="currentProbeUsesCode">
           <label class="form-label">日志模板</label>
           <textarea 
             v-model="form.logContent" 
@@ -122,6 +132,7 @@ export default {
     initialLineNumber: { type: Number, default: null },
     initialInjectionType: { type: String, default: 'ENTER_METHOD' },
     initialCodeType: { type: String, default: 'EXPRESSION' },
+    initialProbeType: { type: String, default: 'LOG' },
     availableLines: { type: Array, default: () => [] }
   },
   emits: ['close', 'submit'],
@@ -129,6 +140,7 @@ export default {
     return {
       form: {
         injectionType: 'ENTER_METHOD',
+        probeType: 'LOG',
         codeType: 'EXPRESSION',
         logContent: '',
         condition: '',
@@ -141,6 +153,16 @@ export default {
   computed: {
     isLineInjection() {
       return this.form.injectionType.startsWith('LINE_')
+    },
+    probeHandlers() {
+      return pluginRegistry.probeHandlers
+    },
+    codeEngines() {
+      return pluginRegistry.codeEngines
+    },
+    currentProbeUsesCode() {
+      const handler = this.probeHandlers.find(h => h.probeType === this.form.probeType)
+      return handler ? handler.usesCode : true
     },
     expressionProtocols() {
       return pluginRegistry.expressionProtocols
@@ -176,11 +198,16 @@ export default {
       const labels = { method: '方法注入', line: '行号注入', field: '字段注入', other: '其他' }
       return labels[cat] || cat
     },
+    getProbeDisplayName(probeType) {
+      const names = { LOG: '日志表达式', SNAPSHOT: '内存快照', TRACE: '方法耗时' }
+      return names[probeType] || probeType
+    },
     resetForm() {
       const isLine = this.initialLineNumber !== null
       
       this.form = {
         injectionType: this.initialInjectionType,
+        probeType: this.initialProbeType,
         codeType: this.initialCodeType,
         logContent: isLine ? `Line ${this.initialLineNumber} check` : `执行方法: ${this.method.name}`,
         condition: '',
@@ -212,10 +239,14 @@ export default {
     insertVar(name) {
       this.form.logContent += ` $${name}`
     },
-    onCodeTypeChange() {
-      const proto = this.expressionProtocols.find(p => p.codeType === this.form.codeType)
-      if (proto && proto.protocol === 'snapshot') {
+    onProbeTypeChange() {
+      if (!this.currentProbeUsesCode) {
         this.form.logContent = ''
+        this.form.codeType = null
+      } else {
+        if (!this.form.codeType) {
+          this.form.codeType = 'EXPRESSION'
+        }
       }
     },
     handleSubmit() {

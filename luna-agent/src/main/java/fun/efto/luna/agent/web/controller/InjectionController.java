@@ -1,4 +1,4 @@
-﻿package fun.efto.luna.agent.web.controller;
+package fun.efto.luna.agent.web.controller;
 
 import fun.efto.luna.core.infra.web.ApiResult;
 import fun.efto.luna.core.infra.web.Controller;
@@ -56,9 +56,10 @@ public class InjectionController {
         for (InjectionPoint point : points) {
             InjectionPointVO vo = new InjectionPointVO();
             vo.setId(point.getId());
+            vo.setProbeType(point.getProbeType());
             vo.setInjectionLocation(point.getInjectionLocation().toString());
             vo.setMethod(point.getTarget().getMethodName());
-            vo.setCode(point.getCode().getCode());
+            vo.setCode(point.getCode().getContent());
             vo.setCodeType(point.getCodeType().toString());
             if (point.getTarget() instanceof LineNumberTarget) {
                 vo.setLineNumber(((LineNumberTarget) point.getTarget()).getLineNumber());

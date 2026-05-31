@@ -155,6 +155,7 @@ export default {
       this.editingRule = rule
       this.form = { 
         ...rule, 
+        probeType: rule.probeType || 'LOG',
         codeType: rule.codeType || 'EXPRESSION',
         enabled: rule.enabled !== false
       }
@@ -168,6 +169,7 @@ export default {
         targetMethod: '',
         injectionType: 'METHOD_ENTER',
         lineNumber: '',
+        probeType: 'LOG',
         codeType: 'EXPRESSION',
         expression: '',
         logContent: '',

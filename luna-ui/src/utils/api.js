@@ -262,3 +262,23 @@ export async function checkPluginUpdate(pluginId) {
     throw error
   }
 }
+
+export async function getProbes() {
+  try {
+    const data = await get(apiUrl('/probes'))
+    return data || []
+  } catch (error) {
+    console.error('获取探针列表失败:', error)
+    return []
+  }
+}
+
+export async function getEngines() {
+  try {
+    const data = await get(apiUrl('/probes/engines'))
+    return data || []
+  } catch (error) {
+    console.error('获取引擎列表失败:', error)
+    return []
+  }
+}

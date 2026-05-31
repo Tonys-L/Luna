@@ -21,8 +21,8 @@
       </div>
     </div>
     <div class="rule-card-footer">
-      <span class="code-type-indicator" :class="rule.codeType">
-        {{ rule.codeType === 'SNAPSHOT' ? '📷 快照' : '📝 日志' }}
+      <span class="code-type-indicator" :class="probeTypeClass">
+        {{ probeTypeDisplay }}
       </span>
       <div class="card-actions">
         <button class="card-action-btn delete" @click.stop="$emit('delete', rule.id)">
@@ -41,6 +41,20 @@ export default {
     active: { type: Boolean, default: false }
   },
   emits: ['select', 'delete'],
+  computed: {
+    probeTypeClass() {
+      const pt = (this.rule.probeType || '').toUpperCase()
+      if (pt === 'SNAPSHOT') return 'SNAPSHOT'
+      if (pt === 'TRACE') return 'TRACE'
+      return 'EXPRESSION'
+    },
+    probeTypeDisplay() {
+      const pt = (this.rule.probeType || '').toUpperCase()
+      if (pt === 'SNAPSHOT') return '📷 快照'
+      if (pt === 'TRACE') return '⏱ 耗时'
+      return '📝 日志'
+    }
+  },
   methods: {
     formatInjectionTypeShort(type) {
       const types = {
@@ -48,7 +62,12 @@ export default {
         'METHOD_EXIT': 'Exit',
         'METHOD_AROUND': 'Around',
         'LINE_BEFORE': 'Line',
-        'LINE_AFTER': 'Line'
+        'LINE_AFTER': 'Line',
+        'method_enter': 'Enter',
+        'method_exit': 'Exit',
+        'method_around': 'Around',
+        'line_before': 'Line',
+        'line_after': 'Line'
       }
       return types[type] || type
     },
@@ -186,6 +205,7 @@ export default {
 
 .code-type-indicator.SNAPSHOT { color: #ec4899; }
 .code-type-indicator.EXPRESSION { color: #10b981; }
+.code-type-indicator.TRACE { color: #f59e0b; }
 
 .card-action-btn.delete {
   color: var(--text-tertiary);

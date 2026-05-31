@@ -5,7 +5,9 @@ import fun.efto.luna.core.plugin.ProbeHandler;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author : Tony.L(286269159@qq.com)
@@ -38,6 +40,10 @@ public final class ProbeHandlerRegistry {
 
     public Collection<ProbeHandler> getAll() {
         return REGISTRY.values();
+    }
+
+    public Set<String> getRegisteredTypes() {
+        return REGISTRY.keySet();
     }
 
     public void clear() {

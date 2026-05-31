@@ -79,35 +79,51 @@
 
             <div class="form-row">
               <div class="form-item">
-                <label>动作类型</label>
+                <label>探针类型</label>
                 <div class="mode-selector">
                   <button 
-                    v-for="proto in expressionProtocols"
-                    :key="proto.protocol"
-                    :class="{ active: selectedProtocol === proto.protocol }"
-                    @click="selectProtocol(proto)"
+                    v-for="handler in probeHandlers"
+                    :key="handler.probeType"
+                    :class="{ active: rule.probeType === handler.probeType }"
+                    @click="selectProbeType(handler)"
                   >
-                    <i class="fas fa-file-code"></i> {{ proto.displayName }}
+                    <i class="fas fa-file-code"></i> {{ getProbeDisplayName(handler.probeType) }}
                   </button>
                 </div>
               </div>
             </div>
 
-            <div class="form-row" v-if="selectedProtocolSyntax">
+            <div class="form-row" v-if="currentProbeUsesCode">
               <div class="form-item">
-                <label>语法提示</label>
-                <div class="syntax-hint">{{ selectedProtocolSyntax }}</div>
+                <label>代码引擎</label>
+                <div class="mode-selector">
+                  <button 
+                    v-for="engine in codeEngines"
+                    :key="engine.codeType"
+                    :class="{ active: rule.codeType === engine.codeType }"
+                    @click="rule.codeType = engine.codeType"
+                  >
+                    {{ engine.codeType }}
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div class="form-row" v-if="selectedProtocol">
+            <div class="form-row" v-if="selectedProbeSyntax">
+              <div class="form-item">
+                <label>语法提示</label>
+                <div class="syntax-hint">{{ selectedProbeSyntax }}</div>
+              </div>
+            </div>
+
+            <div class="form-row">
               <div class="form-item">
                 <label>条件表达式 (可选)</label>
                 <textarea v-model="rule.expression" placeholder="e.g. params[0] != null" class="premium-textarea"></textarea>
               </div>
             </div>
             
-            <div class="form-row" v-if="selectedProtocol">
+            <div class="form-row" v-if="currentProbeUsesCode">
               <div class="form-item">
                 <label>日志模板</label>
                 <textarea v-model="rule.logContent" :placeholder="logContentPlaceholder" class="premium-textarea"></textarea>
@@ -140,8 +156,7 @@ export default {
   emits: ['update:modelValue', 'save', 'cancel'],
   data() {
     return {
-      expressionProtocols: [],
-      selectedProtocol: null
+      selectedProbeType: null
     }
   },
   computed: {
@@ -166,20 +181,30 @@ export default {
       })
       return Object.values(groups)
     },
-    selectedProtocolSyntax() {
-      if (!this.selectedProtocol) return ''
-      const proto = this.expressionProtocols.find(p => p.protocol === this.selectedProtocol)
+    probeHandlers() {
+      return pluginRegistry.probeHandlers
+    },
+    codeEngines() {
+      return pluginRegistry.codeEngines
+    },
+    currentProbeUsesCode() {
+      const handler = this.probeHandlers.find(h => h.probeType === this.selectedProbeType)
+      return handler ? handler.usesCode : true
+    },
+    selectedProbeSyntax() {
+      if (!this.selectedProbeType) return ''
+      const proto = pluginRegistry.expressionProtocols.find(p => p.probeType === this.selectedProbeType)
       return proto ? proto.syntax : ''
     },
     logContentPlaceholder() {
-      if (!this.selectedProtocol) return ''
-      return this.selectedProtocol + ':<expression>'
+      if (!this.selectedProbeType) return ''
+      return this.selectedProbeType.toLowerCase() + ':<expression>'
     }
   },
   mounted() {
-    this.expressionProtocols = pluginRegistry.expressionProtocols
-    if (this.expressionProtocols.length > 0 && !this.selectedProtocol) {
-      this.selectedProtocol = this.expressionProtocols[0].protocol
+    const handlers = pluginRegistry.probeHandlers
+    if (handlers.length > 0 && !this.selectedProbeType) {
+      this.selectedProbeType = handlers[0].probeType
     }
   },
   methods: {
@@ -187,13 +212,18 @@ export default {
       const labels = { method: '方法注入', line: '行号注入', field: '字段注入', other: '其他' }
       return labels[cat] || cat
     },
-    selectProtocol(proto) {
-      this.selectedProtocol = proto.protocol
+    getProbeDisplayName(probeType) {
+      const names = { LOG: '日志表达式', SNAPSHOT: '内存快照', TRACE: '方法耗时' }
+      return names[probeType] || probeType
+    },
+    selectProbeType(handler) {
+      this.selectedProbeType = handler.probeType
       if (this.rule) {
-        if (proto.protocol === 'snapshot') {
-          this.rule.codeType = 'SNAPSHOT'
-        } else {
+        this.rule.probeType = handler.probeType
+        if (handler.usesCode) {
           this.rule.codeType = 'EXPRESSION'
+        } else {
+          this.rule.codeType = null
         }
       }
     }

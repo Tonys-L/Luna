@@ -114,6 +114,8 @@ public class RuleTemplate {
      */
     public static class TemplateRule {
         private String injectionType;
+        private String probeType;
+        private String injectionLocation;
         private String codeType;
         private String code;
         private String condition;
@@ -121,6 +123,10 @@ public class RuleTemplate {
 
         public String getInjectionType() { return injectionType; }
         public void setInjectionType(String injectionType) { this.injectionType = injectionType; }
+        public String getProbeType() { return probeType; }
+        public void setProbeType(String probeType) { this.probeType = probeType; }
+        public String getInjectionLocation() { return injectionLocation; }
+        public void setInjectionLocation(String injectionLocation) { this.injectionLocation = injectionLocation; }
         public String getCodeType() { return codeType; }
         public void setCodeType(String codeType) { this.codeType = codeType; }
         public String getCode() { return code; }

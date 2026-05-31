@@ -13,6 +13,8 @@ public class PersistentInjection {
     private String methodName;
     private String methodDescriptor;
     private String injectionType;
+    private String probeType;
+    private String injectionLocation;
     private String codeType;
     private String code;
     private Integer lineNumber;
@@ -42,6 +44,12 @@ public class PersistentInjection {
 
     public String getInjectionType() { return injectionType; }
     public void setInjectionType(String injectionType) { this.injectionType = injectionType; }
+
+    public String getProbeType() { return probeType; }
+    public void setProbeType(String probeType) { this.probeType = probeType; }
+
+    public String getInjectionLocation() { return injectionLocation; }
+    public void setInjectionLocation(String injectionLocation) { this.injectionLocation = injectionLocation; }
 
     public String getCodeType() { return codeType; }
     public void setCodeType(String codeType) { this.codeType = codeType; }

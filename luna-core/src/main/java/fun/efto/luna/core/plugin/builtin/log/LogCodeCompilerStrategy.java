@@ -14,7 +14,9 @@ public class LogCodeCompilerStrategy implements CodeCompilerStrategy {
 
     @Override
     public boolean supports(String codeType, String code) {
-        return "EXPRESSION".equalsIgnoreCase(codeType) || (code != null && code.startsWith("log:"));
+        return "LOG".equalsIgnoreCase(codeType)
+            || "EXPRESSION".equalsIgnoreCase(codeType)
+            || (code != null && code.startsWith("log:"));
     }
 
     @Override

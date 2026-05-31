@@ -8,6 +8,8 @@ package fun.efto.luna.agent.web.vo;
 public class InjectionPointVO {
     private String id;
     private String type;
+    private String probeType;
+    private String injectionLocation;
     private String method;
     private String code;
     private String codeType;
@@ -28,6 +30,10 @@ public class InjectionPointVO {
     public void setId(String id) { this.id = id; }
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
+    public String getProbeType() { return probeType; }
+    public void setProbeType(String probeType) { this.probeType = probeType; }
+    public String getInjectionLocation() { return injectionLocation; }
+    public void setInjectionLocation(String injectionLocation) { this.injectionLocation = injectionLocation; }
     public String getMethod() { return method; }
     public void setMethod(String method) { this.method = method; }
     public String getCode() { return code; }

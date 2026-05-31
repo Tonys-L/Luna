@@ -8,6 +8,8 @@ public class InjectionCommand {
     private String clazz;
     private String method;
     private String injectionType;
+    private String probeType;
+    private String injectionLocation;
     private String desc;
     private String codeType;
     private String code;
@@ -35,6 +37,22 @@ public class InjectionCommand {
 
     public void setInjectionType(String injectionType) {
         this.injectionType = injectionType;
+    }
+
+    public String getProbeType() {
+        return probeType;
+    }
+
+    public void setProbeType(String probeType) {
+        this.probeType = probeType;
+    }
+
+    public String getInjectionLocation() {
+        return injectionLocation;
+    }
+
+    public void setInjectionLocation(String injectionLocation) {
+        this.injectionLocation = injectionLocation;
     }
 
     public String getDesc() {

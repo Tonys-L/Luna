@@ -180,11 +180,14 @@ export default {
           logObj = { type: 'TRACE', text: parsed.payload || message, timestamp: parsed.timestamp }
         } else if (msgType === 'LOG') {
           logObj = { type: 'LOG', text: parsed.payload || message, timestamp: parsed.timestamp }
+          console.log('[Luna] LOG parsed:', JSON.stringify({text: logObj.text, type: typeof parsed.payload}))
         } else if (msgType === 'CALL_CHAIN') {
           logObj = { type: 'CALL_CHAIN', text: parsed.payload || message, timestamp: parsed.timestamp }
         } else {
           logObj = { type: msgType, text: parsed.payload || message, timestamp: parsed.timestamp }
         }
+      } else {
+        console.warn('[Luna] No parsed.type, raw type:', typeof message, 'value:', message.substring(0, 80))
       }
 
       this.logs.push(logObj)

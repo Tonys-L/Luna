@@ -11,6 +11,8 @@ public class InjectionRule {
     private String targetMethod;
     private String methodDescriptor;
     private String injectionType;
+    private String probeType;
+    private String injectionLocation;
     private int lineNumber;
     private String expression;
     private String logContent;
@@ -66,6 +68,22 @@ public class InjectionRule {
 
     public void setInjectionType(String injectionType) {
         this.injectionType = injectionType;
+    }
+
+    public String getProbeType() {
+        return probeType;
+    }
+
+    public void setProbeType(String probeType) {
+        this.probeType = probeType;
+    }
+
+    public String getInjectionLocation() {
+        return injectionLocation;
+    }
+
+    public void setInjectionLocation(String injectionLocation) {
+        this.injectionLocation = injectionLocation;
     }
 
     public int getLineNumber() {

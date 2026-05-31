@@ -34,16 +34,24 @@
       >
         <template v-if="log.type === 'SNAPSHOT'">
           <span class="log-tag tag-debug">DEBUG</span>
+          <span v-if="log.data && log.data.timestamp" class="log-time">{{ formatTime(log.data.timestamp) }}</span>
           <span class="log-content snapshot-link" @click="openDebugger(log.data)">
             <i class="fas fa-bug"></i> 触发虚拟断点快照: {{ log.data.pointId }} (点击查看详情)
           </span>
         </template>
+        <template v-else-if="log.type === 'LOG'">
+          <span class="log-tag tag-log">LOG</span>
+          <span v-if="log.timestamp" class="log-time">{{ formatTime(log.timestamp) }}</span>
+          <span class="log-content log-text">{{ log.text }}</span>
+        </template>
         <template v-else-if="log.type === 'TRACE'">
           <span class="log-tag tag-trace">TRACE</span>
+          <span v-if="log.timestamp" class="log-time">{{ formatTime(log.timestamp) }}</span>
           <span class="log-content trace-content">{{ log.text }}</span>
         </template>
         <template v-else-if="log.type === 'CALL_CHAIN'">
           <span class="log-tag tag-chain">CHAIN</span>
+          <span v-if="log.timestamp" class="log-time">{{ formatTime(log.timestamp) }}</span>
           <span class="log-content call-chain-content">{{ log.text }}</span>
         </template>
         <template v-else>
@@ -190,6 +198,15 @@ export default {
     openDebugger(snapshot) {
       this.currentSnapshot = snapshot
       this.debuggerVisible = true
+    },
+    formatTime(timestamp) {
+      if (!timestamp) return ''
+      const d = new Date(timestamp)
+      const h = String(d.getHours()).padStart(2, '0')
+      const m = String(d.getMinutes()).padStart(2, '0')
+      const s = String(d.getSeconds()).padStart(2, '0')
+      const ms = String(d.getMilliseconds()).padStart(3, '0')
+      return `${h}:${m}:${s}.${ms}`
     },
     clearLogs() {
       this.logs = []
@@ -357,6 +374,23 @@ export default {
   background: linear-gradient(135deg, #f14c4c 0%, #b91c1c 100%);
   color: white;
   box-shadow: 0 0 8px rgba(241, 76, 76, 0.3);
+}
+
+.tag-log {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+.log-time {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.log-text {
+  color: var(--text-primary);
 }
 
 .snapshot-line {

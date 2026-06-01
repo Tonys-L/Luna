@@ -60,8 +60,8 @@
                   <div 
                     v-for="type in injectionTypes" 
                     :key="type.value"
-                    :class="['type-option', { active: rule.injectionType === type.value }]"
-                    @click="rule.injectionType = type.value"
+                    :class="['type-option', { active: rule.injectionLocation === type.value }]"
+                    @click="rule.injectionLocation = type.value"
                   >
                     <i :class="type.icon"></i>
                     <span>{{ type.label }}</span>
@@ -70,7 +70,7 @@
               </div>
             </div>
             
-            <div class="form-row" v-if="rule.injectionType?.startsWith('LINE_')">
+            <div class="form-row" v-if="rule.injectionLocation?.startsWith('LINE_')">
               <div class="form-item">
                 <label>行号</label>
                 <input type="number" v-model="rule.lineNumber" class="premium-input" />

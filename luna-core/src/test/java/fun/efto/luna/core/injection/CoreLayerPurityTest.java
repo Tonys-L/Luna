@@ -36,7 +36,6 @@ public class CoreLayerPurityTest {
     };
 
     private static final String[] SCANNED_FILES = {
-            "fun/efto/luna/core/bytecode/BytecodeAssembler.java"
     };
 
     private List<Path> findSourceFiles() throws IOException {

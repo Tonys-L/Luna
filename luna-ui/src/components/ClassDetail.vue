@@ -393,7 +393,7 @@ export default {
           clazz: this.classInfo.className,
           method: this.currentMethod.name,
           desc: this.currentMethod.descriptor,
-          injectionLocation: formData.injectionType,
+          injectionLocation: formData.injectionLocation,
           probeType: formData.probeType || 'LOG',
           codeType: formData.codeType,
           code: formData.logContent || '',
@@ -447,7 +447,7 @@ export default {
         .filter(m => m.editorLine)
         .map(m => {
           let glyphClass = 'injected-glyph-default'
-          const type = (m.injectionType || m.type || '').toUpperCase()
+          const type = (m.injectionLocation || m.type || '').toUpperCase()
           const codeType = (m.codeType || '').toUpperCase()
           
           if (codeType === 'SNAPSHOT') {

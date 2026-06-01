@@ -5,8 +5,8 @@
   >
     <div class="rule-card-header">
       <span class="rule-id">#{{ String(rule.id || '').slice(0, 4) }}</span>
-      <div :class="['rule-type-tag', (rule.injectionType || '').toLowerCase()]">
-        {{ formatInjectionTypeShort(rule.injectionType) }}
+      <div :class="['rule-type-tag', (rule.injectionLocation || '').toLowerCase()]">
+        {{ formatInjectionTypeShort(rule.injectionLocation) }}
       </div>
       <div class="status-dot" :class="{ active: rule.enabled }"></div>
     </div>

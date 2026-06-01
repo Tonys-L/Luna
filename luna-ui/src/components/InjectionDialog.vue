@@ -25,7 +25,7 @@
         <!-- 注入位置 -->
         <div class="form-group">
           <label class="form-label">注入位置</label>
-          <select v-model="form.injectionType" class="form-select">
+          <select v-model="form.injectionLocation" class="form-select">
             <optgroup v-for="group in groupedInjectionTypes" :key="group.category" :label="group.label">
               <option v-for="t in group.types" :key="t.name" :value="t.name">{{ t.displayName }}</option>
             </optgroup>
@@ -139,7 +139,7 @@ export default {
   data() {
     return {
       form: {
-        injectionType: 'ENTER_METHOD',
+        injectionLocation: 'ENTER_METHOD',
         probeType: 'LOG',
         codeType: 'EXPRESSION',
         logContent: '',
@@ -152,7 +152,7 @@ export default {
   },
   computed: {
     isLineInjection() {
-      return this.form.injectionType.startsWith('LINE_')
+      return this.form.injectionLocation.startsWith('LINE_')
     },
     probeHandlers() {
       return pluginRegistry.probeHandlers
@@ -206,7 +206,7 @@ export default {
       const isLine = this.initialLineNumber !== null
       
       this.form = {
-        injectionType: this.initialInjectionType,
+        injectionLocation: this.initialInjectionType,
         probeType: this.initialProbeType,
         codeType: this.initialCodeType,
         logContent: isLine ? `Line ${this.initialLineNumber} check` : `执行方法: ${this.method.name}`,

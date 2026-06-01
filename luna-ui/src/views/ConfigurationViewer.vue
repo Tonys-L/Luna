@@ -167,7 +167,7 @@ export default {
         id: '',
         targetClass: '',
         targetMethod: '',
-        injectionType: 'METHOD_ENTER',
+        injectionLocation: 'METHOD_ENTER',
         lineNumber: '',
         probeType: 'LOG',
         codeType: 'EXPRESSION',

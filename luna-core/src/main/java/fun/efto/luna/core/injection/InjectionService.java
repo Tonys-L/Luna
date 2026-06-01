@@ -4,34 +4,48 @@ import fun.efto.luna.core.injection.port.BytecodeLoader;
 import fun.efto.luna.core.injection.port.BytecodePreviewer;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.port.LocalVarValidator;
+import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.plugin.ProbeHandler;
 import fun.efto.luna.core.plugin.ValidationResult;
 import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
 import fun.efto.luna.core.transformer.ClassTransformer;
 import fun.efto.luna.core.transformer.DefaultClassTransformer;
 import fun.efto.luna.core.transformer.TransformerResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/27 20:00
  */
-public class InjectionService implements InjectionQuery {
+public class InjectionService implements InjectionQuery, InjectionLifecycle {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(InjectionService.class);
 
-    private final InjectionManager injectionManager;
+    private final InjectionRepository injectionRepository;
+    private final InjectionRegistry injectionRegistry;
+    private final Retransformer retransformer;
     private final BytecodeLoader bytecodeLoader;
     private final BytecodePreviewer bytecodePreviewer;
     private final LocalVarValidator localVarValidator;
     private final InjectionVerifier injectionVerifier;
     private final ClassTransformer classTransformer = new DefaultClassTransformer();
 
-    public InjectionService(InjectionManager injectionManager,
+    public InjectionService(InjectionRepository injectionRepository,
+                            InjectionRegistry injectionRegistry,
+                            Retransformer retransformer,
                             BytecodeLoader bytecodeLoader,
                             BytecodePreviewer bytecodePreviewer,
                             LocalVarValidator localVarValidator,
                             InjectionVerifier injectionVerifier) {
-        this.injectionManager = injectionManager;
+        this.injectionRepository = injectionRepository;
+        this.injectionRegistry = injectionRegistry;
+        this.retransformer = retransformer;
         this.bytecodeLoader = bytecodeLoader;
         this.bytecodePreviewer = bytecodePreviewer;
         this.localVarValidator = localVarValidator;
@@ -60,9 +74,10 @@ public class InjectionService implements InjectionQuery {
 
         try {
             PersistentInjection pi = toPersistentInjection(cmd);
-            String id = injectionManager.addInjection(pi);
+            String id = addInjection(pi);
             return InjectResult.success(id);
         } catch (Throwable t) {
+            LOGGER.error("Inject failed", t);
             return InjectResult.failure("注入失败: " + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
         }
     }
@@ -95,8 +110,9 @@ public class InjectionService implements InjectionQuery {
         String injectionId;
         try {
             PersistentInjection pi = toPersistentInjection(cmd);
-            injectionId = injectionManager.addInjection(pi);
+            injectionId = addInjection(pi);
         } catch (Exception e) {
+            LOGGER.error("Inject with test failed", e);
             return InjectTestResult.failure("inject", e.getMessage());
         }
 
@@ -148,25 +164,131 @@ public class InjectionService implements InjectionQuery {
 
     @Override
     public List<InjectionPoint> getActivePointsForClass(String className) {
-        return injectionManager.getActivePointsForClass(className);
+        return injectionRegistry.getActivePointsForClass(className);
     }
 
     @Override
     public int getInjectionCount(String className) {
-        return injectionManager.getInjectionCount(className);
+        return injectionRegistry.getInjectionCount(className);
     }
 
     @Override
     public List<InjectionPoint> getInjectionPoints(String className) {
-        return injectionManager.getInjectionPoints(className);
+        return injectionRegistry.getInjectionPoints(className);
     }
 
     public PersistentInjection getInjection(String id) {
-        return injectionManager.getInjection(id);
+        return injectionRepository.findById(id);
     }
 
+    @Override
+    public String addInjection(PersistentInjection injection) {
+        if (injection.getId() == null) {
+            injection.setId(UUID.randomUUID().toString());
+        }
+        injectionRepository.save(injection);
+        
+        try {
+            InjectionPoint point = InjectionPointFactory.create(injection);
+            injectionRegistry.register(point);
+            triggerRetransform(injection.getClazz());
+        } catch (Exception e) {
+            LOGGER.error("Failed to register injection point: {}", injection.getId(), e);
+        }
+        
+        return injection.getId();
+    }
+
+    @Override
     public void removeInjection(String id) {
-        injectionManager.removeInjection(id);
+        PersistentInjection injection = injectionRepository.findById(id);
+        if (injection != null) {
+            injectionRepository.delete(id);
+            injectionRegistry.unregister(id);
+            triggerRetransform(injection.getClazz());
+        }
+    }
+
+    @Override
+    public void updateInjection(String id, PersistentInjection injection) {
+        injection.setId(id);
+        injectionRepository.save(injection);
+        
+        injectionRegistry.unregister(id);
+        try {
+            InjectionPoint point = InjectionPointFactory.create(injection);
+            injectionRegistry.register(point);
+            triggerRetransform(injection.getClazz());
+        } catch (Exception e) {
+            LOGGER.error("Failed to update injection point: {}", id, e);
+        }
+    }
+
+    @Override
+    public void toggleEnabled(String id, boolean enabled) {
+        PersistentInjection injection = injectionRepository.findById(id);
+        if (injection != null) {
+            injection.setEnabled(enabled);
+            injectionRepository.save(injection);
+            
+            if (enabled) {
+                try {
+                    InjectionPoint point = InjectionPointFactory.create(injection);
+                    injectionRegistry.register(point);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to create injection point on enable: {}", id, e);
+                }
+            } else {
+                injectionRegistry.unregister(id);
+            }
+            triggerRetransform(injection.getClazz());
+        }
+    }
+
+    public List<String> suspendInjectionsByLocation(Set<String> locationNames, String reason) {
+        List<String> suspendedIds = new ArrayList<>();
+        for (PersistentInjection injection : injectionRepository.findAll()) {
+            if (injection.getStatus() == InjectionStatus.ACTIVE && locationNames.contains(injection.getInjectionLocation())) {
+                injection.setStatus(InjectionStatus.SUSPENDED);
+                injection.setSuspendReason(reason);
+                injectionRepository.save(injection);
+                injectionRegistry.unregister(injection.getId());
+                triggerRetransform(injection.getClazz());
+                suspendedIds.add(injection.getId());
+            }
+        }
+        return suspendedIds;
+    }
+
+    public void resumeInjectionsByLocation(Set<String> locationNames) {
+        for (PersistentInjection injection : injectionRepository.findAll()) {
+            if (injection.getStatus() == InjectionStatus.SUSPENDED && locationNames.contains(injection.getInjectionLocation())) {
+                injection.setStatus(InjectionStatus.ACTIVE);
+                injection.setSuspendReason(null);
+                injectionRepository.save(injection);
+                try {
+                    InjectionPoint point = InjectionPointFactory.create(injection);
+                    injectionRegistry.register(point);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to re-register injection point on resume: {}", injection.getId(), e);
+                }
+                triggerRetransform(injection.getClazz());
+            }
+        }
+    }
+
+    private void triggerRetransform(String className) {
+        if (retransformer != null) {
+            try {
+                if (className.contains("*")) {
+                    retransformer.retransformByPattern(className);
+                } else {
+                    retransformer.retransform(className);
+                }
+            } catch (Exception e) {
+                LOGGER.error("Retransform failed for class: {}", className, e);
+            }
+        }
     }
 
     private String validateLocalVarReferences(InjectRequest cmd) {

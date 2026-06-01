@@ -16,10 +16,10 @@ import java.util.List;
 public class GlobalClassFileTransformer implements ClassFileTransformer {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalClassFileTransformer.class);
     private final ClassTransformer classTransformer = new DefaultClassTransformer();
-    private final InjectionQuery injectionQuery;
+    private final InjectionRegistry injectionRegistry;
 
-    public GlobalClassFileTransformer(InjectionQuery injectionQuery) {
-        this.injectionQuery = injectionQuery;
+    public GlobalClassFileTransformer(InjectionRegistry injectionRegistry) {
+        this.injectionRegistry = injectionRegistry;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class GlobalClassFileTransformer implements ClassFileTransformer {
 
         String normalizedClassName = className.replace('/', '.');
 
-        List<InjectionPoint> points = injectionQuery.getActivePointsForClass(normalizedClassName);
+        List<InjectionPoint> points = injectionRegistry.getActivePointsForClass(normalizedClassName);
         if (points.isEmpty()) {
             return null;
         }

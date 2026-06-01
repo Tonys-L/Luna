@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import fun.efto.luna.core.injection.InjectionManager;
+import fun.efto.luna.core.injection.InjectionLifecycle;
 import fun.efto.luna.core.injection.PersistentInjection;
 
 /**
@@ -22,6 +22,7 @@ public class RuleManager {
     private final RulePersistenceService persistenceService;
     private final ScheduledExecutorService saveScheduler;
     private volatile boolean dirty = false;
+    private volatile InjectionLifecycle injectionLifecycle;
 
     private RuleManager() {
         persistenceService = new RulePersistenceService();
@@ -48,6 +49,10 @@ public class RuleManager {
         return INSTANCE;
     }
 
+    public void setInjectionLifecycle(InjectionLifecycle injectionLifecycle) {
+        this.injectionLifecycle = injectionLifecycle;
+    }
+
     public List<InjectionRule> getRules() {
         return new ArrayList<>(rules.values());
     }
@@ -62,7 +67,9 @@ public class RuleManager {
         rules.put(id, rule);
         saveRules();
         if (rule.getTargetClass() != null && !rule.getTargetClass().isEmpty()) {
-            InjectionManager.getInstance().addInjection(toPersistentInjection(rule));
+            if (injectionLifecycle != null) {
+                injectionLifecycle.addInjection(toPersistentInjection(rule));
+            }
         }
         return id;
     }
@@ -72,7 +79,9 @@ public class RuleManager {
             rule.setId(id);
             rules.put(id, rule);
             saveRules();
-            InjectionManager.getInstance().updateInjection("rule-" + id, toPersistentInjection(rule));
+            if (injectionLifecycle != null) {
+                injectionLifecycle.updateInjection("rule-" + id, toPersistentInjection(rule));
+            }
         }
     }
 
@@ -80,7 +89,9 @@ public class RuleManager {
         InjectionRule rule = rules.remove(id);
         if (rule != null) {
             saveRules();
-            InjectionManager.getInstance().removeInjection("rule-" + id);
+            if (injectionLifecycle != null) {
+                injectionLifecycle.removeInjection("rule-" + id);
+            }
         }
     }
 
@@ -118,10 +129,11 @@ public class RuleManager {
         // 此方法通常用于初次加载，retransform 会走 Transformer 路径
     }
 
-    public void syncRulesToInjectionManager() {
+    public void syncRules() {
+        if (injectionLifecycle == null) return;
         for (InjectionRule rule : rules.values()) {
             if (rule.isEnabled() && rule.getTargetClass() != null && !rule.getTargetClass().isEmpty()) {
-                InjectionManager.getInstance().addInjection(toPersistentInjection(rule));
+                injectionLifecycle.addInjection(toPersistentInjection(rule));
             }
         }
     }

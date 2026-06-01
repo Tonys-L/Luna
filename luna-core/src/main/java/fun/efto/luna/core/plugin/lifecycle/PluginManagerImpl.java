@@ -44,6 +44,7 @@ public class PluginManagerImpl implements PluginManager {
     private final ClassAnalyzer classAnalyzer;
     private final Decompiler decompiler;
     private final WebServer webServer;
+    private volatile RuleSuspensionManager ruleSuspensionManager;
 
     public PluginManagerImpl(ReadyGate readyGate, LogEmitter logEmitter,
                               RingBuffer<ProbeMessage> logBuffer, Retransformer retransformer,
@@ -62,6 +63,10 @@ public class PluginManagerImpl implements PluginManager {
         this.classAnalyzer = classAnalyzer;
         this.decompiler = decompiler;
         this.webServer = webServer;
+    }
+
+    public void setRuleSuspensionManager(RuleSuspensionManager ruleSuspensionManager) {
+        this.ruleSuspensionManager = ruleSuspensionManager;
     }
 
     public void initializeAll(List<LunaPlugin> discoveredPlugins) {
@@ -187,7 +192,9 @@ public class PluginManagerImpl implements PluginManager {
             for (InjectionLocation location : record.getInjectionLocations()) {
                 restoredLocationNames.add(location.getName());
             }
-            RuleSuspensionManager.resumeSuspendedRules(id, restoredLocationNames);
+            if (ruleSuspensionManager != null) {
+                ruleSuspensionManager.resumeSuspendedRules(id, restoredLocationNames);
+            }
         } catch (Exception e) {
             states.put(id, PluginState.UNLOADED);
             records.remove(id);
@@ -218,7 +225,9 @@ public class PluginManagerImpl implements PluginManager {
         }
 
         PluginRegistrationRecord record = records.get(pluginId);
-        List<String> suspendedRuleIds = RuleSuspensionManager.suspendOrphanedRules(record);
+        List<String> suspendedRuleIds = ruleSuspensionManager != null
+            ? ruleSuspensionManager.suspendOrphanedRules(record)
+            : Collections.emptyList();
 
         PluginClassLoader cl;
         long stamp = transformLock.writeLock();
@@ -323,7 +332,9 @@ public class PluginManagerImpl implements PluginManager {
         String newVersion = newPlugin.getVersion();
 
         PluginRegistrationRecord oldRecord = records.get(pluginId);
-        List<String> suspendedRuleIds = RuleSuspensionManager.suspendOrphanedRules(oldRecord);
+        List<String> suspendedRuleIds = ruleSuspensionManager != null
+            ? ruleSuspensionManager.suspendOrphanedRules(oldRecord)
+            : Collections.emptyList();
 
         PluginClassLoader newPluginCl = new PluginClassLoader(pluginId, new URL[]{jarUrl}, getClass().getClassLoader());
 
@@ -404,7 +415,9 @@ public class PluginManagerImpl implements PluginManager {
         }
 
         PluginRegistrationRecord record = records.get(pluginId);
-        RuleSuspensionManager.suspendOrphanedRules(record);
+        if (ruleSuspensionManager != null) {
+            ruleSuspensionManager.suspendOrphanedRules(record);
+        }
 
         states.put(pluginId, PluginState.DISABLED);
 
@@ -428,7 +441,9 @@ public class PluginManagerImpl implements PluginManager {
         Set<String> restoredLocationNames = record.getInjectionLocations().stream()
             .map(InjectionLocation::getName)
             .collect(Collectors.toSet());
-        RuleSuspensionManager.resumeSuspendedRules(pluginId, restoredLocationNames);
+        if (ruleSuspensionManager != null) {
+            ruleSuspensionManager.resumeSuspendedRules(pluginId, restoredLocationNames);
+        }
 
         states.put(pluginId, PluginState.ACTIVE);
 

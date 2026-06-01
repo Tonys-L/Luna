@@ -1,15 +1,19 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.infra.RingBuffer;
+import fun.efto.luna.core.injection.DefaultInjectionRegistry;
+import fun.efto.luna.core.injection.DefaultInjectionRepository;
+import fun.efto.luna.core.injection.InjectionService;
 import fun.efto.luna.core.injection.PersistentInjection;
-import fun.efto.luna.core.injection.InjectionManager;
 import fun.efto.luna.core.injection.InjectionStatus;
+import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.lifecycle.AffectedClassTracker;
 import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
 import fun.efto.luna.core.plugin.lifecycle.PluginRegistrationRecord;
 import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
+import fun.efto.luna.core.plugin.lifecycle.RuleSuspensionManager;
 import fun.efto.luna.core.plugin.DefaultLogEmitter;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.probe.ProbeOutput;
@@ -38,6 +42,7 @@ public class PluginIntegrationTest {
 
     private PluginManagerImpl pluginManager;
     private ReadyGate readyGate;
+    private InjectionService injectionService;
 
     @BeforeEach
     void setUp() {
@@ -50,6 +55,32 @@ public class PluginIntegrationTest {
             null,
             null
         );
+
+        DefaultInjectionRegistry registry = new DefaultInjectionRegistry();
+        DefaultInjectionRepository repository = new DefaultInjectionRepository();
+        InjectionVerifier injectionVerifier = new InjectionVerifier() {
+            @Override
+            public VerifyResult testInjection(String className, String methodName, String descriptor,
+                                               String injectionLocation, String code) {
+                return new VerifyResult(false, null, "test mock");
+            }
+            @Override
+            public VerifyResult verifyOnly(String className, String methodName) {
+                return new VerifyResult(false, null, "test mock");
+            }
+        };
+        injectionService = new InjectionService(
+            repository, registry,
+            (Retransformer) className -> {},
+            className -> null,
+            (injectionId, className, originalBytes) -> {
+                throw new UnsupportedOperationException("preview not supported in test");
+            },
+            (code, className, methodName, methodDesc, lineNumber, classBytes) -> null,
+            injectionVerifier
+        );
+        pluginManager.setRuleSuspensionManager(new RuleSuspensionManager(injectionService));
+
         AffectedClassTracker.clear();
     }
 
@@ -185,7 +216,7 @@ public class PluginIntegrationTest {
             injection.setMethodName("someMethod");
             injection.setInjectionLocation("custom-type");
             injection.setStatus(InjectionStatus.ACTIVE);
-            InjectionManager.getInstance().addInjection(injection);
+            injectionService.addInjection(injection);
 
             PluginUnloadResult result = pluginManager.unload("type-provider");
             assertTrue(result.isSuccess());
@@ -215,7 +246,7 @@ public class PluginIntegrationTest {
             injection.setMethodName("resumeMethod");
             injection.setInjectionLocation("resume-type");
             injection.setStatus(InjectionStatus.ACTIVE);
-            InjectionManager.getInstance().addInjection(injection);
+            injectionService.addInjection(injection);
 
             pluginManager.unload("reload-provider");
             assertEquals(InjectionStatus.SUSPENDED, injection.getStatus());

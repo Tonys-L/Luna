@@ -7,11 +7,12 @@ import fun.efto.luna.agent.web.JettyConfiguration;
 import fun.efto.luna.agent.web.JettyWebServer;
 import fun.efto.luna.core.infra.InstrumentationHolder;
 import fun.efto.luna.core.bootstrap.init.InitializerManager;
-import fun.efto.luna.core.injection.InjectionManager;
-import fun.efto.luna.core.injection.InjectionPointRegistry;
+import fun.efto.luna.core.injection.DefaultInjectionRegistry;
+import fun.efto.luna.core.injection.DefaultInjectionRepository;
+import fun.efto.luna.core.injection.InjectionRegistry;
+import fun.efto.luna.core.injection.InjectionRepository;
 import fun.efto.luna.core.injection.InjectionService;
 import fun.efto.luna.core.injection.port.BytecodeLoader;
-import fun.efto.luna.core.injection.port.InjectionStore;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.port.LocalVarValidator;
 import fun.efto.luna.core.injection.port.Retransformer;
@@ -24,6 +25,7 @@ import fun.efto.luna.core.plugin.DefaultLogEmitter;
 import fun.efto.luna.core.plugin.LunaPlugin;
 import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
 import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
+import fun.efto.luna.core.plugin.lifecycle.RuleSuspensionManager;
 import fun.efto.luna.core.injection.rule.RuleManager;
 import fun.efto.luna.core.injection.rule.template.TemplateRegistry;
 import fun.efto.luna.core.injection.rule.template.TemplateService;
@@ -94,12 +96,21 @@ public class Agent {
             ClassScanner classScanner = ClassScanner.getInstance(inst, createExcludeClassFilter());
             ClassResourceHelper classResourceHelper = new ClassResourceHelper(inst);
 
-            InjectionService injectionService = assembleInjectionService(classResourceHelper, inst);
+            DefaultInjectionRegistry injectionRegistry = new DefaultInjectionRegistry();
+            DefaultInjectionRepository injectionRepository = new DefaultInjectionRepository();
 
-            inst.addTransformer(new GlobalClassFileTransformer(InjectionManager.getInstance()), true);
+            InjectionService injectionService = assembleInjectionService(
+                    classResourceHelper, inst, injectionRegistry, injectionRepository);
+
+            inst.addTransformer(new GlobalClassFileTransformer(injectionRegistry), true);
 
             RuleManager ruleManager = RuleManager.getInstance();
-            ruleManager.syncRulesToInjectionManager();
+            ruleManager.setInjectionLifecycle(injectionService);
+            ruleManager.syncRules();
+
+            if (pluginManager != null) {
+                pluginManager.setRuleSuspensionManager(new RuleSuspensionManager(injectionService));
+            }
 
             TemplateService templateService = new TemplateService(
                     TemplateRegistry.getInstance(), ruleManager);
@@ -112,7 +123,7 @@ public class Agent {
             jettyWebServer.start();
             logger.info("Luna agent started successfully, web server on port 8421");
 
-            applyActiveInjectionsToLoadedClasses(inst);
+            applyActiveInjectionsToLoadedClasses(inst, injectionService);
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
@@ -133,10 +144,9 @@ public class Agent {
     }
 
     private static InjectionService assembleInjectionService(ClassResourceHelper classResourceHelper,
-                                                              Instrumentation inst) {
-        InjectionManager injectionManager = InjectionManager.getInstance();
-
-        // Retransformer 适配器
+                                                              Instrumentation inst,
+                                                              InjectionRegistry injectionRegistry,
+                                                              InjectionRepository injectionRepository) {
         Retransformer retransformer = new Retransformer() {
             @Override
             public void retransform(String className) {
@@ -181,14 +191,6 @@ public class Agent {
             }
         };
 
-        // InjectionStore 适配器
-        InjectionStore injectionStore = InjectionPointRegistry.getInstance().asInjectionStore();
-
-        // 注册端口到 InjectionManager
-        injectionManager.setRetransformer(retransformer);
-        injectionManager.setInjectionStore(injectionStore);
-
-        // BytecodeLoader 适配器
         BytecodeLoader bytecodeLoader = className -> classResourceHelper.loadClassBytes(className);
 
         // LocalVarValidator 适配器
@@ -222,11 +224,11 @@ public class Agent {
                             "Use InjectionService.preview() which directly uses ClassTransformer");
                 };
 
-        return new InjectionService(injectionManager, bytecodeLoader, bytecodePreviewer,
-                localVarValidator, injectionVerifier);
+        return new InjectionService(injectionRepository, injectionRegistry, retransformer,
+                bytecodeLoader, bytecodePreviewer, localVarValidator, injectionVerifier);
     }
 
-    private static void applyActiveInjectionsToLoadedClasses(Instrumentation inst) {
+    private static void applyActiveInjectionsToLoadedClasses(Instrumentation inst, InjectionService injectionService) {
         logger.info("Scanning already loaded classes for active injections...");
         Class<?>[] allLoadedClasses = inst.getAllLoadedClasses();
         List<Class<?>> targets = new ArrayList<>();
@@ -237,7 +239,7 @@ public class Agent {
                 continue;
             }
 
-            if (!InjectionManager.getInstance().getActivePointsForClass(className).isEmpty()) {
+            if (!injectionService.getActivePointsForClass(className).isEmpty()) {
                 if (inst.isModifiableClass(clazz)) {
                     targets.add(clazz);
                 }

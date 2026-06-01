@@ -71,7 +71,7 @@ public class InjectRequest {
     }
 
     public boolean isValid() {
-        return clazz != null && method != null && injectionLocation != null && codeType != null && code != null;
+        return clazz != null && method != null && injectionLocation != null;
     }
 
     public Integer getLineNumber() {

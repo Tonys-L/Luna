@@ -38,6 +38,10 @@ public final class ProbeHandlerRegistry {
         handlers.forEach(h -> REGISTRY.remove(h.getProbeType().toUpperCase()));
     }
 
+    public void unregister(ProbeHandler handler) {
+        REGISTRY.remove(handler.getProbeType().toUpperCase());
+    }
+
     public Collection<ProbeHandler> getAll() {
         return REGISTRY.values();
     }

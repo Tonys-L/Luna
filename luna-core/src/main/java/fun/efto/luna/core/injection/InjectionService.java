@@ -201,11 +201,11 @@ public class InjectionService implements InjectionQuery {
 
     private String validateProbeHandler(InjectRequest cmd) {
         if (cmd.getProbeType() == null || cmd.getProbeType().isEmpty()) {
-            return null;
+            return "probeType is required";
         }
         ProbeHandler handler = ProbeHandlerRegistry.getInstance().get(cmd.getProbeType()).orElse(null);
         if (handler == null) {
-            return null;
+            return "Unknown probe type: " + cmd.getProbeType();
         }
         ValidationResult result = handler.validate(cmd);
         if (!result.isValid()) {

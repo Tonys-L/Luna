@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,6 +9,8 @@ import java.util.List;
  */
 public class ValidationResult {
 
+    private static final List<String> EMPTY_WARNINGS = Collections.emptyList();
+
     private final boolean valid;
     private final String errorMessage;
     private final List<String> warnings;
@@ -16,7 +18,7 @@ public class ValidationResult {
     private ValidationResult(boolean valid, String errorMessage, List<String> warnings) {
         this.valid = valid;
         this.errorMessage = errorMessage;
-        this.warnings = warnings != null ? warnings : new ArrayList<>();
+        this.warnings = warnings != null ? Collections.unmodifiableList(warnings) : EMPTY_WARNINGS;
     }
 
     public static ValidationResult ok() {

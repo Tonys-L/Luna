@@ -7,6 +7,7 @@ import fun.efto.luna.core.plugin.GenerateContext;
 import fun.efto.luna.core.plugin.ValidationResult;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,6 +16,10 @@ import java.util.Set;
  * @since  : 2026/06/01 01:30
  */
 public class LogProbeHandler extends AbstractProbeHandler {
+
+    private static final Set<String> SUPPORTED_LOCATIONS = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList("method_enter", "method_exit", "method_around", "line_before", "line_after", "invoke", "exception_exit"))
+    );
 
     private final LogExpressionHandler delegate = new LogExpressionHandler();
 
@@ -30,7 +35,7 @@ public class LogProbeHandler extends AbstractProbeHandler {
 
     @Override
     public Set<String> supportedInjectionLocations() {
-        return new HashSet<>(Arrays.asList("method_enter", "method_exit", "method_around", "line_before", "line_after", "invoke", "exception_exit"));
+        return SUPPORTED_LOCATIONS;
     }
 
     @Override

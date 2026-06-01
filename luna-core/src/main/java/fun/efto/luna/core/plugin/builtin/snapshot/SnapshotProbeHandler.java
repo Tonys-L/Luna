@@ -17,6 +17,10 @@ import java.util.Set;
  */
 public class SnapshotProbeHandler extends AbstractProbeHandler {
 
+    private static final Set<String> SUPPORTED_LOCATIONS = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList("line_before", "line_after", "method_enter", "method_exit"))
+    );
+
     private final SnapshotExpressionHandler delegate = new SnapshotExpressionHandler();
 
     @Override
@@ -31,7 +35,7 @@ public class SnapshotProbeHandler extends AbstractProbeHandler {
 
     @Override
     public Set<String> supportedInjectionLocations() {
-        return new HashSet<>(Arrays.asList("line_before", "line_after", "method_enter", "method_exit"));
+        return SUPPORTED_LOCATIONS;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.injection.InjectRequest;
+import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 
 import java.util.ArrayList;
@@ -19,13 +20,14 @@ public abstract class AbstractProbeHandler implements ProbeHandler {
             return ValidationResult.fail("injectionLocation is required");
         }
 
+        InjectionLocation location;
         try {
-            InjectionTypeRegistry.getInstance().resolve(locationName);
+            location = InjectionTypeRegistry.getInstance().resolve(locationName);
         } catch (IllegalArgumentException e) {
             return ValidationResult.fail("Unsupported injection location: " + locationName);
         }
 
-        if (!supportedInjectionLocations().contains(locationName)) {
+        if (!supportedInjectionLocations().contains(location.getName())) {
             return ValidationResult.fail("Probe type '" + getProbeType() + "' does not support location: " + locationName);
         }
 

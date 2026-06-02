@@ -61,3 +61,42 @@
 [Luna] 22:05:47.677 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.handler.ContextHandler - Stopped f.e.l.s.j.s.ServletContextHandler@2d52216b{Luna Web Server,/,null,STOPPED}
 [Luna] 22:05:47.680 [Thread-14] INFO  fun.efto.luna.agent.web.JettyWebServer - Luna Web服务器已停止
 [Luna] 22:05:47.680 [Thread-14] INFO  fun.efto.luna.agent.Agent - Jetty server stopped.
+[Luna] 22:12:30.714 [main] INFO  fun.efto.luna.agent.log.LoggerInitializer - [Luna] Log4j2配置初始化成功
+[Luna] 22:12:30.716 [main] ERROR fun.efto.luna.agent.log.LoggerInitializer - [Luna] Log4j2配置初始化成功
+[Luna] 22:12:30.721 [main] INFO  fun.efto.luna.agent.Agent - Luna logger initialized successfully
+[Luna] 22:12:30.721 [main] INFO  fun.efto.luna.agent.Agent - Initializing Luna agent components...
+[Luna] 22:12:30.736 [main] INFO  fun.efto.luna.core.bootstrap.init.InitializerManager - 初始化完成: fun.efto.luna.core.bootstrap.init.DefaultInitializer
+[Luna] 22:12:30.754 [main] INFO  fun.efto.luna.agent.Agent - Initialized builtin plugin: log (日志注入)
+[Luna] 22:12:30.754 [main] INFO  fun.efto.luna.agent.Agent - Initialized builtin plugin: snapshot (快照注入)
+[Luna] 22:12:30.754 [main] INFO  fun.efto.luna.agent.Agent - Initialized builtin plugin: trace (方法耗时追踪)
+[Luna] 22:12:30.755 [main] INFO  fun.efto.luna.agent.Agent - Initialized builtin plugin: conditional-breakpoint (条件断点)
+[Luna] 22:12:30.797 [main] INFO  fun.efto.luna.shadow.jetty.util.log - Logging initialized @657ms to fun.efto.luna.shadow.jetty.util.log.Slf4jLog
+[Luna] 22:12:30.862 [main] INFO  fun.efto.luna.core.infra.web.RouteEngine - Registered controller: StatusController (prefix=)
+[Luna] 22:12:30.867 [main] INFO  fun.efto.luna.core.infra.web.RouteEngine - Registered controller: ClassController (prefix=)
+[Luna] 22:12:30.877 [main] INFO  fun.efto.luna.core.infra.web.RouteEngine - Registered controller: InjectionController (prefix=/injections)
+[Luna] 22:12:30.880 [main] INFO  fun.efto.luna.core.infra.web.RouteEngine - Registered controller: RuleController (prefix=/rules)
+[Luna] 22:12:30.881 [main] INFO  fun.efto.luna.core.infra.web.RouteEngine - Registered controller: TemplateController (prefix=/templates)
+[Luna] 22:12:30.885 [main] INFO  fun.efto.luna.core.infra.web.RouteEngine - Registered controller: TestController (prefix=/test)
+[Luna] 22:12:30.886 [main] INFO  fun.efto.luna.core.infra.web.RouteEngine - Registered controller: MetricsController (prefix=)
+[Luna] 22:12:30.888 [main] INFO  fun.efto.luna.core.infra.web.RouteEngine - Registered controller: CapabilityController (prefix=/capabilities)
+[Luna] 22:12:30.928 [main] INFO  fun.efto.luna.shadow.jetty.server.Server - jetty-9.4.53.v20231009; built: 2023-10-09T12:29:09.265Z; git: 27bde00a0b95a1d5bbee0eae7984f891d2d0f8c9; jvm 1.8.0_202-b08
+[Luna] 22:12:30.965 [main] INFO  fun.efto.luna.shadow.jetty.server.session - DefaultSessionIdManager workerName=node0
+[Luna] 22:12:30.965 [main] INFO  fun.efto.luna.shadow.jetty.server.session - No SessionScavenger set, using defaults
+[Luna] 22:12:30.967 [main] INFO  fun.efto.luna.shadow.jetty.server.session - node0 Scavenging every 660000ms
+[Luna] 22:12:31.006 [main] INFO  fun.efto.luna.shadow.jetty.server.handler.ContextHandler - Started f.e.l.s.j.s.ServletContextHandler@ba8d91c{Luna Web Server,/,null,AVAILABLE}
+[Luna] 22:12:31.601 [main] INFO  fun.efto.luna.shadow.jetty.server.AbstractConnector - Started ServerConnector@20322d26{HTTP/1.1, (http/1.1)}{0.0.0.0:8421}
+[Luna] 22:12:31.601 [main] INFO  fun.efto.luna.shadow.jetty.server.Server - Started @1462ms
+[Luna] 22:12:31.602 [main] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - Luna 日志分发器已启动
+[Luna] 22:12:31.602 [main] INFO  fun.efto.luna.agent.web.JettyWebServer - Luna Web服务器启动成功:
+[Luna] 22:12:31.602 [main] INFO  fun.efto.luna.agent.web.JettyWebServer -   - HTTP服务: http://0.0.0.0:8421
+[Luna] 22:12:31.602 [main] INFO  fun.efto.luna.agent.web.JettyWebServer -   - WebSocket服务: ws://0.0.0.0:8421/ws/log
+[Luna] 22:12:31.602 [main] INFO  fun.efto.luna.agent.Agent - Luna agent started successfully, web server on port 8421
+[Luna] 22:12:31.602 [main] INFO  fun.efto.luna.agent.Agent - Scanning already loaded classes for active injections...
+[Luna] 22:12:31.614 [main] INFO  fun.efto.luna.agent.Agent - Initial injection application completed.
+[Luna] 22:12:40.590 [Thread-14] INFO  fun.efto.luna.agent.Agent - Shutting down Jetty server...
+[Luna] 22:12:40.590 [Thread-14] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - Luna 日志分发器已停止
+[Luna] 22:12:40.595 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.AbstractConnector - Stopped ServerConnector@20322d26{HTTP/1.1, (http/1.1)}{0.0.0.0:8421}
+[Luna] 22:12:40.595 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.session - node0 Stopped scavenging
+[Luna] 22:12:40.596 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.handler.ContextHandler - Stopped f.e.l.s.j.s.ServletContextHandler@ba8d91c{Luna Web Server,/,null,STOPPED}
+[Luna] 22:12:40.601 [Thread-14] INFO  fun.efto.luna.agent.web.JettyWebServer - Luna Web服务器已停止
+[Luna] 22:12:40.601 [Thread-14] INFO  fun.efto.luna.agent.Agent - Jetty server stopped.

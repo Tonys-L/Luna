@@ -80,17 +80,13 @@ public class Agent {
 
     @SuppressWarnings("java:S1144")
     private static void startAgent(String args, Instrumentation inst) {
+        initLogger();
         try {
             String agentJarPath = Agent.class.getProtectionDomain()
                     .getCodeSource().getLocation().toURI().getPath();
+            logger.info("Appending agent jar to bootstrap classloader: {}", agentJarPath);
             inst.appendToBootstrapClassLoaderSearch(new JarFile(agentJarPath));
-        } catch (Exception e) {
-            System.err.println("[Luna] Failed to append agent jar to bootstrap classloader: " + e.getMessage());
-        }
 
-        initLogger();
-
-        try {
             logger.info("Initializing Luna agent components...");
             InitializerManager.getInstance().initializeAll();
             InstrumentationHolder.init(inst);

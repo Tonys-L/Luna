@@ -5,6 +5,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLStreamHandlerFactory;
 import java.util.Enumeration;
+import java.util.Collections;
 
 /**
  * @author : Tony.L(286269159@qq.com)
@@ -35,10 +36,7 @@ public class LunaAgentClassLoader extends URLClassLoader {
         if (name.startsWith("fun.efto.luna.core.probe.")
                 || name.startsWith("fun.efto.luna.core.infra.")
                 || name.startsWith("fun.efto.luna.core.expression.context.")
-                || name.startsWith("fun.efto.luna.core.expression.ConditionRegistry")
-                || name.startsWith("fun.efto.luna.shadow.log4j2.")
-                || name.startsWith("fun.efto.luna.shadow.slf4j.")
-                || name.startsWith("fun.efto.luna.shadow.log4j2.slf4j.")) {
+                || name.startsWith("fun.efto.luna.core.expression.ConditionRegistry")) {
             return super.loadClass(name, resolve);
         }
 
@@ -66,7 +64,7 @@ public class LunaAgentClassLoader extends URLClassLoader {
 
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
-        if ("META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.json".equals(name)) {
+        if (name != null && name.contains("Log4j2Plugins")) {
             return findResources(name);
         }
         return super.getResources(name);

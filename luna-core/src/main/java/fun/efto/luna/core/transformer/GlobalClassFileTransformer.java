@@ -2,6 +2,7 @@ package fun.efto.luna.core.transformer;
 
 import fun.efto.luna.core.injection.InjectionPoint;
 import fun.efto.luna.core.injection.InjectionQuery;
+import fun.efto.luna.core.injection.InjectionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

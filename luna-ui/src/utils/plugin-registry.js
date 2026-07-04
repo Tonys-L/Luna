@@ -1,6 +1,7 @@
 class PluginRegistry {
   constructor() {
     this._manifest = null
+    this._cachedManifest = null
   }
 
   async init() {
@@ -9,34 +10,18 @@ class PluginRegistry {
 
   async refresh() {
     try {
-      const [probesResp, enginesResp] = await Promise.all([
-        fetch('/api/probes'),
-        fetch('/api/probes/engines')
-      ])
-
-      if (probesResp.ok && enginesResp.ok) {
-        const probes = await probesResp.json()
-        const engines = await enginesResp.json()
-
-        this._manifest = {
-          injectionTypes: this._builtInInjectionTypes(),
-          probeHandlers: probes.data || probes || [],
-          codeEngines: engines.data || engines || [],
-          templates: []
-        }
-
-        this._manifest.expressionProtocols = this._convertToExpressionProtocols(this._manifest.probeHandlers)
-        return
-      }
-    } catch (e) {
-      console.warn('Failed to load probe/engine capabilities from API, using built-in defaults:', e)
-    }
-
-    try {
       const resp = await fetch('/api/plugins/ui-manifest')
       if (resp.ok) {
-        this._manifest = await resp.json()
-        if (this._manifest.injectionTypes && this._manifest.injectionTypes.length > 0) {
+        const data = await resp.json()
+        const manifest = data.data || data
+        const converted = {
+          injectionTypes: this._convertInjectionLocations(manifest.injectionLocations),
+          probeHandlers: this._convertToProbeTypes(manifest.probeTypes || []),
+          codeEngines: manifest.codeEngines || []
+        }
+        if (converted.injectionTypes.length > 0 && converted.probeHandlers.length > 0) {
+          this._manifest = converted
+          this._cachedManifest = converted
           return
         }
       }
@@ -44,70 +29,47 @@ class PluginRegistry {
       console.warn('Failed to load plugin UI manifest:', e)
     }
 
-    this._manifest = this._builtInDefaults()
+    // API 不可用时使用上次成功缓存的 manifest，无缓存则为空
+    this._manifest = this._cachedManifest || { injectionTypes: [], probeHandlers: [], codeEngines: [] }
   }
 
-  _convertToExpressionProtocols(probeHandlers) {
-    return probeHandlers.map(p => ({
-      protocol: p.probeType.toLowerCase(),
-      displayName: this._probeDisplayName(p.probeType),
-      codeType: p.usesCode ? 'EXPRESSION' : null,
-      syntax: this._probeSyntax(p.probeType),
+  _convertInjectionLocations(locations) {
+    if (!locations || locations.length === 0) return []
+    return locations.map(loc => {
+      const name = loc.name || loc
+      // 优先使用后端传的 category，缺失时从 name 推导
+      const category = loc.category || (name.startsWith('line_') ? 'line'
+        : name.startsWith('method_') || name === 'invoke' || name.startsWith('exception_') ? 'method'
+        : 'other')
+      return {
+        name,
+        displayName: loc.displayName || name,
+        category,
+        categoryLabel: loc.categoryLabel || category,
+        color: loc.color || '#6b7280',
+        canonicalName: name.toLowerCase()
+      }
+    })
+  }
+
+  _convertToProbeTypes(probeTypes) {
+    return probeTypes.map(p => ({
       probeType: p.probeType,
+      displayName: p.displayName || p.probeType,
+      syntax: p.syntax || '',
+      icon: p.icon || '',
+      category: p.category || 'injection',
       usesCode: p.usesCode,
-      supportedInjectionLocations: p.supportedInjectionLocations || []
+      supportedInjectionLocations: p.supportedInjectionLocations || [],
+      quickActionBehavior: p.quickActionBehavior || 'FORM',
+      glyphColor: p.glyphColor || '',
+      configSchema: p.configSchema || []
     }))
   }
 
-  _probeDisplayName(probeType) {
-    const names = { LOG: '日志表达式', SNAPSHOT: '内存快照', TRACE: '方法耗时' }
-    return names[probeType] || probeType
-  }
-
-  _probeSyntax(probeType) {
-    const syntax = {
-      LOG: '使用 {} 占位符，如: User ID is {}',
-      SNAPSHOT: '自动捕获当前作用域内所有局部变量',
-      TRACE: '格式: start | end:阈值ms | alert:阈值ms'
-    }
-    return syntax[probeType] || ''
-  }
-
-  _builtInInjectionTypes() {
-    return [
-      { name: 'ENTER_METHOD', displayName: '方法进入', category: 'method' },
-      { name: 'EXIT_METHOD', displayName: '方法退出', category: 'method' },
-      { name: 'AROUND_METHOD', displayName: '方法环绕', category: 'method' },
-      { name: 'LINE_BEFORE', displayName: '行号前注入', category: 'line' },
-      { name: 'LINE_AFTER', displayName: '行号后注入', category: 'line' }
-    ]
-  }
-
-  _builtInDefaults() {
-    return {
-      injectionTypes: this._builtInInjectionTypes(),
-      probeHandlers: [
-        { probeType: 'LOG', usesCode: true, supportedInjectionLocations: ['method_enter', 'method_exit', 'method_around', 'line_before', 'line_after'] },
-        { probeType: 'SNAPSHOT', usesCode: false, supportedInjectionLocations: ['line_before', 'line_after', 'method_enter', 'method_exit'] },
-        { probeType: 'TRACE', usesCode: false, supportedInjectionLocations: ['method_enter', 'method_exit'] }
-      ],
-      codeEngines: [
-        { codeType: 'EXPRESSION' }
-      ],
-      expressionProtocols: [
-        { protocol: 'log', displayName: '日志表达式', codeType: 'EXPRESSION', syntax: '使用 {} 占位符，如: User ID is {}' },
-        { protocol: 'snapshot', displayName: '内存快照', codeType: 'SNAPSHOT', syntax: '自动捕获当前作用域内所有局部变量' },
-        { protocol: 'trace', displayName: '方法耗时', codeType: 'EXPRESSION', syntax: '格式: start | end:阈值ms | alert:阈值ms' }
-      ],
-      templates: []
-    }
-  }
-
   get injectionTypes() { return this._manifest?.injectionTypes || [] }
-  get expressionProtocols() { return this._manifest?.expressionProtocols || [] }
   get probeHandlers() { return this._manifest?.probeHandlers || [] }
   get codeEngines() { return this._manifest?.codeEngines || [] }
-  get templates() { return this._manifest?.templates || [] }
 }
 
 export const pluginRegistry = new PluginRegistry()

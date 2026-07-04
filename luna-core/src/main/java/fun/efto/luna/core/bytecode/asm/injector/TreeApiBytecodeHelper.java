@@ -27,15 +27,19 @@ import java.util.Map;
 public class TreeApiBytecodeHelper {
 
     public static InsnList assemble(AsmInjectionContext asmContext, CompiledCode compiledCode, ProbeHandler probeHandler, byte[] bytecode) {
+        return assemble(asmContext, compiledCode, probeHandler, bytecode, null);
+    }
+
+    public static InsnList assemble(AsmInjectionContext asmContext, CompiledCode compiledCode, ProbeHandler probeHandler, byte[] bytecode, GenerateContext.Phase phase) {
         InsnListCollector collector = new InsnListCollector();
         MethodVisitor originalMv = asmContext.getMethodVisitor();
         asmContext.setMethodVisitor(collector);
 
-        String content = compiledCode.getContent() != null ? compiledCode.getContent() : "";
-        String condition = compiledCode.getCondition();
-        boolean hasCondition = compiledCode.hasCondition();
+        String content = compiledCode != null && compiledCode.getContent() != null ? compiledCode.getContent() : "";
+        String condition = compiledCode != null ? compiledCode.getCondition() : null;
+        boolean hasCondition = compiledCode != null && compiledCode.hasCondition();
 
-        GenerateContext ctx = new DefaultGenerateContext(content, asmContext, hasCondition, collector);
+        GenerateContext ctx = new DefaultGenerateContext(content, asmContext, hasCondition, collector, phase);
 
         if (hasCondition) {
             String methodDesc = asmContext.getInjectionPoint().getTarget().getMethodDescriptor();

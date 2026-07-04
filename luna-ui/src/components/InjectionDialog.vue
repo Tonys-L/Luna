@@ -15,40 +15,44 @@
         <!-- 探针类型 -->
         <div class="form-group">
           <label class="form-label">探针类型</label>
-          <select v-model="form.probeType" class="form-select" @change="onProbeTypeChange">
+          <select v-if="!readonlyProbeType" v-model="form.probeType" class="form-select" @change="onProbeTypeChange">
             <option v-for="handler in probeHandlers" :key="handler.probeType" :value="handler.probeType">
               {{ getProbeDisplayName(handler.probeType) }}
             </option>
           </select>
+          <div v-else class="form-readonly">
+            <i :class="['fas', currentProbeIcon]" v-if="currentProbeIcon"></i>
+            {{ getProbeDisplayName(form.probeType) }}
+          </div>
         </div>
 
         <!-- 注入位置 -->
         <div class="form-group">
           <label class="form-label">注入位置</label>
-          <select v-model="form.injectionLocation" class="form-select">
+          <select v-if="!isInjectionLocationReadonly" v-model="form.injectionLocation" class="form-select">
             <optgroup v-for="group in groupedInjectionTypes" :key="group.category" :label="group.label">
               <option v-for="t in group.types" :key="t.name" :value="t.name">{{ t.displayName }}</option>
             </optgroup>
           </select>
+          <div v-else class="form-readonly">
+            {{ getLocationDisplayName(form.injectionLocation) }}
+          </div>
         </div>
 
-        <!-- 行号选择 (仅行注入可见) -->
-        <div class="form-group" v-if="isLineInjection">
+        <!-- 行号选择 (仅行级上下文可见) -->
+        <div class="form-group" v-if="injectionContext === 'line'">
           <label class="form-label">源码行号</label>
-          <select v-model.number="form.lineNumber" class="form-select">
-            <option :value="null" disabled>请选择源码行号</option>
-            <option v-for="line in availableLines" :key="line" :value="line">
-              Line {{ line }}
-            </option>
-          </select>
+          <div class="form-readonly">
+            Line {{ form.lineNumber }}
+          </div>
           <div class="form-hint" v-if="availableLines.length === 0">
             <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
             <span>未找到该方法的源码行号表，请确保源码已加载。</span>
           </div>
         </div>
 
-        <!-- 局部变量辅助 (仅行注入且选中行号后可见) -->
-        <div class="form-group" v-if="isLineInjection && form.lineNumber">
+        <!-- 局部变量辅助 (仅行级上下文且当前探针使用代码) -->
+        <div class="form-group" v-if="injectionContext === 'line' && currentProbeUsesCode">
           <label class="form-label">可用变量 (点击插入)</label>
           <div class="local-vars-container" v-if="loadingVars">
             <div class="loading-spinner-small"></div>
@@ -70,36 +74,83 @@
           </div>
         </div>
 
-        <!-- 代码类型 (仅 usesCode=true 时可见) -->
-        <div class="form-group" v-if="currentProbeUsesCode">
-          <label class="form-label">动作类型</label>
-          <select v-model="form.codeType" class="form-select">
-            <option v-for="engine in codeEngines" :key="engine.codeType" :value="engine.codeType">
-              {{ engine.codeType }}
+        <!-- 动态表单字段（根据 configSchema 渲染） -->
+        <div
+          v-for="field in currentConfigSchema"
+          :key="field.key"
+          class="form-group"
+        >
+          <label class="form-label">
+            {{ field.label }}
+            <span v-if="field.required" class="required-mark">*</span>
+          </label>
+
+          <!-- text -->
+          <input
+            v-if="field.type === 'text'"
+            v-model="form.configValues[field.key]"
+            type="text"
+            class="form-input"
+            :placeholder="field.placeholder || ''"
+          />
+
+          <!-- number -->
+          <input
+            v-else-if="field.type === 'number'"
+            v-model.number="form.configValues[field.key]"
+            type="number"
+            class="form-input"
+            :placeholder="field.placeholder || ''"
+          />
+
+          <!-- select -->
+          <select
+            v-else-if="field.type === 'select'"
+            v-model="form.configValues[field.key]"
+            class="form-select"
+          >
+            <option v-for="opt in field.options" :key="opt.value" :value="opt.value">
+              {{ opt.label }}
             </option>
           </select>
-        </div>
 
-        <!-- 条件表达式 -->
-        <div class="form-group">
-          <label class="form-label">条件表达式 (可选)</label>
-          <input 
-            v-model="form.condition" 
-            type="text" 
-            class="form-input"
-            placeholder="例如: params[0] != null"
-          />
-        </div>
-
-        <!-- 日志模板 (仅 usesCode=true 时可见) -->
-        <div class="form-group" v-if="currentProbeUsesCode">
-          <label class="form-label">日志模板</label>
-          <textarea 
-            v-model="form.logContent" 
+          <!-- textarea -->
+          <textarea
+            v-else-if="field.type === 'textarea'"
+            v-model="form.configValues[field.key]"
             class="form-textarea"
-            placeholder="例如: User ID is {}"
+            :placeholder="field.placeholder || ''"
             rows="3"
           ></textarea>
+
+          <div class="form-hint" v-if="field.key === 'code' && currentProbeSyntax">
+            <i class="fas fa-info-circle"></i>
+            <span>{{ currentProbeSyntax }}</span>
+          </div>
+        </div>
+
+        <!-- 持久化选项 -->
+        <div class="form-group">
+          <label class="form-label">注入类型</label>
+          <div class="toggle-group">
+            <button 
+              class="toggle-btn" 
+              :class="{ active: form.ephemeral }" 
+              @click="form.ephemeral = true"
+            >
+              <i class="fas fa-bolt"></i> 临时
+            </button>
+            <button 
+              class="toggle-btn" 
+              :class="{ active: !form.ephemeral }" 
+              @click="form.ephemeral = false"
+            >
+              <i class="fas fa-thumbtack"></i> 持久
+            </button>
+          </div>
+          <div class="form-hint">
+            {{ form.ephemeral ? '临时注入：Agent 重启后自动失效' : '持久注入：Agent 重启后仍然生效' }}
+          </div>
         </div>
       </div>
 
@@ -130,21 +181,23 @@ export default {
     className: String,
     method: Object,
     initialLineNumber: { type: Number, default: null },
-    initialInjectionType: { type: String, default: 'ENTER_METHOD' },
-    initialCodeType: { type: String, default: 'EXPRESSION' },
-    initialProbeType: { type: String, default: 'LOG' },
+    initialInjectionType: { type: String, default: '' },
+    initialCodeType: { type: String, default: '' },
+    initialProbeType: { type: String, default: '' },
+    readonlyProbeType: { type: Boolean, default: false },
+    injectionContext: { type: String, default: 'free', validator: v => ['method', 'line', 'free'].includes(v) },
     availableLines: { type: Array, default: () => [] }
   },
   emits: ['close', 'submit'],
   data() {
     return {
       form: {
-        injectionLocation: 'ENTER_METHOD',
-        probeType: 'LOG',
-        codeType: 'EXPRESSION',
-        logContent: '',
-        condition: '',
-        lineNumber: null
+        injectionLocation: '',
+        probeType: '',
+        codeType: '',
+        configValues: {},
+        lineNumber: null,
+        ephemeral: true
       },
       localVariables: [],
       loadingVars: false
@@ -152,7 +205,14 @@ export default {
   },
   computed: {
     isLineInjection() {
-      return this.form.injectionLocation.startsWith('LINE_')
+      const type = pluginRegistry.injectionTypes.find(t => t.name === this.form.injectionLocation)
+      return type?.category === 'line'
+    },
+    // 探针只支持一个注入位置时，位置不可选
+    isInjectionLocationReadonly() {
+      const handler = this.probeHandlers.find(h => h.probeType === this.form.probeType)
+      const supported = handler?.supportedInjectionLocations || []
+      return supported.length <= 1
     },
     probeHandlers() {
       return pluginRegistry.probeHandlers
@@ -164,15 +224,39 @@ export default {
       const handler = this.probeHandlers.find(h => h.probeType === this.form.probeType)
       return handler ? handler.usesCode : true
     },
-    expressionProtocols() {
-      return pluginRegistry.expressionProtocols
+    currentProbeIcon() {
+      const handler = this.probeHandlers.find(h => h.probeType === this.form.probeType)
+      return handler?.icon || ''
+    },
+    currentProbeSyntax() {
+      const handler = this.probeHandlers.find(h => h.probeType === this.form.probeType)
+      return handler?.syntax || ''
+    },
+    currentConfigSchema() {
+      const handler = this.probeHandlers.find(h => h.probeType === this.form.probeType)
+      return handler?.configSchema || []
     },
     groupedInjectionTypes() {
       const types = pluginRegistry.injectionTypes
+      const currentHandler = this.probeHandlers.find(h => h.probeType === this.form.probeType)
+      const supportedLocations = currentHandler?.supportedInjectionLocations || null
+
+      // 按 injectionContext 过滤位置类别
+      const contextCategories = this.injectionContext === 'line'
+        ? ['line']
+        : this.injectionContext === 'method'
+          ? ['method']
+          : ['method', 'line', 'field', 'other']
+
       const groups = {}
       types.forEach(t => {
+        const canonicalName = t.canonicalName || t.name.toLowerCase()
+        // 过滤1：探针支持的位置
+        if (supportedLocations && !supportedLocations.includes(canonicalName)) return
+        // 过滤2：上下文允许的类别
         const cat = t.category || 'other'
-        if (!groups[cat]) groups[cat] = { category: cat, label: this.getCategoryLabel(cat), types: [] }
+        if (!contextCategories.includes(cat)) return
+        if (!groups[cat]) groups[cat] = { category: cat, label: t.categoryLabel || cat, types: [] }
         groups[cat].types.push(t)
       })
       return Object.values(groups)
@@ -191,31 +275,67 @@ export default {
       if (this.isLineInjection && this.form.lineNumber) {
         this.fetchVars()
       }
+    },
+    'form.injectionLocation'() {
+      this.applyDefaultCode()
     }
   },
   methods: {
-    getCategoryLabel(cat) {
-      const labels = { method: '方法注入', line: '行号注入', field: '字段注入', other: '其他' }
-      return labels[cat] || cat
-    },
     getProbeDisplayName(probeType) {
-      const names = { LOG: '日志表达式', SNAPSHOT: '内存快照', TRACE: '方法耗时' }
-      return names[probeType] || probeType
+      const handler = pluginRegistry.probeHandlers?.find(h => h.probeType === probeType)
+      return handler?.displayName || probeType
+    },
+    getLocationDisplayName(location) {
+      const type = pluginRegistry.injectionTypes?.find(t => t.name === location)
+      return type?.displayName || location
+    },
+    applyDefaultCode() {
+      const handler = pluginRegistry.probeHandlers?.find(h => h.probeType === this.form.probeType)
+      if (!handler) return
+
+      // 初始化 configValues（从 configSchema 的 defaultValue）
+      const configValues = {}
+      const schema = handler.configSchema || []
+      schema.forEach(field => {
+        configValues[field.key] = field.defaultValue != null ? field.defaultValue : ''
+      })
+
+      this.form.configValues = configValues
     },
     resetForm() {
-      const isLine = this.initialLineNumber !== null
-      
+      let injectionLocation = this.initialInjectionType
+      const probeType = this.initialProbeType
+
+      // 校验初始注入位置是否被当前探针支持，不支持则选择第一个可用位置
+      const handler = pluginRegistry.probeHandlers?.find(h => h.probeType === probeType)
+      const supportedLocations = handler?.supportedInjectionLocations || null
+      if (supportedLocations && injectionLocation) {
+        const currentType = pluginRegistry.injectionTypes.find(t => t.name === injectionLocation)
+        const canonicalName = currentType?.canonicalName || injectionLocation.toLowerCase()
+        if (!supportedLocations.includes(canonicalName)) {
+          const firstAvailable = pluginRegistry.injectionTypes.find(t => {
+            const cn = t.canonicalName || t.name.toLowerCase()
+            return supportedLocations.includes(cn)
+          })
+          if (firstAvailable) {
+            injectionLocation = firstAvailable.name
+          }
+        }
+      }
+
       this.form = {
-        injectionLocation: this.initialInjectionType,
-        probeType: this.initialProbeType,
+        injectionLocation,
+        probeType,
         codeType: this.initialCodeType,
-        logContent: isLine ? `Line ${this.initialLineNumber} check` : `执行方法: ${this.method.name}`,
-        condition: '',
-        lineNumber: this.initialLineNumber
+        configValues: {},
+        lineNumber: this.initialLineNumber,
+        ephemeral: true
       }
       this.localVariables = []
-      
-      if (isLine) {
+
+      this.applyDefaultCode()
+
+      if (this.injectionContext === 'line' && this.initialLineNumber) {
         this.fetchVars()
       }
     },
@@ -237,20 +357,48 @@ export default {
       }
     },
     insertVar(name) {
-      this.form.logContent += ` $${name}`
+      if (this.form.configValues.hasOwnProperty('code')) {
+        this.form.configValues['code'] += ` $${name}`
+      }
     },
     onProbeTypeChange() {
+      this.applyDefaultCode()
+
       if (!this.currentProbeUsesCode) {
-        this.form.logContent = ''
         this.form.codeType = null
       } else {
         if (!this.form.codeType) {
-          this.form.codeType = 'EXPRESSION'
+          const engines = pluginRegistry.codeEngines
+          this.form.codeType = engines.length > 0 ? engines[0].codeType : ''
+        }
+      }
+
+      // If current injection location is not supported by the new probe type, reset to first available
+      const currentHandler = this.probeHandlers.find(h => h.probeType === this.form.probeType)
+      const supportedLocations = currentHandler?.supportedInjectionLocations || null
+      if (supportedLocations) {
+        const currentType = pluginRegistry.injectionTypes.find(t => t.name === this.form.injectionLocation)
+        const canonicalName = currentType?.canonicalName || this.form.injectionLocation.toLowerCase()
+        if (!supportedLocations.includes(canonicalName)) {
+          const firstAvailable = this.groupedInjectionTypes.flatMap(g => g.types)[0]
+          if (firstAvailable) {
+            this.form.injectionLocation = firstAvailable.name
+          }
         }
       }
     },
     handleSubmit() {
-      this.$emit('submit', { ...this.form })
+      const configValues = this.form.configValues || {}
+      const submitData = {
+        injectionLocation: this.form.injectionLocation,
+        probeType: this.form.probeType,
+        codeType: this.form.codeType,
+        code: configValues['code'] || '',
+        configValues: { ...configValues },
+        lineNumber: this.form.lineNumber,
+        ephemeral: this.form.ephemeral !== undefined ? this.form.ephemeral : true
+      }
+      this.$emit('submit', submitData)
     }
   }
 }
@@ -418,6 +566,66 @@ export default {
 .primary-button:hover {
   background: #4f46e5;
   transform: translateY(-1px);
+}
+
+.form-hint {
+  font-size: 11px;
+  color: #666;
+  margin-top: 6px;
+}
+
+.required-mark {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.form-readonly {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #eee;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-group {
+  display: flex;
+  gap: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #1e1e1e;
+  border: none;
+  color: #888;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.toggle-btn:first-child {
+  border-right: 1px solid #333;
+}
+
+.toggle-btn.active {
+  background: #6366f1;
+  color: #fff;
+}
+
+.toggle-btn:not(.active):hover {
+  background: #2a2a2a;
+  color: #ccc;
 }
 
 .loading-spinner-small {

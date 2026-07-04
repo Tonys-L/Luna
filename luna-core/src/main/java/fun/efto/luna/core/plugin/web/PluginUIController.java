@@ -1,13 +1,13 @@
 package fun.efto.luna.core.plugin.web;
 
-import fun.efto.luna.core.injection.target.InjectionLocation;
+import fun.efto.luna.core.plugin.InjectionLocationUIDescriptor;
 import fun.efto.luna.core.plugin.LunaController;
 import fun.efto.luna.core.plugin.PluginInfo;
 import fun.efto.luna.core.plugin.PluginManager;
 import fun.efto.luna.core.plugin.PluginState;
+import fun.efto.luna.core.plugin.ProbeHandler;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
-import fun.efto.luna.core.injection.rule.template.TemplateRegistry;
 import fun.efto.luna.core.infra.web.ApiResult;
 import fun.efto.luna.core.infra.web.Controller;
 import fun.efto.luna.core.infra.web.GetMapping;
@@ -35,8 +35,7 @@ public class PluginUIController implements LunaController {
         Set<String> disabledPluginIds = collectDisabledPluginIds();
         return ApiResult.ok(new UiManifestVO(
                 buildInjectionLocations(disabledPluginIds),
-                buildProbeTypes(disabledPluginIds),
-                buildTemplates(disabledPluginIds)));
+                buildProbeTypeEntries(disabledPluginIds)));
     }
 
     private Set<String> collectDisabledPluginIds() {
@@ -51,27 +50,35 @@ public class PluginUIController implements LunaController {
 
     private List<UiManifestVO.InjectionLocationEntry> buildInjectionLocations(Set<String> disabledPluginIds) {
         Set<String> disabledLocationNames = collectDisabledLocationNames(disabledPluginIds);
-        return InjectionTypeRegistry.getInstance().getAll().stream()
+        InjectionTypeRegistry registry = InjectionTypeRegistry.getInstance();
+        return registry.getAll().stream()
                 .filter(t -> !disabledLocationNames.contains(t.getName()))
-                .map(t -> new UiManifestVO.InjectionLocationEntry(t.getName(), t.getName(), t.getDescription()))
+                .distinct()
+                .map(t -> {
+                    InjectionLocationUIDescriptor ui = registry.getUIDescriptor(t.getName());
+                    String categoryLabel = ui != null ? ui.getCategoryLabel() : t.getCategory();
+                    String color = ui != null ? ui.getColor() : "#6b7280";
+                    return new UiManifestVO.InjectionLocationEntry(
+                            t.getName(), t.getDescription(), t.getCategory(), categoryLabel, color);
+                })
                 .collect(Collectors.toList());
     }
 
-    private List<UiManifestVO.ExpressionProtocolEntry> buildProbeTypes(Set<String> disabledPluginIds) {
+    private List<UiManifestVO.ProbeTypeEntry> buildProbeTypeEntries(Set<String> disabledPluginIds) {
         Set<String> disabledProbeTypes = collectDisabledProbeTypes(disabledPluginIds);
         return ProbeHandlerRegistry.getInstance().getAll().stream()
                 .filter(h -> !disabledProbeTypes.contains(h.getProbeType()))
-                .map(h -> new UiManifestVO.ExpressionProtocolEntry(
-                        h.getProbeType(), h.getProbeType(), h.getProbeType() + " probe"))
-                .collect(Collectors.toList());
-    }
-
-    private List<UiManifestVO.TemplateEntry> buildTemplates(Set<String> disabledPluginIds) {
-        Set<String> disabledTemplateNames = collectDisabledTemplateNames(disabledPluginIds);
-        return TemplateRegistry.getInstance().getAllTemplates().stream()
-                .filter(t -> !disabledTemplateNames.contains(t.getName()))
-                .map(t -> new UiManifestVO.TemplateEntry(
-                        t.getName(), t.getDisplayName(), t.getDescription(), t.getCategory()))
+                .map(h -> new UiManifestVO.ProbeTypeEntry(
+                        h.getProbeType(),
+                        h.getDisplayName(),
+                        h.getSyntax(),
+                        h.getIcon(),
+                        h.getCategory(),
+                        h.usesCode(),
+                        h.supportedInjectionLocations(),
+                        h.getQuickActionBehavior().name(),
+                        h.getGlyphColor(),
+                        h.getConfigSchema()))
                 .collect(Collectors.toList());
     }
 
@@ -91,14 +98,5 @@ public class PluginUIController implements LunaController {
                     .forEach(h -> probeTypes.add(h.getProbeType()));
         }
         return probeTypes;
-    }
-
-    private Set<String> collectDisabledTemplateNames(Set<String> disabledPluginIds) {
-        Set<String> templateNames = new HashSet<>();
-        for (String pluginId : disabledPluginIds) {
-            pluginManager.getTemplatesForPlugin(pluginId)
-                    .forEach(t -> templateNames.add(t.getName()));
-        }
-        return templateNames;
     }
 }

@@ -14,19 +14,26 @@ public class DefaultGenerateContext implements GenerateContext {
     private final AsmInjectionContext asmContext;
     private final boolean hasCondition;
     private final MethodVisitor mv;
+    private final Phase phase;
     private BytecodeHelper helper;
 
     public DefaultGenerateContext(String expression, AsmInjectionContext asmContext, boolean hasCondition, MethodVisitor mv) {
+        this(expression, asmContext, hasCondition, mv, Phase.ENTER);
+    }
+
+    public DefaultGenerateContext(String expression, AsmInjectionContext asmContext, boolean hasCondition, MethodVisitor mv, Phase phase) {
         this.expression = expression;
         this.asmContext = asmContext;
         this.hasCondition = hasCondition;
         this.mv = mv;
+        this.phase = phase != null ? phase : Phase.ENTER;
     }
 
     @Override public String expression() { return expression; }
     @Override public AsmInjectionContext asmContext() { return asmContext; }
     @Override public boolean hasCondition() { return hasCondition; }
     @Override public MethodVisitor mv() { return mv; }
+    @Override public Phase phase() { return phase; }
     @Override
     public BytecodeHelper helper() {
         if (helper == null) {

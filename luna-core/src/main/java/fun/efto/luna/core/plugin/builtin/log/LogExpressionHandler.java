@@ -7,7 +7,6 @@ import fun.efto.luna.core.bytecode.asm.assembler.ExpressionSegment;
 import fun.efto.luna.core.plugin.BytecodeHelper;
 import fun.efto.luna.core.plugin.GenerateContext;
 import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
-import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -36,7 +35,7 @@ public class LogExpressionHandler {
         boolean hasRefs = segments.stream()
                 .anyMatch(s -> s instanceof ExpressionSegment.ParameterSegment || s instanceof ExpressionSegment.LocalVariableSegment);
 
-        String prefix = resolveLogPrefix(asmContext);
+        String prefix = resolveLogPrefix(ctx);
 
         if (!hasRefs) {
             h.loadString(prefix + expression);
@@ -91,15 +90,14 @@ public class LogExpressionHandler {
         return (asmContext.getMethodAccess() & Opcodes.ACC_STATIC) != 0;
     }
 
-    private static String resolveLogPrefix(AsmInjectionContext asmContext) {
-        if (asmContext.getInjectionPoint().getInjectionLocation() instanceof MethodInjectionLocation) {
-            MethodInjectionLocation type = (MethodInjectionLocation) asmContext.getInjectionPoint().getInjectionLocation();
-            if (type.getName().equals(MethodInjectionLocation.EXIT.getName())) {
-                return "method exit: ";
-            } else if (type.getName().equals(MethodInjectionLocation.AROUND.getName())) {
-                return "method around: ";
-            }
-        } else if (asmContext.getInjectionPoint().getInjectionLocation() instanceof LineNumberInjectionLocation) {
+    private static String resolveLogPrefix(GenerateContext ctx) {
+        // AROUND 注入时，handle() 被调用两次（ENTER + EXIT），通过 phase 区分
+        if (ctx.phase() == GenerateContext.Phase.EXIT) {
+            return "method exit: ";
+        }
+
+        AsmInjectionContext asmContext = ctx.asmContext();
+        if (asmContext.getInjectionPoint().getInjectionLocation() instanceof LineNumberInjectionLocation) {
             LineNumberInjectionLocation type = (LineNumberInjectionLocation) asmContext.getInjectionPoint().getInjectionLocation();
             if (type.getName().equals(LineNumberInjectionLocation.AFTER.getName())) {
                 return "line after: ";

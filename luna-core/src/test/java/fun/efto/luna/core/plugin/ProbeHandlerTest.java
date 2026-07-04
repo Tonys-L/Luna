@@ -27,13 +27,13 @@ public class ProbeHandlerTest {
 
     @BeforeEach
     void setUp() {
-        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("method_enter", "test"));
-        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("method_exit", "test"));
-        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("method_around", "test"));
-        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("line_before", "test"));
-        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("line_after", "test"));
-        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("invoke", "test"));
-        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("exception_exit", "test"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("method_enter", "test", "method"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("method_exit", "test", "method"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("method_around", "test", "method"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("line_before", "test", "line"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("line_after", "test", "line"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("invoke", "test", "method"));
+        InjectionTypeRegistry.getInstance().register(InjectionLocation.of("exception_exit", "test", "method"));
     }
 
     @AfterEach
@@ -189,33 +189,32 @@ public class ProbeHandlerTest {
         private final TraceProbeHandler handler = new TraceProbeHandler();
 
         @Test
-        @DisplayName("自描述属性: probeType=TRACE, usesCode=false, supportedLocations 只有 method_enter/exit")
+        @DisplayName("自描述属性: probeType=TRACE, usesCode=false, supportedLocations 只有 method_around")
         void selfDescription() {
             assertEquals("TRACE", handler.getProbeType());
             assertFalse(handler.usesCode());
             Set<String> locations = handler.supportedInjectionLocations();
-            assertTrue(locations.contains("method_enter"));
-            assertTrue(locations.contains("method_exit"));
-            assertEquals(2, locations.size());
+            assertTrue(locations.contains("method_around"));
+            assertEquals(1, locations.size());
         }
 
         @Test
-        @DisplayName("validate() 拒绝 method_around")
-        void rejectMethodAround() {
+        @DisplayName("validate() 拒绝 method_enter (TRACE 只支持 method_around)")
+        void rejectMethodEnter() {
             InjectRequest cmd = new InjectRequest();
             cmd.setProbeType("TRACE");
-            cmd.setInjectionLocation("method_around");
+            cmd.setInjectionLocation("method_enter");
 
             ValidationResult result = handler.validate(cmd);
             assertFalse(result.isValid());
         }
 
         @Test
-        @DisplayName("validate() 通过合法请求")
+        @DisplayName("validate() 通过 method_around 请求")
         void acceptValidRequest() {
             InjectRequest cmd = new InjectRequest();
             cmd.setProbeType("TRACE");
-            cmd.setInjectionLocation("method_enter");
+            cmd.setInjectionLocation("method_around");
 
             ValidationResult result = handler.validate(cmd);
             assertTrue(result.isValid());

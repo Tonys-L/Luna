@@ -6,9 +6,6 @@ import fun.efto.luna.core.plugin.lifecycle.AffectedClassTracker;
 import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
 import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
 import fun.efto.luna.core.probe.ProbeOutput;
-import fun.efto.luna.core.injection.rule.InjectionRule;
-import fun.efto.luna.core.injection.rule.RuleManager;
-import fun.efto.luna.core.injection.rule.RuleStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,21 +76,6 @@ public class UnloadTest {
         assertTrue(result.isSuccess());
         assertEquals(PluginState.UNLOADED, pluginManager.getState("removable"));
         assertNull(pluginManager.getPlugin("removable"));
-    }
-
-    @Test
-    @DisplayName("卸载插件后相关规则被挂起")
-    void testSuspendOrphanedRulesOnUnload() {
-        LunaPlugin plugin = new TestPlugin("rule-provider", Collections.emptyList());
-        pluginManager.initializeAll(Arrays.asList(plugin));
-
-        InjectionRule rule = new InjectionRule();
-        rule.setInjectionLocation("method-enter");
-        rule.setStatus(RuleStatus.ACTIVE);
-        RuleManager.getInstance().addRule(rule);
-
-        PluginUnloadResult result = pluginManager.unload("rule-provider");
-        assertTrue(result.isSuccess());
     }
 
     private static class TestPlugin implements LunaPlugin {

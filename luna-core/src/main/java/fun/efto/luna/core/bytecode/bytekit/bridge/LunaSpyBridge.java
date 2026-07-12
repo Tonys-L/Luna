@@ -1,6 +1,6 @@
 package fun.efto.luna.core.bytecode.bytekit.bridge;
 
-import fun.efto.luna.core.probe.LunaSpy;
+import fun.efto.luna.core.plugin.builtin.log.LogProbe;
 
 /**
  * @author : Tony.L(286269159@qq.com)
@@ -13,11 +13,11 @@ public class LunaSpyBridge {
 
     public static void onMethodEnter(Object target, Object[] args, String methodName) {
         String message = "[ENTER] " + methodName;
-        LunaSpy.onLog(message);
+        LogProbe.onLog(message);
     }
 
     public static void onMethodExit(Object target, Object[] args, String methodName, Object returnValue) {
         String message = "[EXIT] " + methodName + " => " + returnValue;
-        LunaSpy.onLog(message);
+        LogProbe.onLog(message);
     }
 }

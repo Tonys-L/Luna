@@ -16,11 +16,4 @@ public final class ProbeOutput {
     public static boolean offer(ProbeMessage message) {
         return BUFFER.offer(message);
     }
-
-    /**
-     * Convenience method for backward compatibility — wraps plain strings as LOG type messages.
-     */
-    public static boolean offer(String message) {
-        return BUFFER.offer(new ProbeMessage("LOG", message));
-    }
 }

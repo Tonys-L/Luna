@@ -17,6 +17,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LocalVariableNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
@@ -70,9 +71,17 @@ public class AsmMethodExpressionInjector implements BytecodeInjector {
             mn.instructions.insert(code);
         }
         if (phase == Phase.EXIT || phase == Phase.AROUND) {
+            // Set up return value capture slot only when the probe handler needs it
+            Type returnType = Type.getReturnType(mn.desc);
+            int returnCaptureSlot = -1;
+            if (probeHandler.capturesReturnValue() && returnType != Type.VOID_TYPE) {
+                returnCaptureSlot = mn.maxLocals;
+                asmContext.setReturnCaptureSlot(returnCaptureSlot);
+            }
+
             InsnList code = TreeApiBytecodeHelper.assemble(asmContext, compiledCode, probeHandler, bytecode, GenerateContext.Phase.EXIT);
             updateMaxLocals(mn, code, asmContext);
-            insertBeforeReturns(mn, code);
+            insertBeforeReturns(mn, code, returnType, returnCaptureSlot);
         }
 
         LineInjectorHelper.removeFrameNodes(cn);
@@ -133,7 +142,7 @@ public class AsmMethodExpressionInjector implements BytecodeInjector {
         return slot;
     }
 
-    private void insertBeforeReturns(MethodNode mn, InsnList code) {
+    private void insertBeforeReturns(MethodNode mn, InsnList code, Type returnType, int returnCaptureSlot) {
         List<AbstractInsnNode> returnInsns = new ArrayList<>();
         for (AbstractInsnNode insn = mn.instructions.getFirst(); insn != null; insn = insn.getNext()) {
             if (LineInjectorHelper.isReturnOrThrow(insn.getOpcode())) {
@@ -141,8 +150,72 @@ public class AsmMethodExpressionInjector implements BytecodeInjector {
             }
         }
         for (AbstractInsnNode ret : returnInsns) {
+            // Generate pre-code to capture return value into a local slot
+            if (returnCaptureSlot >= 0) {
+                InsnList preCode = generateReturnCapturePreCode(ret.getOpcode(), returnType, returnCaptureSlot);
+                mn.instructions.insertBefore(ret, preCode);
+            }
+
             InsnList copy = cloneInsnList(code);
             mn.instructions.insertBefore(ret, copy);
+        }
+    }
+
+    /**
+     * Generate pre-code to capture the return value before a RETURN/ATHROW instruction.
+     * For value-returning instructions: DUP/DUP2 + box if primitive + ASTORE.
+     * For void RETURN or ATHROW: ACONST_NULL + ASTORE.
+     */
+    private InsnList generateReturnCapturePreCode(int returnOpcode, Type returnType, int captureSlot) {
+        InsnList preCode = new InsnList();
+
+        if (returnOpcode == Opcodes.ATHROW || returnOpcode == Opcodes.RETURN) {
+            // No return value on stack — store null
+            preCode.add(new InsnNode(Opcodes.ACONST_NULL));
+            preCode.add(new VarInsnNode(Opcodes.ASTORE, captureSlot));
+        } else {
+            // Value-returning instruction: DUP the return value, box if primitive, then store
+            if (returnType.getSize() == 2) {
+                preCode.add(new InsnNode(Opcodes.DUP2));
+            } else {
+                preCode.add(new InsnNode(Opcodes.DUP));
+            }
+            addBoxingInstructions(preCode, returnType);
+            preCode.add(new VarInsnNode(Opcodes.ASTORE, captureSlot));
+        }
+
+        return preCode;
+    }
+
+    private void addBoxingInstructions(InsnList preCode, Type returnType) {
+        switch (returnType.getSort()) {
+            case Type.BOOLEAN:
+                preCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false));
+                break;
+            case Type.BYTE:
+                preCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false));
+                break;
+            case Type.CHAR:
+                preCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false));
+                break;
+            case Type.SHORT:
+                preCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false));
+                break;
+            case Type.INT:
+                preCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false));
+                break;
+            case Type.LONG:
+                preCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false));
+                break;
+            case Type.FLOAT:
+                preCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false));
+                break;
+            case Type.DOUBLE:
+                preCode.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false));
+                break;
+            default:
+                // Object type — no boxing needed, already on stack as reference
+                break;
         }
     }
 

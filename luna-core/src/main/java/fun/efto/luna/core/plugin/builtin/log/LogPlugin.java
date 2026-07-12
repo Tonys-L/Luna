@@ -17,6 +17,5 @@ public class LogPlugin implements LunaPlugin {
     public void initialize(PluginContext ctx) {
         ctx.registerProbeHandler(new LogProbeHandler());
         ctx.registerCodeEngine(new ExpressionCodeEngine());
-        ctx.registerTemplate(LogTemplates.methodAccessLog());
     }
 }

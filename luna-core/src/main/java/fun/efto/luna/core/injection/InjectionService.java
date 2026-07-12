@@ -5,6 +5,7 @@ import fun.efto.luna.core.injection.port.BytecodePreviewer;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.port.LocalVarValidator;
 import fun.efto.luna.core.injection.port.Retransformer;
+import fun.efto.luna.core.plugin.PluginContext;
 import fun.efto.luna.core.plugin.ProbeHandler;
 import fun.efto.luna.core.plugin.ValidationResult;
 import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
@@ -177,8 +178,21 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
         return injectionRegistry.getInjectionPoints(className);
     }
 
+    @Override
+    public boolean contains(String pointId) {
+        return injectionRegistry.contains(pointId);
+    }
+
     public PersistentInjection getInjection(String id) {
         return injectionRepository.findById(id);
+    }
+
+    public List<PersistentInjection> getAllInjections() {
+        return injectionRepository.findAll();
+    }
+
+    public boolean isActive(String injectionId) {
+        return injectionRegistry.contains(injectionId);
     }
 
     @Override
@@ -187,15 +201,19 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
             injection.setId(UUID.randomUUID().toString());
         }
         injectionRepository.save(injection);
-        
+
         try {
             InjectionPoint point = InjectionPointFactory.create(injection);
             injectionRegistry.register(point);
+
+            // Fire onInject hook after successful save + register, before retransform
+            fireOnInject(injection);
+
             triggerRetransform(injection.getClazz());
         } catch (Exception e) {
             LOGGER.error("Failed to register injection point: {}", injection.getId(), e);
         }
-        
+
         return injection.getId();
     }
 
@@ -203,6 +221,10 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
     public void removeInjection(String id) {
         PersistentInjection injection = injectionRepository.findById(id);
         if (injection != null) {
+            // Route to plugin's onDelete hook for associated cleanup (e.g., paired injection deletion)
+            ProbeHandlerRegistry.getInstance().get(injection.getProbeType())
+                .ifPresent(handler -> handler.onDelete(injection, injectionRepository, injectionRegistry));
+            // Core mechanism: delete the injection itself
             injectionRepository.delete(id);
             injectionRegistry.unregister(id);
             triggerRetransform(injection.getClazz());
@@ -291,6 +313,20 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
         }
     }
 
+    private void fireOnInject(PersistentInjection injection) {
+        try {
+            ProbeHandlerRegistry registry = ProbeHandlerRegistry.getInstance();
+            registry.get(injection.getProbeType()).ifPresent(handler -> {
+                registry.getPluginContext(injection.getProbeType()).ifPresent(ctx -> {
+                    handler.onInject(injection, ctx);
+                });
+            });
+        } catch (Exception e) {
+            LOGGER.error("onInject hook failed for injection: {} (probeType={})",
+                    injection.getId(), injection.getProbeType(), e);
+        }
+    }
+
     private String validateLocalVarReferences(InjectRequest cmd) {
         try {
             byte[] bytecode = bytecodeLoader.loadBytecode(cmd.getClazz());
@@ -312,7 +348,8 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
         pi.setCodeType(cmd.getCodeType());
         pi.setCode(cmd.getCode());
         pi.setLineNumber(cmd.getLineNumber() != null ? cmd.getLineNumber() : 0);
-        pi.setEphemeral(true);
+        pi.setEphemeral(cmd.isEphemeral());
+        pi.setGroupId(cmd.getGroupId());
         return pi;
     }
 

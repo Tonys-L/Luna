@@ -306,87 +306,6 @@ test.describe('Luna - 注入生命周期', () => {
   })
 })
 
-test.describe('Luna - 规则 CRUD', () => {
-
-  let ruleId
-
-  test.afterEach(async ({ request }) => {
-    if (ruleId) {
-      await request.delete(`/api/rules/${ruleId}`)
-      ruleId = null
-    }
-  })
-
-  test('POST /api/rules 创建规则', async ({ request }) => {
-    const response = await request.post('/api/rules', {
-      data: {
-        targetClass: TARGET_CLASS,
-        targetMethod: TARGET_METHOD,
-        injectionType: 'METHOD_ENTER',
-        expression: '',
-        logContent: 'E2E test rule',
-        enabled: true,
-        codeType: 'EXPRESSION'
-      }
-    })
-    expect(response.ok()).toBeTruthy()
-    const json = await response.json()
-    expect(json.success).toBeTruthy()
-    expect(json.data.id).toBeDefined()
-    ruleId = json.data.id
-  })
-
-  test('GET /api/rules 获取规则列表', async ({ request }) => {
-    const createResp = await request.post('/api/rules', {
-      data: {
-        targetClass: TARGET_CLASS,
-        targetMethod: TARGET_METHOD,
-        injectionType: 'METHOD_ENTER',
-        expression: '',
-        logContent: 'List test rule',
-        enabled: true,
-        codeType: 'EXPRESSION'
-      }
-    })
-    const createJson = await createResp.json()
-    ruleId = createJson.data.id
-
-    const listResp = await request.get('/api/rules')
-    expect(listResp.ok()).toBeTruthy()
-    const listJson = await listResp.json()
-    expect(listJson.success).toBeTruthy()
-    expect(Array.isArray(listJson.data)).toBeTruthy()
-    expect(listJson.data.length).toBeGreaterThan(0)
-  })
-
-  test('DELETE /api/rules/{id} 删除规则', async ({ request }) => {
-    const createResp = await request.post('/api/rules', {
-      data: {
-        targetClass: TARGET_CLASS,
-        targetMethod: TARGET_METHOD,
-        injectionType: 'METHOD_ENTER',
-        expression: '',
-        logContent: 'Delete test rule',
-        enabled: true,
-        codeType: 'EXPRESSION'
-      }
-    })
-    const createJson = await createResp.json()
-    const id = createJson.data.id
-
-    const deleteResp = await request.delete(`/api/rules/${id}`)
-    expect(deleteResp.ok()).toBeTruthy()
-
-    const getResp = await request.get(`/api/rules/${id}`)
-    expect(getResp.ok()).toBeFalsy()
-  })
-
-  test('GET /api/rules/{id} 不存在返回 404', async ({ request }) => {
-    const response = await request.get('/api/rules/999999')
-    expect(response.status()).toBe(404)
-  })
-})
-
 test.describe('Luna - 系统状态与指标', () => {
 
   test('GET /api/status 返回运行状态', async ({ request }) => {
@@ -436,48 +355,6 @@ test.describe('Luna - 系统状态与指标', () => {
     expect(json.success).toBeTruthy()
     expect(json.data.status).toBeDefined()
     expect(json.data.timestamp).toBeDefined()
-  })
-})
-
-test.describe('Luna - 模板管理', () => {
-  test('GET /api/templates 返回模板列表', async ({ request }) => {
-    const response = await request.get('/api/templates')
-    expect(response.ok()).toBeTruthy()
-    const json = await response.json()
-    expect(json.success).toBeTruthy()
-    expect(Array.isArray(json.data)).toBeTruthy()
-  })
-
-  test('GET /api/templates/categories 返回按分类分组', async ({ request }) => {
-    const response = await request.get('/api/templates/categories')
-    expect(response.ok()).toBeTruthy()
-    const json = await response.json()
-    expect(json.success).toBeTruthy()
-    expect(typeof json.data).toBe('object')
-  })
-
-  test('GET /api/templates/{name} 不存在返回 404', async ({ request }) => {
-    const response = await request.get('/api/templates/nonexistent-template-xyz')
-    expect(response.status()).toBe(404)
-  })
-
-  test('POST /api/templates/apply 应用模板', async ({ request }) => {
-    const listResp = await request.get('/api/templates')
-    const listJson = await listResp.json()
-    if (listJson.data && listJson.data.length > 0) {
-      const template = listJson.data[0]
-      const response = await request.post('/api/templates/apply', {
-        data: {
-          templateName: template.name,
-          targetClass: TARGET_CLASS,
-          targetMethod: TARGET_METHOD,
-          parameters: {}
-        }
-      })
-      expect(response.ok()).toBeTruthy()
-      const json = await response.json()
-      expect(json.success).toBeTruthy()
-    }
   })
 })
 

@@ -11,4 +11,5 @@ public interface InjectionRepository {
     void delete(String id);
     PersistentInjection findById(String id);
     List<PersistentInjection> findAll();
+    List<PersistentInjection> findByGroupId(String groupId);
 }

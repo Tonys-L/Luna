@@ -20,7 +20,7 @@ public class InjectionRegistryTest {
     }
 
     private InjectionPoint createPoint(String id, String targetClass) {
-        InjectionTarget target = new BaseTarget(InjectionLocation.of("mock", "mock"), targetClass) {};
+        InjectionTarget target = new BaseTarget(InjectionLocation.of("mock", "mock", "other"), targetClass) {};
         PersistentInjection source = new PersistentInjection();
         source.setId(id);
         return new InjectionPoint(id, target, null, "mock", "mock", source);

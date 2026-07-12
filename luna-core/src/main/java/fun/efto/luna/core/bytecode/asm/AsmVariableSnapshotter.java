@@ -1,5 +1,7 @@
 package fun.efto.luna.core.bytecode.asm;
 
+import fun.efto.luna.core.bytecode.asm.analyzer.LocalVariableScanner;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -49,46 +49,6 @@ export async function injectMethodLog(injectionData) {
   }
 }
 
-export async function getRules() {
-  try {
-    const data = await get(apiUrl('/rules'))
-    return data || []
-  } catch (error) {
-    console.error('获取规则列表失败:', error)
-    throw error
-  }
-}
-
-export async function addRule(rule) {
-  try {
-    const data = await post(apiUrl('/rules'), rule)
-    return data
-  } catch (error) {
-    console.error('添加规则失败:', error)
-    throw error
-  }
-}
-
-export async function updateRule(id, rule) {
-  try {
-    const data = await put(apiUrl(`/rules/${id}`), rule)
-    return data
-  } catch (error) {
-    console.error('更新规则失败:', error)
-    throw error
-  }
-}
-
-export async function deleteRule(id) {
-  try {
-    const data = await del(apiUrl(`/rules/${id}`))
-    return data
-  } catch (error) {
-    console.error('删除规则失败:', error)
-    throw error
-  }
-}
-
 export async function getStatus() {
   try {
     const data = await get(apiUrl('/status'))
@@ -129,6 +89,16 @@ export async function getInjectionList(className) {
     return data || { injections: [] }
   } catch (error) {
     console.error('获取注入点列表失败:', error)
+    return { injections: [] }
+  }
+}
+
+export async function getPersistentInjections() {
+  try {
+    const data = await get(apiUrl('/injections/persistent'))
+    return data || { injections: [] }
+  } catch (error) {
+    console.error('获取持久注入列表失败:', error)
     return { injections: [] }
   }
 }

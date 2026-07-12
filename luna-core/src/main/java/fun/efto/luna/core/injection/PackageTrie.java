@@ -59,4 +59,18 @@ class PackageTrie {
             removeByIdRecursive(child, id);
         }
     }
+
+    public boolean containsById(String id) {
+        return containsByIdRecursive(root, id);
+    }
+
+    private boolean containsByIdRecursive(Node node, String id) {
+        for (InjectionPoint p : node.points) {
+            if (p.getId().equals(id)) return true;
+        }
+        for (Node child : node.children.values()) {
+            if (containsByIdRecursive(child, id)) return true;
+        }
+        return false;
+    }
 }

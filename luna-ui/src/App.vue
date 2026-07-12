@@ -76,12 +76,16 @@
         
         <!-- 主内容区域 -->
         <main class="app-main">
-          <ClassTreeViewer v-if="activeTab === 'class-tree'" @class-count-update="updateClassCount" @refresh-data="handleRefreshData" />
-          <LogViewer v-else-if="activeTab === 'log'" />
-          <Dashboard v-else-if="activeTab === 'dashboard'" />
-          <ThreadAnalyzer v-else-if="activeTab === 'thread-analyzer'" />
-          <ConfigurationViewer v-else-if="activeTab === 'configuration'" />
-          <PluginManager v-else-if="activeTab === 'plugin-manager'" />
+          <keep-alive>
+            <ClassTreeViewer v-if="activeTab === 'class-tree'" @class-count-update="updateClassCount" @refresh-data="handleRefreshData" />
+          </keep-alive>
+          <keep-alive>
+            <LogViewer v-if="activeTab === 'log'" />
+          </keep-alive>
+          <Dashboard v-if="activeTab === 'dashboard'" />
+          <ThreadAnalyzer v-if="activeTab === 'thread-analyzer'" />
+          <ConfigurationViewer v-if="activeTab === 'configuration'" />
+          <PluginManager v-if="activeTab === 'plugin-manager'" />
         </main>
         
         <!-- 底部状态栏 -->

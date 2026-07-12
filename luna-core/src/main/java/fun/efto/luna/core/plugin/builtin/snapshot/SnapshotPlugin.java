@@ -18,6 +18,5 @@ public class SnapshotPlugin implements LunaPlugin {
     public void initialize(PluginContext ctx) {
         ctx.registerProbeHandler(new SnapshotProbeHandler());
         ctx.registerCodeEngine(new ExpressionCodeEngine());
-        ctx.registerTemplate(SnapshotTemplates.lineSnapshot());
     }
 }

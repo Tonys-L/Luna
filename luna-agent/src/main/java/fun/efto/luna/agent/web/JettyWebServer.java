@@ -4,9 +4,7 @@ import fun.efto.luna.agent.clazz.ClassResourceHelper;
 import fun.efto.luna.agent.clazz.ClassScanner;
 import fun.efto.luna.agent.web.controller.ClassController;
 import fun.efto.luna.agent.web.controller.InjectionController;
-import fun.efto.luna.agent.web.controller.RuleController;
 import fun.efto.luna.agent.web.controller.StatusController;
-import fun.efto.luna.agent.web.controller.TemplateController;
 import fun.efto.luna.agent.web.controller.TestController;
 import fun.efto.luna.agent.web.controller.MetricsController;
 import fun.efto.luna.agent.web.controller.CapabilityController;
@@ -15,8 +13,6 @@ import fun.efto.luna.agent.web.ws.LogDispatcher;
 import fun.efto.luna.agent.web.ws.LogWebSocketServlet;
 import fun.efto.luna.core.injection.InjectionService;
 import fun.efto.luna.core.plugin.LunaController;
-import fun.efto.luna.core.injection.rule.RuleManager;
-import fun.efto.luna.core.injection.rule.template.TemplateService;
 import fun.efto.luna.core.infra.web.WebServer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -56,21 +52,16 @@ public class JettyWebServer implements WebServer {
     public JettyWebServer(int port, JettyConfiguration configuration,
                           ClassScanner classScanner,
                           ClassResourceHelper classResourceHelper,
-                          InjectionService injectionService,
-                          RuleManager ruleManager,
-                          TemplateService templateService) {
+                          InjectionService injectionService) {
         this.port = port;
         this.configuration = configuration;
         this.dispatcher = new DispatcherServlet();
-        this.server = createServer(classScanner, classResourceHelper, injectionService,
-                ruleManager, templateService);
+        this.server = createServer(classScanner, classResourceHelper, injectionService);
     }
 
     private Server createServer(ClassScanner classScanner,
                                  ClassResourceHelper classResourceHelper,
-                                 InjectionService injectionService,
-                                 RuleManager ruleManager,
-                                 TemplateService templateService) {
+                                 InjectionService injectionService) {
         Server jettyServer = new Server();
 
         ServerConnector connector = new ServerConnector(jettyServer);
@@ -94,8 +85,6 @@ public class JettyWebServer implements WebServer {
         dispatcher.registerController(new StatusController());
         dispatcher.registerController(new ClassController(classScanner, classResourceHelper, injectionService));
         dispatcher.registerController(new InjectionController(injectionService));
-        dispatcher.registerController(new RuleController(ruleManager));
-        dispatcher.registerController(new TemplateController(templateService));
         dispatcher.registerController(new TestController(classScanner, classResourceHelper));
         dispatcher.registerController(new MetricsController());
         dispatcher.registerController(new CapabilityController());

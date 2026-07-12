@@ -49,16 +49,6 @@ public class TracePluginTest {
     }
 
     @Test
-    @DisplayName("registerTemplate 注册 trace 模板")
-    void testRegisterTemplates() {
-        plugin.initialize(ctx);
-        assertFalse(ctx.getTemplates().isEmpty());
-        assertTrue(ctx.getTemplates().stream().anyMatch(t -> "method-timing".equals(t.getName())));
-        assertTrue(ctx.getTemplates().stream().anyMatch(t -> "method-timing-threshold".equals(t.getName())));
-        assertTrue(ctx.getTemplates().stream().anyMatch(t -> "slow-method-alert".equals(t.getName())));
-    }
-
-    @Test
     @DisplayName("插件元信息正确")
     void testPluginMetadata() {
         assertEquals("trace", plugin.getId());

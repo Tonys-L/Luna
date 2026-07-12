@@ -24,7 +24,7 @@ public class InjectionTypeRegistryTest {
 
     @Test
     void testRegisterAndResolve() {
-        InjectionLocation location = InjectionLocation.of("method_enter", "test");
+        InjectionLocation location = InjectionLocation.of("method_enter", "test", "method");
 
         InjectionTypeRegistry.getInstance().register(location);
         assertSame(location, InjectionTypeRegistry.getInstance().resolve("method_enter"));
@@ -37,7 +37,7 @@ public class InjectionTypeRegistryTest {
 
     @Test
     void testAliasSupport() {
-        InjectionLocation location = InjectionLocation.of("method_enter", "test", "enter", "ENTER");
+        InjectionLocation location = InjectionLocation.of("method_enter", "test", "method", "enter", "ENTER");
 
         InjectionTypeRegistry.getInstance().register(location);
         assertSame(location, InjectionTypeRegistry.getInstance().resolve("enter"));
@@ -46,7 +46,7 @@ public class InjectionTypeRegistryTest {
 
     @Test
     void testUnregisterAll() {
-        InjectionLocation location = InjectionLocation.of("method_enter", "test");
+        InjectionLocation location = InjectionLocation.of("method_enter", "test", "method");
 
         InjectionTypeRegistry.getInstance().register(location);
         InjectionTypeRegistry.getInstance().unregisterAll(Collections.singletonList(location));

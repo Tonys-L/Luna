@@ -39,4 +39,14 @@ public interface BytecodeHelper {
     void jump(Object label);
 
     void returnVoid();
+
+    void loadNull();
+
+    void newObjectArray(int size);
+
+    void dup();
+
+    void arrayStore();
+
+    void loadArgumentBoxed(int paramIndex);
 }

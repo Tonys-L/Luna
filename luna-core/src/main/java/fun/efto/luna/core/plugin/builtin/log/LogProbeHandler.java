@@ -6,9 +6,12 @@ import fun.efto.luna.core.plugin.AbstractProbeHandler;
 import fun.efto.luna.core.plugin.GenerateContext;
 import fun.efto.luna.core.plugin.ValidationResult;
 
+import fun.efto.luna.core.plugin.FormFieldSchema;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,6 +47,26 @@ public class LogProbeHandler extends AbstractProbeHandler {
             return ValidationResult.fail("code is required for LOG probe");
         }
         return ValidationResult.ok();
+    }
+
+    @Override
+    public String getDisplayName() { return "日志表达式"; }
+
+    @Override
+    public String getSyntax() { return "使用 {} 占位符，如: User ID is {}"; }
+
+    @Override
+    public String getIcon() { return "fas fa-print"; }
+
+    @Override
+    public String getGlyphColor() { return "#6366f1"; }
+
+    @Override
+    public List<FormFieldSchema> getConfigSchema() {
+        return java.util.Arrays.asList(
+            new FormFieldSchema("code", "表达式", "textarea", null, null, true, "输入日志表达式"),
+            new FormFieldSchema("condition", "条件", "text", null, null, false, "可选条件表达式")
+        );
     }
 
     @Override

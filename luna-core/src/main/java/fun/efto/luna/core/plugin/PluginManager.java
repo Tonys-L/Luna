@@ -1,7 +1,6 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.injection.target.InjectionLocation;
-import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,10 +43,6 @@ public interface PluginManager {
     }
 
     default Set<ProbeHandler> getProbeHandlersForPlugin(String pluginId) {
-        return Collections.emptySet();
-    }
-
-    default Set<RuleTemplate> getTemplatesForPlugin(String pluginId) {
         return Collections.emptySet();
     }
 

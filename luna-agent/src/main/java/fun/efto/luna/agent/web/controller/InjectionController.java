@@ -54,16 +54,30 @@ public class InjectionController {
         List<InjectionPoint> points = injectionService.getInjectionPoints(className);
         List<InjectionPointVO> voList = new ArrayList<>();
         for (InjectionPoint point : points) {
+            voList.add(toVO(point));
+        }
+        return ApiResult.ok(new InjectionListVO(voList));
+    }
+
+    @GetMapping("/persistent")
+    public ApiResult persistentList() {
+        List<PersistentInjection> all = injectionService.getAllInjections();
+        List<InjectionPointVO> voList = new ArrayList<>();
+        for (PersistentInjection pi : all) {
+            if (pi.isEphemeral()) continue;
+            // 只展示当前实际生效的注入（在 registry 中能找到的）
+            if (!injectionService.isActive(pi.getId())) continue;
             InjectionPointVO vo = new InjectionPointVO();
-            vo.setId(point.getId());
-            vo.setProbeType(point.getProbeType());
-            vo.setInjectionLocation(point.getInjectionLocation().toString());
-            vo.setMethod(point.getTarget().getMethodName());
-            vo.setCode(point.getCode().getContent());
-            vo.setCodeType(point.getCodeType().toString());
-            if (point.getTarget() instanceof LineNumberTarget) {
-                vo.setLineNumber(((LineNumberTarget) point.getTarget()).getLineNumber());
-            }
+            vo.setId(pi.getId());
+            vo.setClazz(pi.getClazz());
+            vo.setProbeType(pi.getProbeType());
+            vo.setInjectionLocation(pi.getInjectionLocation());
+            vo.setMethod(pi.getMethodName());
+            vo.setCode(pi.getCode());
+            vo.setCodeType(pi.getCodeType());
+            vo.setLineNumber(pi.getLineNumber());
+            vo.setEphemeral(false);
+            vo.setGroupId(pi.getGroupId());
             voList.add(vo);
         }
         return ApiResult.ok(new InjectionListVO(voList));
@@ -192,5 +206,25 @@ public class InjectionController {
 
     private ApiResult failWith(String error, Object data) {
         return ApiResult.fail(error, data, 400);
+    }
+
+    private InjectionPointVO toVO(InjectionPoint point) {
+        InjectionPointVO vo = new InjectionPointVO();
+        vo.setId(point.getId());
+        vo.setClazz(point.getTarget().getClassName());
+        vo.setProbeType(point.getProbeType());
+        vo.setInjectionLocation(point.getInjectionLocation().toString());
+        vo.setMethod(point.getTarget().getMethodName());
+        vo.setCode(point.getCode() != null ? point.getCode().getContent() : null);
+        vo.setCodeType(point.getCodeType() != null ? point.getCodeType().toString() : null);
+        vo.setTargetType(point.getTarget().getClass().getSimpleName());
+        if (point.toPersistentInjection() != null) {
+            vo.setEphemeral(point.toPersistentInjection().isEphemeral());
+            vo.setGroupId(point.toPersistentInjection().getGroupId());
+        }
+        if (point.getTarget() instanceof LineNumberTarget) {
+            vo.setLineNumber(((LineNumberTarget) point.getTarget()).getLineNumber());
+        }
+        return vo;
     }
 }

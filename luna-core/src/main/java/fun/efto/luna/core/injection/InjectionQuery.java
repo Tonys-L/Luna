@@ -27,4 +27,9 @@ public interface InjectionQuery {
      * @return 注入点列表
      */
     List<InjectionPoint> getInjectionPoints(String className);
+
+    /**
+     * 检查指定注入点是否在注册表中（即当前实际生效）
+     */
+    boolean contains(String pointId);
 }

@@ -20,7 +20,6 @@ import fun.efto.luna.core.plugin.builtin.method.ExceptionExitInjectionLocation;
 import fun.efto.luna.core.plugin.builtin.method.InvokeInjectionLocation;
 import fun.efto.luna.core.plugin.builtin.method.MethodInjectionLocation;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
-import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +34,6 @@ public class ByteKitRegistrationTest {
     void setUp() {
         BytecodeInjectorRegistry.getInstance().getRegistry().clear();
         InjectionTypeRegistry.getInstance().clear();
-        RuleConverterRegistry.getInstance().clear();
         CoreCapabilityRegistry.getInstance().clear();
     }
 

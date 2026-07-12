@@ -37,6 +37,15 @@ public interface ProbeHandler {
      */
     default void onDelete(PersistentInjection injection, InjectionRepository repository, InjectionRegistry registry) {}
 
+    /**
+     * 注入点创建后的钩子。插件可在此执行关联操作（如成对注入的自动创建）。
+     * 在核心完成当前注入点的保存和注册之后、触发 retransform 之前调用。
+     *
+     * @param injection 已创建的注入点
+     * @param ctx 插件上下文（用于创建衍生注入等操作）
+     */
+    default void onInject(PersistentInjection injection, PluginContext ctx) {}
+
     // 新增：前端展示元数据
     default String getDisplayName() { return getProbeType(); }
     default String getSyntax() { return ""; }
@@ -61,4 +70,11 @@ public interface ProbeHandler {
 
     // 新增：配置表单 schema
     default List<FormFieldSchema> getConfigSchema() { return Collections.emptyList(); }
+
+    /**
+     * 是否需要在 EXIT 阶段捕获方法返回值。
+     * 返回 true 时，注入器会为非 void 方法生成 DUP+box+ASTORE pre-code，
+     * 并通过 AsmInjectionContext.returnCaptureSlot 传递给探针处理器。
+     */
+    default boolean capturesReturnValue() { return false; }
 }

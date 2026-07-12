@@ -26,6 +26,25 @@ public class DefaultBytecodeHelper implements BytecodeHelper {
     @Override public void loadString(String value) { mv.visitLdcInsn(value); }
     @Override public void loadLong(long value) { mv.visitLdcInsn(value); }
     @Override public void returnVoid() { mv.visitInsn(Opcodes.RETURN); }
+    @Override public void loadNull() { mv.visitInsn(Opcodes.ACONST_NULL); }
+
+    @Override
+    public void newObjectArray(int size) {
+        emitIntConstant(size);
+        mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
+    }
+
+    @Override
+    public void dup() { mv.visitInsn(Opcodes.DUP); }
+
+    @Override
+    public void arrayStore() { mv.visitInsn(Opcodes.AASTORE); }
+
+    @Override
+    public void loadArgumentBoxed(int paramIndex) {
+        loadArgument(paramIndex);
+        boxIfNeeded(asmContext.getInjectionTarget().getMethodDescriptor(), paramIndex);
+    }
     @Override
     public void invokeStatic(String owner, String name, String descriptor) {
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, owner, name, descriptor, false);

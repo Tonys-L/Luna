@@ -1,5 +1,6 @@
 package fun.efto.luna.core.bytecode.asm.analyzer;
 
+import fun.efto.luna.core.bytecode.asm.AsmInjectionContext;
 import fun.efto.luna.core.bytecode.asm.Constants;
 import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.analysis.analyzer.ClassAnalysisResult;
@@ -101,83 +102,14 @@ public class AsmClassAnalyzer implements ClassAnalyzer {
             return Collections.emptyList();
         }
 
-        try {
-            ClassReader reader = new ClassReader(classBytes);
-            List<LocalVariableInfo> variables = new ArrayList<>();
+        List<AsmInjectionContext.LocalVarInfo> asmVars =
+                LocalVariableScanner.scanVisibleLocalVariables(classBytes, methodName, methodDescriptor, lineNumber);
 
-            reader.accept(new ClassVisitor(Opcodes.ASM9) {
-                boolean methodFound = false;
-
-                @Override
-                public MethodVisitor visitMethod(int access, String name, String descriptor,
-                                                 String signature, String[] exceptions) {
-                    if (!name.equals(methodName)) return null;
-                    if (methodDescriptor != null && !methodDescriptor.isEmpty()
-                            && !descriptor.equals(methodDescriptor)) return null;
-                    methodFound = true;
-
-                    return new MethodVisitor(Opcodes.ASM9) {
-                        final Map<Label, Integer> labelLines = new LinkedHashMap<>();
-                        final List<Object[]> localVarEntries = new ArrayList<>();
-
-                        @Override
-                        public void visitLineNumber(int line, Label start) {
-                            labelLines.put(start, line);
-                        }
-
-                        @Override
-                        public void visitLocalVariable(String vName, String vDesc, String vSig,
-                                                       Label start, Label end, int index) {
-                            localVarEntries.add(new Object[]{vName, vDesc, index, start, end});
-                        }
-
-                        @Override
-                        public void visitEnd() {
-                            for (Object[] entry : localVarEntries) {
-                                String vName = (String) entry[0];
-                                String vDesc = (String) entry[1];
-                                int slot = (Integer) entry[2];
-                                Label startLabel = (Label) entry[3];
-                                Label endLabel = (Label) entry[4];
-
-                                if (isVariableVisibleAtLine(startLabel, endLabel, lineNumber)) {
-                                    Integer startLine = labelLines.get(startLabel);
-                                    Integer endLine = labelLines.get(endLabel);
-                                    variables.add(new LocalVariableInfo(vName, vDesc, slot,
-                                            startLine != null ? startLine : -1,
-                                            endLine != null ? endLine : -1));
-                                }
-                            }
-                        }
-
-                        private boolean isVariableVisibleAtLine(Label start, Label end, int line) {
-                            Integer startLine = labelLines.get(start);
-                            Integer endLine = labelLines.get(end);
-                            if (startLine == null) return true;
-                            if (line < startLine) return false;
-                            if (endLine == null || endLine <= startLine) return true;
-                            return line <= endLine;
-                        }
-                    };
-                }
-
-                @Override
-                public void visitEnd() {
-                    if (!methodFound) {
-                        throw new RuntimeException("method not found: " + methodName);
-                    }
-                }
-            }, ClassReader.SKIP_FRAMES);
-
-            return variables;
-        } catch (RuntimeException e) {
-            if (e.getMessage() != null && e.getMessage().startsWith("method not found")) {
-                throw e;
-            }
-            return Collections.emptyList();
-        } catch (Exception e) {
-            return Collections.emptyList();
+        List<LocalVariableInfo> result = new ArrayList<>();
+        for (AsmInjectionContext.LocalVarInfo lv : asmVars) {
+            result.add(new LocalVariableInfo(lv.getName(), lv.getDescriptor(), lv.getSlot(), -1, -1));
         }
+        return result;
     }
 
     private static class AnalysisVisitor extends ClassVisitor {

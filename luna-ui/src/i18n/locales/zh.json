@@ -44,9 +44,9 @@
     "injecting": "注入中..."
   },
   "config": {
-    "title": "注入规则",
-    "add_rule": "添加规则",
-    "edit_rule": "编辑规则",
+    "title": "持久注入",
+    "add_rule": "添加注入",
+    "edit_rule": "编辑注入",
     "class": "类",
     "method": "方法",
     "type": "类型",

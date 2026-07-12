@@ -19,6 +19,7 @@ public class AsmInjectionContext extends InjectionContext {
     private List<LocalVarInfo> excludedSameLineVariables = Collections.emptyList();
     private int methodAccess;
     private int maxLocals;
+    private int returnCaptureSlot = -1;
 
     public AsmInjectionContext(InjectionContext injectionContext, byte[] bytecode) {
         super(injectionContext.getInjectionPoint());
@@ -75,6 +76,14 @@ public class AsmInjectionContext extends InjectionContext {
 
     public void setMaxLocals(int maxLocals) {
         this.maxLocals = maxLocals;
+    }
+
+    public int getReturnCaptureSlot() {
+        return returnCaptureSlot;
+    }
+
+    public void setReturnCaptureSlot(int returnCaptureSlot) {
+        this.returnCaptureSlot = returnCaptureSlot;
     }
 
     public static class LocalVarInfo {

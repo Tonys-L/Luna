@@ -1,7 +1,5 @@
 package fun.efto.luna.core.injection;
 
-import fun.efto.luna.core.injection.rule.InjectionRule;
-import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,29 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * @since  : 2026/06/01 10:00
  */
 class DataModelExtensionTest {
-
-    @Nested
-    @DisplayName("InjectionRule 新字段测试")
-    class InjectionRuleTest {
-
-        @Test
-        @DisplayName("probeType getter/setter")
-        void probeTypeGetterSetter() {
-            InjectionRule rule = new InjectionRule();
-            assertNull(rule.getProbeType());
-            rule.setProbeType("LOG");
-            assertEquals("LOG", rule.getProbeType());
-        }
-
-        @Test
-        @DisplayName("injectionLocation getter/setter")
-        void injectionLocationGetterSetter() {
-            InjectionRule rule = new InjectionRule();
-            assertNull(rule.getInjectionLocation());
-            rule.setInjectionLocation("method_enter");
-            assertEquals("method_enter", rule.getInjectionLocation());
-        }
-    }
 
     @Nested
     @DisplayName("PersistentInjection 新字段测试")
@@ -81,29 +56,6 @@ class DataModelExtensionTest {
             assertNull(command.getInjectionLocation());
             command.setInjectionLocation("line_before");
             assertEquals("line_before", command.getInjectionLocation());
-        }
-    }
-
-    @Nested
-    @DisplayName("RuleTemplate.TemplateRule 新字段测试")
-    class TemplateRuleTest {
-
-        @Test
-        @DisplayName("probeType getter/setter")
-        void probeTypeGetterSetter() {
-            RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
-            assertNull(rule.getProbeType());
-            rule.setProbeType("LOG");
-            assertEquals("LOG", rule.getProbeType());
-        }
-
-        @Test
-        @DisplayName("injectionLocation getter/setter")
-        void injectionLocationGetterSetter() {
-            RuleTemplate.TemplateRule rule = new RuleTemplate.TemplateRule();
-            assertNull(rule.getInjectionLocation());
-            rule.setInjectionLocation("method_enter");
-            assertEquals("method_enter", rule.getInjectionLocation());
         }
     }
 }

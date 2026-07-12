@@ -55,6 +55,17 @@ public class DefaultInjectionRepository implements InjectionRepository {
     public List<PersistentInjection> findAll() {
         return new ArrayList<>(injections.values());
     }
+
+    @Override
+    public List<PersistentInjection> findByGroupId(String groupId) {
+        List<PersistentInjection> result = new ArrayList<>();
+        for (PersistentInjection inj : injections.values()) {
+            if (groupId.equals(inj.getGroupId())) {
+                result.add(inj);
+            }
+        }
+        return result;
+    }
     
     private void persist() {
         try {

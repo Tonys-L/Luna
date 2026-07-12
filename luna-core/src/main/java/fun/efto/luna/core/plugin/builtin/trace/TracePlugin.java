@@ -1,7 +1,6 @@
 package fun.efto.luna.core.plugin.builtin.trace;
 
 import fun.efto.luna.core.plugin.*;
-import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +24,5 @@ public class TracePlugin implements LunaPlugin {
     @Override
     public void initialize(PluginContext ctx) {
         ctx.registerProbeHandler(new TraceProbeHandler());
-        for (RuleTemplate t : TraceTemplates.all()) ctx.registerTemplate(t);
     }
 }

@@ -21,17 +21,6 @@ public class InjectionManagerMigrationTest {
     }
 
     @Test
-    @DisplayName("RuleManager 不应引用 InjectionManager")
-    void testRuleManagerNoInjectionManagerReference() throws ClassNotFoundException {
-        Class<?> ruleManagerClass = Class.forName("fun.efto.luna.core.injection.rule.RuleManager");
-        for (java.lang.reflect.Field field : ruleManagerClass.getDeclaredFields()) {
-            assertNotEquals("fun.efto.luna.core.injection.InjectionManager",
-                    field.getType().getName(),
-                    "RuleManager should not hold InjectionManager reference");
-        }
-    }
-
-    @Test
     @DisplayName("InjectionService 应提供 suspendInjectionsByLocation 方法")
     void testInjectionServiceHasSuspendMethod() throws NoSuchMethodException {
         InjectionService.class.getMethod("suspendInjectionsByLocation", java.util.Set.class, String.class);

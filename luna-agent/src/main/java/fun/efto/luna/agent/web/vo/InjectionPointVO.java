@@ -6,12 +6,16 @@ package fun.efto.luna.agent.web.vo;
  */
 public class InjectionPointVO {
     private String id;
+    private String clazz;
     private String probeType;
     private String injectionLocation;
     private String method;
     private String code;
     private String codeType;
     private Integer lineNumber;
+    private String targetType;
+    private boolean ephemeral;
+    private String groupId;
 
     public InjectionPointVO() {}
 
@@ -38,4 +42,12 @@ public class InjectionPointVO {
     public void setCodeType(String codeType) { this.codeType = codeType; }
     public Integer getLineNumber() { return lineNumber; }
     public void setLineNumber(Integer lineNumber) { this.lineNumber = lineNumber; }
+    public String getTargetType() { return targetType; }
+    public void setTargetType(String targetType) { this.targetType = targetType; }
+    public boolean isEphemeral() { return ephemeral; }
+    public void setEphemeral(boolean ephemeral) { this.ephemeral = ephemeral; }
+    public String getGroupId() { return groupId; }
+    public void setGroupId(String groupId) { this.groupId = groupId; }
+    public String getClazz() { return clazz; }
+    public void setClazz(String clazz) { this.clazz = clazz; }
 }

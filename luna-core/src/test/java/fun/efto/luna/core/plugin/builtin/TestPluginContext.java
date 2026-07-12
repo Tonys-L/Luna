@@ -4,11 +4,11 @@ import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.infra.RingBuffer;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
 import fun.efto.luna.core.injection.CodeEngine;
+import fun.efto.luna.core.injection.InjectRequest;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
 import fun.efto.luna.core.plugin.*;
 import fun.efto.luna.core.probe.ProbeMessage;
-import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 
 import fun.efto.luna.core.injection.port.Retransformer;
 
@@ -25,15 +25,17 @@ public class TestPluginContext implements PluginContext {
 
     private final List<InjectionLocation> injectionLocations = new ArrayList<>();
     private final Map<InjectionLocation, BytecodeInjector> injectors = new HashMap<>();
-    private final List<InjectionRuleConverter> ruleConverters = new ArrayList<>();
-    private final Map<InjectionLocation, InjectionRuleConverter> typedRuleConverters = new HashMap<>();
-    private final List<RuleTemplate> templates = new ArrayList<>();
     private final List<CodeEngine> codeEngines = new ArrayList<>();
     private final List<ProbeHandler> probeHandlers = new ArrayList<>();
     private final List<String> bootstrapClasses = new ArrayList<>();
 
     @Override
     public void registerInjectionLocation(InjectionLocation location) {
+        injectionLocations.add(location);
+    }
+
+    @Override
+    public void registerInjectionLocation(InjectionLocation location, InjectionLocationUIDescriptor uiDescriptor) {
         injectionLocations.add(location);
     }
 
@@ -50,21 +52,6 @@ public class TestPluginContext implements PluginContext {
     @Override
     public void registerCodeEngine(CodeEngine engine) {
         codeEngines.add(engine);
-    }
-
-    @Override
-    public void registerRuleConverter(InjectionRuleConverter converter) {
-        ruleConverters.add(converter);
-    }
-
-    @Override
-    public void registerRuleConverter(InjectionLocation location, InjectionRuleConverter converter) {
-        typedRuleConverters.put(location, converter);
-    }
-
-    @Override
-    public void registerTemplate(RuleTemplate template) {
-        templates.add(template);
     }
 
     @Override
@@ -93,11 +80,17 @@ public class TestPluginContext implements PluginContext {
     @Override
     public void savePluginConfig(Map<String, String> config) {}
 
+    @Override
+    public byte[] getClassBytes(String className) { return null; }
+
+    @Override
+    public java.util.Set<String> getLoadedClassNames() { return java.util.Collections.emptySet(); }
+
+    @Override
+    public String inject(InjectRequest request) { return null; }
+
     public List<InjectionLocation> getInjectionLocations() { return injectionLocations; }
     public Map<InjectionLocation, BytecodeInjector> getInjectors() { return injectors; }
-    public List<InjectionRuleConverter> getRuleConverters() { return ruleConverters; }
-    public Map<InjectionLocation, InjectionRuleConverter> getTypedRuleConverters() { return typedRuleConverters; }
-    public List<RuleTemplate> getTemplates() { return templates; }
     public List<CodeEngine> getCodeEngines() { return codeEngines; }
     public List<ProbeHandler> getProbeHandlers() { return probeHandlers; }
 }

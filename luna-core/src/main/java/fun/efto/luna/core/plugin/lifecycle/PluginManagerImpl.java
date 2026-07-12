@@ -3,17 +3,17 @@ package fun.efto.luna.core.plugin.lifecycle;
 import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.infra.RingBuffer;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
+import fun.efto.luna.core.injection.InjectionService;
+import fun.efto.luna.core.injection.port.BytecodeLoader;
 import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.infra.config.ConfigManager;
 import fun.efto.luna.core.plugin.*;
 import fun.efto.luna.core.probe.ProbeMessage;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
-import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import fun.efto.luna.core.plugin.loader.PluginClassLoader;
 import fun.efto.luna.core.plugin.loader.PluginDependencyResolver;
 import fun.efto.luna.core.plugin.loader.LunaAgentClassLoader;
-import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 import fun.efto.luna.core.infra.web.WebServer;
 import java.io.File;
 import java.io.IOException;
@@ -43,18 +43,27 @@ public class PluginManagerImpl implements PluginManager {
     private final Retransformer retransformer;
     private final ClassAnalyzer classAnalyzer;
     private final Decompiler decompiler;
+    private final BytecodeLoader bytecodeLoader;
+    private final InjectionService injectionService;
     private final WebServer webServer;
-    private volatile RuleSuspensionManager ruleSuspensionManager;
 
     public PluginManagerImpl(ReadyGate readyGate, LogEmitter logEmitter,
                               RingBuffer<ProbeMessage> logBuffer, Retransformer retransformer,
                               ClassAnalyzer classAnalyzer, Decompiler decompiler) {
-        this(readyGate, logEmitter, logBuffer, retransformer, classAnalyzer, decompiler, null);
+        this(readyGate, logEmitter, logBuffer, retransformer, classAnalyzer, decompiler, null, null, null);
     }
 
     public PluginManagerImpl(ReadyGate readyGate, LogEmitter logEmitter,
                               RingBuffer<ProbeMessage> logBuffer, Retransformer retransformer,
                               ClassAnalyzer classAnalyzer, Decompiler decompiler,
+                              WebServer webServer) {
+        this(readyGate, logEmitter, logBuffer, retransformer, classAnalyzer, decompiler, null, null, webServer);
+    }
+
+    public PluginManagerImpl(ReadyGate readyGate, LogEmitter logEmitter,
+                              RingBuffer<ProbeMessage> logBuffer, Retransformer retransformer,
+                              ClassAnalyzer classAnalyzer, Decompiler decompiler,
+                              BytecodeLoader bytecodeLoader, InjectionService injectionService,
                               WebServer webServer) {
         this.readyGate = readyGate;
         this.logEmitter = logEmitter;
@@ -62,11 +71,9 @@ public class PluginManagerImpl implements PluginManager {
         this.retransformer = retransformer;
         this.classAnalyzer = classAnalyzer;
         this.decompiler = decompiler;
+        this.bytecodeLoader = bytecodeLoader;
+        this.injectionService = injectionService;
         this.webServer = webServer;
-    }
-
-    public void setRuleSuspensionManager(RuleSuspensionManager ruleSuspensionManager) {
-        this.ruleSuspensionManager = ruleSuspensionManager;
     }
 
     public void initializeAll(List<LunaPlugin> discoveredPlugins) {
@@ -90,7 +97,7 @@ public class PluginManagerImpl implements PluginManager {
     }
 
     private void initPlugin(LunaPlugin plugin, PluginRegistrationRecord record) {
-        PluginContextImpl ctx = new PluginContextImpl(record, logEmitter, logBuffer, retransformer, classAnalyzer, decompiler);
+        PluginContextImpl ctx = new PluginContextImpl(record, logEmitter, logBuffer, retransformer, classAnalyzer, decompiler, bytecodeLoader, injectionService);
         plugin.initialize(ctx);
 
         List<LunaController> controllers = new ArrayList<>();
@@ -187,14 +194,6 @@ public class PluginManagerImpl implements PluginManager {
             record = new PluginRegistrationRecord(id);
             records.put(id, record);
             initPlugin(plugin, record);
-
-            Set<String> restoredLocationNames = new HashSet<>();
-            for (InjectionLocation location : record.getInjectionLocations()) {
-                restoredLocationNames.add(location.getName());
-            }
-            if (ruleSuspensionManager != null) {
-                ruleSuspensionManager.resumeSuspendedRules(id, restoredLocationNames);
-            }
         } catch (Exception e) {
             states.put(id, PluginState.UNLOADED);
             records.remove(id);
@@ -225,9 +224,6 @@ public class PluginManagerImpl implements PluginManager {
         }
 
         PluginRegistrationRecord record = records.get(pluginId);
-        List<String> suspendedRuleIds = ruleSuspensionManager != null
-            ? ruleSuspensionManager.suspendOrphanedRules(record)
-            : Collections.emptyList();
 
         PluginClassLoader cl;
         long stamp = transformLock.writeLock();
@@ -241,7 +237,7 @@ public class PluginManagerImpl implements PluginManager {
         listeners.forEach(l -> {
             try { l.onUnloaded(toInfo(plugin)); } catch (Exception ignored) {}
         });
-        return PluginUnloadResult.success(pluginId, suspendedRuleIds);
+        return PluginUnloadResult.success(pluginId);
     }
 
     private PluginClassLoader doUnloadCore(String pluginId, LunaPlugin plugin, PluginRegistrationRecord record) {
@@ -332,9 +328,6 @@ public class PluginManagerImpl implements PluginManager {
         String newVersion = newPlugin.getVersion();
 
         PluginRegistrationRecord oldRecord = records.get(pluginId);
-        List<String> suspendedRuleIds = ruleSuspensionManager != null
-            ? ruleSuspensionManager.suspendOrphanedRules(oldRecord)
-            : Collections.emptyList();
 
         PluginClassLoader newPluginCl = new PluginClassLoader(pluginId, new URL[]{jarUrl}, getClass().getClassLoader());
 
@@ -415,9 +408,6 @@ public class PluginManagerImpl implements PluginManager {
         }
 
         PluginRegistrationRecord record = records.get(pluginId);
-        if (ruleSuspensionManager != null) {
-            ruleSuspensionManager.suspendOrphanedRules(record);
-        }
 
         states.put(pluginId, PluginState.DISABLED);
 
@@ -438,12 +428,6 @@ public class PluginManagerImpl implements PluginManager {
         }
 
         PluginRegistrationRecord record = records.get(pluginId);
-        Set<String> restoredLocationNames = record.getInjectionLocations().stream()
-            .map(InjectionLocation::getName)
-            .collect(Collectors.toSet());
-        if (ruleSuspensionManager != null) {
-            ruleSuspensionManager.resumeSuspendedRules(pluginId, restoredLocationNames);
-        }
 
         states.put(pluginId, PluginState.ACTIVE);
 
@@ -475,12 +459,6 @@ public class PluginManagerImpl implements PluginManager {
     public Set<ProbeHandler> getProbeHandlersForPlugin(String pluginId) {
         PluginRegistrationRecord record = records.get(pluginId);
         return record != null ? new HashSet<>(record.getProbeHandlers()) : Collections.emptySet();
-    }
-
-    @Override
-    public Set<RuleTemplate> getTemplatesForPlugin(String pluginId) {
-        PluginRegistrationRecord record = records.get(pluginId);
-        return record != null ? new HashSet<>(record.getTemplates()) : Collections.emptySet();
     }
 
     private void retransformAffectedClasses(Set<String> classNames) {

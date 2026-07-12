@@ -34,6 +34,16 @@ public class EvaluationContext {
         return ctx;
     }
 
+    /**
+     * 创建求值上下文（委托给 getThreadLocal，供注入字节码调用）
+     * <p>
+     * 注入字节码通过 INVOKESTATIC 调用此方法获取上下文实例。
+     * 方法名 create() 比 getThreadLocal() 更直观，且与 ASM 生成代码中的引用一致。
+     */
+    public static EvaluationContext create() {
+        return getThreadLocal();
+    }
+
     private final Map<String, Object> variables = new HashMap<>();
 
     /**

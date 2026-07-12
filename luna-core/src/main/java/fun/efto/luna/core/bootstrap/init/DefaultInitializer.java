@@ -10,7 +10,6 @@ import fun.efto.luna.core.bootstrap.capability.LifecyclePolicy;
 import fun.efto.luna.core.bootstrap.capability.ReadinessState;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.LunaPlugin;
-import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
 import fun.efto.luna.core.plugin.builtin.CoreModuleInitializer;
 
 import java.util.ArrayList;

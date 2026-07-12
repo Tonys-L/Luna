@@ -9,18 +9,18 @@ import java.util.List;
 
 /**
  * @author : Tony.L(286269159@qq.com)
- * @since  : 2026/05/16 10:00
+ * @since : 2026/05/16 10:00
  */
 public class LineNumberInjectionLocation extends InjectionLocation {
 
-    public static final LineNumberInjectionLocation BEFORE = new LineNumberInjectionLocation("line_before", "行号前注入", 0, "LINE_BEFORE");
-    public static final LineNumberInjectionLocation AFTER = new LineNumberInjectionLocation("line_after", "行号后注入", 0, "LINE_AFTER");
+    public static final LineNumberInjectionLocation BEFORE = new LineNumberInjectionLocation("line_before", "行号前注入", "line", 0, "LINE_BEFORE");
+    public static final LineNumberInjectionLocation AFTER = new LineNumberInjectionLocation("line_after", "行号后注入", "line", 0, "LINE_AFTER");
 
     private final int lineNumber;
     private final List<String> aliases;
 
-    public LineNumberInjectionLocation(String name, String description, int lineNumber, String... aliases) {
-        super(name, description);
+    public LineNumberInjectionLocation(String name, String description, String category, int lineNumber, String... aliases) {
+        super(name, description, category);
         this.lineNumber = lineNumber;
         this.aliases = Arrays.asList(aliases);
     }
@@ -35,7 +35,7 @@ public class LineNumberInjectionLocation extends InjectionLocation {
     }
 
     public LineNumberInjectionLocation withLineNumber(int lineNumber) {
-        return new LineNumberInjectionLocation(getName(), getDescription(), lineNumber, aliases.toArray(new String[0]));
+        return new LineNumberInjectionLocation(getName(), getDescription(), getCategory(), lineNumber, aliases.toArray(new String[0]));
     }
 
     @Override

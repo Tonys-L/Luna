@@ -2,3 +2,4 @@ fun.efto.luna.core.plugin.builtin.log.LogPlugin
 fun.efto.luna.core.plugin.builtin.snapshot.SnapshotPlugin
 fun.efto.luna.core.plugin.builtin.trace.TracePlugin
 fun.efto.luna.core.plugin.builtin.conditional.ConditionalBreakpointPlugin
+fun.efto.luna.core.plugin.builtin.invocation.InvocationPlugin

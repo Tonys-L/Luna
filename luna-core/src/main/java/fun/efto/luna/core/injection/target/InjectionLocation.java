@@ -6,28 +6,31 @@ import java.util.List;
 
 /**
  * @author : Tony.L(286269159@qq.com)
- * @since  : 2026/03/29 02:30
+ * @since : 2026/03/29 02:30
  */
 public abstract class InjectionLocation {
 
     private final String name;
     private final String description;
+    private final String category;
 
-    protected InjectionLocation(String name, String description) {
+    protected InjectionLocation(String name, String description, String category) {
         this.name = name;
         this.description = description;
+        this.category = category;
     }
 
     protected InjectionLocation() {
         this.name = null;
         this.description = null;
+        this.category = "other";
     }
 
-    public static InjectionLocation of(String name, String description, String... aliases) {
+    public static InjectionLocation of(String name, String description, String category, String... aliases) {
         final List<String> aliasList = aliases.length > 0
             ? Arrays.asList(aliases)
             : Collections.emptyList();
-        return new InjectionLocation(name, description) {
+        return new InjectionLocation(name, description, category) {
             @Override
             public List<String> getAliases() { return aliasList; }
         };
@@ -39,6 +42,11 @@ public abstract class InjectionLocation {
 
     public String getDescription() {
         return description;
+    }
+
+    /** 分类标识，如 "method"、"line"、"other" */
+    public String getCategory() {
+        return category;
     }
 
     public List<String> getAliases() {

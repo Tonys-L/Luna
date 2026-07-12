@@ -5,8 +5,6 @@ import fun.efto.luna.core.injection.CodeEngine;
 import fun.efto.luna.core.injection.CodeEngineRegistry;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
-import fun.efto.luna.core.plugin.registry.RuleConverterRegistry;
-import fun.efto.luna.core.injection.rule.template.TemplateRegistry;
 import fun.efto.luna.core.infra.web.WebServer;
 
 /**
@@ -18,11 +16,7 @@ public class PluginRegistryCleaner {
         InjectionTypeRegistry.getInstance().unregisterAll(record.getInjectionLocations());
         BytecodeInjectorRegistry.getInstance().getRegistry().keySet().removeAll(record.getInjectors().keySet());
         ProbeHandlerRegistry.getInstance().unregisterAll(record.getProbeHandlers());
-        RuleConverterRegistry.getInstance().unregisterAll(record.getRuleConverters());
         CodeEngineRegistry.getInstance().unregisterAll(record.getCodeEngines());
-        TemplateRegistry.getInstance().getAllTemplates().stream()
-            .filter(t -> record.getTemplates().contains(t))
-            .forEach(t -> TemplateRegistry.getInstance().unregister(t.getName()));
         if (webServer != null && !record.getControllers().isEmpty()) {
             webServer.unregisterControllers(record.getControllers());
         }

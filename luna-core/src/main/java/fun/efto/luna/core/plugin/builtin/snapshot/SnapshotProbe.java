@@ -15,7 +15,6 @@ public class SnapshotProbe {
     static {
         BootstrapClassRegistry.register(SnapshotProbe.class.getName());
         BootstrapClassRegistry.register(StackFrameCapture.class.getName());
-        BootstrapClassRegistry.register(SnapshotSerializer.class.getName());
     }
 
     private SnapshotProbe() {

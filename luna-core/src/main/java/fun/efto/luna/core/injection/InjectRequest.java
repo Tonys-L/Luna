@@ -13,6 +13,8 @@ public class InjectRequest {
     private String codeType;
     private String code;
     private Integer lineNumber;
+    private boolean ephemeral = false;
+    private String groupId;
 
     public String getClazz() {
         return clazz;
@@ -80,5 +82,21 @@ public class InjectRequest {
 
     public void setLineNumber(Integer lineNumber) {
         this.lineNumber = lineNumber;
+    }
+
+    public boolean isEphemeral() {
+        return ephemeral;
+    }
+
+    public void setEphemeral(boolean ephemeral) {
+        this.ephemeral = ephemeral;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 }

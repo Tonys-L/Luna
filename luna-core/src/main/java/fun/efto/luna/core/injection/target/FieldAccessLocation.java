@@ -5,15 +5,15 @@ import java.util.List;
 
 /**
  * @author : Tony.L(286269159@qq.com)
- * @since  : 2026/05/26 16:00
+ * @since : 2026/05/26 16:00
  */
 public class FieldAccessLocation extends InjectionLocation {
 
     private final List<String> aliases;
     private final FieldAccessTarget.AccessType accessType;
 
-    public FieldAccessLocation(String name, String description, FieldAccessTarget.AccessType accessType, String... aliases) {
-        super(name, description);
+    public FieldAccessLocation(String name, String description, String category, FieldAccessTarget.AccessType accessType, String... aliases) {
+        super(name, description, category);
         this.accessType = accessType;
         this.aliases = Arrays.asList(aliases);
     }

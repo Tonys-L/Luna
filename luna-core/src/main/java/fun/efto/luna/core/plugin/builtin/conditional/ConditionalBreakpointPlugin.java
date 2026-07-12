@@ -25,6 +25,5 @@ public class ConditionalBreakpointPlugin implements LunaPlugin {
 
     @Override
     public void initialize(PluginContext context) {
-        context.registerTemplate(ConditionalBreakpointTemplates.conditionalBreakpoint());
     }
 }

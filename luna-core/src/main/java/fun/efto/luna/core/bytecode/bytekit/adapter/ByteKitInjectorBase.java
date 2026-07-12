@@ -47,7 +47,7 @@ public abstract class ByteKitInjectorBase implements BytecodeInjector {
 
     @Override
     public byte[] inject(CompiledCode compiledCode, ProbeHandler probeHandler, InjectionContext injectionContext, byte[] bytecode) {
-        if (probeHandler != null && probeHandler.usesCode()) {
+        if (probeHandler != null) {
             return injectWithExpression(compiledCode, probeHandler, injectionContext, bytecode);
         }
         return injectWithByteKit(injectionContext, bytecode);

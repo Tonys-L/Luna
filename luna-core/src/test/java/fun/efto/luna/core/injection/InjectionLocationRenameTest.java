@@ -1,6 +1,5 @@
 package fun.efto.luna.core.injection;
 
-import fun.efto.luna.core.injection.rule.InjectionRule;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.injection.target.InjectionTarget;
 import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
@@ -21,7 +20,7 @@ class InjectionLocationRenameTest {
     @Test
     @DisplayName("InjectionLocation 类存在且可实例化（通过 of 工厂方法）")
     void injectionLocationClassExists() {
-        InjectionLocation location = InjectionLocation.of("test", "test description");
+        InjectionLocation location = InjectionLocation.of("test", "test description", "other");
         assertNotNull(location);
         assertEquals("test", location.getName());
         assertEquals("test description", location.getDescription());
@@ -58,19 +57,6 @@ class InjectionLocationRenameTest {
         Method getInjectionLocation = InjectionPoint.class.getMethod("getInjectionLocation");
         assertNotNull(getInjectionLocation);
         assertEquals(InjectionLocation.class, getInjectionLocation.getReturnType());
-    }
-
-    @Test
-    @DisplayName("InjectionRule 使用 injectionLocation 字段（不再有 injectionType）")
-    void injectionRuleUsesInjectionLocation() throws NoSuchMethodException {
-        InjectionRule rule = new InjectionRule();
-        rule.setInjectionLocation("method_enter");
-        assertEquals("method_enter", rule.getInjectionLocation());
-
-        assertThrows(NoSuchMethodException.class, () ->
-            InjectionRule.class.getMethod("getInjectionType"));
-        assertThrows(NoSuchMethodException.class, () ->
-            InjectionRule.class.getMethod("setInjectionType", String.class));
     }
 
     @Test

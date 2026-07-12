@@ -5,14 +5,14 @@ import java.util.List;
 
 /**
  * @author : Tony.L(286269159@qq.com)
- * @since  : 2026/05/26 16:00
+ * @since : 2026/05/26 16:00
  */
 public class ConstructorLocation extends InjectionLocation {
 
     private final List<String> aliases;
 
-    public ConstructorLocation(String name, String description, String... aliases) {
-        super(name, description);
+    public ConstructorLocation(String name, String description, String category, String... aliases) {
+        super(name, description, category);
         this.aliases = Arrays.asList(aliases);
     }
 

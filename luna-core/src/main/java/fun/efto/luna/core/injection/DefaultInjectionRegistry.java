@@ -92,4 +92,17 @@ public class DefaultInjectionRegistry implements InjectionRegistry {
     public List<InjectionPoint> getInjectionPoints(String className) {
         return getActivePointsForClass(className);
     }
+
+    @Override
+    public boolean contains(String pointId) {
+        for (List<InjectionPoint> list : exactIndex.values()) {
+            for (InjectionPoint p : list) {
+                if (p.getId().equals(pointId)) return true;
+            }
+        }
+        for (RegexEntry entry : regexFallback) {
+            if (entry.point.getId().equals(pointId)) return true;
+        }
+        return prefixTrie.containsById(pointId);
+    }
 }

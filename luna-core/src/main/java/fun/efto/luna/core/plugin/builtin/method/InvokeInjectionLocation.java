@@ -9,16 +9,16 @@ import java.util.List;
 
 /**
  * @author : Tony.L(286269159@qq.com)
- * @since  : 2026/06/01 00:00
+ * @since : 2026/06/01 00:00
  */
 public class InvokeInjectionLocation extends InjectionLocation {
 
-    public static final InvokeInjectionLocation INVOKE = new InvokeInjectionLocation("invoke", "子函数调用拦截注入", "invoke", "INVOKE_METHOD");
+    public static final InvokeInjectionLocation INVOKE = new InvokeInjectionLocation("invoke", "子函数调用拦截注入", "method", "invoke", "INVOKE_METHOD");
 
     private final List<String> aliases;
 
-    private InvokeInjectionLocation(String name, String description, String... aliases) {
-        super(name, description);
+    private InvokeInjectionLocation(String name, String description, String category, String... aliases) {
+        super(name, description, category);
         this.aliases = Arrays.asList(aliases);
     }
 

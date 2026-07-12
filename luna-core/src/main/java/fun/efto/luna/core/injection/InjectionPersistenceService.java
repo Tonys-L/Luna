@@ -43,19 +43,7 @@ public class InjectionPersistenceService {
             }
             String json = sb.toString();
             List<PersistentInjection> list = JSON.parseArray(json, PersistentInjection.class);
-            if (list == null) {
-                return new ArrayList<>();
-            }
-            list.removeIf(inj -> {
-                if (inj.getMethodName() == null && inj.getInjectionLocation() != null
-                        && !inj.getInjectionLocation().contains("line")) {
-                    System.err.println("[Luna] WARN: Skipping legacy injection record with null method: id="
-                        + inj.getId() + ", location=" + inj.getInjectionLocation() + ", class=" + inj.getClazz());
-                    return true;
-                }
-                return false;
-            });
-            return list;
+            return list != null ? list : new ArrayList<>();
         }
     }
 }

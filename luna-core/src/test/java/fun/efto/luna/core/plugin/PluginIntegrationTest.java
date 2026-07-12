@@ -4,8 +4,6 @@ import fun.efto.luna.core.infra.RingBuffer;
 import fun.efto.luna.core.injection.DefaultInjectionRegistry;
 import fun.efto.luna.core.injection.DefaultInjectionRepository;
 import fun.efto.luna.core.injection.InjectionService;
-import fun.efto.luna.core.injection.PersistentInjection;
-import fun.efto.luna.core.injection.InjectionStatus;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.injection.target.InjectionLocation;
@@ -13,11 +11,9 @@ import fun.efto.luna.core.plugin.lifecycle.AffectedClassTracker;
 import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
 import fun.efto.luna.core.plugin.lifecycle.PluginRegistrationRecord;
 import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
-import fun.efto.luna.core.plugin.lifecycle.RuleSuspensionManager;
 import fun.efto.luna.core.plugin.DefaultLogEmitter;
 import fun.efto.luna.core.plugin.registry.InjectionTypeRegistry;
 import fun.efto.luna.core.probe.ProbeOutput;
-import fun.efto.luna.core.injection.rule.template.RuleTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,7 +75,6 @@ public class PluginIntegrationTest {
             (code, className, methodName, methodDesc, lineNumber, classBytes) -> null,
             injectionVerifier
         );
-        pluginManager.setRuleSuspensionManager(new RuleSuspensionManager(injectionService));
 
         AffectedClassTracker.clear();
     }
@@ -191,76 +186,6 @@ public class PluginIntegrationTest {
             pluginManager.initializeAll(createBuiltinPlugins());
             readyGate.markReady();
             assertTrue(readyGate.isReady());
-        }
-    }
-
-    @Nested
-    @DisplayName("规则挂起/恢复机制")
-    class RuleSuspendResumeTests {
-
-        @Test
-        @DisplayName("卸载插件后引用其 InjectionLocation 的规则被挂起")
-        void testRulesSuspendedOnUnload() {
-            final InjectionLocation customLocation = InjectionLocation.of("custom-type", "Custom Type", "CUSTOM");
-            LunaPlugin plugin = new StubPlugin("type-provider", Collections.emptyList()) {
-                @Override
-                public void initialize(PluginContext context) {
-                    context.registerInjectionLocation(customLocation);
-                }
-            };
-
-            pluginManager.initializeAll(Arrays.asList(plugin));
-
-            PersistentInjection injection = new PersistentInjection();
-            injection.setClazz("com.example.TestService");
-            injection.setMethodName("someMethod");
-            injection.setInjectionLocation("custom-type");
-            injection.setStatus(InjectionStatus.ACTIVE);
-            injectionService.addInjection(injection);
-
-            PluginUnloadResult result = pluginManager.unload("type-provider");
-            assertTrue(result.isSuccess());
-            assertFalse(result.getSuspendedRuleIds().isEmpty(),
-                "Should have suspended rules referencing the unloaded plugin's locations");
-
-            assertEquals(InjectionStatus.SUSPENDED, injection.getStatus());
-            assertNotNull(injection.getSuspendReason());
-        }
-
-        @Test
-        @DisplayName("重新加载同 ID 插件后挂起规则自动恢复")
-        void testRulesResumedOnReload() {
-            final InjectionLocation customLocation = InjectionLocation.of("resume-type", "Resume Type", "RESUME");
-
-            LunaPlugin plugin = new StubPlugin("reload-provider", Collections.emptyList()) {
-                @Override
-                public void initialize(PluginContext context) {
-                    context.registerInjectionLocation(customLocation);
-                }
-            };
-
-            pluginManager.initializeAll(Arrays.asList(plugin));
-
-            PersistentInjection injection = new PersistentInjection();
-            injection.setClazz("com.example.ResumeService");
-            injection.setMethodName("resumeMethod");
-            injection.setInjectionLocation("resume-type");
-            injection.setStatus(InjectionStatus.ACTIVE);
-            injectionService.addInjection(injection);
-
-            pluginManager.unload("reload-provider");
-            assertEquals(InjectionStatus.SUSPENDED, injection.getStatus());
-
-            LunaPlugin reloadedPlugin = new StubPlugin("reload-provider", Collections.emptyList()) {
-                @Override
-                public void initialize(PluginContext context) {
-                    context.registerInjectionLocation(customLocation);
-                }
-            };
-            pluginManager.initializeAll(Arrays.asList(reloadedPlugin));
-
-            InjectionLocation resolved = InjectionTypeRegistry.getInstance().get("resume-type").orElse(null);
-            assertNotNull(resolved, "InjectionLocation should be re-registered");
         }
     }
 

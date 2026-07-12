@@ -1,5 +1,7 @@
 package fun.efto.luna.core.plugin.builtin.snapshot;
 
+import fun.efto.luna.core.infra.serialization.SnapshotSerializer;
+
 /**
  * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:00

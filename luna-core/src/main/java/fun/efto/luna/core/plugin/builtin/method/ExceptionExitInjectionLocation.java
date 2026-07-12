@@ -9,16 +9,16 @@ import java.util.List;
 
 /**
  * @author : Tony.L(286269159@qq.com)
- * @since  : 2026/06/01 00:00
+ * @since : 2026/06/01 00:00
  */
 public class ExceptionExitInjectionLocation extends InjectionLocation {
 
-    public static final ExceptionExitInjectionLocation EXCEPTION_EXIT = new ExceptionExitInjectionLocation("exception_exit", "方法异常退出注入", "exception_exit", "EXCEPTION_EXIT_METHOD");
+    public static final ExceptionExitInjectionLocation EXCEPTION_EXIT = new ExceptionExitInjectionLocation("exception_exit", "方法异常退出注入", "method", "exception_exit", "EXCEPTION_EXIT_METHOD");
 
     private final List<String> aliases;
 
-    private ExceptionExitInjectionLocation(String name, String description, String... aliases) {
-        super(name, description);
+    private ExceptionExitInjectionLocation(String name, String description, String category, String... aliases) {
+        super(name, description, category);
         this.aliases = Arrays.asList(aliases);
     }
 

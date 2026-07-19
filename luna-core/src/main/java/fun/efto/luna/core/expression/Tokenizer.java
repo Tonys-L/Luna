@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * 词法分析器，将表达式字符串转换为 Token 序列
- * @author ：Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
 public class Tokenizer {

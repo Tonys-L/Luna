@@ -2,12 +2,19 @@
   <div v-if="visible && marker" class="injection-detail-overlay" @click.self="$emit('close')">
     <div class="injection-detail-panel">
       <div class="injection-detail-header">
-        <span class="injection-detail-type" :class="'type-' + marker.type.toLowerCase().replace('_', '-')">
-          {{ getLabel(marker.type) }}
+        <span class="injection-detail-type" :style="getTypeStyle(marker.injectionLocation)">
+          {{ getLabel(marker.injectionLocation, marker.probeType) }}
+        </span>
+        <span v-if="marker.ephemeral !== undefined" class="injection-detail-badge" :class="marker.ephemeral ? 'badge-ephemeral' : 'badge-persistent'">
+          {{ marker.ephemeral ? '临时' : '持久' }}
         </span>
         <button class="injection-detail-close" @click="$emit('close')">&times;</button>
       </div>
       <div class="injection-detail-body">
+        <div class="injection-detail-row">
+          <span class="injection-detail-label">Probe:</span>
+          <span class="injection-detail-value">{{ getProbeDisplayName(marker.probeType) }}</span>
+        </div>
         <div class="injection-detail-row">
           <span class="injection-detail-label">Method:</span>
           <span class="injection-detail-value">{{ marker.method }}</span>
@@ -17,16 +24,12 @@
           <span class="injection-detail-value">{{ marker.lineNumber }}</span>
         </div>
         <div class="injection-detail-row">
-          <span class="injection-detail-label">Condition:</span>
-          <code class="injection-detail-code">{{ parseCondition(marker.code) || '无条件 (Always)' }}</code>
-        </div>
-        <div class="injection-detail-row">
-          <span class="injection-detail-label">Log:</span>
-          <code class="injection-detail-code">{{ parseLog(marker.code) }}</code>
+          <span class="injection-detail-label">Code:</span>
+          <code class="injection-detail-code">{{ getCodeDisplay(marker.code, marker.probeType) }}</code>
         </div>
       </div>
       <div class="injection-detail-footer">
-        <button class="injection-detail-delete" @click="$emit('delete', marker)">
+        <button class="injection-detail-delete" @click="handleDelete">
           Delete Injection
         </button>
       </div>
@@ -35,6 +38,8 @@
 </template>
 
 <script>
+import { pluginRegistry } from '../utils/plugin-registry'
+
 export default {
   name: 'InjectionDetailOverlay',
   props: {
@@ -43,27 +48,36 @@ export default {
   },
   emits: ['close', 'delete'],
   methods: {
-    getLabel(type) {
-      const labels = {
-        'ENTER_METHOD': 'BEFORE METHOD',
-        'EXIT_METHOD': 'AFTER METHOD',
-        'AROUND_METHOD': 'AROUND METHOD',
-        'LINE_BEFORE': 'BEFORE LINE',
-        'LINE_AFTER': 'AFTER LINE'
+    getProbeDisplayName(probeType) {
+      const handler = pluginRegistry.probeHandlers?.find(h => h.probeType === probeType)
+      return handler?.displayName || probeType || ''
+    },
+    getTypeStyle(injectionLocation) {
+      const type = pluginRegistry.injectionTypes?.find(t => t.name === injectionLocation)
+      const color = type?.color || '#6b7280'
+      return { background: color }
+    },
+    getLabel(loc, probeType) {
+      if (!loc) return 'UNKNOWN'
+      const injectionType = pluginRegistry.injectionTypes?.find(t => t.name === loc)
+      return injectionType?.displayName || loc.toUpperCase()
+    },
+    getCodeDisplay(code, probeType) {
+      if (!code) return '-'
+      const handler = pluginRegistry.probeHandlers?.find(h => h.probeType === probeType)
+      // 如果探针不使用代码（如 TRACE），显示 configSchema 的 label
+      if (handler && !handler.usesCode) {
+        const schema = handler.configSchema || []
+        const codeField = schema.find(f => f.key === 'code')
+        if (codeField) {
+          return code === '0' ? '全部输出' : `≥ ${code} ms`
+        }
       }
-      return labels[type] || type
+      return code
     },
-    parseCondition(code) {
-      try {
-        const json = JSON.parse(code)
-        return json.condition
-      } catch (e) { return null }
-    },
-    parseLog(code) {
-      try {
-        const json = JSON.parse(code)
-        return json.logContent
-      } catch (e) { return code }
+    handleDelete() {
+      if (!confirm('Delete this injection?')) return
+      this.$emit('delete', this.marker)
     }
   }
 }
@@ -97,8 +111,8 @@ export default {
   padding: 12px 16px;
   background: #383838;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 8px;
   border-bottom: 1px solid #444;
 }
 
@@ -110,9 +124,16 @@ export default {
   color: white;
 }
 
-.type-enter-method { background: #10b981; }
-.type-exit-method { background: #3b82f6; }
-.type-line-before { background: #6366f1; }
+.injection-detail-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+  color: white;
+}
+
+.badge-ephemeral { background: #6b7280; }
+.badge-persistent { background: #059669; }
 
 .injection-detail-close {
   background: none;
@@ -120,6 +141,7 @@ export default {
   color: #888;
   cursor: pointer;
   font-size: 20px;
+  margin-left: auto;
 }
 
 .injection-detail-body {

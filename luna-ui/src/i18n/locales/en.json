@@ -8,7 +8,7 @@
   },
   "nav": {
     "class_tree": "Class Tree",
-    "configuration": "Configuration"
+    "configuration": "Injection Mgmt"
   },
   "tree": {
     "search_placeholder": "SEARCH CLASSES",
@@ -44,9 +44,9 @@
     "injecting": "INJECTING..."
   },
   "config": {
-    "title": "INJECTION RULES",
-    "add_rule": "ADD RULE",
-    "edit_rule": "EDIT RULE",
+    "title": "PERSISTENT INJECTIONS",
+    "add_rule": "ADD INJECTION",
+    "edit_rule": "EDIT INJECTION",
     "class": "CLASS",
     "method": "METHOD",
     "type": "TYPE",

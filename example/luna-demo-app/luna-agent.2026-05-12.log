@@ -1,0 +1,219 @@
+[Luna] 01:37:14.315 [main] INFO  fun.efto.luna.agent.log.LoggerInitializer - [Luna] Log4j2配置初始化成功
+[Luna] 01:37:14.324 [main] ERROR fun.efto.luna.agent.log.LoggerInitializer - [Luna] Log4j2配置初始化成功
+[Luna] 01:37:14.334 [main] INFO  fun.efto.luna.agent.Agent - Luna logger initialized successfully
+[Luna] 01:37:14.355 [main] INFO  fun.efto.luna.agent.Agent - Appending agent jar to bootstrap classloader: /D:/project/my/Luna/luna-agent/target/luna-agent-1.0-SNAPSHOT.jar
+[Luna] 01:37:14.357 [main] INFO  fun.efto.luna.agent.Agent - Initializing Luna agent components...
+[Luna] 01:37:14.369 [main] INFO  fun.efto.luna.core.init.InitializerManager - 初始化完成: fun.efto.luna.core.init.DefaultInitializer
+[Luna] 01:37:14.399 [main] INFO  fun.efto.luna.shadow.jetty.util.log - Logging initialized @832ms to fun.efto.luna.shadow.jetty.util.log.Slf4jLog
+[Luna] 01:37:14.466 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: StatusController (prefix=)
+[Luna] 01:37:14.472 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: ClassController (prefix=)
+[Luna] 01:37:14.484 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: InjectionController (prefix=/inject)
+[Luna] 01:37:14.490 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: RuleController (prefix=/rules)
+[Luna] 01:37:14.493 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: TemplateController (prefix=/templates)
+[Luna] 01:37:14.494 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: TestController (prefix=/test)
+[Luna] 01:37:14.495 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: MetricsController (prefix=)
+[Luna] 01:37:14.533 [main] INFO  fun.efto.luna.shadow.jetty.server.Server - jetty-9.4.53.v20231009; built: 2023-10-09T12:29:09.265Z; git: 27bde00a0b95a1d5bbee0eae7984f891d2d0f8c9; jvm 1.8.0_202-b08
+[Luna] 01:37:14.568 [main] INFO  fun.efto.luna.shadow.jetty.server.session - DefaultSessionIdManager workerName=node0
+[Luna] 01:37:14.568 [main] INFO  fun.efto.luna.shadow.jetty.server.session - No SessionScavenger set, using defaults
+[Luna] 01:37:14.571 [main] INFO  fun.efto.luna.shadow.jetty.server.session - node0 Scavenging every 600000ms
+[Luna] 01:37:14.608 [main] INFO  fun.efto.luna.shadow.jetty.server.handler.ContextHandler - Started f.e.l.s.j.s.ServletContextHandler@44821a96{Luna Web Server,/,null,AVAILABLE}
+[Luna] 01:37:15.444 [main] INFO  fun.efto.luna.shadow.jetty.server.AbstractConnector - Started ServerConnector@50eac852{HTTP/1.1, (http/1.1)}{0.0.0.0:8421}
+[Luna] 01:37:15.444 [main] INFO  fun.efto.luna.shadow.jetty.server.Server - Started @1879ms
+[Luna] 01:37:15.446 [main] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - Luna 日志分发器已启动
+[Luna] 01:37:15.446 [main] INFO  fun.efto.luna.agent.web.JettyWebServer - Luna Web服务器启动成功:
+[Luna] 01:37:15.446 [main] INFO  fun.efto.luna.agent.web.JettyWebServer -   - HTTP服务: http://0.0.0.0:8421
+[Luna] 01:37:15.447 [main] INFO  fun.efto.luna.agent.web.JettyWebServer -   - WebSocket服务: ws://0.0.0.0:8421/ws/log
+[Luna] 01:37:15.447 [main] INFO  fun.efto.luna.agent.Agent - Luna agent started successfully, web server on port 8421
+[Luna] 01:37:15.448 [main] INFO  fun.efto.luna.agent.Agent - Scanning already loaded classes for matching rules...
+[Luna] 01:37:15.663 [main] INFO  fun.efto.luna.agent.Agent - Initial rule application completed.
+[Luna] 01:37:15.692 [main] INFO  fun.efto.luna.core.transformer.RuleClassFileTransformer - Applying 1 rule(s) to newly loaded class: fun.efto.luna.demo.service.UserService
+[Luna] 01:37:15.695 [main] ERROR fun.efto.luna.core.transformer.RuleClassFileTransformer - Failed to convert rule to injection point for class: fun.efto.luna.demo.service.UserService
+java.lang.IllegalArgumentException: Unknown injection type: METHOD_ENTER, registered: []
+	at fun.efto.luna.core.plugin.InjectionTypeRegistry.resolve(InjectionTypeRegistry.java:28) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.core.plugin.RuleConverterRegistry.convert(RuleConverterRegistry.java:24) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.core.transformer.RuleClassFileTransformer.transform(RuleClassFileTransformer.java:42) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at sun.instrument.TransformerManager.transform(TransformerManager.java:188) [?:1.8.0_202]
+	at sun.instrument.InstrumentationImpl.transform(InstrumentationImpl.java:428) [?:1.8.0_202]
+	at java.lang.ClassLoader.defineClass1(Native Method) ~[?:1.8.0_202]
+	at java.lang.ClassLoader.defineClass(ClassLoader.java:763) [?:1.8.0_202]
+	at java.security.SecureClassLoader.defineClass(SecureClassLoader.java:142) [?:1.8.0_202]
+	at java.net.URLClassLoader.defineClass(URLClassLoader.java:468) [?:1.8.0_202]
+	at java.net.URLClassLoader.access$100(URLClassLoader.java:74) [?:1.8.0_202]
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:369) [?:1.8.0_202]
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:363) [?:1.8.0_202]
+	at java.security.AccessController.doPrivileged(Native Method) ~[?:1.8.0_202]
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:362) [?:1.8.0_202]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424) [?:1.8.0_202]
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349) [?:1.8.0_202]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357) [?:1.8.0_202]
+	at fun.efto.luna.demo.DemoApplication.<clinit>(DemoApplication.java:16) [luna-demo-app-1.0-SNAPSHOT.jar:?]
+[Luna] 01:37:15.796 [qtp963110412-27] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /127.0.0.1:31390
+[Luna] 01:37:15.796 [qtp963110412-23] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31395
+[Luna] 01:37:15.827 [qtp963110412-15] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /127.0.0.1:31428
+[Luna] 01:37:15.827 [qtp963110412-11] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31427
+[Luna] 01:37:15.842 [qtp963110412-8] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31429
+[Luna] 01:37:15.842 [qtp963110412-22] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /127.0.0.1:31430
+[Luna] 01:37:15.856 [qtp963110412-9] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /127.0.0.1:31431
+[Luna] 01:37:18.190 [qtp963110412-11] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31463
+[Luna] 01:37:18.204 [qtp963110412-12] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31464
+[Luna] 01:37:18.806 [qtp963110412-13] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31465
+[Luna] 01:37:33.416 [qtp963110412-20] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31494
+[Luna] 01:37:34.589 [qtp963110412-15] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31494, status: 1005, reason: null
+[Luna] 01:37:39.599 [qtp963110412-19] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31512
+[Luna] 01:38:12.322 [qtp963110412-8] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31465, status: 1006, reason: Disconnected
+[Luna] 01:38:12.324 [qtp963110412-12] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:31428, status: 1006, reason: Disconnected
+[Luna] 01:38:12.323 [qtp963110412-22] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:31431, status: 1006, reason: Disconnected
+[Luna] 01:38:12.323 [qtp963110412-27] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31512, status: 1006, reason: Disconnected
+[Luna] 01:38:12.322 [qtp963110412-19] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31464, status: 1006, reason: Disconnected
+[Luna] 01:38:12.328 [qtp963110412-53] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31395, status: 1006, reason: Disconnected
+[Luna] 01:38:12.328 [qtp963110412-9] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:31390, status: 1006, reason: Disconnected
+[Luna] 01:38:12.327 [qtp963110412-48] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31427, status: 1006, reason: Disconnected
+[Luna] 01:38:12.327 [qtp963110412-52] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:31430, status: 1006, reason: Disconnected
+[Luna] 01:38:12.327 [qtp963110412-14] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31463, status: 1006, reason: Disconnected
+[Luna] 01:38:12.327 [qtp963110412-45] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31429, status: 1006, reason: Disconnected
+[Luna] 20:56:18.648 [qtp963110412-21] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:45215
+[Luna] 20:56:19.090 [qtp963110412-23] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:45284
+[Luna] 20:56:19.098 [qtp963110412-11] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /127.0.0.1:45459
+[Luna] 20:56:19.116 [qtp963110412-10] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:45695
+[Luna] 20:56:19.117 [qtp963110412-20] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /127.0.0.1:45713
+[Luna] 20:56:19.130 [qtp963110412-13] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:46034
+[Luna] 20:56:19.148 [qtp963110412-14] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:46449
+[Luna] 20:56:19.164 [qtp963110412-9] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:46961
+[Luna] 20:56:19.179 [qtp963110412-44] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:47314
+[Luna] 20:56:19.198 [qtp963110412-46] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:47585
+[Luna] 20:56:19.227 [qtp963110412-23] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:47659
+[Luna] 20:59:00.973 [Thread-17] INFO  fun.efto.luna.agent.Agent - Shutting down Jetty server...
+[Luna] 20:59:00.975 [qtp963110412-13] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:45215, status: 1000, reason: Server stopping
+[Luna] 20:59:00.975 [qtp963110412-9] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:45284, status: 1000, reason: Server stopping
+[Luna] 20:59:00.975 [qtp963110412-46] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:45459, status: 1000, reason: Server stopping
+[Luna] 20:59:00.976 [qtp963110412-11] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:45695, status: 1000, reason: Server stopping
+[Luna] 20:59:00.977 [qtp963110412-27] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:45713, status: 1000, reason: Server stopping
+[Luna] 20:59:00.977 [qtp963110412-51] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:46034, status: 1000, reason: Server stopping
+[Luna] 20:59:00.978 [Thread-17] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - Luna 日志分发器已停止
+[Luna] 20:59:00.977 [qtp963110412-23] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:46961, status: 1000, reason: Server stopping
+[Luna] 20:59:00.977 [qtp963110412-20] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:46449, status: 1000, reason: Server stopping
+[Luna] 20:59:00.977 [qtp963110412-49] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:47314, status: 1000, reason: Server stopping
+[Luna] 20:59:00.995 [qtp963110412-12] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:47659, status: 1000, reason: Server stopping
+[Luna] 20:59:00.995 [qtp963110412-44] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:47585, status: 1000, reason: Server stopping
+[Luna] 20:59:01.007 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.AbstractConnector - Stopped ServerConnector@50eac852{HTTP/1.1, (http/1.1)}{0.0.0.0:8421}
+[Luna] 20:59:01.007 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.session - node0 Stopped scavenging
+[Luna] 20:59:01.009 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.handler.ContextHandler - Stopped f.e.l.s.j.s.ServletContextHandler@44821a96{Luna Web Server,/,null,STOPPED}
+[Luna] 20:59:01.016 [Thread-17] INFO  fun.efto.luna.agent.web.JettyWebServer - Luna Web服务器已停止
+[Luna] 20:59:01.017 [Thread-17] INFO  fun.efto.luna.agent.Agent - Jetty server stopped.
+[Luna] 21:59:01.353 [main] INFO  fun.efto.luna.agent.log.LoggerInitializer - [Luna] Log4j2配置初始化成功
+[Luna] 21:59:01.357 [main] ERROR fun.efto.luna.agent.log.LoggerInitializer - [Luna] Log4j2配置初始化成功
+[Luna] 21:59:01.366 [main] INFO  fun.efto.luna.agent.Agent - Luna logger initialized successfully
+[Luna] 21:59:01.385 [main] INFO  fun.efto.luna.agent.Agent - Appending agent jar to bootstrap classloader: /D:/project/my/Luna/luna-agent/target/luna-agent-1.0-SNAPSHOT.jar
+[Luna] 21:59:01.387 [main] INFO  fun.efto.luna.agent.Agent - Initializing Luna agent components...
+[Luna] 21:59:01.399 [main] INFO  fun.efto.luna.core.init.InitializerManager - 初始化完成: fun.efto.luna.core.init.DefaultInitializer
+[Luna] 21:59:01.423 [main] INFO  fun.efto.luna.shadow.jetty.util.log - Logging initialized @852ms to fun.efto.luna.shadow.jetty.util.log.Slf4jLog
+[Luna] 21:59:01.490 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: StatusController (prefix=)
+[Luna] 21:59:01.496 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: ClassController (prefix=)
+[Luna] 21:59:01.507 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: InjectionController (prefix=/inject)
+[Luna] 21:59:01.514 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: RuleController (prefix=/rules)
+[Luna] 21:59:01.515 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: TemplateController (prefix=/templates)
+[Luna] 21:59:01.517 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: TestController (prefix=/test)
+[Luna] 21:59:01.518 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: MetricsController (prefix=)
+[Luna] 21:59:01.554 [main] INFO  fun.efto.luna.shadow.jetty.server.Server - jetty-9.4.53.v20231009; built: 2023-10-09T12:29:09.265Z; git: 27bde00a0b95a1d5bbee0eae7984f891d2d0f8c9; jvm 1.8.0_202-b08
+[Luna] 21:59:01.589 [main] INFO  fun.efto.luna.shadow.jetty.server.session - DefaultSessionIdManager workerName=node0
+[Luna] 21:59:01.589 [main] INFO  fun.efto.luna.shadow.jetty.server.session - No SessionScavenger set, using defaults
+[Luna] 21:59:01.593 [main] INFO  fun.efto.luna.shadow.jetty.server.session - node0 Scavenging every 660000ms
+[Luna] 21:59:01.629 [main] INFO  fun.efto.luna.shadow.jetty.server.handler.ContextHandler - Started f.e.l.s.j.s.ServletContextHandler@2bfc268b{Luna Web Server,/,null,AVAILABLE}
+[Luna] 21:59:02.487 [main] INFO  fun.efto.luna.shadow.jetty.server.AbstractConnector - Started ServerConnector@68999068{HTTP/1.1, (http/1.1)}{0.0.0.0:8421}
+[Luna] 21:59:02.488 [main] INFO  fun.efto.luna.shadow.jetty.server.Server - Started @1918ms
+[Luna] 21:59:02.489 [main] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - Luna 日志分发器已启动
+[Luna] 21:59:02.489 [main] INFO  fun.efto.luna.agent.web.JettyWebServer - Luna Web服务器启动成功:
+[Luna] 21:59:02.490 [main] INFO  fun.efto.luna.agent.web.JettyWebServer -   - HTTP服务: http://0.0.0.0:8421
+[Luna] 21:59:02.490 [main] INFO  fun.efto.luna.agent.web.JettyWebServer -   - WebSocket服务: ws://0.0.0.0:8421/ws/log
+[Luna] 21:59:02.490 [main] INFO  fun.efto.luna.agent.Agent - Luna agent started successfully, web server on port 8421
+[Luna] 21:59:02.491 [main] INFO  fun.efto.luna.agent.Agent - Scanning already loaded classes for matching rules...
+[Luna] 21:59:02.717 [main] INFO  fun.efto.luna.agent.Agent - Initial rule application completed.
+[Luna] 21:59:02.743 [main] INFO  fun.efto.luna.core.transformer.RuleClassFileTransformer - Applying 1 rule(s) to newly loaded class: fun.efto.luna.demo.service.UserService
+[Luna] 21:59:02.744 [main] ERROR fun.efto.luna.core.transformer.RuleClassFileTransformer - Failed to convert rule to injection point for class: fun.efto.luna.demo.service.UserService
+java.lang.IllegalArgumentException: Unknown injection type: METHOD_ENTER, registered: []
+	at fun.efto.luna.core.plugin.InjectionTypeRegistry.resolve(InjectionTypeRegistry.java:28) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.core.plugin.RuleConverterRegistry.convert(RuleConverterRegistry.java:24) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.core.transformer.RuleClassFileTransformer.transform(RuleClassFileTransformer.java:42) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at sun.instrument.TransformerManager.transform(TransformerManager.java:188) [?:1.8.0_202]
+	at sun.instrument.InstrumentationImpl.transform(InstrumentationImpl.java:428) [?:1.8.0_202]
+	at java.lang.ClassLoader.defineClass1(Native Method) ~[?:1.8.0_202]
+	at java.lang.ClassLoader.defineClass(ClassLoader.java:763) [?:1.8.0_202]
+	at java.security.SecureClassLoader.defineClass(SecureClassLoader.java:142) [?:1.8.0_202]
+	at java.net.URLClassLoader.defineClass(URLClassLoader.java:468) [?:1.8.0_202]
+	at java.net.URLClassLoader.access$100(URLClassLoader.java:74) [?:1.8.0_202]
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:369) [?:1.8.0_202]
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:363) [?:1.8.0_202]
+	at java.security.AccessController.doPrivileged(Native Method) ~[?:1.8.0_202]
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:362) [?:1.8.0_202]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424) [?:1.8.0_202]
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349) [?:1.8.0_202]
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357) [?:1.8.0_202]
+	at fun.efto.luna.demo.DemoApplication.<clinit>(DemoApplication.java:16) [luna-demo-app-1.0-SNAPSHOT.jar:?]
+[Luna] 21:59:02.847 [qtp524241174-27] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /127.0.0.1:35874
+[Luna] 21:59:02.847 [qtp524241174-23] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:35876
+[Luna] 21:59:02.878 [qtp524241174-14] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:35905
+[Luna] 21:59:02.893 [qtp524241174-8] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /127.0.0.1:35907
+[Luna] 21:59:02.894 [qtp524241174-20] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:35908
+[Luna] 21:59:02.908 [qtp524241174-15] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /127.0.0.1:35909
+[Luna] 21:59:02.909 [qtp524241174-12] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:35910
+[Luna] 21:59:04.453 [qtp524241174-10] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:35927
+[Luna] 21:59:05.092 [qtp524241174-9] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:35929
+[Luna] 21:59:05.698 [qtp524241174-22] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:35930
+[Luna] 21:59:06.456 [qtp524241174-19] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:35933
+[Luna] 21:59:31.954 [qtp524241174-19] ERROR fun.efto.luna.agent.web.controller.InjectionController - 注入过程发生严重错误
+java.lang.IllegalArgumentException: Unknown injection type: LINE_BEFORE, registered: []
+	at fun.efto.luna.core.plugin.InjectionTypeRegistry.resolve(InjectionTypeRegistry.java:28) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.agent.web.controller.InjectionController.buildInjectionPoint(InjectionController.java:341) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.agent.web.controller.InjectionController.inject(InjectionController.java:113) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_202]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_202]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_202]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_202]
+	at fun.efto.luna.agent.web.mvc.DispatcherServlet$RouteHandler.invoke(DispatcherServlet.java:245) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.agent.web.mvc.DispatcherServlet.service(DispatcherServlet.java:150) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.servlet.http.HttpServlet.service(HttpServlet.java:790) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.servlet.ServletHolder.handle(ServletHolder.java:799) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.servlet.ServletHandler$ChainEnd.doFilter(ServletHandler.java:1656) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.agent.web.JettyWebServer$1.doFilter(JettyWebServer.java:92) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.servlet.FilterHolder.doFilter(FilterHolder.java:193) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.servlet.ServletHandler$Chain.doFilter(ServletHandler.java:1626) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:552) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:233) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1624) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:233) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1440) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:188) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.servlet.ServletHandler.doScope(ServletHandler.java:505) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1594) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:186) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1355) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:141) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.handler.HandlerList.handle(HandlerList.java:59) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:127) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.Server.handle(Server.java:516) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.HttpChannel.lambda$handle$1(HttpChannel.java:487) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.HttpChannel.dispatch(HttpChannel.java:732) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.HttpChannel.handle(HttpChannel.java:479) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.server.HttpConnection.onFillable(HttpConnection.java:277) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:311) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.FillInterest.fillable(FillInterest.java:105) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.ChannelEndPoint$1.run(ChannelEndPoint.java:104) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.util.thread.strategy.EatWhatYouKill.runTask(EatWhatYouKill.java:338) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:315) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:173) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:131) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:409) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:883) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.util.thread.QueuedThreadPool$Runner.run(QueuedThreadPool.java:1034) [luna-agent-1.0-SNAPSHOT.jar:?]
+	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_202]
+[Luna] 21:59:41.264 [qtp524241174-14] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:35909, status: 1006, reason: Disconnected
+[Luna] 21:59:41.264 [qtp524241174-22] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:35933, status: 1006, reason: Disconnected
+[Luna] 21:59:41.264 [qtp524241174-15] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:35927, status: 1006, reason: Disconnected
+[Luna] 21:59:41.264 [qtp524241174-20] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:35929, status: 1006, reason: Disconnected
+[Luna] 21:59:41.264 [qtp524241174-21] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:35907, status: 1006, reason: Disconnected
+[Luna] 21:59:41.264 [qtp524241174-44] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:35910, status: 1006, reason: Disconnected
+[Luna] 21:59:41.264 [qtp524241174-9] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:35876, status: 1006, reason: Disconnected
+[Luna] 21:59:41.264 [qtp524241174-13] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:35930, status: 1006, reason: Disconnected
+[Luna] 21:59:41.264 [qtp524241174-45] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:35905, status: 1006, reason: Disconnected
+[Luna] 21:59:41.265 [qtp524241174-23] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:35908, status: 1006, reason: Disconnected
+[Luna] 21:59:41.265 [qtp524241174-49] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:35874, status: 1006, reason: Disconnected

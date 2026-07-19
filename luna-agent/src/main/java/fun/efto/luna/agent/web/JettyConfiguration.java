@@ -2,7 +2,7 @@ package fun.efto.luna.agent.web;
 
 /**
  * Jetty服务器配置
- * 洋葱架构基础设施层 - Jetty服务器优化配置
+ * 整洁架构基础设施层 - Jetty服务器优化配置
  * 
  * @author Tony.L
  * @since 1.0.0

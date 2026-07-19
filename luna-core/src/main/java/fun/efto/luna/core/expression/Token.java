@@ -2,7 +2,7 @@ package fun.efto.luna.core.expression;
 
 /**
  * Token 类，用于表示表达式中的各种标记
- * @author ：Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
 public class Token {

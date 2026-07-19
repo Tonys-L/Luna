@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/4 14:17
  */
 public class ClassFileTransformerAdapter implements ClassFileTransformer {
@@ -47,19 +47,19 @@ public class ClassFileTransformerAdapter implements ClassFileTransformer {
 
         for (InjectionPoint injectionPoint : injectionPoints) {
             TransformerResult result = classTransformer.transform(injectionPoint, javaClassName, currentBytecode);
-            String injType = injectionPoint.getInjectionType().toString();
+            String injLocation = injectionPoint.getInjectionLocation().toString();
             String methodName = injectionPoint.getTarget().getMethodName();
 
             if (result.isTransformed()) {
                 currentBytecode = result.getBytecode();
                 anyTransformed = true;
-                results.add(new InjectionResult(true, "注入成功", injType, methodName));
+                results.add(new InjectionResult(true, "注入成功", injLocation, methodName));
                 LOGGER.info("Injection applied: {} -> {}, bytecode size={}",
-                        injType, methodName, currentBytecode.length);
+                        injLocation, methodName, currentBytecode.length);
             } else {
-                results.add(new InjectionResult(false, result.getMessage(), injType, methodName));
+                results.add(new InjectionResult(false, result.getMessage(), injLocation, methodName));
                 LOGGER.warn("Injection failed: {} -> {}, reason: {}",
-                        injType, methodName, result.getMessage());
+                        injLocation, methodName, result.getMessage());
             }
         }
 

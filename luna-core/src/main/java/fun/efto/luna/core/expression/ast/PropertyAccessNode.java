@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * 属性访问节点，用于表示链式字段访问（如 user.name, param[0].age）
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:00
  */
 public class PropertyAccessNode implements ExpressionNode {

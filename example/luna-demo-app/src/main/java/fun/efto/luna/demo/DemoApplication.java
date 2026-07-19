@@ -2,19 +2,25 @@ package fun.efto.luna.demo;
 
 import fun.efto.luna.demo.model.Order;
 import fun.efto.luna.demo.model.User;
+import fun.efto.luna.demo.repository.OrderRepository;
+import fun.efto.luna.demo.repository.UserRepository;
 import fun.efto.luna.demo.service.OrderService;
+import fun.efto.luna.demo.service.PricingService;
 import fun.efto.luna.demo.service.UserService;
 
 /**
  * Luna Agent 测试目标应用
  * 每3秒循环执行业务方法，方便观察注入效果
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com)
  * @since : 2026/05/01 15:30
  */
 public class DemoApplication {
-    private static final UserService userService = new UserService();
-    private static final OrderService orderService = new OrderService();
+    private static final UserRepository userRepo = new UserRepository();
+    private static final OrderRepository orderRepo = new OrderRepository();
+    private static final PricingService pricingService = new PricingService();
+    private static final UserService userService = new UserService(userRepo);
+    private static final OrderService orderService = new OrderService(orderRepo, pricingService);
     private static int counter = 0;
 
     public static void main(String[] args) {

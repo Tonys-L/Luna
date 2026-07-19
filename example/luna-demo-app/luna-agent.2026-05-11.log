@@ -1,0 +1,679 @@
+[Luna] 00:01:03.810 [Connector-Scheduler-619713e5-1] ERROR fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 发生错误: /0:0:0:0:0:0:0:1:20115
+fun.efto.luna.shadow.jetty.websocket.api.CloseException: java.util.concurrent.TimeoutException: Idle timeout expired: 3600001/3600000 ms
+	at fun.efto.luna.shadow.jetty.websocket.common.io.AbstractWebSocketConnection.onReadTimeout(AbstractWebSocketConnection.java:564) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection.onFillInterestedFailed(AbstractConnection.java:172) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.websocket.common.io.AbstractWebSocketConnection.onFillInterestedFailed(AbstractWebSocketConnection.java:539) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection$ReadCallback.failed(AbstractConnection.java:317) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.FillInterest.onFail(FillInterest.java:140) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractEndPoint.onIdleExpired(AbstractEndPoint.java:407) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.IdleTimeout.checkIdleTimeout(IdleTimeout.java:171) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.IdleTimeout.idleCheck(IdleTimeout.java:113) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511) [?:1.8.0_202]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_202]
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:180) [?:1.8.0_202]
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:293) [?:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_202]
+	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_202]
+Caused by: java.util.concurrent.TimeoutException: Idle timeout expired: 3600001/3600000 ms
+	... 9 more
+[Luna] 00:01:03.820 [Connector-Scheduler-619713e5-1] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:20115, status: 1001, reason: java.util.concurrent.TimeoutException: Idle timeout expired: 3600001/3600000 ms
+[Luna] 00:01:03.822 [Connector-Scheduler-619713e5-1] ERROR fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 发生错误: /0:0:0:0:0:0:0:1:22011
+fun.efto.luna.shadow.jetty.websocket.api.CloseException: java.util.concurrent.TimeoutException: Idle timeout expired: 3600012/3600000 ms
+	at fun.efto.luna.shadow.jetty.websocket.common.io.AbstractWebSocketConnection.onReadTimeout(AbstractWebSocketConnection.java:564) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection.onFillInterestedFailed(AbstractConnection.java:172) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.websocket.common.io.AbstractWebSocketConnection.onFillInterestedFailed(AbstractWebSocketConnection.java:539) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection$ReadCallback.failed(AbstractConnection.java:317) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.FillInterest.onFail(FillInterest.java:140) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractEndPoint.onIdleExpired(AbstractEndPoint.java:407) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.IdleTimeout.checkIdleTimeout(IdleTimeout.java:171) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.IdleTimeout.idleCheck(IdleTimeout.java:113) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511) [?:1.8.0_202]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_202]
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:180) [?:1.8.0_202]
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:293) [?:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_202]
+	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_202]
+Caused by: java.util.concurrent.TimeoutException: Idle timeout expired: 3600012/3600000 ms
+	... 9 more
+[Luna] 00:01:03.824 [Connector-Scheduler-619713e5-1] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:22011, status: 1001, reason: java.util.concurrent.TimeoutException: Idle timeout expired: 3600012/3600000 ms
+[Luna] 00:01:03.824 [Connector-Scheduler-619713e5-1] ERROR fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 发生错误: /127.0.0.1:19867
+fun.efto.luna.shadow.jetty.websocket.api.CloseException: java.util.concurrent.TimeoutException: Idle timeout expired: 3600015/3600000 ms
+	at fun.efto.luna.shadow.jetty.websocket.common.io.AbstractWebSocketConnection.onReadTimeout(AbstractWebSocketConnection.java:564) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection.onFillInterestedFailed(AbstractConnection.java:172) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.websocket.common.io.AbstractWebSocketConnection.onFillInterestedFailed(AbstractWebSocketConnection.java:539) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection$ReadCallback.failed(AbstractConnection.java:317) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.FillInterest.onFail(FillInterest.java:140) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractEndPoint.onIdleExpired(AbstractEndPoint.java:407) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.IdleTimeout.checkIdleTimeout(IdleTimeout.java:171) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.IdleTimeout.idleCheck(IdleTimeout.java:113) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511) [?:1.8.0_202]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_202]
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:180) [?:1.8.0_202]
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:293) [?:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_202]
+	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_202]
+Caused by: java.util.concurrent.TimeoutException: Idle timeout expired: 3600015/3600000 ms
+	... 9 more
+[Luna] 00:01:03.826 [Connector-Scheduler-619713e5-1] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:19867, status: 1001, reason: java.util.concurrent.TimeoutException: Idle timeout expired: 3600015/3600000 ms
+[Luna] 00:01:03.827 [Connector-Scheduler-619713e5-1] ERROR fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 发生错误: /0:0:0:0:0:0:0:1:21962
+fun.efto.luna.shadow.jetty.websocket.api.CloseException: java.util.concurrent.TimeoutException: Idle timeout expired: 3600018/3600000 ms
+	at fun.efto.luna.shadow.jetty.websocket.common.io.AbstractWebSocketConnection.onReadTimeout(AbstractWebSocketConnection.java:564) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection.onFillInterestedFailed(AbstractConnection.java:172) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.websocket.common.io.AbstractWebSocketConnection.onFillInterestedFailed(AbstractWebSocketConnection.java:539) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection$ReadCallback.failed(AbstractConnection.java:317) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.FillInterest.onFail(FillInterest.java:140) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractEndPoint.onIdleExpired(AbstractEndPoint.java:407) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.IdleTimeout.checkIdleTimeout(IdleTimeout.java:171) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.IdleTimeout.idleCheck(IdleTimeout.java:113) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511) [?:1.8.0_202]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_202]
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:180) [?:1.8.0_202]
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:293) [?:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_202]
+	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_202]
+Caused by: java.util.concurrent.TimeoutException: Idle timeout expired: 3600018/3600000 ms
+	... 9 more
+[Luna] 00:01:03.828 [Connector-Scheduler-619713e5-1] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:21962, status: 1001, reason: java.util.concurrent.TimeoutException: Idle timeout expired: 3600018/3600000 ms
+[Luna] 00:01:09.280 [qtp1556995360-53] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31967
+[Luna] 00:01:09.294 [qtp1556995360-10] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31968
+[Luna] 00:01:09.310 [qtp1556995360-19] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31969
+[Luna] 00:01:09.325 [qtp1556995360-47] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:31970
+[Luna] 00:01:20.272 [Connector-Scheduler-619713e5-1] ERROR fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 发生错误: /0:0:0:0:0:0:0:1:22064
+fun.efto.luna.shadow.jetty.websocket.api.CloseException: java.util.concurrent.TimeoutException: Idle timeout expired: 3600000/3600000 ms
+	at fun.efto.luna.shadow.jetty.websocket.common.io.AbstractWebSocketConnection.onReadTimeout(AbstractWebSocketConnection.java:564) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection.onFillInterestedFailed(AbstractConnection.java:172) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.websocket.common.io.AbstractWebSocketConnection.onFillInterestedFailed(AbstractWebSocketConnection.java:539) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractConnection$ReadCallback.failed(AbstractConnection.java:317) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.FillInterest.onFail(FillInterest.java:140) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.AbstractEndPoint.onIdleExpired(AbstractEndPoint.java:407) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.IdleTimeout.checkIdleTimeout(IdleTimeout.java:171) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at fun.efto.luna.shadow.jetty.io.IdleTimeout.idleCheck(IdleTimeout.java:113) ~[luna-agent-1.0-SNAPSHOT.jar:?]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511) [?:1.8.0_202]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_202]
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:180) [?:1.8.0_202]
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:293) [?:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_202]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_202]
+	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_202]
+Caused by: java.util.concurrent.TimeoutException: Idle timeout expired: 3600000/3600000 ms
+	... 9 more
+[Luna] 00:01:20.273 [Connector-Scheduler-619713e5-1] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:22064, status: 1001, reason: java.util.concurrent.TimeoutException: Idle timeout expired: 3600000/3600000 ms
+[Luna] 00:01:26.276 [qtp1556995360-12] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:32031
+[Luna] 00:12:38.591 [Thread-15] INFO  fun.efto.luna.agent.Agent - Shutting down Jetty server...
+[Luna] 00:12:38.593 [Thread-15] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - Luna 日志分发器已停止
+[Luna] 00:12:38.594 [qtp1556995360-19] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31970, status: 1000, reason: Server stopping
+[Luna] 00:12:38.594 [qtp1556995360-18] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31968, status: 1000, reason: Server stopping
+[Luna] 00:12:38.594 [qtp1556995360-17] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31967, status: 1000, reason: Server stopping
+[Luna] 00:12:38.594 [qtp1556995360-10] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:31969, status: 1000, reason: Server stopping
+[Luna] 00:12:38.594 [qtp1556995360-47] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:32031, status: 1000, reason: Server stopping
+[Luna] 00:12:38.605 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.AbstractConnector - Stopped ServerConnector@619713e5{HTTP/1.1, (http/1.1)}{0.0.0.0:8421}
+[Luna] 00:12:38.605 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.session - node0 Stopped scavenging
+[Luna] 00:12:38.607 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.handler.ContextHandler - Stopped f.e.l.s.j.s.ServletContextHandler@79da8dc5{Luna Web Server,/,null,STOPPED}
+[Luna] 00:12:38.612 [Thread-15] INFO  fun.efto.luna.agent.web.JettyWebServer - Luna Web服务器已停止
+[Luna] 00:12:38.612 [Thread-15] INFO  fun.efto.luna.agent.Agent - Jetty server stopped.
+[Luna] 00:13:36.685 [main] INFO  fun.efto.luna.agent.log.LoggerInitializer - [Luna] Log4j2配置初始化成功
+[Luna] 00:13:36.690 [main] ERROR fun.efto.luna.agent.log.LoggerInitializer - [Luna] Log4j2配置初始化成功
+[Luna] 00:13:36.699 [main] INFO  fun.efto.luna.agent.Agent - Luna logger initialized successfully
+[Luna] 00:13:36.717 [main] INFO  fun.efto.luna.agent.Agent - Appending agent jar to bootstrap classloader: /D:/project/my/Luna/luna-agent/target/luna-agent-1.0-SNAPSHOT.jar
+[Luna] 00:13:36.720 [main] INFO  fun.efto.luna.agent.Agent - Initializing Luna agent components...
+[Luna] 00:13:36.732 [main] INFO  fun.efto.luna.core.init.InitializerManager - 初始化完成: fun.efto.luna.core.init.DefaultInitializer
+[Luna] 00:13:36.755 [main] INFO  fun.efto.luna.shadow.jetty.util.log - Logging initialized @781ms to fun.efto.luna.shadow.jetty.util.log.Slf4jLog
+[Luna] 00:13:36.822 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: StatusController (prefix=)
+[Luna] 00:13:36.829 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: ClassController (prefix=)
+[Luna] 00:13:36.841 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: InjectionController (prefix=/inject)
+[Luna] 00:13:36.849 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: RuleController (prefix=/rules)
+[Luna] 00:13:36.850 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: TemplateController (prefix=/templates)
+[Luna] 00:13:36.852 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: TestController (prefix=/test)
+[Luna] 00:13:36.853 [main] INFO  fun.efto.luna.agent.web.mvc.DispatcherServlet - Registered controller: MetricsController (prefix=)
+[Luna] 00:13:36.895 [main] INFO  fun.efto.luna.shadow.jetty.server.Server - jetty-9.4.53.v20231009; built: 2023-10-09T12:29:09.265Z; git: 27bde00a0b95a1d5bbee0eae7984f891d2d0f8c9; jvm 1.8.0_202-b08
+[Luna] 00:13:36.934 [main] INFO  fun.efto.luna.shadow.jetty.server.session - DefaultSessionIdManager workerName=node0
+[Luna] 00:13:36.935 [main] INFO  fun.efto.luna.shadow.jetty.server.session - No SessionScavenger set, using defaults
+[Luna] 00:13:36.938 [main] INFO  fun.efto.luna.shadow.jetty.server.session - node0 Scavenging every 660000ms
+[Luna] 00:13:36.981 [main] INFO  fun.efto.luna.shadow.jetty.server.handler.ContextHandler - Started f.e.l.s.j.s.ServletContextHandler@4e7912d8{Luna Web Server,/,null,AVAILABLE}
+[Luna] 00:13:37.824 [main] INFO  fun.efto.luna.shadow.jetty.server.AbstractConnector - Started ServerConnector@619713e5{HTTP/1.1, (http/1.1)}{0.0.0.0:8421}
+[Luna] 00:13:37.824 [main] INFO  fun.efto.luna.shadow.jetty.server.Server - Started @1852ms
+[Luna] 00:13:37.826 [main] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - Luna 日志分发器已启动
+[Luna] 00:13:37.826 [main] INFO  fun.efto.luna.agent.web.JettyWebServer - Luna Web服务器启动成功:
+[Luna] 00:13:37.827 [main] INFO  fun.efto.luna.agent.web.JettyWebServer -   - HTTP服务: http://0.0.0.0:8421
+[Luna] 00:13:37.827 [main] INFO  fun.efto.luna.agent.web.JettyWebServer -   - WebSocket服务: ws://0.0.0.0:8421/ws/log
+[Luna] 00:13:37.827 [main] INFO  fun.efto.luna.agent.Agent - Luna agent started successfully, web server on port 8421
+[Luna] 00:13:37.829 [main] INFO  fun.efto.luna.agent.Agent - Scanning already loaded classes for matching rules...
+[Luna] 00:13:38.049 [main] INFO  fun.efto.luna.agent.Agent - Initial rule application completed.
+[Luna] 00:13:38.090 [main] INFO  fun.efto.luna.core.transformer.RuleClassFileTransformer - Applying 1 rule(s) to newly loaded class: fun.efto.luna.demo.service.UserService
+[Luna] 00:13:38.162 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:13:38.207 [qtp1556995360-27] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /127.0.0.1:34291
+[Luna] 00:13:38.207 [qtp1556995360-22] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:34310
+[Luna] 00:13:38.238 [qtp1556995360-10] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:34333
+[Luna] 00:13:39.304 [qtp1556995360-15] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:34341
+[Luna] 00:13:41.167 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:13:41.275 [qtp1556995360-9] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:34357
+[Luna] 00:13:44.183 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:13:47.194 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:13:50.196 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:13:53.199 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:13:55.593 [qtp1556995360-23] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:34391
+[Luna] 00:13:56.070 [qtp1556995360-12] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:34391, status: 1005, reason: null
+[Luna] 00:13:56.198 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:13:59.201 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:01.278 [qtp1556995360-11] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:34410
+[Luna] 00:14:02.203 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:05.205 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:08.207 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:11.222 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:14.234 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:17.249 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:20.254 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:23.263 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:26.264 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:29.270 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:32.273 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:35.288 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:38.304 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:41.306 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:44.308 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:47.311 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:50.321 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:53.322 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:56.332 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:14:59.347 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:02.356 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:05.358 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:08.359 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:11.359 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:14.362 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:17.365 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:20.365 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:23.370 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:26.375 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:29.387 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:32.393 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:35.403 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:38.404 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:41.420 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:44.423 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:47.427 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:50.430 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:53.440 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:56.451 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:15:59.461 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:02.463 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:05.467 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:08.469 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:11.471 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:14.471 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:17.473 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:20.475 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:23.488 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:26.491 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:29.505 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:32.521 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:35.532 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:38.546 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:41.547 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:44.550 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:47.550 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:50.557 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:53.559 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:56.573 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:16:59.576 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:02.578 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:05.589 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:08.591 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:11.593 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:14.597 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:17.600 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:20.601 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:23.603 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:26.603 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:29.607 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:32.607 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:35.610 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:38.613 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:41.615 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:44.616 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:47.617 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:50.629 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:53.645 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:56.652 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:17:59.655 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:02.656 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:05.671 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:08.675 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:11.676 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:14.677 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:17.680 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:20.680 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:23.684 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:26.690 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:29.691 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:32.691 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:35.705 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:38.722 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:41.723 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:44.730 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:47.733 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:50.735 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:53.736 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:56.738 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:18:59.741 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:02.742 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:05.744 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:08.749 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:11.762 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:14.768 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:17.778 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:20.788 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:23.793 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:26.800 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:29.800 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:32.815 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:35.826 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:38.830 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:41.843 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:44.844 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:47.847 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:50.847 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:53.854 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:56.855 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:19:59.858 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:02.859 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:05.863 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:08.864 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:11.872 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:14.877 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:17.879 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:20.882 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:23.885 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:26.887 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:29.889 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:32.892 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:35.893 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:38.894 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:41.896 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:44.900 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:47.911 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:50.914 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:53.916 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:56.918 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:20:59.923 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:02.929 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:05.932 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:08.933 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:11.933 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:14.936 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:17.936 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:20.938 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:23.940 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:26.948 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:29.950 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:32.953 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:35.956 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:38.958 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:41.970 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:44.973 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:47.975 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:50.977 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:53.978 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:56.982 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:21:59.983 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:02.988 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:05.990 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:09.003 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:12.004 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:15.006 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:18.009 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:21.011 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:24.011 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:27.024 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:30.029 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:33.043 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:36.053 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:39.069 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:42.071 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:45.074 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:48.076 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:51.079 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:54.081 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:22:57.087 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:00.090 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:03.106 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:06.110 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:09.113 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:09.946 [qtp1556995360-14] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:35943
+[Luna] 00:23:11.489 [qtp1556995360-44] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:35943, status: 1005, reason: null
+[Luna] 00:23:12.114 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:15.121 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:16.501 [qtp1556995360-8] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接建立: /0:0:0:0:0:0:0:1:35961
+[Luna] 00:23:18.136 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:21.136 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:24.139 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:27.140 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:30.156 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:33.165 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:36.165 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:39.171 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:42.171 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:45.174 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:48.176 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:51.187 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:54.189 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:23:57.197 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:00.202 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:03.201 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:06.204 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:09.205 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:12.210 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:15.214 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:18.228 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:21.228 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:24.232 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:27.233 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:30.235 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:33.239 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:36.248 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:39.252 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:42.269 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:45.270 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:48.271 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:51.277 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:54.280 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:24:57.282 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:00.283 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:03.285 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:06.287 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:09.290 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:12.293 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:15.294 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:18.301 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:21.303 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:24.307 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:27.317 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:30.319 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:33.332 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:36.341 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:39.346 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:42.356 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:45.358 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:48.361 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:51.363 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:54.366 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:25:57.368 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:00.371 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:03.382 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:06.386 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:09.387 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:12.389 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:15.391 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:18.406 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:21.422 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:24.436 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:27.439 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:30.451 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:33.455 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:36.472 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:39.485 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:42.488 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:45.489 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:48.492 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:51.502 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:54.504 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:26:57.508 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:00.522 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:03.536 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:06.545 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:09.554 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:12.558 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:15.569 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:18.572 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:21.577 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:24.579 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:27.581 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:30.584 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:33.589 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:36.601 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:39.606 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:42.616 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:45.616 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:48.619 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:51.621 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:54.634 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:27:57.636 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:00.638 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:03.641 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:06.658 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:09.663 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:12.666 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:15.682 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:18.685 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:21.689 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:24.691 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:27.691 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:30.702 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:33.705 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:36.705 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:39.708 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:42.710 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:45.712 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:48.724 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:51.725 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:54.727 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:28:57.731 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:00.732 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:03.733 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:06.736 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:09.741 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:12.753 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:15.760 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:18.762 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:21.763 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:24.764 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:27.767 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:30.783 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:33.793 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:36.794 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:39.795 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:42.799 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:45.799 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:48.811 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:51.816 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:54.818 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:29:57.830 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:00.832 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:03.847 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:06.848 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:09.851 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:12.853 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:15.853 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:18.856 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:21.859 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:24.866 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:27.876 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:30.879 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:33.882 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:36.896 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:39.901 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:42.907 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:45.910 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:48.913 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:51.914 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:54.929 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:30:57.931 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:00.932 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:03.933 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:06.943 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:09.944 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:12.945 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:15.947 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:18.950 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:21.950 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:24.952 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:27.964 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:30.970 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:33.978 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:36.980 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:39.984 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:42.998 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:46.003 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:49.016 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:52.030 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:55.029 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:31:58.032 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:01.035 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:04.037 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:07.041 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:10.041 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:13.043 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:16.046 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:19.057 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:22.074 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:25.075 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:28.077 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:31.080 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:34.083 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:37.099 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:40.101 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:43.103 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:46.104 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:49.114 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:52.126 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:55.127 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:32:58.138 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:01.138 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:04.143 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:07.157 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:10.159 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:13.161 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:16.161 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:19.163 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:22.166 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:25.166 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:28.181 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:31.192 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:34.195 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:37.212 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:40.212 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:43.214 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:46.216 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:49.217 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:52.225 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:55.227 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:33:58.228 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:01.229 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:04.231 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:07.237 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:10.238 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:13.247 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:16.249 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:19.249 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:22.251 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:25.253 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:28.255 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:31.255 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:34.261 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:37.261 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:40.264 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:43.266 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:46.267 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:49.269 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:52.284 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:55.287 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:34:58.298 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:01.300 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:04.303 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:07.305 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:10.308 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:13.309 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:16.309 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:19.322 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:22.327 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:25.345 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:28.348 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:31.350 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:34.353 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:37.354 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:40.364 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:43.381 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:46.395 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:49.396 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:52.396 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:55.399 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:35:58.403 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:01.403 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:04.410 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:07.411 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:10.442 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:13.445 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:16.446 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:19.449 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:22.452 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:25.465 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:28.460 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:31.461 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:34.471 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:37.483 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:40.492 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:43.497 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:46.511 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:49.514 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:52.516 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:55.534 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:36:58.534 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:01.537 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:04.552 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:07.554 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:10.556 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:13.556 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:16.559 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:19.574 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:22.580 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:25.590 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:28.600 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:31.601 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:34.611 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:37.624 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:40.625 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:43.631 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:46.639 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:49.643 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:52.649 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:55.653 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:37:58.656 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:01.658 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:04.664 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:07.680 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:10.680 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:13.686 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:16.687 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:19.691 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:22.692 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:25.694 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:28.698 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:31.700 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:34.705 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:37.708 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:40.710 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:43.719 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:46.730 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:49.746 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:52.749 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:55.756 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:38:58.760 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:39:01.774 [Luna-Log-Dispatcher] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - [Diagnostic] method enter: ++++++++++++++++++++++++  测试日志
+[Luna] 00:39:02.870 [Thread-17] INFO  fun.efto.luna.agent.Agent - Shutting down Jetty server...
+[Luna] 00:39:02.872 [qtp1556995360-44] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:34310, status: 1000, reason: Server stopping
+[Luna] 00:39:02.872 [qtp1556995360-47] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /127.0.0.1:34291, status: 1000, reason: Server stopping
+[Luna] 00:39:02.872 [Thread-17] INFO  fun.efto.luna.agent.web.ws.LogDispatcher - Luna 日志分发器已停止
+[Luna] 00:39:02.872 [qtp1556995360-19] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:34333, status: 1000, reason: Server stopping
+[Luna] 00:39:02.872 [qtp1556995360-27] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:34341, status: 1000, reason: Server stopping
+[Luna] 00:39:02.873 [qtp1556995360-23] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:34410, status: 1000, reason: Server stopping
+[Luna] 00:39:02.874 [qtp1556995360-18] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:35961, status: 1000, reason: Server stopping
+[Luna] 00:39:02.874 [qtp1556995360-51] INFO  fun.efto.luna.agent.web.ws.LogWebSocketEndpoint - WebSocket 连接关闭: /0:0:0:0:0:0:0:1:34357, status: 1000, reason: Server stopping
+[Luna] 00:39:02.878 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.AbstractConnector - Stopped ServerConnector@619713e5{HTTP/1.1, (http/1.1)}{0.0.0.0:8421}
+[Luna] 00:39:02.879 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.session - node0 Stopped scavenging
+[Luna] 00:39:02.880 [JettyShutdownThread] INFO  fun.efto.luna.shadow.jetty.server.handler.ContextHandler - Stopped f.e.l.s.j.s.ServletContextHandler@4e7912d8{Luna Web Server,/,null,STOPPED}
+[Luna] 00:39:02.882 [Thread-17] INFO  fun.efto.luna.agent.web.JettyWebServer - Luna Web服务器已停止
+[Luna] 00:39:02.883 [Thread-17] INFO  fun.efto.luna.agent.Agent - Jetty server stopped.

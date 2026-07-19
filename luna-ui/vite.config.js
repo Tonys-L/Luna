@@ -19,5 +19,10 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['monaco-editor']
+  },
+  test: {
+    environment: 'happy-dom',
+    globals: true,
+    exclude: ['e2e/**', 'node/**', 'node_modules/**']
   }
 })

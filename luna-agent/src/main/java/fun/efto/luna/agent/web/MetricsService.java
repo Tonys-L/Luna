@@ -1,5 +1,7 @@
 package fun.efto.luna.agent.web;
 
+import fun.efto.luna.core.injection.InjectionService;
+
 import java.lang.management.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +11,7 @@ import java.util.Map;
 /**
  * JVM 指标采集服务
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:30
  */
 public class MetricsService {
@@ -62,7 +64,49 @@ public class MetricsService {
         metrics.put("uptime", runtimeMXBean.getUptime());
         metrics.put("startTime", runtimeMXBean.getStartTime());
 
+        // 6. OS 指标（UnixOperatingSystemMXBean，Windows 可能不可用）
+        metrics.put("os", getOsMetrics());
+
         return metrics;
+    }
+
+    public static Map<String, Object> getJvmMetrics(InjectionService injectionService) {
+        Map<String, Object> metrics = getJvmMetrics();
+
+        // 7. 注入统计
+        Map<String, Object> injections = new HashMap<>();
+        injections.put("activeCount", injectionService.getAllInjections().size());
+        metrics.put("injections", injections);
+
+        return metrics;
+    }
+
+    private static Map<String, Object> getOsMetrics() {
+        Map<String, Object> os = new HashMap<>();
+        try {
+            java.lang.management.OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
+            os.put("availableProcessors", osBean.getAvailableProcessors());
+            if (osBean instanceof com.sun.management.OperatingSystemMXBean) {
+                com.sun.management.OperatingSystemMXBean sunBean =
+                    (com.sun.management.OperatingSystemMXBean) osBean;
+                os.put("processCpuLoad", roundPercent(sunBean.getProcessCpuLoad()));
+                os.put("systemCpuLoad", roundPercent(sunBean.getSystemCpuLoad()));
+                os.put("processCpuTime", sunBean.getProcessCpuTime());
+            } else {
+                os.put("processCpuLoad", -1);
+                os.put("systemCpuLoad", -1);
+            }
+        } catch (Exception e) {
+            os.put("availableProcessors", Runtime.getRuntime().availableProcessors());
+            os.put("processCpuLoad", -1);
+            os.put("systemCpuLoad", -1);
+        }
+        return os;
+    }
+
+    private static double roundPercent(double value) {
+        if (value < 0) return -1;
+        return Math.round(value * 10000.0) / 100.0;
     }
 
     public static List<Map<String, Object>> getThreadDump() {

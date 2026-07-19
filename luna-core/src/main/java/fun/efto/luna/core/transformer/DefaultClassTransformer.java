@@ -1,18 +1,19 @@
 package fun.efto.luna.core.transformer;
 
-import fun.efto.luna.core.InjectionContext;
-import fun.efto.luna.core.bytecode.BytecodeAssembler;
-import fun.efto.luna.core.bytecode.BytecodeAssemblerRegistry;
+import fun.efto.luna.core.injection.InjectionContext;
 import fun.efto.luna.core.injection.InjectionPoint;
-import fun.efto.luna.core.injector.BytecodeInjector;
-import fun.efto.luna.core.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.injection.code.CompiledCode;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjector;
+import fun.efto.luna.core.bytecode.asm.injector.BytecodeInjectorRegistry;
+import fun.efto.luna.core.plugin.ProbeHandler;
+import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
 /**
- * @author ：Tony.L(286269159@qq.com)
+ * @author : Tony.L(286269159@qq.com)
  * @since ：2025/10/4 14:23
  */
 public class DefaultClassTransformer implements ClassTransformer {
@@ -29,18 +30,23 @@ public class DefaultClassTransformer implements ClassTransformer {
     @Override
     public TransformerResult transform(InjectionPoint injectionPoint, String className, byte[] bytecode) {
         try {
-            Optional<BytecodeInjector> injectorOptional = BytecodeInjectorRegistry.getInstance().get(injectionPoint.getInjectionType());
+            Optional<BytecodeInjector> injectorOptional = BytecodeInjectorRegistry.getInstance().get(injectionPoint.getInjectionLocation());
             if (!injectorOptional.isPresent()) {
-                return buildErrorResult(bytecode, "未找到对应的字节码注入器: " + injectionPoint.getInjectionType());
-            }
-
-            Optional<BytecodeAssembler> assemblerOptional = BytecodeAssemblerRegistry.getInstance().get(injectionPoint.getCodeType());
-            if (!assemblerOptional.isPresent()) {
-                return buildErrorResult(bytecode, "未找到对应的字节码组装器: " + injectionPoint.getCodeType());
+                return buildErrorResult(bytecode, "未找到对应的字节码注入器: " + injectionPoint.getInjectionLocation());
             }
 
             BytecodeInjector injector = injectorOptional.get();
-            byte[] transformedBytecode = injector.inject(new InjectionContext(injectionPoint), bytecode, assemblerOptional.get());
+
+            String probeType = injectionPoint.getProbeType();
+
+            ProbeHandler probeHandler = null;
+            if (probeType != null && !probeType.isEmpty()) {
+                probeHandler = ProbeHandlerRegistry.getInstance().get(probeType).orElse(null);
+            }
+
+            CompiledCode compiledCode = injectionPoint.getCode();
+
+            byte[] transformedBytecode = injector.inject(compiledCode, probeHandler, new InjectionContext(injectionPoint), bytecode);
 
             return new TransformerResult(
                     transformedBytecode,

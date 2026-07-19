@@ -41,50 +41,10 @@ export async function getDecompiledCode(className) {
 
 export async function injectMethodLog(injectionData) {
   try {
-    const data = await post(apiUrl('/inject'), injectionData)
+    const data = await post(apiUrl('/injections'), injectionData)
     return data
   } catch (error) {
     console.error('方法注入失败:', error)
-    throw error
-  }
-}
-
-export async function getRules() {
-  try {
-    const data = await get(apiUrl('/rules'))
-    return data || []
-  } catch (error) {
-    console.error('获取规则列表失败:', error)
-    throw error
-  }
-}
-
-export async function addRule(rule) {
-  try {
-    const data = await post(apiUrl('/rules'), rule)
-    return data
-  } catch (error) {
-    console.error('添加规则失败:', error)
-    throw error
-  }
-}
-
-export async function updateRule(id, rule) {
-  try {
-    const data = await put(apiUrl(`/rules/${id}`), rule)
-    return data
-  } catch (error) {
-    console.error('更新规则失败:', error)
-    throw error
-  }
-}
-
-export async function deleteRule(id) {
-  try {
-    const data = await del(apiUrl(`/rules/${id}`))
-    return data
-  } catch (error) {
-    console.error('删除规则失败:', error)
     throw error
   }
 }
@@ -125,7 +85,7 @@ export async function getLocalVariables(className, methodName, methodDesc, lineN
 
 export async function getInjectionList(className) {
   try {
-    const data = await get(apiUrl('/inject/list'), { class: className })
+    const data = await get(apiUrl('/injections/list'), { class: className })
     return data || { injections: [] }
   } catch (error) {
     console.error('获取注入点列表失败:', error)
@@ -133,9 +93,19 @@ export async function getInjectionList(className) {
   }
 }
 
+export async function getPersistentInjections() {
+  try {
+    const data = await get(apiUrl('/injections/persistent'))
+    return data || { injections: [] }
+  } catch (error) {
+    console.error('获取持久注入列表失败:', error)
+    return { injections: [] }
+  }
+}
+
 export async function removeInjection(id) {
   try {
-    const data = await post(apiUrl('/inject/remove'), { id })
+    const data = await del(apiUrl(`/injections/${id}`))
     return data
   } catch (error) {
     console.error('删除注入点失败:', error)
@@ -160,5 +130,125 @@ export async function getThreadDump() {
   } catch (error) {
     console.error('获取线程堆栈失败:', error)
     throw error
+  }
+}
+
+export async function getPlugins() {
+  try {
+    const data = await get(apiUrl('/plugins'))
+    return data || []
+  } catch (error) {
+    console.error('获取插件列表失败:', error)
+    throw error
+  }
+}
+
+export async function getPluginDetail(pluginId) {
+  try {
+    const data = await get(apiUrl(`/plugins/${pluginId}`))
+    return data
+  } catch (error) {
+    console.error('获取插件详情失败:', error)
+    throw error
+  }
+}
+
+export async function disablePlugin(pluginId) {
+  try {
+    const data = await post(apiUrl(`/plugins/${pluginId}/disable`))
+    return data
+  } catch (error) {
+    console.error('禁用插件失败:', error)
+    throw error
+  }
+}
+
+export async function enablePlugin(pluginId) {
+  try {
+    const data = await post(apiUrl(`/plugins/${pluginId}/enable`))
+    return data
+  } catch (error) {
+    console.error('启用插件失败:', error)
+    throw error
+  }
+}
+
+export async function unloadPlugin(pluginId) {
+  try {
+    const data = await post(apiUrl(`/plugins/${pluginId}/unload`))
+    return data
+  } catch (error) {
+    console.error('卸载插件失败:', error)
+    throw error
+  }
+}
+
+export async function searchPlugins(keyword) {
+  try {
+    const data = await get(apiUrl('/plugins/market/search'), { keyword })
+    return data || []
+  } catch (error) {
+    console.error('搜索插件失败:', error)
+    throw error
+  }
+}
+
+export async function installPlugin(pluginId) {
+  try {
+    const data = await post(apiUrl(`/plugins/market/install/${pluginId}`))
+    return data
+  } catch (error) {
+    console.error('安装插件失败:', error)
+    throw error
+  }
+}
+
+export async function getPluginConfig(pluginId) {
+  try {
+    const data = await get(apiUrl(`/plugins/${pluginId}/config`))
+    return data || {}
+  } catch (error) {
+    console.error('获取插件配置失败:', error)
+    throw error
+  }
+}
+
+export async function savePluginConfig(pluginId, config) {
+  try {
+    const data = await put(apiUrl(`/plugins/${pluginId}/config`), config)
+    return data
+  } catch (error) {
+    console.error('保存插件配置失败:', error)
+    throw error
+  }
+}
+
+export async function checkPluginUpdate(pluginId) {
+  try {
+    const data = await post(apiUrl(`/plugins/market/plugins/${pluginId}/update`))
+    return data
+  } catch (error) {
+    console.error('检查插件更新失败:', error)
+    throw error
+  }
+}
+
+export async function getProbes() {
+  try {
+    const data = await get(apiUrl('/probes'))
+    return data || []
+  } catch (error) {
+    console.error('获取探针列表失败:', error)
+    return []
+  }
+}
+
+export async function getEngines() {
+  try {
+    const data = await get(apiUrl('/probes/engines'))
+    return data || []
+  } catch (error) {
+    console.error('获取引擎列表失败:', error)
+    return []
   }
 }

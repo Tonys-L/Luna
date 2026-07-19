@@ -1,53 +1,45 @@
 package fun.efto.luna.demo.service;
 
 import fun.efto.luna.demo.model.User;
+import fun.efto.luna.demo.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com)
  * @since : 2026/05/01 15:30
  */
 public class UserService {
-    private final Map<Long, User> userStore = new ConcurrentHashMap<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
+    private final UserRepository userRepo;
+
+    public UserService(UserRepository userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public User createUser(String name, int age) {
-        long id = idGenerator.getAndIncrement();
-        int count =0;
-        for (int i = 0; i < 100; i++) {
-            int a = 0;
-            int b = 0;
-            if(i%2==0){
-                int c = a+b;
-                count++;
-            }else{
-                int d = a-b;
-            }
+        if (userRepo.existsByName(name)) {
+            System.out.println("[UserService] User already exists: " + name);
+            return null;
         }
-        User user = new User(id, name, age, name.toLowerCase() + "@example.com");
-        userStore.put(id, user);
-        System.out.println("[UserService] User count: " + userStore.size());
+        User user = new User(null, name, age, name.toLowerCase() + "@example.com");
+        userRepo.save(user);
         System.out.println("[UserService] Created user: " + user);
         return user;
     }
 
     public User getUser(Long id) {
-        User user = userStore.get(id);
+        User user = userRepo.findById(id);
         if (user == null) {
             System.out.println("[UserService] User not found: id=" + id);
-            return null;
+        } else {
+            System.out.println("[UserService] Found user: " + user);
         }
-        System.out.println("[UserService] Found user: " + user);
         return user;
     }
 
     public User updateUser(Long id, String name, int age) {
-        User user = userStore.get(id);
+        User user = userRepo.findById(id);
         if (user == null) {
             System.out.println("[UserService] User not found for update: id=" + id);
             return null;
@@ -55,12 +47,13 @@ public class UserService {
         user.setName(name);
         user.setAge(age);
         user.setEmail(name.toLowerCase() + "@example.com");
+        userRepo.save(user);
         System.out.println("[UserService] Updated user: " + user);
         return user;
     }
 
     public boolean deleteUser(Long id) {
-        User removed = userStore.remove(id);
+        User removed = userRepo.deleteById(id);
         if (removed == null) {
             System.out.println("[UserService] User not found for delete: id=" + id);
             return false;
@@ -69,13 +62,7 @@ public class UserService {
         return true;
     }
 
-    public List<User> listUsers() {
-        List<User> users = new ArrayList<>(userStore.values());
-        System.out.println("[UserService] Listed " + users.size() + " users");
-        return users;
-    }
-
     public int getUserCount() {
-        return userStore.size();
+        return userRepo.count();
     }
 }

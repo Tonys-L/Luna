@@ -2,12 +2,13 @@ package fun.efto.luna.core.expression.parser;
 
 import fun.efto.luna.core.expression.Token;
 import fun.efto.luna.core.expression.ast.*;
+import fun.efto.luna.core.expression.ast.PropertyAccessNode;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 表达式解析器，将Token序列解析为抽象语法树
- * @author ：Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
 public class ExpressionParser {
@@ -206,7 +207,7 @@ public class ExpressionParser {
                 throw new IllegalArgumentException("Expected property name after .");
             }
             consume();
-            node = new fun.efto.luna.core.expression.ast.PropertyAccessNode(node, propToken.getValue());
+            node = new PropertyAccessNode(node, propToken.getValue());
         }
 
         return node;

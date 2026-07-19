@@ -1,5 +1,7 @@
 package fun.efto.luna.core.expression.context;
 
+import fun.efto.luna.core.probe.BootstrapClassRegistry;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,10 +14,14 @@ import java.util.Map;
  * - this 引用：this
  * - 返回值：return
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:00
  */
 public class EvaluationContext {
+
+    static {
+        BootstrapClassRegistry.register(EvaluationContext.class.getName());
+    }
 
     private static final ThreadLocal<EvaluationContext> THREAD_LOCAL = ThreadLocal.withInitial(EvaluationContext::new);
 
@@ -26,6 +32,16 @@ public class EvaluationContext {
         EvaluationContext ctx = THREAD_LOCAL.get();
         ctx.clear();
         return ctx;
+    }
+
+    /**
+     * 创建求值上下文（委托给 getThreadLocal，供注入字节码调用）
+     * <p>
+     * 注入字节码通过 INVOKESTATIC 调用此方法获取上下文实例。
+     * 方法名 create() 比 getThreadLocal() 更直观，且与 ASM 生成代码中的引用一致。
+     */
+    public static EvaluationContext create() {
+        return getThreadLocal();
     }
 
     private final Map<String, Object> variables = new HashMap<>();

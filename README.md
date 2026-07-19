@@ -5,9 +5,25 @@
 
 > 无侵入式 Java 应用运行时诊断工具，基于 Agent + 字节码注入实现方法级观测
 
-## 截图
+## 功能截图
 
-![Luna Dashboard](docs/luna-dashboard-screenshot.png)
+### 类浏览器 - 代码级注入
+![类浏览器](docs/screenshot-class-detail.png)
+
+### 日志监控 - 实时探针输出
+![日志监控](docs/screenshot-log-viewer.png)
+
+### 监控大盘 - 运行状态概览
+![监控大盘](docs/screenshot-dashboard.png)
+
+### 线程分析
+![线程分析](docs/screenshot-thread-analyzer.png)
+
+### 注入管理
+![注入管理](docs/screenshot-injection-management.png)
+
+### 插件管理
+![插件管理](docs/screenshot-plugin-management.png)
 
 ## 核心能力
 
@@ -50,15 +66,12 @@
 # 构建
 mvn clean package -DskipTests
 
-# 启动 Demo 应用
+# 启动 Demo 应用（含 Agent）
 cd example/scripts
 start.bat
 
-# 附加 Agent
-attach.bat
-
 # 访问 UI
-open http://localhost:9090
+open http://localhost:8421
 ```
 
 ## 技术栈

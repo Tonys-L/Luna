@@ -1,4 +1,4 @@
-# 实体 (Entity)
+﻿# 实体 (Entity)
 
 > **文档定位**: 定义核心业务实体、属性、业务规则
 > **更新时机**: 新增/修改实体属性或业务规则时更新
@@ -35,6 +35,7 @@ classDiagram
         +InjectionLocation injectionLocation
         +String codeType
         +String probeType
+        +String source
         +toPersistentInjection() PersistentInjection
     }
     class PersistentInjection {
@@ -53,6 +54,7 @@ classDiagram
         +boolean enabled
         +boolean ephemeral
         +String groupId
+        +String source
         +InjectionStatus status
         +String suspendReason
     }
@@ -141,7 +143,7 @@ classDiagram
 | injectionLocation | InjectionLocation | 注入位置类型（派生自 target.getLocation()） | 非空 |
 | codeType | String | 代码类型 | EXPRESSION/JAVA/SNAPSHOT |
 | probeType | String | 探针类型 | 非空 |
-| source | PersistentInjection | 原始持久化实体引用 | 非空 |
+| source | String | 注入来源，区分 root 与 derived | 非空 |
 
 **创建流程**:
 
@@ -185,9 +187,10 @@ InjectionPoint point = InjectionPointFactory.create(persistentInjection);
 | fieldName | String | 否 | 字段名 | 字段访问注入时必填 |
 | fieldDescriptor | String | 否 | 字段描述符 | 字段访问注入时可选 |
 | enabled | boolean | 是 | 是否启用 | 默认 true |
-| ephemeral | boolean | 否 | 是否临时注入 | 默认 false |
+| ephemeral | boolean | 否 | 是否临时注入 | 默认 false，root 注入默认 false，derived 注入显式设为 true |
 | groupId | String | 否 | 分组标识 | 可选 |
-| status | InjectionStatus | 是 | 状态 | ACTIVE/SUSPENDED/DISABLED |
+| source | String | 否 | 注入来源 | 区分 root 与 derived |
+| status | InjectionStatus | 是 | 状态 | ACTIVE/DISABLED 等 |
 | suspendReason | String | 否 | 挂起原因 | SUSPENDED 时有值 |
 
 **协议前缀 (code 字段)**:
@@ -276,11 +279,12 @@ public interface LunaPlugin {
 
 ## 变更记录
 
-| 日期 | 变更内容 | 变更人 |
-|------|----------|--------|
-| 2026/06/16 | 初始版本 | Tony.L |
-| 2026/06/16 | 对照代码补充：InjectionLocation 多态、Port 接口、CoreCapability、实际枚举值 | Tony.L |
-| 2026/06/17 | 迁移补充：三层模型、PersistentInjection协议前缀表、InjectionPoint完整字段+创建流程、InjectionTarget classDiagram、InjectionLocation完整表(含适用目标/注册状态)、LunaPlugin完整接口、ProbeHandler完整接口+对照表、PluginContext接口、PluginRegistrationRecord、注入状态流转图 | Tony.L |
-| 2026/06/17 | 代码一致性修正：PersistentInjection/InjectRequest.injectionLocation类型改为String、lineNumber类型改为Integer、LunaPlugin.getControllers签名修正、ConstructorLocation/FieldAccessLocation标注为规划中未实现、PluginRegistrationRecord字段修正、CodeType标注为String无枚举约束、ProbeMessage.payload改为String、CoreCapabilityRecord补充displayName/dependencies字段及providedEntries类型修正、InjectionPoint.injectionLocation标注为派生属性、InjectionLocation.of()补充description参数、新增PluginLifecycleListener接口(7个方法) | Tony.L |
-| 2026/06/17 | 从 domain-model.md 拆分为目录结构 | Tony.L |
+| 日期 | 变更内容 | 变更人 | 关联变更 |
+|------|----------|--------|----------|
+| 2026/06/16 | 初始版本 | Tony.L | — |
+| 2026/06/16 | 对照代码补充：InjectionLocation 多态、Port 接口、CoreCapability、实际枚举值 | Tony.L | — |
+| 2026/06/17 | 迁移补充：三层模型、PersistentInjection协议前缀表、InjectionPoint完整字段+创建流程、InjectionTarget classDiagram、InjectionLocation完整表(含适用目标/注册状态)、LunaPlugin完整接口、ProbeHandler完整接口+对照表、PluginContext接口、PluginRegistrationRecord、注入状态流转图 | Tony.L | — |
+| 2026/06/17 | 代码一致性修正：PersistentInjection/InjectRequest.injectionLocation类型改为String、lineNumber类型改为Integer、LunaPlugin.getControllers签名修正、ConstructorLocation/FieldAccessLocation标注为规划中未实现、PluginRegistrationRecord字段修正、CodeType标注为String无枚举约束、ProbeMessage.payload改为String、CoreCapabilityRecord补充displayName/dependencies字段及providedEntries类型修正、InjectionPoint.injectionLocation标注为派生属性、InjectionLocation.of()补充description参数、新增PluginLifecycleListener接口(7个方法) | Tony.L | — |
+| 2026/06/17 | 从 domain-model.md 拆分为目录结构 | Tony.L | — |
 | 2026/07/03 | InjectionLocation 补充 category 字段、TRACE 协议改为 method_around 单注入点 | Tony.L | TRACE 重构 |
+| 2026/07/19 | 同步PersistentInjection/InjectRequest/InjectionPoint字段定义至代码实现 | Tony.L | 知识库同步审计 |

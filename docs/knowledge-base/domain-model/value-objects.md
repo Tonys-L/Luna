@@ -1,4 +1,4 @@
-# 值对象 (Value Object) & 枚举类型
+﻿# 值对象 (Value Object) & 枚举类型
 
 > **文档定位**: 定义值对象、接口、枚举类型
 > **更新时机**: 新增/修改值对象或枚举时更新
@@ -16,19 +16,21 @@
 
 | 子类型 | 静态实例 | 说明 | 适用目标 | 注册状态 |
 |--------|----------|------|---------|---------|
-| MethodInjectionLocation | ENTER, EXIT, AROUND | 方法级注入位置 | MethodTarget | 已注册 |
-| LineNumberInjectionLocation | BEFORE, AFTER | 行号级注入位置 | LineNumberTarget | 已注册 |
+| MethodInjectionLocation | METHOD_ENTER, METHOD_EXIT, METHOD_AROUND | 方法级注入位置，最常用，适用于 LOG/TRACE/INVOCATION | MethodTarget | 已注册 |
+| LineNumberInjectionLocation | LINE_BEFORE, LINE_AFTER | 行号级注入位置，适用于 LOG 行级注入 | LineNumberTarget | 已注册 |
 | InvokeInjectionLocation | INVOKE | 方法调用注入位置 | MethodTarget | 已注册 |
-| ExceptionExitInjectionLocation | EXCEPTION_EXIT | 异常退出注入位置 | MethodTarget | 已注册 |
-| ConstructorLocation | - | 构造器注入位置 | ConstructorTarget | 规划中，未实现 |
-| FieldAccessLocation | - | 字段访问注入位置 | FieldAccessTarget | 规划中，未实现 |
+| ExceptionExitInjectionLocation | EXCEPTION_EXIT | 异常退出（ATHROW 路径）注入位置 | MethodTarget | 已注册 |
+| ConstructorLocation | CONSTRUCTOR | 构造器注入位置 | ConstructorTarget | 规划中，未实现 |
+| FieldAccessLocation | FIELD_GET, FIELD_SET | 字段访问注入位置 | FieldAccessTarget | 规划中，未实现 |
 
-> **注意**: `constructor` 和 `field_access` 当前为规划中状态，代码中尚无对应类定义和注册，不可通过 API 使用。
+> **注意**: `ConstructorLocation` 和 `FieldAccessLocation` 当前为规划中状态，代码中尚无对应类定义和注册，不可通过 API 使用。
 
 **对应代码**:
 - `luna-core/injection/target/InjectionLocation.java`
 - `luna-core/plugin/builtin/method/MethodInjectionLocation.java`
 - `luna-core/plugin/builtin/line/LineNumberInjectionLocation.java`
+- `luna-core/plugin/builtin/invoke/InvokeInjectionLocation.java`
+- `luna-core/plugin/builtin/exception/ExceptionExitInjectionLocation.java`
 
 ---
 
@@ -187,9 +189,10 @@ public interface PluginLifecycleListener {
 
 ```java
 public interface ProbeHandler {
-    // 核心方法（6 个）
+    // 核心方法（7 个）
     String getProbeType();                             // 探针类型标识
     boolean usesCode();                                // 是否需要代码内容
+    String getCodeType();                              // 代码类型（String），当 usesCode() 为 true 时必须返回非 null 值（如 "EXPRESSION"）
     Set<String> supportedInjectionLocations();         // 支持的注入位置
     ValidationResult validate(InjectRequest request);  // 验证请求
     void handle(CompiledCode code, GenerateContext ctx); // 生成字节码
@@ -210,11 +213,11 @@ public interface ProbeHandler {
 
 **探针行为对照表**:
 
-| ProbeHandler | usesCode | 支持位置 | 验证规则 | 生成行为 | 删除行为 |
-|-------------|----------|---------|---------|---------|---------|
-| `LogProbeHandler` | true | method_enter/exit/around, line_before/after, invoke, exception_exit | code 非空 | 调用 LogProbe.onLog() | 默认（无关联清理） |
-| `SnapshotProbeHandler` | false | method_enter/exit, line_before/after | 无需 code | 调用 SnapshotProbe.onSnapshot() | 默认（无关联清理） |
-| `TraceProbeHandler` | false | method_around | 无需 code | 根据 ctx.phase() 生成 onTraceStart(ENTER) / onTraceEnd(EXIT) | 默认（无关联清理） |
+| ProbeHandler | usesCode | getCodeType | 支持位置 | 验证规则 | 生成行为 | 删除行为 |
+|-------------|----------|-------------|---------|---------|---------|---------|
+| `LogProbeHandler` | true | "EXPRESSION" | method_enter/exit/around, line_before/after, invoke, exception_exit | code 非空 | 调用 LogProbe.onLog() | 默认（无关联清理） |
+| `SnapshotProbeHandler` | false | null | method_enter/exit, line_before/after | 无需 code | 调用 SnapshotProbe.onSnapshot() | 默认（无关联清理） |
+| `TraceProbeHandler` | false | null | method_around | 无需 code | 根据 ctx.phase() 生成 onTraceStart(ENTER) / onTraceEnd(EXIT) | 默认（无关联清理） |
 
 > **注意**: TRACE 探针使用 `method_around` 单注入点模型，`handle()` 在 AROUND 时被调用两次（Phase.ENTER + Phase.EXIT），根据 `ctx.phase()` 生成不同的探针代码。用户只需选择"方法耗时"即可，不需要关心入口/出口的实现细节。
 
@@ -336,10 +339,10 @@ DISABLED    // 停用
 
 ### 4.2 CodeType
 
-> **注意**: 代码中 `codeType` 字段为 `String` 类型，无枚举约束。以下为约定值：
+> **注意**: `codeType` 不是枚举类型，而是 `String` 类型，由 `ProbeHandler.getCodeType()` 声明。当 `usesCode()` 返回 `true` 时，`getCodeType()` 必须返回非 null 值（如 LOG 探针返回 `"EXPRESSION"`）；当 `usesCode()` 返回 `false` 时，`getCodeType()` 返回 `null`。以下为约定值：
 
 ```text
-EXPRESSION  // 表达式类型（核心）
+EXPRESSION  // 表达式类型（核心，LOG 探针使用）
 JAVA        // Java 代码类型
 SNAPSHOT    // 快照类型
 ```
@@ -391,3 +394,4 @@ DYNAMIC_PLUGIN  // 动态插件
 | 2026/06/17 | 代码一致性修正：PersistentInjection/InjectRequest.injectionLocation类型改为String、lineNumber类型改为Integer、LunaPlugin.getControllers签名修正、ConstructorLocation/FieldAccessLocation标注为规划中未实现、PluginRegistrationRecord字段修正、CodeType标注为String无枚举约束、ProbeMessage.payload改为String、CoreCapabilityRecord补充displayName/dependencies字段及providedEntries类型修正、InjectionPoint.injectionLocation标注为派生属性、InjectionLocation.of()补充description参数、新增PluginLifecycleListener接口(7个方法) | Tony.L |
 | 2026/06/17 | 从 domain-model.md 拆分为目录结构 | Tony.L |
 | 2026/07/03 | 插件扩展机制同步：ProbeHandler 补充 7 个 UI 元数据方法、TRACE 改为 method_around + Phase、新增 InjectionLocationUIDescriptor、GenerateContext.Phase、ProbeMessage.structuredPayload、PluginContext 新增 getClassBytes/getLoadedClassNames/inject | Tony.L |
+| 2026/07/19 | 同步InjectionLocation为抽象类体系+codeType改为String：InjectionLocation子类静态实例名称修正(METHOD_ENTER/METHOD_EXIT/METHOD_AROUND/LINE_BEFORE/LINE_AFTER/FIELD_GET/FIELD_SET/CONSTRUCTOR)、说明补充最常用场景和ATHROW路径、对应代码补充InvokeInjectionLocation和ExceptionExitInjectionLocation；ProbeHandler新增getCodeType()方法、探针行为对照表补充getCodeType列；CodeType节强调由ProbeHandler.getCodeType()声明及usesCode()为true时必须返回非null | Tony.L |

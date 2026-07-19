@@ -1,4 +1,4 @@
-# 数据模型总览与数据实体
+﻿# 数据模型总览与数据实体
 
 > **文档定位**: 定义数据结构、字段定义、枚举类型
 > **更新时机**: 新增/修改数据模型时更新
@@ -31,7 +31,7 @@ Luna 的数据存储分为两层：
 | `codeType` | String | 否 | 代码类型 (EXPRESSION)，可选，SNAPSHOT/TRACE 不需要 |
 | `code` | String | 否 | 注入代码内容，SNAPSHOT/TRACE 不需要 |
 | `lineNumber` | Integer | 否 | 行号（行号注入时必填） |
-| `ephemeral` | boolean | 否 | 是否临时注入（默认 true，Agent 重启后失效） |
+| `ephemeral` | boolean | 否 | 是否临时注入（默认 false，Agent 重启后失效） |
 | `groupId` | String | 否 | 分组 ID（成对注入关联，如 TRACE 的 start/end） |
 
 ---
@@ -50,7 +50,7 @@ Luna 的数据存储分为两层：
 | methodDescriptor | String | - | 方法描述符 | 否 |
 | probeType | String | - | 探针类型 | 否 |
 | injectionLocation | String | - | 注入位置 | 否 |
-| codeType | String | - | 代码类型（可选，nullable） | 否 |
+| codeType | VARCHAR(32) | - | 代码引擎类型（如 "EXPRESSION"），nullable | 否 |
 | code | String | - | 注入代码（支持协议前缀，可选，nullable） | 否 |
 | lineNumber | Integer | 0 | 行号 | 否 |
 | expression | String | - | 条件表达式 | 否 |
@@ -58,7 +58,7 @@ Luna 的数据存储分为两层：
 | fieldDescriptor | String | - | 字段描述符 | 否 |
 | enabled | boolean | true | 是否启用 | 否 |
 | ephemeral | boolean | false | 是否临时注入 | 否 |
-| status | InjectionStatus | ACTIVE | 状态 | 否 |
+| status | VARCHAR(16) | 'ACTIVE' | 注入状态（InjectionStatus 枚举：ACTIVE/DISABLED），not null | 否 |
 | groupId | String | - | 分组 ID | 否 |
 | suspendReason | String | - | 挂起原因 | 否 |
 
@@ -67,6 +67,7 @@ Luna 的数据存储分为两层：
 - injectionLocation 必须为合法值
 - 行号注入时 lineNumber 必填且 > 0
 - SNAPSHOT/TRACE 的 codeType 可为 null
+- status 必须为 InjectionStatus 枚举值（ACTIVE / DISABLED），不允许为 null
 
 ---
 
@@ -174,7 +175,6 @@ Luna 的数据存储分为两层：
 | 值 | 说明 |
 |-----|------|
 | `ACTIVE` | 激活状态 |
-| `SUSPENDED` | 挂起状态 |
 | `DISABLED` | 禁用状态 |
 
 #### PluginState
@@ -193,4 +193,5 @@ Luna 的数据存储分为两层：
 
 | 日期 | 变更内容 | 变更人 |
 |------|----------|--------|
+| 2026/07/19 | 补充codeType/status列+修正ephemeral默认值 | Tony.L |
 | 2026/06/16 | 初始版本 | Tony.L |

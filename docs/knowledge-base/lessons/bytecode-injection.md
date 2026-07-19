@@ -156,3 +156,55 @@ public static void putIfAbsent(String className, byte[] originalBytecode) {
 **影响模块**: plugin/web, plugin, frontend
 **日期**: 2026-07
 **标签**: #API契约缺失 #前端-后端数据不一致 #静默降级
+
+---
+
+### 1.7 UiManifestVO 缺失 codeType 字段
+
+**日期**: 2026-07-19
+**严重程度**: 高
+**分类**: 字节码注入
+
+### 现象
+LOG 探针注入后，前端表达式编辑器中 codeType 为空字符串，导致 InjectionPointFactory 无法选择正确的 CodeEngine 编译表达式代码，LOG 探针的表达式内容被静默丢弃。
+
+### 根因
+UiManifestVO.ProbeTypeEntry 缺少 codeType 字段。前端从 GET /api/plugins/ui-manifest 获取的 manifest 中没有 codeType 信息，导致 pluginRegistry.codeEngines 始终为空数组，applyDefaultCode() 无法设置正确的 codeType。
+
+### 修复
+1. ProbeHandler 接口新增 getCodeType() 默认方法（返回 null）
+2. LogProbeHandler 覆写返回 "EXPRESSION"
+3. UiManifestVO.ProbeTypeEntry 增加 codeType 字段
+4. PluginUIController 构建时传入 h.getCodeType()
+5. 前端 _convertToProbeTypes 增加 codeType 映射
+
+### 教训
+- 探针类型的自描述能力（usesCode + codeType）必须通过 API 完整传递给前端
+- 数据流断裂（后端有值但 API 不暴露）会导致前端静默降级，难以排查
+- 新增 ProbeHandler 自描述字段时，需同时检查 API 契约和前端映射
+
+---
+
+### 1.7 UiManifestVO 缺失 codeType 字段
+
+**日期**: 2026-07-19
+**严重程度**: 高
+**分类**: 字节码注入
+
+### 现象
+LOG 探针注入后，前端表达式编辑器中 codeType 为空字符串，导致 InjectionPointFactory 无法选择正确的 CodeEngine 编译表达式代码，LOG 探针的表达式内容被静默丢弃。
+
+### 根因
+UiManifestVO.ProbeTypeEntry 缺少 codeType 字段。前端从 GET /api/plugins/ui-manifest 获取的 manifest 中没有 codeType 信息，导致 pluginRegistry.codeEngines 始终为空数组，applyDefaultCode() 无法设置正确的 codeType。
+
+### 修复
+1. ProbeHandler 接口新增 getCodeType() 默认方法（返回 null）
+2. LogProbeHandler 覆写返回 "EXPRESSION"
+3. UiManifestVO.ProbeTypeEntry 增加 codeType 字段
+4. PluginUIController 构建时传入 h.getCodeType()
+5. 前端 _convertToProbeTypes 增加 codeType 映射
+
+### 教训
+- 探针类型的自描述能力（usesCode + codeType）必须通过 API 完整传递给前端
+- 数据流断裂（后端有值但 API 不暴露）会导致前端静默降级，难以排查
+- 新增 ProbeHandler 自描述字段时，需同时检查 API 契约和前端映射

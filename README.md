@@ -5,7 +5,7 @@
 
 > **在代码的阴影里，露娜为你标记真相。**
 
-Luna（露娜），命名灵感来自《三角洲行动》中的侦察干员露娜——她的侦察箭矢洞悉战场，敌情分析与队友共享；正如 Luna 在 JVM 中无侵入地侦察运行时状态，标记问题真相，让排查不再是盲人摸象。
+在《三角洲行动》中，侦察干员露娜以箭矢洞穿迷雾，为队友标记威胁、共享情报；Luna 承袭其名，在 JVM 世界重演同样的侦察——无侵入、不干扰，实时标定运行真相，让排障不再盲目。
 
 ## Luna 是什么
 
@@ -213,31 +213,8 @@ public class MyPlugin implements LunaPlugin {
 | CPU 抖动 | < 2% |
 | RingBuffer 满时策略 | 丢弃不阻塞业务线程 |
 
-## 与同类工具对比
-
-| 特性 | Luna | Arthas | BTrace |
-|------|------|--------|--------|
-| 零侵入 | ✅ | ✅ | ✅ |
-| 运行时 Attach | ✅ | ✅ | ✅ |
-| 变量级观测 | ✅ 方法入参/返回值/局部变量 | ✅ OGNL 表达式 | ✅ BTrace 脚本 |
-| 调用链追踪 | ✅ 树形层级展示 | ❌ | ❌ |
-| Web UI | ✅ 类浏览器+注入管理 | ✅ Web Console | ❌ |
-| 代码编辑器 | ✅ Monaco Editor | ❌ | ❌ |
-| 插件扩展 | ✅ ProbeHandler SPI | ❌ 内置命令 | ⚠️ 有限 |
-| 目标 JDK | 8+ | 8+ | 8+ |
-| 安全边界 | 注入异常不传播 + RingBuffer 丢弃 | ⚠️ OGNL 可执行任意代码 | ⚠️ 脚本功能受限 |
 
 Luna 的定位差异：**面向开发者的可视化诊断工具**，而非命令行排障工具。通过类浏览器 + 代码编辑器的交互模式，降低诊断门槛，让"选方法 → 选探针 → 填参数"替代"写命令/写脚本"。
-
-## 贡献指南
-
-欢迎贡献！请遵循以下流程：
-
-1. Fork 本仓库
-2. 创建特性分支（`git checkout -b feature/my-feature`）
-3. 提交变更（`git commit -m 'feat: add my feature'`）
-4. 推送分支（`git push origin feature/my-feature`）
-5. 创建 Pull Request
 
 ### 开发环境搭建
 
@@ -255,16 +232,6 @@ npm run dev
 # 后端开发
 # 使用 start.bat 启动 Agent，前端通过 dev server 代理 API
 ```
-
-### 提交规范
-
-使用 [Conventional Commits](https://www.conventionalcommits.org/) 格式：
-
-- `feat:` 新功能
-- `fix:` Bug 修复
-- `refactor:` 重构
-- `docs:` 文档
-- `perf:` 性能优化
 
 ## 常见问题
 

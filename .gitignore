@@ -14,6 +14,10 @@ dependency-reduced-pom.xml
 *.class
 luna-rules.json
 luna.properties
+luna-ui/node/
+luna-ui/test-report/
+luna-ui/test-results/
+playwright-report/
 
 ### IntelliJ IDEA ###
 .idea/
@@ -44,6 +48,7 @@ demo-output.log
 TASKS/
 tmp/
 *.bak
+*.bak.md
 image.png
 mock-server.js
 test_frontend.py

@@ -8,11 +8,14 @@ import fun.efto.luna.agent.web.controller.StatusController;
 import fun.efto.luna.agent.web.controller.TestController;
 import fun.efto.luna.agent.web.controller.MetricsController;
 import fun.efto.luna.agent.web.controller.CapabilityController;
+import fun.efto.luna.agent.web.controller.ProbeController;
 import fun.efto.luna.agent.web.mvc.DispatcherServlet;
 import fun.efto.luna.agent.web.ws.LogDispatcher;
 import fun.efto.luna.agent.web.ws.LogWebSocketServlet;
+import fun.efto.luna.core.injection.CodeEngineRegistry;
 import fun.efto.luna.core.injection.InjectionService;
 import fun.efto.luna.core.plugin.LunaController;
+import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
 import fun.efto.luna.core.infra.web.WebServer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -88,6 +91,8 @@ public class JettyWebServer implements WebServer {
         dispatcher.registerController(new TestController(classScanner, classResourceHelper));
         dispatcher.registerController(new MetricsController(injectionService));
         dispatcher.registerController(new CapabilityController());
+        dispatcher.registerController(new ProbeController(
+                ProbeHandlerRegistry.getInstance(), CodeEngineRegistry.getInstance()));
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");

@@ -159,7 +159,7 @@ Spring transaction boundary → 对应 @Transactional 切面
 
 **当前优先推进方向**：
 
-1. Beta 品质打磨：ProbeController 注册到 WebServer 使 API 可达、健壮性提升
+1. Beta 品质打磨：ProbeController/MarketController 已注册到 WebServer，下一步是健壮性提升
 2. 完善内置能力注册追踪（#3 剩余部分）
 3. Phase 2 启动：readiness + class-analysis + verification
 
@@ -176,3 +176,4 @@ Spring transaction boundary → 对应 @Transactional 切面
 |------|----------|--------|----------|
 | 2026/06/17 | 从 project-context.md 拆分 | Tony.L | — |
 | 2026/07/19 | 对照代码审计更新：阶段改为 Beta 准备期、已实现能力补充（EXCEPTION_EXIT/INVOKE/SUSPENDED/ephemeral/统一运行时/路由分离）、架构深化 #1#2#7 标记已完成、#5 模板应用移除、Ephemeral 描述修正、能力地图补充状态列、推进方向更新 | Tony.L | 知识库同步审计 |
+| 2026/07/19 | Beta 品质打磨推进方向更新：ProbeController/MarketController 已注册到 WebServer | Tony.L | #feat/beta-quality-polish 同步更新 api-contracts/endpoints.md |

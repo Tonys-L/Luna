@@ -33,6 +33,7 @@ import fun.efto.luna.core.plugin.lifecycle.ReadyGate;
 
 import fun.efto.luna.core.plugin.web.PluginManagerController;
 import fun.efto.luna.core.plugin.web.PluginUIController;
+import fun.efto.luna.core.market.MarketController;
 import fun.efto.luna.core.transformer.GlobalClassFileTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +124,7 @@ public final class AgentRuntime {
             List<fun.efto.luna.core.plugin.LunaController> pluginControllers = new ArrayList<>();
             pluginControllers.add(new PluginManagerController(pluginManager));
             pluginControllers.add(new PluginUIController(pluginManager));
+            pluginControllers.add(new MarketController(pluginManager));
             webServer.registerControllers(pluginControllers);
 
             webServer.start();

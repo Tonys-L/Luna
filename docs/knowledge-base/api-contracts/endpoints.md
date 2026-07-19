@@ -210,8 +210,6 @@ GET /api/probes
 
 返回：已注册的 ProbeHandler 列表。
 
-> **注意**：ProbeController 代码已实现，尚未注册到 WebServer，运行时不可达。
-
 ---
 
 ### 5.3 代码引擎列表
@@ -221,8 +219,6 @@ GET /api/probes/engines
 ```
 
 返回：已注册的 CodeEngine 列表。
-
-> **注意**：ProbeController 代码已实现，尚未注册到 WebServer，运行时不可达。
 
 ---
 
@@ -343,7 +339,7 @@ GET /api/plugins/ui-manifest
 GET /api/plugins/market/search?keyword={keyword}
 ```
 
-> **注意**：MarketController 代码已实现，尚未注册到 WebServer，运行时不可达。
+> **注意**：MarketClient 未配置时返回 503。
 
 ---
 
@@ -474,8 +470,8 @@ ws://localhost:8421/ws/log
 | `/api/metrics/jvm` | GET | MetricsController | JVM 指标 |
 | `/api/metrics/threads` | GET | MetricsController | 线程 dump |
 | `/api/capabilities` | GET | CapabilityController | 能力清单 |
-| `/api/probes` | GET | ProbeController ⚠️ | 探针列表（代码已实现，尚未注册到 WebServer） |
-| `/api/probes/engines` | GET | ProbeController ⚠️ | 代码引擎列表（代码已实现，尚未注册到 WebServer） |
+| `/api/probes` | GET | ProbeController | 探针列表 |
+| `/api/probes/engines` | GET | ProbeController | 代码引擎列表 |
 | `/api/plugins` | GET | PluginManagerController | 插件列表 |
 | `/api/plugins/{pluginId}` | GET | PluginManagerController | 插件详情 |
 | `/api/plugins/{pluginId}/disable` | POST | PluginManagerController | 禁用插件 |
@@ -486,12 +482,12 @@ ws://localhost:8421/ws/log
 | `/api/plugins/{pluginId}/config` | GET | PluginManagerController | 获取插件配置 |
 | `/api/plugins/{pluginId}/config` | PUT | PluginManagerController | 保存插件配置 |
 | `/api/plugins/ui-manifest` | GET | PluginUIController | 插件 UI 扩展信息 |
-| `/api/plugins/market/search` | GET | MarketController ⚠️ | 插件市场搜索（代码已实现，尚未注册到 WebServer） |
-| `/api/plugins/market/install/{pluginId}` | POST | MarketController ⚠️ | 安装插件（代码已实现，尚未注册到 WebServer） |
-| `/api/plugins/market/plugins/{pluginId}` | GET | MarketController ⚠️ | 市场插件详情（代码已实现，尚未注册到 WebServer） |
-| `/api/plugins/market/plugins/{pluginId}/update` | POST | MarketController ⚠️ | 检查/执行更新（代码已实现，尚未注册到 WebServer） |
-| `/api/plugins/market/check-updates` | GET | MarketController ⚠️ | 检查所有更新（代码已实现，尚未注册到 WebServer） |
-| `/api/plugins/market/plugins/{pluginId}/uninstall` | DELETE | MarketController ⚠️ | 卸载市场插件（代码已实现，尚未注册到 WebServer） |
+| `/api/plugins/market/search` | GET | MarketController | 插件市场搜索 |
+| `/api/plugins/market/install/{pluginId}` | POST | MarketController | 安装插件 |
+| `/api/plugins/market/plugins/{pluginId}` | GET | MarketController | 市场插件详情 |
+| `/api/plugins/market/plugins/{pluginId}/update` | POST | MarketController | 检查/执行更新 |
+| `/api/plugins/market/check-updates` | GET | MarketController | 检查所有更新 |
+| `/api/plugins/market/plugins/{pluginId}/uninstall` | DELETE | MarketController | 卸载市场插件 |
 
 ---
 
@@ -502,3 +498,4 @@ ws://localhost:8421/ws/log
 | 2026/06/16 | 初始版本 | Tony.L |
 | 2026/06/16 | 对照代码补充：实际路由、InjectRequest 字段、插件市场 API、完整路由汇总 | Tony.L |
 | 2026/06/17 | 对照代码修正：端口号 8080→8421、ephemeral 默认值→true、必填校验对齐 isValid()、ProbeController/MarketController 标注未注册、ApiResult 字段顺序、ProbeMessage.timestamp、自研 MVC 注解、local-variables line 类型→String、/api/test/invoke 请求参数 | Tony.L |
+| 2026/07/19 | ProbeController 注册到 JettyWebServer、MarketController 注册到 AgentRuntime，移除"尚未注册到 WebServer"标注 | Tony.L |

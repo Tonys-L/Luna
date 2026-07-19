@@ -20,6 +20,24 @@ Luna 是基于 Java Agent 的**运行时动态诊断工具**。无需修改业�
 
 **Luna 不是什么：** 业务执行平台、业务逻辑扩展框架、持久业务状态管理器。Luna 只做观测、诊断、验证——安全扰动运行时行为，绝不替 JVM 执行业务。
 
+## 核心能力
+
+| 探针类型 | 功能 | 示例 |
+|----------|------|------|
+| **LOG** | 方法入参/返回值/变量日志 | `line before: user=${user}, age=${age}` |
+| **TRACE** | 方法耗时追踪与阈值告警 | `processOrder took 230ms` |
+| **SNAPSHOT** | 执行快照（局部变量+调用栈） | 完整方法执行现场 |
+| **INVOCATION** | 调用链追踪（树形层级） | `OrderService.processOrder → UserService.getUser → UserDao.findById` |
+
+### 关键特性
+
+- **零侵入** — 不修改业务代码，基于 Java Instrumentation API 实现
+- **不重启** — 支持运行时 Attach，诊断逻辑按需注入/移除
+- **类隔离** — Agent 依赖通过 Bootstrap ClassLoader + Shade 隔离，不污染目标应用
+- **安全可控** — 注入代码受沙箱保护，异常不传播到业务线程；RingBuffer 满时丢弃不阻塞
+- **插件化** — 核心能力稳定，产品能力通过 ProbeHandler 插件扩展
+- **实时推送** — WebSocket 实时推送诊断数据到 Web UI
+
 ## 功能截图
 
 ### 类浏览器 — 代码级注入
@@ -39,24 +57,6 @@ Luna 是基于 Java Agent 的**运行时动态诊断工具**。无需修改业�
 
 ### 插件管理
 ![插件管理](docs/screenshot-plugin-management.png)
-
-## 核心能力
-
-| 探针类型 | 功能 | 示例 |
-|----------|------|------|
-| **LOG** | 方法入参/返回值/变量日志 | `line before: user=${user}, age=${age}` |
-| **TRACE** | 方法耗时追踪与阈值告警 | `processOrder took 230ms` |
-| **SNAPSHOT** | 执行快照（局部变量+调用栈） | 完整方法执行现场 |
-| **INVOCATION** | 调用链追踪（树形层级） | `OrderService.processOrder → UserService.getUser → UserDao.findById` |
-
-### 关键特性
-
-- **零侵入** — 不修改业务代码，基于 Java Instrumentation API 实现
-- **不重启** — 支持运行时 Attach，诊断逻辑按需注入/移除
-- **类隔离** — Agent 依赖通过 Bootstrap ClassLoader + Shade 隔离，不污染目标应用
-- **安全可控** — 注入代码受沙箱保护，异常不传播到业务线程；RingBuffer 满时丢弃不阻塞
-- **插件化** — 核心能力稳定，产品能力通过 ProbeHandler 插件扩展
-- **实时推送** — WebSocket 实时推送诊断数据到 Web UI
 
 ## 架构
 
@@ -213,8 +213,9 @@ public class MyPlugin implements LunaPlugin {
 | CPU 抖动 | < 2% |
 | RingBuffer 满时策略 | 丢弃不阻塞业务线程 |
 
-
 Luna 的定位差异：**面向开发者的可视化诊断工具**，而非命令行排障工具。通过类浏览器 + 代码编辑器的交互模式，降低诊断门槛，让"选方法 → 选探针 → 填参数"替代"写命令/写脚本"。
+
+## 贡献
 
 ### 开发环境搭建
 

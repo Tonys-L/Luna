@@ -2,20 +2,24 @@
 
 ## 当前阶段
 
-* **MVP → Beta 过渡期**
+* **Beta 准备期**
 
 核心能力已实现：
-- 方法级注入（ENTER / EXIT / AROUND）
+- 方法级注入（ENTER / EXIT / AROUND / EXCEPTION_EXIT / INVOKE）
 - 行号级注入（LINE_BEFORE / LINE_AFTER）
 - 条件表达式引擎
-- 插件热加载/卸载
-- Web UI 诊断控制台
-- 规则持久化与模板系统
+- 插件热加载/卸载（含 PluginRegistrationRecord 自动清理）
+- Web UI 诊断控制台（6 页面：类浏览、日志、仪表盘、线程、注入管理、插件管理）
+- 注入持久化与状态管理（ACTIVE / SUSPENDED / ephemeral root/derived 区分）
+- 微内核 + 插件架构（LunaPlugin SPI + PluginContext + ProbeHandler + CodeEngine）
+- Core Capability Registry（6 个核心能力已注册且 READY）
+- 统一注入运行时（GlobalClassFileTransformer 为唯一 Transformer）
+- 核心/插件路由分离（JettyWebServer 硬注册 + LunaController 动态注册）
 
 正在演进：
-- 微内核 + 插件架构深化
+- Beta 品质打磨（ProbeController 注册可达、健壮性提升）
+- INVOCATION 探针调用链分析深化
 - Runtime Semantic Architecture 探索
-- Core Capabilities 体系化
 
 ---
 
@@ -23,13 +27,13 @@
 
 ### 分期路线
 
-| 阶段 | 方向 | 说明 |
-|------|------|------|
-| Phase 1 | Core Capability Registry | 最小核心能力记录，覆盖 method/line/bytecode-assembly 等 11 项 |
-| Phase 2 | 启动与诊断 | readiness + dependency graph + class-analysis + verification + observation-store |
-| Phase 3 | 恢复与观测 | bytecode-recovery + probe-runtime + observation-store + audit + Runtime Execution Graph |
-| Phase 4 | 诊断、权限与 AI-native | diagnostic + capability-permission-model + injection-scoped-state + AI Runtime Diagnostics |
-| 长期 | Runtime Semantic Engine | 从 JVM Runtime Execution 重建 Runtime Semantic World |
+| 阶段 | 方向 | 状态 | 说明 |
+|------|------|------|------|
+| Phase 1 | Core Capability Registry | ✅ 已完成 | 6 个核心能力已注册（method-target, line-target, bytecode-assembly, injection-lifecycle, code-compiler-dispatch, transform-pipeline），全部 READY |
+| Phase 2 | 启动与诊断 | 待启动 | readiness + dependency graph + class-analysis + verification + observation-store |
+| Phase 3 | 恢复与观测 | 待启动 | bytecode-recovery + probe-runtime + observation-store + audit + Runtime Execution Graph |
+| Phase 4 | 诊断、权限与 AI-native | 待启动 | diagnostic + capability-permission-model + injection-scoped-state + AI Runtime Diagnostics |
+| 长期 | Runtime Semantic Engine | 概念 | 从 JVM Runtime Execution 重建 Runtime Semantic World |
 
 注意：
 
@@ -97,7 +101,7 @@ Session 核心属性：
 - **isolation**：不同 session 的注入在 transform pipeline 中互不干扰
 - **cleanup 完成同步**：cleanup 完成前 session 不关闭
 
-当前 Injection Lifecycle 没有 ephemeral 概念，所有注入都是 persistent 语义。如果 AI Agent 方向是真实路线，这个缺口会很早暴露。
+**当前状态**：`PersistentInjection.ephemeral` 字段已存在（root 注入默认 false，derived 注入显式 true），`InvocationProbeHandler` 已区分 root/derived 行为。但尚无 Session 级别的 TTL、isolation 和自动 cleanup 机制——这是 Phase 3 的 `ephemeral-injection-session` 核心能力要解决的。
 
 #### Semantic Injection Model
 
@@ -119,23 +123,23 @@ Spring transaction boundary → 对应 @Transactional 切面
 
 15 个候选核心能力及其分期规划：
 
-| # | 能力 | 分类 | 分期 | 核心职责 |
-|---|------|------|------|----------|
-| 1 | method-target | Kernel | Phase 1 | 方法级注入目标 |
-| 2 | line-target | Kernel | Phase 1 | 行号级注入目标 |
-| 3 | bytecode-assembly | Kernel | Phase 1 | 字节码组装 |
-| 4 | code-compiler-dispatch | Kernel | Phase 1 | 代码编译分发 |
-| 5 | injection-lifecycle | Kernel | Phase 1 | 注入生命周期 |
-| 6 | transform-pipeline | Kernel | Phase 1 | 转换管线 |
-| 7 | instrumentation | Runtime Support | Phase 2 | Instrumentation 能力 |
-| 8 | runtime-readiness | Runtime Support | Phase 2 | 运行时就绪 |
-| 9 | class-analysis | Runtime Support | Phase 2 | 类分析 |
-| 10 | verification-preview | Runtime Support | Phase 2 | 验证预览 |
-| 11 | bytecode-recovery | Runtime Support | Phase 3 | 字节码恢复 |
-| 12 | probe-runtime | Runtime Support | Phase 3 | 探针运行时（含 back-pressure policy、per-probe 开关、跨线程 context 传播） |
-| 13 | observation-store | Runtime Support | Phase 3 | 观测存储（含 event graph、causality edge、thread/request relationship） |
-| 14 | ephemeral-injection-session | Runtime Support | Phase 3 | 临时注入会话（TTL-bounded、来源绑定、session isolation） |
-| 15 | diagnostic | Runtime Support | Phase 4 | 诊断能力（静态诊断 + 动态诊断，依赖 observation-store event graph） |
+| # | 能力 | 分类 | 分期 | 核心职责 | 状态 |
+|---|------|------|------|----------|------|
+| 1 | method-target | Kernel | Phase 1 | 方法级注入目标 | ✅ READY |
+| 2 | line-target | Kernel | Phase 1 | 行号级注入目标 | ✅ READY |
+| 3 | bytecode-assembly | Kernel | Phase 1 | 字节码组装 | ✅ READY |
+| 4 | code-compiler-dispatch | Kernel | Phase 1 | 代码编译分发 | ✅ READY |
+| 5 | injection-lifecycle | Kernel | Phase 1 | 注入生命周期 | ✅ READY |
+| 6 | transform-pipeline | Kernel | Phase 1 | 转换管线 | ✅ READY |
+| 7 | instrumentation | Runtime Support | Phase 2 | Instrumentation 能力 | 待启动 |
+| 8 | runtime-readiness | Runtime Support | Phase 2 | 运行时就绪 | 待启动 |
+| 9 | class-analysis | Runtime Support | Phase 2 | 类分析 | 待启动 |
+| 10 | verification-preview | Runtime Support | Phase 2 | 验证预览 | 待启动 |
+| 11 | bytecode-recovery | Runtime Support | Phase 3 | 字节码恢复 | 待启动 |
+| 12 | probe-runtime | Runtime Support | Phase 3 | 探针运行时（含 back-pressure policy、per-probe 开关、跨线程 context 传播） | 待启动 |
+| 13 | observation-store | Runtime Support | Phase 3 | 观测存储（含 event graph、causality edge、thread/request relationship） | 待启动 |
+| 14 | ephemeral-injection-session | Runtime Support | Phase 3 | 临时注入会话（TTL-bounded、来源绑定、session isolation） | 待启动 |
+| 15 | diagnostic | Runtime Support | Phase 4 | 诊断能力（静态诊断 + 动态诊断，依赖 observation-store event graph） | 待启动 |
 
 其他候选能力（Phase 4+）：capability-permission-model、injection-scoped-state、runtime-audit、sandbox-and-isolation、schema-and-migration、verification-scenario、capability-manifest。
 
@@ -143,26 +147,25 @@ Spring transaction boundary → 对应 @Transactional 切面
 
 7 个候选深化方向评估分析：
 
-| # | 深化方向 | Depth Signal | 推荐优先级 |
-|---|----------|-------------|-----------|
-| 1 | 统一注入运行时 | GlobalClassFileTransformer 成为唯一外部 Seam | **Phase 1 最高优先** |
-| 2 | 统一 Transformer 路径 | RuleClassFileTransformer 降级为迁移 Adapter | Phase 1 |
-| 3 | 内置能力注册追踪 | CoreModuleInitializer + registration tracking | Phase 1 |
-| 4 | 插件生命周期事务 | load/unload/update 事务化，保证 invariants | Phase 3 |
-| 5 | 模板应用 | TemplateService 改为依赖 InjectionLifecycle | Phase 2 |
-| 6 | 验证运行 | 提炼验证 Module，统一接收注入请求 | Phase 3 |
-| 7 | Web Runtime 注册 | 核心路由与插件路由 Interface 分开 | Phase 3 |
+| # | 深化方向 | 状态 | 说明 |
+|---|----------|------|------|
+| 1 | 统一注入运行时 | ✅ 已完成 | `RuleClassFileTransformer` 已删除，`GlobalClassFileTransformer` 为唯一 Transformer |
+| 2 | 统一 Transformer 路径 | ✅ 已完成 | 双路径已统一，`ByteKitInjectorBase.inject()` 统一分发 |
+| 3 | 内置能力注册追踪 | ⚠️ 部分完成 | `CoreModuleInitializer` 存在且工作，但运行时 registration tracking（查询某能力注册了什么、状态如何）尚不完整 |
+| 4 | 插件生命周期事务 | 待启动 | `PluginRegistrationRecord` 提供了卸载自动清理，但 load/unload 失败时尚无事务回滚 |
+| 5 | ~~模板应用~~ | ❌ 已移除 | `TemplateService` 从未实现，不再需要此方向 |
+| 6 | 验证运行 | ⚠️ 部分完成 | `InjectionService.injectWithTest()` 实现了 dryRun→inject→verify→validate，但尚未提炼为独立 Module |
+| 7 | Web Runtime 注册 | ✅ 已完成 | 核心 Controller 硬注册于 `JettyWebServer`，插件 Controller 通过 `LunaController` 动态注册 |
 
-**推荐推进顺序**：
+**当前优先推进方向**：
 
-1. Phase 1：让生产启动路径和测试路径合流（候选一、二、三的最小切片）
-2. Phase 2：迁移模板和规则旧模式（候选五）
-3. Phase 3：插件事务化和验证深化（候选四、六、七）
+1. Beta 品质打磨：ProbeController 注册到 WebServer 使 API 可达、健壮性提升
+2. 完善内置能力注册追踪（#3 剩余部分）
+3. Phase 2 启动：readiness + class-analysis + verification
 
 **暂不建议做的事**：
 - 不继续扩展市场安装能力
 - 不继续拆小 helper
-- 不先初始化 RuleManager
 - 不引入 DI 容器
 
 ---
@@ -172,3 +175,4 @@ Spring transaction boundary → 对应 @Transactional 切面
 | 日期 | 变更内容 | 变更人 | 关联变更 |
 |------|----------|--------|----------|
 | 2026/06/17 | 从 project-context.md 拆分 | Tony.L | — |
+| 2026/07/19 | 对照代码审计更新：阶段改为 Beta 准备期、已实现能力补充（EXCEPTION_EXIT/INVOKE/SUSPENDED/ephemeral/统一运行时/路由分离）、架构深化 #1#2#7 标记已完成、#5 模板应用移除、Ephemeral 描述修正、能力地图补充状态列、推进方向更新 | Tony.L | 知识库同步审计 |

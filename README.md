@@ -86,16 +86,63 @@ Luna 是基于 Java Agent 的**运行时动态诊断工具**。无需修改业�
 
 ## 快速开始
 
+### 前提条件
+
+- JDK 8+ （构建需 JDK 8+，目标应用兼容 JDK 8+）
+- Maven 3.6+
+
+### 一键启动 Demo
+
 ```bash
-# 构建
+# 克隆项目
+git clone https://github.com/Tonys-L/Luna.git
+cd Luna
+
+# 构建并启动（Windows）
+example\scripts\start.bat
+
+# 或手动构建
 mvn clean package -DskipTests
 
 # 启动 Demo 应用（含 Agent）
-cd example/scripts
-start.bat
+java -javaagent:luna-agent/target/luna-agent-1.0-SNAPSHOT.jar \
+     -jar example/luna-demo-app/target/luna-demo-app-1.0-SNAPSHOT.jar
 
 # 访问 UI
 open http://localhost:8421
+```
+
+### 运行时 Attach 到目标 JVM
+
+无需重启目标应用，动态挂载 Agent：
+
+```bash
+# 查找目标 JVM 的 PID
+jps -l
+
+# 运行时 Attach
+java -jar luna-agent/target/luna-agent-1.0-SNAPSHOT.jar <pid>
+
+# 访问 UI
+open http://localhost:8421
+```
+
+## 配置
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| Web 端口 | `8421` | Agent 内置 Jetty 服务端口 |
+| WebSocket 路径 | `/ws/log` | 实时日志推送 |
+| API 基路径 | `/api/` | REST API |
+
+## 项目结构
+
+```
+luna-core/          # 核心库：字节码注入引擎、插件系统、探针运行时
+luna-agent/         # Agent 入口：premain/agentmain、Web 服务、REST API
+luna-ui/            # 前端：类浏览器、注入对话框、日志查看器
+example/            # Demo 应用与启动脚本
+docs/knowledge-base/# 知识库驱动开发文档
 ```
 
 ## 技术栈
@@ -105,14 +152,56 @@ open http://localhost:8421
 - **Web Layer**: Jetty 嵌入式服务, REST API + WebSocket 实时推送
 - **Frontend**: Vue 3 + Monaco Editor + TailwindCSS
 
-## 项目结构
+## 插件开发
 
+Luna 通过 `ProbeHandler` 接口实现探针插件化扩展。实现该接口即可定义新的探针类型：
+
+```java
+public class MyProbeHandler implements ProbeHandler {
+
+    @Override
+    public String getProbeType() { return "MY_PROBE"; }
+
+    @Override
+    public boolean usesCode() { return true; }
+
+    @Override
+    public String getCodeType() { return "EXPRESSION"; }
+
+    @Override
+    public Set<String> supportedInjectionLocations() {
+        return Set.of("method_around");
+    }
+
+    @Override
+    public ValidationResult validate(InjectRequest request) {
+        if (request.getCode() == null || request.getCode().isEmpty()) {
+            return ValidationResult.fail("code is required");
+        }
+        return ValidationResult.ok();
+    }
+
+    @Override
+    public void handle(CompiledCode code, GenerateContext ctx) {
+        // 注入逻辑：在方法入口/出口处插入探针代码
+    }
+
+    // 可选：自定义前端展示
+    @Override public String getDisplayName() { return "自定义探针"; }
+    @Override public String getGlyphColor()  { return "#ff6b6b"; }
+    @Override public String getIcon()        { return "fas fa-bolt"; }
+}
 ```
-luna-core/          # 核心库：字节码注入引擎、插件系统、探针运行时
-luna-agent/         # Agent 入口：premain/agentmain、Web 服务、REST API
-luna-ui/            # 前端：类浏览器、注入对话框、日志查看器
-example/            # Demo 应用与脚本
-docs/knowledge-base/# 知识库驱动开发文档
+
+注册为 `LunaPlugin` 即可被 Agent 自动加载：
+
+```java
+public class MyPlugin implements LunaPlugin {
+    @Override
+    public void register(PluginRegistry registry) {
+        registry.registerProbeHandler(new MyProbeHandler());
+    }
+}
 ```
 
 ## 性能约束
@@ -124,6 +213,91 @@ docs/knowledge-base/# 知识库驱动开发文档
 | CPU 抖动 | < 2% |
 | RingBuffer 满时策略 | 丢弃不阻塞业务线程 |
 
+## 与同类工具对比
+
+| 特性 | Luna | Arthas | BTrace |
+|------|------|--------|--------|
+| 零侵入 | ✅ | ✅ | ✅ |
+| 运行时 Attach | ✅ | ✅ | ✅ |
+| 变量级观测 | ✅ 方法入参/返回值/局部变量 | ✅ OGNL 表达式 | ✅ BTrace 脚本 |
+| 调用链追踪 | ✅ 树形层级展示 | ❌ | ❌ |
+| Web UI | ✅ 类浏览器+注入管理 | ✅ Web Console | ❌ |
+| 代码编辑器 | ✅ Monaco Editor | ❌ | ❌ |
+| 插件扩展 | ✅ ProbeHandler SPI | ❌ 内置命令 | ⚠️ 有限 |
+| 目标 JDK | 8+ | 8+ | 8+ |
+| 安全边界 | 注入异常不传播 + RingBuffer 丢弃 | ⚠️ OGNL 可执行任意代码 | ⚠️ 脚本功能受限 |
+
+Luna 的定位差异：**面向开发者的可视化诊断工具**，而非命令行排障工具。通过类浏览器 + 代码编辑器的交互模式，降低诊断门槛，让"选方法 → 选探针 → 填参数"替代"写命令/写脚本"。
+
+## 贡献指南
+
+欢迎贡献！请遵循以下流程：
+
+1. Fork 本仓库
+2. 创建特性分支（`git checkout -b feature/my-feature`）
+3. 提交变更（`git commit -m 'feat: add my feature'`）
+4. 推送分支（`git push origin feature/my-feature`）
+5. 创建 Pull Request
+
+### 开发环境搭建
+
+```bash
+# 克隆并构建
+git clone https://github.com/Tonys-L/Luna.git
+cd Luna
+mvn clean package -DskipTests
+
+# 前端开发（热更新）
+cd luna-ui
+npm install
+npm run dev
+
+# 后端开发
+# 使用 start.bat 启动 Agent，前端通过 dev server 代理 API
+```
+
+### 提交规范
+
+使用 [Conventional Commits](https://www.conventionalcommits.org/) 格式：
+
+- `feat:` 新功能
+- `fix:` Bug 修复
+- `refactor:` 重构
+- `docs:` 文档
+- `perf:` 性能优化
+
+## 常见问题
+
+<details>
+<summary><b>Luna 会影响目标应用的性能吗？</b></summary>
+
+Luna 设计了多层安全边界：
+- 注入代码的异常不会传播到业务线程
+- RingBuffer 满时丢弃数据，不阻塞业务线程
+- 单次插桩判定 < 0.1ms，CPU 抖动 < 2%
+- 未被注入的方法零开销
+</details>
+
+<details>
+<summary><b>Luna 支持哪些 JDK 版本？</b></summary>
+
+JDK 8+。Luna 自身编译为 JDK 8 字节码，Agent 通过 ASM 操作字节码时兼容 JDK 8 ~ 21+ 的 class 文件格式。
+</details>
+
+<details>
+<summary><b>注入的探针可以移除吗？</b></summary>
+
+可以。在"注入管理"页面点击删除，或通过 REST API 调用 `DELETE /api/injections/{id}`。Luna 会触发 retransform 还原原始字节码。
+</details>
+
+<details>
+<summary><b>重启目标 JVM 后注入会失效吗？</b></summary>
+
+是的。Luna 的注入是运行时的，JVM 重启后字节码恢复原始状态。这是"零侵入"设计的必然结果——不修改 class 文件、不打补丁。
+</details>
+
 ## License
 
-Apache License 2.0
+[Apache License 2.0](LICENSE)
+
+Copyright © 2025-2026 Tony.L

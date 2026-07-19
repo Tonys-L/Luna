@@ -34,8 +34,16 @@ luna.properties
 ### Trae ###
 .trae/
 
+### Runtime ###
+*.log
+luna-injections.json
+luna-agent.jar
+demo-output.log
+
 ### Temp ###
 TASKS/
+tmp/
 *.bak
+image.png
 mock-server.js
 test_frontend.py

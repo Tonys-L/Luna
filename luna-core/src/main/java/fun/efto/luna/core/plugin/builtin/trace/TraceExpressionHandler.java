@@ -2,6 +2,7 @@ package fun.efto.luna.core.plugin.builtin.trace;
 
 import fun.efto.luna.core.plugin.BytecodeHelper;
 import fun.efto.luna.core.plugin.GenerateContext;
+import fun.efto.luna.core.probe.trace.TraceProbe;
 
 /**
  * @author : Tony.L(286269159@qq.com)

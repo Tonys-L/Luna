@@ -7,6 +7,7 @@ import fun.efto.luna.core.bytecode.asm.assembler.ReferenceExpressionParser;
 import fun.efto.luna.core.bytecode.asm.assembler.ExpressionSegment;
 import fun.efto.luna.core.plugin.BytecodeHelper;
 import fun.efto.luna.core.plugin.GenerateContext;
+import fun.efto.luna.core.probe.snapshot.SnapshotProbe;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;

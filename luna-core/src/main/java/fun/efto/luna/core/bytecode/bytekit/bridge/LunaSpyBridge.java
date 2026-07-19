@@ -1,6 +1,6 @@
 package fun.efto.luna.core.bytecode.bytekit.bridge;
 
-import fun.efto.luna.core.plugin.builtin.log.LogProbe;
+import fun.efto.luna.core.probe.log.LogProbe;
 
 /**
  * @author : Tony.L(286269159@qq.com)

@@ -15,25 +15,29 @@ public class ProbeMessage {
     private final String payload;
     private final long timestamp;
     private final Map<String, Object> structuredPayload;
+    private final String renderHint;
 
     public ProbeMessage(String type, String payload) {
-        this.type = type;
-        this.payload = payload;
-        this.timestamp = System.currentTimeMillis();
-        this.structuredPayload = null;
+        this(type, payload, null, null);
     }
 
     public ProbeMessage(String type, String payload, Map<String, Object> structuredPayload) {
+        this(type, payload, structuredPayload, null);
+    }
+
+    public ProbeMessage(String type, String payload, Map<String, Object> structuredPayload, String renderHint) {
         this.type = type;
         this.payload = payload;
         this.timestamp = System.currentTimeMillis();
         this.structuredPayload = structuredPayload;
+        this.renderHint = renderHint;
     }
 
     public String getType() { return type; }
     public String getPayload() { return payload; }
     public long getTimestamp() { return timestamp; }
     public Map<String, Object> getStructuredPayload() { return structuredPayload; }
+    public String getRenderHint() { return renderHint; }
 
     public String toJson() {
         StringBuilder sb = new StringBuilder(128);
@@ -48,6 +52,9 @@ public class ProbeMessage {
         if (structuredPayload != null) {
             sb.append(",\"structuredPayload\":");
             sb.append(mapToJson(structuredPayload));
+        }
+        if (renderHint != null) {
+            sb.append(",\"renderHint\":\"").append(escapeJson(renderHint)).append("\"");
         }
         sb.append("}");
         return sb.toString();

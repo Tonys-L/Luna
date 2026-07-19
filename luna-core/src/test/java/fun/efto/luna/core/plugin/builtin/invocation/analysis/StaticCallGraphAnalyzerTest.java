@@ -144,7 +144,7 @@ public class StaticCallGraphAnalyzerTest {
         public fun.efto.luna.core.plugin.LogEmitter getLogEmitter() { return null; }
 
         @Override
-        public fun.efto.luna.core.infra.RingBuffer<fun.efto.luna.core.probe.ProbeMessage> getLogBuffer() { return null; }
+        public fun.efto.luna.core.probe.RingBuffer<fun.efto.luna.core.probe.ProbeMessage> getLogBuffer() { return null; }
 
         @Override
         public fun.efto.luna.core.injection.port.Retransformer getRetransformer() { return className -> {}; }

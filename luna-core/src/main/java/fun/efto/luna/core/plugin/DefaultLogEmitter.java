@@ -1,8 +1,8 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.plugin.builtin.log.LogProbe;
-import fun.efto.luna.core.plugin.builtin.snapshot.SnapshotProbe;
-import fun.efto.luna.core.plugin.builtin.trace.TraceProbe;
+import fun.efto.luna.core.probe.log.LogProbe;
+import fun.efto.luna.core.probe.snapshot.SnapshotProbe;
+import fun.efto.luna.core.probe.trace.TraceProbe;
 
 /**
  * @author : Tony.L(286269159@qq.com)

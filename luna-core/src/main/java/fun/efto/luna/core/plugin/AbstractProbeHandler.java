@@ -31,7 +31,7 @@ public abstract class AbstractProbeHandler implements ProbeHandler {
             return ValidationResult.fail("Probe type '" + getProbeType() + "' does not support location: " + locationName);
         }
 
-        if (usesCode() && request.getCodeType() == null) {
+        if (usesCode() && (request.getCodeType() == null || request.getCodeType().isEmpty())) {
             return ValidationResult.fail("codeType is required for probe type '" + getProbeType() + "'");
         }
 

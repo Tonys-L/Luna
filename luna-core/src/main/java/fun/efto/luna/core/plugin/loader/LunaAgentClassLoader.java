@@ -15,7 +15,8 @@ public class LunaAgentClassLoader extends URLClassLoader {
      * Parent-first packages: delegated to parent ClassLoader (Bootstrap CL via Bootstrap JAR).
      * These classes are in the Bootstrap JAR and MUST be loaded by Bootstrap CL because:
      * 1. Injected bytecode references them (e.g., EvaluationContext.create(), ConditionRegistry.test(),
-     *    LogProbe.onLog(), SnapshotProbe.onSnapshot(), TraceProbe.onTraceStart/End/Alert())
+     *    LogProbe.onLog(), SnapshotProbe.onSnapshot(), TraceProbe.onTraceStart/End/Alert(),
+     *    InvocationTraceProbe.onMethodEnter/Exit(), RingBuffer.offer())
      * 2. Agent code must share the same class instances with injected bytecode (static state like
      *    ConditionRegistry.AST_CACHE, ProbeOutput.BUFFER)
      *
@@ -24,14 +25,13 @@ public class LunaAgentClassLoader extends URLClassLoader {
      *
      * Classes NOT in the Bootstrap JAR but in these packages will fall through to
      * LunaAgentClassLoader.findClass() and be loaded normally — no harm done.
+     *
+     * The "probe." prefix covers all probe runtime classes (LogProbe, TraceProbe, SnapshotProbe,
+     * InvocationTraceProbe, RingBuffer, StackFrameCapture, SnapshotSerializer, etc.).
      */
     private static final String[] PARENT_FIRST_PACKAGES = {
             "fun.efto.luna.core.probe.",
-            "fun.efto.luna.core.infra.",
             "fun.efto.luna.core.expression.",
-            "fun.efto.luna.core.plugin.builtin.log.",
-            "fun.efto.luna.core.plugin.builtin.snapshot.",
-            "fun.efto.luna.core.plugin.builtin.trace.",
     };
 
     private static final String[] CHILD_FIRST_PACKAGES = {

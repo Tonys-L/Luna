@@ -312,6 +312,29 @@ GET /api/plugins/ui-manifest
 
 返回所有插件的 UI 扩展信息（注入类型、表达式协议、模板等），前端据此动态渲染。
 
+**响应字段** (UiManifestVO):
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| injectionLocations | InjectionLocationEntry[] | 可用注入位置列表 |
+| probeTypes | ProbeTypeEntry[] | 可用探针类型列表 |
+
+**ProbeTypeEntry 字段**:
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| probeType | String | 探针类型标识（LOG, TRACE, SNAPSHOT, INVOCATION） |
+| displayName | String | 显示名称 |
+| syntax | String | 语法提示 |
+| icon | String | 图标类名 |
+| category | String | 分类 |
+| usesCode | Boolean | 是否需要代码输入 |
+| codeType | String | 代码引擎类型（usesCode=true 时非空，如 "EXPRESSION"） |
+| supportedInjectionLocations | String[] | 支持的注入位置 |
+| quickActionBehavior | String | 快捷行为（DIRECT/FORM） |
+| glyphColor | String | 标记颜色 |
+| configSchema | FormFieldSchema[] | 配置表单定义 |
+
 ---
 
 ### 6.11 插件市场搜索

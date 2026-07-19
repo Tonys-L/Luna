@@ -215,8 +215,8 @@ public final class AgentRuntime {
                     if (!classes.isEmpty()) {
                         InstrumentationHolder.retransformClasses(classes.toArray(new Class<?>[0]));
                     }
-                } catch (Exception e) {
-                    throw new RuntimeException("Retransform failed for class: " + className, e);
+                } catch (Throwable t) {
+                    throw new RuntimeException("Retransform failed for class: " + className, t);
                 }
             }
 
@@ -228,8 +228,8 @@ public final class AgentRuntime {
                     if (!targets.isEmpty()) {
                         InstrumentationHolder.retransformClasses(targets.toArray(new Class<?>[0]));
                     }
-                } catch (Exception e) {
-                    throw new RuntimeException("Batch retransform failed", e);
+                } catch (Throwable t) {
+                    throw new RuntimeException("Batch retransform failed", t);
                 }
             }
 
@@ -245,8 +245,8 @@ public final class AgentRuntime {
                     if (!targets.isEmpty()) {
                         InstrumentationHolder.retransformClasses(targets.toArray(new Class<?>[0]));
                     }
-                } catch (Exception e) {
-                    throw new RuntimeException("Pattern retransform failed for: " + pattern, e);
+                } catch (Throwable t) {
+                    throw new RuntimeException("Pattern retransform failed for: " + pattern, t);
                 }
             }
         };

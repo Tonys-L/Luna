@@ -75,6 +75,7 @@ public class PluginUIController implements LunaController {
                         h.getIcon(),
                         h.getCategory(),
                         h.usesCode(),
+                        h.getCodeType(),
                         h.supportedInjectionLocations(),
                         h.getQuickActionBehavior().name(),
                         h.getGlyphColor(),

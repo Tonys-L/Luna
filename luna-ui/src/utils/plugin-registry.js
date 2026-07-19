@@ -60,6 +60,7 @@ class PluginRegistry {
       icon: p.icon || '',
       category: p.category || 'injection',
       usesCode: p.usesCode,
+      codeType: p.codeType || null,
       supportedInjectionLocations: p.supportedInjectionLocations || [],
       quickActionBehavior: p.quickActionBehavior || 'FORM',
       glyphColor: p.glyphColor || '',

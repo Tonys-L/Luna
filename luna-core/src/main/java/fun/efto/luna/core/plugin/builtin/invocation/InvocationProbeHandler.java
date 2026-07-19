@@ -3,6 +3,7 @@ package fun.efto.luna.core.plugin.builtin.invocation;
 import fun.efto.luna.core.injection.*;
 import fun.efto.luna.core.injection.code.CompiledCode;
 import fun.efto.luna.core.plugin.*;
+import fun.efto.luna.core.probe.invocation.InvocationTraceProbe;
 import fun.efto.luna.core.plugin.builtin.invocation.analysis.*;
 import org.objectweb.asm.Type;
 

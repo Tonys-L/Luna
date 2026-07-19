@@ -86,7 +86,7 @@ public class JettyWebServer implements WebServer {
         dispatcher.registerController(new ClassController(classScanner, classResourceHelper, injectionService));
         dispatcher.registerController(new InjectionController(injectionService));
         dispatcher.registerController(new TestController(classScanner, classResourceHelper));
-        dispatcher.registerController(new MetricsController());
+        dispatcher.registerController(new MetricsController(injectionService));
         dispatcher.registerController(new CapabilityController());
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);

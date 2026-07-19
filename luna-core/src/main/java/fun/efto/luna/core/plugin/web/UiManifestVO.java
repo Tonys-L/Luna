@@ -52,13 +52,14 @@ public class UiManifestVO {
         private final String icon;
         private final String category;
         private final boolean usesCode;
+        private final String codeType;
         private final Set<String> supportedInjectionLocations;
         private final String quickActionBehavior;
         private final String glyphColor;
         private final List<FormFieldSchema> configSchema;
 
         public ProbeTypeEntry(String probeType, String displayName, String syntax,
-                              String icon, String category, boolean usesCode,
+                              String icon, String category, boolean usesCode, String codeType,
                               Set<String> supportedInjectionLocations,
                               String quickActionBehavior,
                               String glyphColor,
@@ -69,6 +70,7 @@ public class UiManifestVO {
             this.icon = icon;
             this.category = category;
             this.usesCode = usesCode;
+            this.codeType = codeType;
             this.supportedInjectionLocations = supportedInjectionLocations;
             this.quickActionBehavior = quickActionBehavior;
             this.glyphColor = glyphColor;
@@ -81,6 +83,7 @@ public class UiManifestVO {
         public String getIcon() { return icon; }
         public String getCategory() { return category; }
         public boolean isUsesCode() { return usesCode; }
+        public String getCodeType() { return codeType; }
         public Set<String> getSupportedInjectionLocations() { return supportedInjectionLocations; }
         public String getQuickActionBehavior() { return quickActionBehavior; }
         public String getGlyphColor() { return glyphColor; }

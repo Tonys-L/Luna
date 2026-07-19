@@ -9,6 +9,8 @@ import fun.efto.luna.core.infra.web.PostMapping;
 import fun.efto.luna.core.infra.web.RequestBody;
 import fun.efto.luna.core.infra.web.RequestMapping;
 import fun.efto.luna.core.infra.web.RequestParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import fun.efto.luna.agent.web.vo.InjectionListVO;
 import fun.efto.luna.agent.web.vo.InjectionPointVO;
 import fun.efto.luna.agent.web.vo.InjectionResultVO;
@@ -38,6 +40,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/injections")
 public class InjectionController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InjectionController.class);
 
     private final InjectionService injectionService;
 
@@ -88,6 +92,9 @@ public class InjectionController {
         if (cmd == null || !cmd.isValid()) {
             return ApiResult.fail("缺少必要参数");
         }
+
+        LOGGER.info("[DIAG-INJECT] code='{}', codeType='{}', probeType='{}', location='{}', method='{}', desc='{}'",
+                cmd.getCode(), cmd.getCodeType(), cmd.getProbeType(), cmd.getInjectionLocation(), cmd.getMethod(), cmd.getDesc());
 
         InjectionService.InjectResult result = injectionService.inject(cmd);
         if (result.isSuccess()) {

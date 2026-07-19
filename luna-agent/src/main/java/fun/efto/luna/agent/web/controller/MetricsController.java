@@ -2,6 +2,7 @@ package fun.efto.luna.agent.web.controller;
 
 import fun.efto.luna.agent.web.MetricsService;
 import fun.efto.luna.agent.web.vo.ThreadDumpVO;
+import fun.efto.luna.core.injection.InjectionService;
 import fun.efto.luna.core.infra.web.ApiResult;
 import fun.efto.luna.core.infra.web.Controller;
 import fun.efto.luna.core.infra.web.GetMapping;
@@ -18,9 +19,15 @@ import java.util.List;
 @Controller
 public class MetricsController {
 
+    private final InjectionService injectionService;
+
+    public MetricsController(InjectionService injectionService) {
+        this.injectionService = injectionService;
+    }
+
     @GetMapping("/metrics/jvm")
     public ApiResult getJvmMetrics() {
-        return ApiResult.ok(MetricsService.getJvmMetrics());
+        return ApiResult.ok(MetricsService.getJvmMetrics(injectionService));
     }
 
     @GetMapping("/metrics/threads")

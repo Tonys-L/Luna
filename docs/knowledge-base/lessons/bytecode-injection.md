@@ -126,3 +126,33 @@ public static void putIfAbsent(String className, byte[] originalBytecode) {
 **影响模块**: bytecode/asm/analyzer
 **日期**: 2026-06
 **标签**: #算法漏洞 #LocalVariableScanner
+
+---
+
+### 1.6 UiManifestVO 缺失 codeType 导致 LOG 探针不显示变量
+
+**问题**: LOG 探针输出仅有前缀（如 "line before:"），不显示用户输入的表达式变量内容。
+
+**原因**: `UiManifestVO` 的 `ProbeTypeEntry` 缺少 `codeType` 字段，前端 `PluginRegistry` 的 `codeEngines` 列表始终为空，`getDefaultCodeType()` 返回空字符串 `""`。
+
+完整影响链：
+1. `UiManifestVO` 无 `codeType` 字段 → 前端 `codeEngines = []`
+2. `getDefaultCodeType()` → `engines.length === 0` → 返回 `''`
+3. `InjectRequest.codeType = ""` → `PersistentInjection.codeType = ""`
+4. `AbstractProbeHandler.validate()` 仅检查 `null`，不检查空字符串 → 验证通过
+5. `InjectionPointFactory.compileCode()` 检查 `codeType.isEmpty()` → 返回 `null`
+6. `TreeApiBytecodeHelper.assemble()` → `compiledCode = null` → `content = ""`
+7. `LogExpressionHandler.generateBytecode()` → `expression = ""` → 仅输出前缀
+
+**解决方案**:
+- `ProbeHandler` 接口增加 `getCodeType()` 默认方法
+- `LogProbeHandler` 覆写返回 `"EXPRESSION"`
+- `ProbeTypeEntry` 增加 `codeType` 字段
+- `AbstractProbeHandler.validate()` 同时检查 null 和空字符串
+- 前端 `getDefaultCodeType()` 直接从 `handler.codeType` 获取
+
+**教训**: API 契约字段必须与前端依赖一致。当前端需要某个值但 API 不提供时，会静默降级而非报错，导致难以排查的运行时问题。`validate()` 应同时检查 null 和空字符串。
+
+**影响模块**: plugin/web, plugin, frontend
+**日期**: 2026-07
+**标签**: #API契约缺失 #前端-后端数据不一致 #静默降级

@@ -37,6 +37,11 @@ public class LogProbeHandler extends AbstractProbeHandler {
     }
 
     @Override
+    public String getCodeType() {
+        return "EXPRESSION";
+    }
+
+    @Override
     public Set<String> supportedInjectionLocations() {
         return SUPPORTED_LOCATIONS;
     }

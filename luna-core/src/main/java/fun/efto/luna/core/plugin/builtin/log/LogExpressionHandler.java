@@ -7,6 +7,8 @@ import fun.efto.luna.core.bytecode.asm.assembler.ExpressionSegment;
 import fun.efto.luna.core.plugin.BytecodeHelper;
 import fun.efto.luna.core.plugin.GenerateContext;
 import fun.efto.luna.core.plugin.builtin.line.LineNumberInjectionLocation;
+import fun.efto.luna.core.probe.ValueSerializer;
+import fun.efto.luna.core.probe.log.LogProbe;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -64,11 +66,19 @@ public class LogExpressionHandler {
         for (ExpressionSegment seg : segments) {
             if (seg instanceof ExpressionSegment.ParameterSegment) {
                 ExpressionSegment.ParameterSegment param = (ExpressionSegment.ParameterSegment) seg;
-                emitArrayStore(mv, arrayIndex, () -> AsmTypeHelper.loadAndBox(mv, param.getType(), param.getSlot()));
+                emitArrayStore(mv, arrayIndex, () -> {
+                    AsmTypeHelper.loadAndBox(mv, param.getType(), param.getSlot());
+                    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ValueSerializer.INTERNAL_NAME, "serialize",
+                            "(Ljava/lang/Object;)Ljava/lang/String;", false);
+                });
                 arrayIndex++;
             } else if (seg instanceof ExpressionSegment.LocalVariableSegment) {
                 ExpressionSegment.LocalVariableSegment lv = (ExpressionSegment.LocalVariableSegment) seg;
-                emitArrayStore(mv, arrayIndex, () -> AsmTypeHelper.loadAndBox(mv, Type.getType(lv.getDescriptor()), lv.getSlot()));
+                emitArrayStore(mv, arrayIndex, () -> {
+                    AsmTypeHelper.loadAndBox(mv, Type.getType(lv.getDescriptor()), lv.getSlot());
+                    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ValueSerializer.INTERNAL_NAME, "serialize",
+                            "(Ljava/lang/Object;)Ljava/lang/String;", false);
+                });
                 arrayIndex++;
             }
         }

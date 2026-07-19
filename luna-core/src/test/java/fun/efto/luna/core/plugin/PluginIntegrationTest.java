@@ -1,6 +1,6 @@
 package fun.efto.luna.core.plugin;
 
-import fun.efto.luna.core.infra.RingBuffer;
+import fun.efto.luna.core.probe.RingBuffer;
 import fun.efto.luna.core.injection.DefaultInjectionRegistry;
 import fun.efto.luna.core.injection.DefaultInjectionRepository;
 import fun.efto.luna.core.injection.InjectionService;

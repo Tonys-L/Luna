@@ -293,11 +293,17 @@ export default {
       const handler = pluginRegistry.probeHandlers?.find(h => h.probeType === this.form.probeType)
       if (!handler) return
 
-      // 初始化 configValues（从 configSchema 的 defaultValue）
+      // 初始化 configValues（从 configSchema 的 defaultValue），保留用户已输入的值
       const configValues = {}
       const schema = handler.configSchema || []
       schema.forEach(field => {
-        configValues[field.key] = field.defaultValue != null ? field.defaultValue : ''
+        // Preserve user-entered values when re-initializing (e.g., injectionLocation change)
+        if (this.form.configValues && this.form.configValues.hasOwnProperty(field.key)
+            && this.form.configValues[field.key] !== '') {
+          configValues[field.key] = this.form.configValues[field.key]
+        } else {
+          configValues[field.key] = field.defaultValue != null ? field.defaultValue : ''
+        }
       })
 
       this.form.configValues = configValues

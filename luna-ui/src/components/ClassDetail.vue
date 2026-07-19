@@ -513,8 +513,7 @@ export default {
     getDefaultCodeType(probeType) {
       const handler = pluginRegistry.probeHandlers?.find(h => h.probeType === probeType)
       if (!handler?.usesCode) return null
-      const engines = pluginRegistry.codeEngines
-      return engines.length > 0 ? engines[0].codeType : ''
+      return handler.codeType || ''
     },
     async handleInjectLog(formData) {
       this.injecting = true

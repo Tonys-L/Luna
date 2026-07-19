@@ -77,4 +77,12 @@ public interface ProbeHandler {
      * 并通过 AsmInjectionContext.returnCaptureSlot 传递给探针处理器。
      */
     default boolean capturesReturnValue() { return false; }
+
+    /**
+     * 该探针使用的代码引擎类型。
+     * 当 usesCode() 为 true 时，前端需要此值来设置 InjectRequest.codeType，
+     * 后端 InjectionPointFactory 据此选择 CodeEngine 编译代码。
+     * 返回 null 表示不需要代码引擎（usesCode 为 false 的探针）。
+     */
+    default String getCodeType() { return null; }
 }

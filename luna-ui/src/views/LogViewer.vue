@@ -28,20 +28,23 @@
         class="log-line"
         :class="getLineClass(log.type)"
       >
-        <template v-if="log.type === 'SNAPSHOT'">
+        <!-- outputViewType: snapshot -->
+        <template v-if="log.outputViewType === 'snapshot'">
           <span class="log-tag tag-debug">DEBUG</span>
           <span v-if="log.data && log.data.timestamp" class="log-time">{{ formatTime(log.data.timestamp) }}</span>
           <span class="log-content snapshot-link" @click="openDebugger(log.data)">
             <i class="fas fa-bug"></i> 触发虚拟断点快照: {{ (log.data.payload && log.data.payload.pointId) || log.data.pointId }} (点击查看详情)
           </span>
         </template>
-        <template v-else-if="log.type === 'INVOCATION'">
+        <!-- outputViewType: tree -->
+        <template v-else-if="log.outputViewType === 'tree'">
           <span class="log-tag tag-invocation">TRACE</span>
           <span v-if="log.timestamp" class="log-time">{{ formatTime(log.timestamp) }}</span>
           <div class="log-content invocation-content">
             <TraceTreeViewer :trace="log.trace" :timestamp="log.timestamp" />
           </div>
         </template>
+        <!-- outputViewType: text (default) -->
         <template v-else>
           <span class="log-tag" :class="getTypeConfig(log.type).tagClass">{{ getTypeConfig(log.type).tag || log.type }}</span>
           <span v-if="log.timestamp" class="log-time">{{ formatTime(log.timestamp) }}</span>
@@ -64,13 +67,14 @@ import DebuggerPanel from '../components/DebuggerPanel.vue'
 import TraceTreeViewer from '../components/TraceTreeViewer.vue'
 
 const messageHandlers = {
-    SNAPSHOT: (parsed) => ({ type: 'SNAPSHOT', data: parsed }),
-    TRACE: (parsed) => ({ type: 'TRACE', text: parsed.payload, timestamp: parsed.timestamp }),
-    LOG: (parsed) => ({ type: 'LOG', text: parsed.payload, timestamp: parsed.timestamp }),
+    SNAPSHOT: (parsed) => ({ type: 'SNAPSHOT', data: parsed, outputViewType: parsed.outputViewType || 'snapshot' }),
+    TRACE: (parsed) => ({ type: 'TRACE', text: parsed.payload, timestamp: parsed.timestamp, outputViewType: parsed.outputViewType || 'text' }),
+    LOG: (parsed) => ({ type: 'LOG', text: parsed.payload, timestamp: parsed.timestamp, outputViewType: parsed.outputViewType || 'text' }),
     INVOCATION: (parsed) => ({
         type: 'INVOCATION',
         trace: parsed.structuredPayload || {},
-        timestamp: parsed.timestamp
+        timestamp: parsed.timestamp,
+        outputViewType: parsed.outputViewType || 'tree'
     }),
 }
 

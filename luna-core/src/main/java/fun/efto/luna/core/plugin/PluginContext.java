@@ -1,7 +1,7 @@
 package fun.efto.luna.core.plugin;
 
 import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
-import fun.efto.luna.core.infra.RingBuffer;
+import fun.efto.luna.core.probe.RingBuffer;
 import fun.efto.luna.core.analysis.decompile.Decompiler;
 import fun.efto.luna.core.injection.CodeEngine;
 import fun.efto.luna.core.injection.InjectRequest;

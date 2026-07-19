@@ -29,7 +29,12 @@ import java.util.jar.JarOutputStream;
  */
 public final class BootstrapJarBuilder {
 
-    /** 需要包含在 Bootstrap JAR 中的包前缀 */
+    /**
+     * 需要包含在 Bootstrap JAR 中的包前缀。
+     * probe/ 包含所有探针运行时类（LogProbe、TraceProbe、SnapshotProbe、InvocationTraceProbe、
+     * RingBuffer、StackFrameCapture、SnapshotSerializer 等），expression/ 包含表达式引擎类。
+     * 这些类被注入字节码引用，必须由 Bootstrap CL 加载。
+     */
     private static final String[] INCLUDE_PREFIXES = {
             "fun/efto/luna/core/probe/",
             "fun/efto/luna/core/expression/",
@@ -38,16 +43,6 @@ public final class BootstrapJarBuilder {
     /** 需要从包含列表中排除的包前缀（有 ASM 依赖，不需要在 Bootstrap CL） */
     private static final String[] EXCLUDE_PREFIXES = {
             "fun/efto/luna/core/expression/bytecode/",
-    };
-
-    /** 需要包含在 Bootstrap JAR 中的精确类路径 */
-    private static final String[] INCLUDE_EXACT = {
-            "fun/efto/luna/core/infra/RingBuffer.class",
-            "fun/efto/luna/core/plugin/builtin/log/LogProbe.class",
-            "fun/efto/luna/core/plugin/builtin/snapshot/SnapshotProbe.class",
-            "fun/efto/luna/core/plugin/builtin/snapshot/StackFrameCapture.class",
-            "fun/efto/luna/core/infra/serialization/SnapshotSerializer.class",
-            "fun/efto/luna/core/plugin/builtin/trace/TraceProbe.class",
     };
 
     private BootstrapJarBuilder() {
@@ -102,16 +97,9 @@ public final class BootstrapJarBuilder {
             }
         }
 
-        // 检查包前缀包含列表
+        // 检查包前缀包含列表（probe/ 覆盖所有探针运行时类）
         for (String prefix : INCLUDE_PREFIXES) {
             if (entryName.startsWith(prefix)) {
-                return true;
-            }
-        }
-
-        // 检查精确类路径包含列表
-        for (String exact : INCLUDE_EXACT) {
-            if (entryName.equals(exact)) {
                 return true;
             }
         }

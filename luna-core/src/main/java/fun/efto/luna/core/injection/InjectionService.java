@@ -118,8 +118,15 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
             fireOnInject(injection);
 
             triggerRetransform(injection.getClazz());
-        } catch (Exception e) {
-            LOGGER.error("Failed to register injection point: {}", injection.getId(), e);
+        } catch (Throwable t) {
+            // INV-001: retransform 失败时回滚持久化数据和注册表条目，避免数据与运行时状态不一致
+            LOGGER.error("Failed to register injection point: {}, rolling back", injection.getId(), t);
+            try {
+                injectionRegistry.unregister(injection.getId());
+                injectionRepository.delete(injection.getId());
+            } catch (Exception rollbackEx) {
+                LOGGER.error("Rollback failed for injection: {}", injection.getId(), rollbackEx);
+            }
         }
 
         return injection.getId();
@@ -135,7 +142,12 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
             // Core mechanism: delete the injection itself
             injectionRepository.delete(id);
             injectionRegistry.unregister(id);
-            triggerRetransform(injection.getClazz());
+            try {
+                triggerRetransform(injection.getClazz());
+            } catch (Throwable t) {
+                // INV-011: 捕获 Throwable 处理 VerifyError 等 Error 类型异常
+                LOGGER.error("Retransform failed during removeInjection for class: {}", injection.getClazz(), t);
+            }
         }
     }
 
@@ -143,14 +155,15 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
     public void updateInjection(String id, PersistentInjection injection) {
         injection.setId(id);
         injectionRepository.save(injection);
-        
+
         injectionRegistry.unregister(id);
         try {
             InjectionPoint point = InjectionPointFactory.create(injection);
             injectionRegistry.register(point);
             triggerRetransform(injection.getClazz());
-        } catch (Exception e) {
-            LOGGER.error("Failed to update injection point: {}", id, e);
+        } catch (Throwable t) {
+            // INV-011: 捕获 Throwable 处理 VerifyError 等 Error 类型异常
+            LOGGER.error("Failed to update injection point: {}", id, t);
         }
     }
 
@@ -160,18 +173,24 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
         if (injection != null) {
             injection.setEnabled(enabled);
             injectionRepository.save(injection);
-            
+
             if (enabled) {
                 try {
                     InjectionPoint point = InjectionPointFactory.create(injection);
                     injectionRegistry.register(point);
-                } catch (Exception e) {
-                    LOGGER.error("Failed to create injection point on enable: {}", id, e);
+                    triggerRetransform(injection.getClazz());
+                } catch (Throwable t) {
+                    // INV-011: 捕获 Throwable 处理 VerifyError 等 Error 类型异常
+                    LOGGER.error("Failed to create injection point on enable: {}", id, t);
                 }
             } else {
                 injectionRegistry.unregister(id);
+                try {
+                    triggerRetransform(injection.getClazz());
+                } catch (Throwable t) {
+                    LOGGER.error("Retransform failed during toggleEnabled for class: {}", injection.getClazz(), t);
+                }
             }
-            triggerRetransform(injection.getClazz());
         }
     }
 
@@ -183,7 +202,12 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
                 injection.setSuspendReason(reason);
                 injectionRepository.save(injection);
                 injectionRegistry.unregister(injection.getId());
-                triggerRetransform(injection.getClazz());
+                try {
+                    triggerRetransform(injection.getClazz());
+                } catch (Throwable t) {
+                    // INV-011: 捕获 Throwable 处理 VerifyError 等 Error 类型异常
+                    LOGGER.error("Retransform failed during suspendInjectionsByLocation for class: {}", injection.getClazz(), t);
+                }
                 suspendedIds.add(injection.getId());
             }
         }
@@ -199,10 +223,11 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
                 try {
                     InjectionPoint point = InjectionPointFactory.create(injection);
                     injectionRegistry.register(point);
-                } catch (Exception e) {
-                    LOGGER.error("Failed to re-register injection point on resume: {}", injection.getId(), e);
+                    triggerRetransform(injection.getClazz());
+                } catch (Throwable t) {
+                    // INV-011: 捕获 Throwable 处理 VerifyError 等 Error 类型异常
+                    LOGGER.error("Failed to re-register injection point on resume: {}", injection.getId(), t);
                 }
-                triggerRetransform(injection.getClazz());
             }
         }
     }
@@ -215,8 +240,10 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
                 } else {
                     retransformer.retransform(className);
                 }
-            } catch (Exception e) {
-                LOGGER.error("Retransform failed for class: {}", className, e);
+            } catch (Throwable t) {
+                // INV-011: 捕获 Throwable 处理 VerifyError 等 Error 类型异常
+                LOGGER.error("Retransform failed for class: {}", className, t);
+                throw new RuntimeException("Retransform failed for class: " + className, t);
             }
         }
     }

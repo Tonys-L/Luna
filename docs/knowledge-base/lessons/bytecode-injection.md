@@ -159,52 +159,37 @@ public static void putIfAbsent(String className, byte[] originalBytecode) {
 
 ---
 
-### 1.7 UiManifestVO 缺失 codeType 字段
+### 1.9 retransform 失败回滚与 Throwable 捕获
 
-**日期**: 2026-07-19
-**严重程度**: 高
-**分类**: 字节码注入
+**问题**: `InjectionService.addInjection()` 在 retransform 失败时不回滚持久化数据和注册表条目，导致数据与运行时状态不一致；`triggerRetransform()` 和 `GlobalClassFileTransformer.transform()` 捕获 Exception 而非 Throwable，VerifyError 等 Error 类型异常穿透。
 
-### 现象
-LOG 探针注入后，前端表达式编辑器中 codeType 为空字符串，导致 InjectionPointFactory 无法选择正确的 CodeEngine 编译表达式代码，LOG 探针的表达式内容被静默丢弃。
+**原因**:
+1. `triggerRetransform()` 内部 `catch (Exception e)` 静默吞噬异常，调用方无法感知失败
+2. `addInjection()` 的 `catch (Exception e)` 块因 `triggerRetransform()` 已吞噬异常而完全不可达，回滚逻辑即使加上也无法触发
+3. `GlobalClassFileTransformer.transform()` 循环内 `catch (Exception e)` 无法捕获 VerifyError，且 Error 会中断循环导致后续注入点未应用（违反 INV-001）
+4. `DefaultInjectionRepository.persist()` 无同步机制，并发写入导致文件损坏
 
-### 根因
-UiManifestVO.ProbeTypeEntry 缺少 codeType 字段。前端从 GET /api/plugins/ui-manifest 获取的 manifest 中没有 codeType 信息，导致 pluginRegistry.codeEngines 始终为空数组，applyDefaultCode() 无法设置正确的 codeType。
+**解决方案**:
+1. `triggerRetransform()` 改为 `catch (Throwable t)` 并抛出 RuntimeException，让调用方感知失败
+2. `addInjection()` 改为 `catch (Throwable t)` 并执行回滚（unregister + delete），回滚失败仅记录日志
+3. `GlobalClassFileTransformer.transform()` 改为 `catch (Throwable t)`，不中断循环
+4. 所有调用 `triggerRetransform()` 的方法（removeInjection/updateInjection/toggleEnabled/suspendInjectionsByLocation/resumeInjectionsByLocation）补全 try-catch(Throwable)
+5. `DefaultInjectionRepository.persist()` 使用 synchronized 保护
 
-### 修复
-1. ProbeHandler 接口新增 getCodeType() 默认方法（返回 null）
-2. LogProbeHandler 覆写返回 "EXPRESSION"
-3. UiManifestVO.ProbeTypeEntry 增加 codeType 字段
-4. PluginUIController 构建时传入 h.getCodeType()
-5. 前端 _convertToProbeTypes 增加 codeType 映射
+```java
+// addInjection 回滚示例
+catch (Throwable t) {
+    LOGGER.error("Failed to register injection point: {}, rolling back", injection.getId(), t);
+    try {
+        injectionRegistry.unregister(injection.getId());
+        injectionRepository.delete(injection.getId());
+    } catch (Exception rollbackEx) {
+        LOGGER.error("Rollback failed for injection: {}", injection.getId(), rollbackEx);
+    }
+}
+```
 
-### 教训
-- 探针类型的自描述能力（usesCode + codeType）必须通过 API 完整传递给前端
-- 数据流断裂（后端有值但 API 不暴露）会导致前端静默降级，难以排查
-- 新增 ProbeHandler 自描述字段时，需同时检查 API 契约和前端映射
-
----
-
-### 1.7 UiManifestVO 缺失 codeType 字段
-
-**日期**: 2026-07-19
-**严重程度**: 高
-**分类**: 字节码注入
-
-### 现象
-LOG 探针注入后，前端表达式编辑器中 codeType 为空字符串，导致 InjectionPointFactory 无法选择正确的 CodeEngine 编译表达式代码，LOG 探针的表达式内容被静默丢弃。
-
-### 根因
-UiManifestVO.ProbeTypeEntry 缺少 codeType 字段。前端从 GET /api/plugins/ui-manifest 获取的 manifest 中没有 codeType 信息，导致 pluginRegistry.codeEngines 始终为空数组，applyDefaultCode() 无法设置正确的 codeType。
-
-### 修复
-1. ProbeHandler 接口新增 getCodeType() 默认方法（返回 null）
-2. LogProbeHandler 覆写返回 "EXPRESSION"
-3. UiManifestVO.ProbeTypeEntry 增加 codeType 字段
-4. PluginUIController 构建时传入 h.getCodeType()
-5. 前端 _convertToProbeTypes 增加 codeType 映射
-
-### 教训
-- 探针类型的自描述能力（usesCode + codeType）必须通过 API 完整传递给前端
-- 数据流断裂（后端有值但 API 不暴露）会导致前端静默降级，难以排查
-- 新增 ProbeHandler 自描述字段时，需同时检查 API 契约和前端映射
+**影响模块**: injection/transformer
+**日期**: 2026-08
+**标签**: #retransform #回滚 #Throwable #VerifyError #并发
+**关联不变量**: INV-001、INV-011、INV-013

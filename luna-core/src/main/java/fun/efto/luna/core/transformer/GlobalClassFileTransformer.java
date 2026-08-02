@@ -60,8 +60,10 @@ public class GlobalClassFileTransformer implements ClassFileTransformer {
                     LOGGER.warn("Failed to apply injection point [id={}, location={}, method={}] to class: {}, reason: {}",
                             point.getId(), point.getInjectionLocation(), point.getTarget().getMethodName(), normalizedClassName, result.getMessage());
                 }
-            } catch (Exception e) {
-                LOGGER.error("Error occurred while applying injection point [id={}] to class: {}", point.getId(), normalizedClassName, e);
+            } catch (Throwable t) {
+                // INV-011: 捕获 Throwable 处理 VerifyError 等 Error 类型异常
+                // INV-001: 不中断循环，确保同一类的所有活跃注入点都被应用
+                LOGGER.error("Error occurred while applying injection point [id={}] to class: {}", point.getId(), normalizedClassName, t);
             }
         }
 

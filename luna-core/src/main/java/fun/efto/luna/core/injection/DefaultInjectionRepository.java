@@ -14,9 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultInjectionRepository implements InjectionRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultInjectionRepository.class);
-    
+
     private final Map<String, PersistentInjection> injections = new ConcurrentHashMap<>();
     private final InjectionPersistenceService persistenceService = new InjectionPersistenceService();
+    private final Object persistLock = new Object();
 
     public DefaultInjectionRepository() {
         try {
@@ -68,10 +69,12 @@ public class DefaultInjectionRepository implements InjectionRepository {
     }
     
     private void persist() {
-        try {
-            persistenceService.save(new ArrayList<>(injections.values()));
-        } catch (Exception e) {
-            LOGGER.error("Failed to save injections to disk", e);
+        synchronized (persistLock) {
+            try {
+                persistenceService.save(new ArrayList<>(injections.values()));
+            } catch (Exception e) {
+                LOGGER.error("Failed to save injections to disk", e);
+            }
         }
     }
 }

@@ -207,7 +207,14 @@
 
 #### 第一阶段: Beta 品质打磨（方向 A）
 
-**状态**: ProbeController/MarketController 已注册到 WebServer，API 可达。下一步健壮性提升。
+**状态**: 部分完成
+- ✅ ProbeController/MarketController 已注册到 WebServer，API 可达
+- ✅ 第一批高严重度不变量违反问题已修复（H-1/H-2/H-3/H-4）：
+  - INV-011 落实：triggerRetransform 和 GlobalClassFileTransformer 改为 catch Throwable
+  - INV-013 新增：addInjection retransform 失败回滚
+  - DefaultInjectionRepository.persist() 加锁消除并发竞态
+  - 补全 5 个 retransform 调用方的 try-catch(Throwable)
+- ⏳ 第二批中严重度问题待处理（11 个，含 toggleEnabled 状态不一致、validateLocalVarReferences 静默吞异常、Controller null 校验等）
 
 #### 第二阶段: Phase 2 推进（方向 C）✅ 已完成
 
@@ -266,3 +273,4 @@
 | 2026-07-19 | 初始版本：基于知识库审计结果生成下一步推进方案分析 | Tony.L |
 | 2026-08-02 | 方向 E（验证运行提炼）标记为已完成；Phase 2 部分能力已注册；更新推荐路径和决策建议 | Tony.L |
 | 2026-08-02 | Phase 2 全部完成：runtime-readiness 已注册 READY，CoreCapabilityRegistry 增加依赖校验和依赖图查询；更新推荐路径 | Tony.L |
+| 2026-08-02 | Beta 品质打磨第一批完成：修复 4 个高严重度不变量违反问题（H-1/H-2/H-3/H-4），新增 INV-013，更新 INV-011 | Tony.L |

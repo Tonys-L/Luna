@@ -175,6 +175,7 @@ public static void putIfAbsent(String className, byte[] originalBytecode) {
 3. `GlobalClassFileTransformer.transform()` 改为 `catch (Throwable t)`，不中断循环
 4. 所有调用 `triggerRetransform()` 的方法（removeInjection/updateInjection/toggleEnabled/suspendInjectionsByLocation/resumeInjectionsByLocation）补全 try-catch(Throwable)
 5. `DefaultInjectionRepository.persist()` 使用 synchronized 保护
+6. `toggleEnabled()` enable 失败时必须同时回滚 enabled 标志 **和** unregister registry 条目（仅回滚标志会导致 registry 与持久化状态不一致）
 
 ```java
 // addInjection 回滚示例
@@ -186,6 +187,14 @@ catch (Throwable t) {
     } catch (Exception rollbackEx) {
         LOGGER.error("Rollback failed for injection: {}", injection.getId(), rollbackEx);
     }
+}
+
+// toggleEnabled 回滚示例（M-3 修复）
+catch (Throwable t) {
+    LOGGER.error("Failed to create injection point on enable: {}, rolling back", id, t);
+    injection.setEnabled(false);
+    injectionRepository.save(injection);
+    injectionRegistry.unregister(id);  // 必须同时 unregister，否则 registry 残留
 }
 ```
 

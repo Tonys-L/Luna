@@ -33,6 +33,9 @@ public class DefaultInjectionRepository implements InjectionRepository {
 
     @Override
     public void save(PersistentInjection injection) {
+        if (injection == null || injection.getId() == null) {
+            throw new IllegalArgumentException("injection and injection.id must not be null");
+        }
         injections.put(injection.getId(), injection);
         if (!injection.isEphemeral()) {
             persist();
@@ -41,6 +44,7 @@ public class DefaultInjectionRepository implements InjectionRepository {
 
     @Override
     public void delete(String id) {
+        if (id == null) return;
         PersistentInjection removed = injections.remove(id);
         if (removed != null && !removed.isEphemeral()) {
             persist();
@@ -49,6 +53,7 @@ public class DefaultInjectionRepository implements InjectionRepository {
 
     @Override
     public PersistentInjection findById(String id) {
+        if (id == null) return null;
         return injections.get(id);
     }
 
@@ -60,6 +65,7 @@ public class DefaultInjectionRepository implements InjectionRepository {
     @Override
     public List<PersistentInjection> findByGroupId(String groupId) {
         List<PersistentInjection> result = new ArrayList<>();
+        if (groupId == null) return result;
         for (PersistentInjection inj : injections.values()) {
             if (groupId.equals(inj.getGroupId())) {
                 result.add(inj);

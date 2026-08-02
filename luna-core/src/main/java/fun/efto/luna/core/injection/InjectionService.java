@@ -181,7 +181,11 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
                     triggerRetransform(injection.getClazz());
                 } catch (Throwable t) {
                     // INV-011: 捕获 Throwable 处理 VerifyError 等 Error 类型异常
-                    LOGGER.error("Failed to create injection point on enable: {}", id, t);
+                    // 回滚 enabled 标志和 registry 条目，保持持久化与运行时状态一致
+                    LOGGER.error("Failed to create injection point on enable: {}, rolling back", id, t);
+                    injection.setEnabled(false);
+                    injectionRepository.save(injection);
+                    injectionRegistry.unregister(id);
                 }
             } else {
                 injectionRegistry.unregister(id);
@@ -269,7 +273,8 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
                     cmd.getCode(), cmd.getClazz(), cmd.getMethod(),
                     cmd.getDesc(), cmd.getLineNumber(), bytecode);
         } catch (Exception e) {
-            return null;
+            LOGGER.warn("Failed to validate local var references for class: {}", cmd.getClazz(), e);
+            return "局部变量校验失败: " + e.getMessage();
         }
     }
 

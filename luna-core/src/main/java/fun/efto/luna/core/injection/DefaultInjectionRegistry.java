@@ -1,5 +1,8 @@
 package fun.efto.luna.core.injection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +16,9 @@ import java.util.regex.PatternSyntaxException;
  * @since  : 2026/06/01 14:00
  */
 public class DefaultInjectionRegistry implements InjectionRegistry {
-    
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultInjectionRegistry.class);
+
     private final Map<String, List<InjectionPoint>> exactIndex = new ConcurrentHashMap<>();
     private final PackageTrie prefixTrie = new PackageTrie();
     private final List<RegexEntry> regexFallback = new CopyOnWriteArrayList<>();
@@ -41,7 +46,8 @@ public class DefaultInjectionRegistry implements InjectionRegistry {
                     Pattern pattern = Pattern.compile(targetClass);
                     regexFallback.add(new RegexEntry(pattern, point));
                 } catch (PatternSyntaxException e) {
-                    // Ignore invalid patterns
+                    LOGGER.warn("Invalid regex pattern for injection point [id={}]: {}", point.getId(), targetClass);
+                    throw new IllegalArgumentException("Invalid regex pattern: " + targetClass, e);
                 }
             }
         } else {

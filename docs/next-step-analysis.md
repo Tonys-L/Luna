@@ -189,7 +189,7 @@
 |------|----------|--------|------|--------|------------|
 | A. Beta 品质打磨 | 高 | 高 | 低 | 中 | **P0** |
 | B. 能力注册追踪 | 中 | 中 | 中 | 中 | P2 |
-| C. Phase 2 启动 | 高 | 中 | 高 | 大 | P1（部分已推进） |
+| C. Phase 2 启动 | — | — | — | — | ✅ 已完成 |
 | D. 插件生命周期事务 | 中 | 低 | 中 | 中偏大 | P3 |
 | E. 验证运行提炼 | — | — | — | — | ✅ 已完成 |
 
@@ -203,23 +203,21 @@
 
 ## 四、推荐推进路径
 
-### 推荐顺序: A -> C -> B -> D（E 已完成）
+### 推荐顺序: A -> B -> D（C 和 E 已完成）
 
 #### 第一阶段: Beta 品质打磨（方向 A）
 
 **状态**: ProbeController/MarketController 已注册到 WebServer，API 可达。下一步健壮性提升。
 
-#### 第二阶段: Phase 2 推进（方向 C）
+#### 第二阶段: Phase 2 推进（方向 C）✅ 已完成
 
-**状态**: 部分已推进
+**状态**: 全部完成
 - ✅ instrumentation（已注册 READY）
 - ✅ class-analysis（已注册 READY）
 - ✅ verification-preview（已注册 READY，VerificationService 已提炼为独立 Module）
-- ⏳ runtime-readiness（待启动）
+- ✅ runtime-readiness（已注册 READY，CoreCapabilityRegistry 增加依赖校验和依赖图查询）
 
-**下一步**:
-1. runtime-readiness（运行时就绪，其他能力依赖）
-2. 完善依赖图谱查询能力
+**下一步**: Phase 3 启动
 
 #### 第三阶段: 架构深化补全（方向 B / D）
 
@@ -232,31 +230,32 @@
 
 ## 五、决策建议
 
-### 已完成: 方向 E（验证运行提炼）+ Phase 2 部分能力注册
+### 已完成: 方向 E（验证运行提炼）+ Phase 2 全部能力注册
 
 **已完成内容**:
 - VerificationService 从 InjectionService 提炼为独立 Module
-- Phase 2 三个核心能力（instrumentation / class-analysis / verification-preview）已注册 READY
+- Phase 2 四个核心能力全部注册 READY（instrumentation / class-analysis / verification-preview / runtime-readiness）
+- CoreCapabilityRegistry 增加依赖校验（声明 READY 但依赖未满足时降级为 NOT_INITIALIZED）和依赖图查询（getDependencies / getDependents）
 - 知识库已同步更新
 
 ### 下一步推进建议
 
-**选项 1: 继续 Phase 2 剩余能力（runtime-readiness）**
-- 完善运行时就绪检查机制
-- 补充依赖图谱查询能力
-
-**选项 2: Beta 品质打磨（方向 A 剩余部分）**
+**选项 1: Beta 品质打磨（方向 A 剩余部分）**
 - 健壮性提升（错误处理、边界条件、并发安全）
+- Beta 发布前必须完成
 
-**选项 3: 架构深化 #3（能力注册追踪）**
+**选项 2: 架构深化 #3（能力注册追踪）**
 - 完善运行时 registration tracking 查询能力
+
+**选项 3: Phase 3 启动（恢复与观测）**
+- bytecode-recovery / probe-runtime / observation-store
+- 工作量大，风险高
 
 ---
 
 ## 六、待用户确认事项
 
-1. **下一步方向**: 选择继续 Phase 2（runtime-readiness）、Beta 品质打磨、还是能力注册追踪？
-2. **Phase 2 runtime-readiness 范围**: 若推进，需要明确"就绪检查"的具体语义和暴露方式
+1. **下一步方向**: 选择 Beta 品质打磨、能力注册追踪、还是 Phase 3 启动？
 
 ---
 
@@ -266,3 +265,4 @@
 |------|----------|--------|
 | 2026-07-19 | 初始版本：基于知识库审计结果生成下一步推进方案分析 | Tony.L |
 | 2026-08-02 | 方向 E（验证运行提炼）标记为已完成；Phase 2 部分能力已注册；更新推荐路径和决策建议 | Tony.L |
+| 2026-08-02 | Phase 2 全部完成：runtime-readiness 已注册 READY，CoreCapabilityRegistry 增加依赖校验和依赖图查询；更新推荐路径 | Tony.L |

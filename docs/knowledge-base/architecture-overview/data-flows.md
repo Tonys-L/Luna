@@ -171,7 +171,7 @@ public interface CodeEngine {
 | `InjectionTypeRegistry` | locationName (String) | InjectionLocation | CoreModuleInitializer |
 | `BytecodeInjectorRegistry` | InjectionLocation | BytecodeInjector | CoreModuleInitializer |
 | `CodeEngineRegistry` | codeType (String) | CodeEngine | 插件 onLoad |
-| `CoreCapabilityRegistry` | capabilityId | CoreCapabilityRecord | 启动时 |
+| `CoreCapabilityRegistry` | capabilityId | CoreCapabilityRecord | 启动时（register 时校验依赖，声明 READY 但依赖未就绪时降级为 NOT_INITIALIZED） |
 | `AnalyzerRegistry` | AnalyzerType | ClassAnalyzer | CoreModuleInitializer |
 | `InjectionPointRegistry` | className (String) | List\<InjectionPoint\> | 运行时注册 |
 
@@ -595,3 +595,4 @@ ProbeHandler 通过 `ctx.phase()` 判断当前阶段，生成不同的探针代�
 | 2026/06/17 | 迁移旧知识库内容：17步Agent启动时序、架构演进历程表、模块间协作图、完整7层架构、Variable Lifetime Model、Capability Flags、Invocation Trace 4 Phase计划、InvocationContextCarrier、SamplingPolicy、RuntimeSession | Tony.L | — |
 | 2026/06/17 | 从 architecture-overview.md 拆分为独立文件 | Tony.L | architecture-overview.md 拆分 |
 | 2026/07/03 | ProbeHandler 接口同步、TRACE 改为 method_around + Phase、新增插件扩展机制章节 | Tony.L | TRACE 重构 |
+| 2026/08/02 | CoreCapabilityRegistry 注册表说明补充：register 时校验依赖，依赖未满足降级为 NOT_INITIALIZED | Tony.L | #feat/phase2-runtime-readiness |

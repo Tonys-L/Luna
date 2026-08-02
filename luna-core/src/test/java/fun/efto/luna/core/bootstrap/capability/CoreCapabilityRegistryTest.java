@@ -119,4 +119,135 @@ public class CoreCapabilityRegistryTest {
         record.markFailed();
         assertEquals(ReadinessState.FAILED, record.getReadinessState());
     }
+
+    @Test
+    void testRegisterWithDependenciesSatisfiedRemainsReady() {
+        CoreCapabilityRecord dep = new CoreCapabilityRecord(
+                "base-cap", "基础能力", CapabilityKind.KERNEL,
+                Collections.emptyList(),
+                ReadinessState.READY, Collections.emptyList(), LifecyclePolicy.CORE_ONLY
+        );
+        registry.register(dep);
+
+        CoreCapabilityRecord dependent = new CoreCapabilityRecord(
+                "derived-cap", "派生能力", CapabilityKind.RUNTIME_SUPPORT,
+                Collections.emptyList(),
+                ReadinessState.READY, Arrays.asList("base-cap"), LifecyclePolicy.CORE_ONLY
+        );
+        registry.register(dependent);
+
+        assertEquals(ReadinessState.READY, registry.get("derived-cap").getReadinessState());
+        assertTrue(registry.isReady("derived-cap"));
+    }
+
+    @Test
+    void testRegisterWithMissingDependencyDegradesToNotInitialized() {
+        CoreCapabilityRecord dependent = new CoreCapabilityRecord(
+                "derived-cap", "派生能力", CapabilityKind.RUNTIME_SUPPORT,
+                Collections.emptyList(),
+                ReadinessState.READY, Arrays.asList("nonexistent-cap"), LifecyclePolicy.CORE_ONLY
+        );
+        registry.register(dependent);
+
+        assertEquals(ReadinessState.NOT_INITIALIZED, registry.get("derived-cap").getReadinessState());
+        assertFalse(registry.isReady("derived-cap"));
+    }
+
+    @Test
+    void testRegisterWithNotReadyDependencyDegradesToNotInitialized() {
+        CoreCapabilityRecord dep = new CoreCapabilityRecord(
+                "base-cap", "基础能力", CapabilityKind.KERNEL,
+                Collections.emptyList(),
+                ReadinessState.NOT_INITIALIZED, Collections.emptyList(), LifecyclePolicy.CORE_ONLY
+        );
+        registry.register(dep);
+
+        CoreCapabilityRecord dependent = new CoreCapabilityRecord(
+                "derived-cap", "派生能力", CapabilityKind.RUNTIME_SUPPORT,
+                Collections.emptyList(),
+                ReadinessState.READY, Arrays.asList("base-cap"), LifecyclePolicy.CORE_ONLY
+        );
+        registry.register(dependent);
+
+        assertEquals(ReadinessState.NOT_INITIALIZED, registry.get("derived-cap").getReadinessState());
+    }
+
+    @Test
+    void testRegisterWithDeclaredNotReadyStateIsPreserved() {
+        CoreCapabilityRecord dependent = new CoreCapabilityRecord(
+                "derived-cap", "派生能力", CapabilityKind.RUNTIME_SUPPORT,
+                Collections.emptyList(),
+                ReadinessState.DEGRADED, Arrays.asList("nonexistent-cap"), LifecyclePolicy.CORE_ONLY
+        );
+        registry.register(dependent);
+
+        assertEquals(ReadinessState.DEGRADED, registry.get("derived-cap").getReadinessState());
+    }
+
+    @Test
+    void testGetDependenciesReturnsDeclaredDependencies() {
+        CoreCapabilityRecord record = new CoreCapabilityRecord(
+                "derived-cap", "派生能力", CapabilityKind.RUNTIME_SUPPORT,
+                Collections.emptyList(),
+                ReadinessState.NOT_INITIALIZED, Arrays.asList("base-cap", "other-cap"),
+                LifecyclePolicy.CORE_ONLY
+        );
+        registry.register(record);
+
+        List<String> deps = registry.getDependencies("derived-cap");
+        assertEquals(2, deps.size());
+        assertTrue(deps.contains("base-cap"));
+        assertTrue(deps.contains("other-cap"));
+    }
+
+    @Test
+    void testGetDependenciesReturnsEmptyForUnknownCapability() {
+        List<String> deps = registry.getDependencies("nonexistent-cap");
+        assertTrue(deps.isEmpty());
+    }
+
+    @Test
+    void testGetDependentsReturnsReverseDependencyGraph() {
+        CoreCapabilityRecord base = new CoreCapabilityRecord(
+                "base-cap", "基础能力", CapabilityKind.KERNEL,
+                Collections.emptyList(),
+                ReadinessState.READY, Collections.emptyList(), LifecyclePolicy.CORE_ONLY
+        );
+        registry.register(base);
+
+        registry.register(new CoreCapabilityRecord(
+                "derived-a", "派生 A", CapabilityKind.RUNTIME_SUPPORT,
+                Collections.emptyList(),
+                ReadinessState.READY, Arrays.asList("base-cap"), LifecyclePolicy.CORE_ONLY
+        ));
+        registry.register(new CoreCapabilityRecord(
+                "derived-b", "派生 B", CapabilityKind.RUNTIME_SUPPORT,
+                Collections.emptyList(),
+                ReadinessState.READY, Arrays.asList("base-cap", "other-cap"),
+                LifecyclePolicy.CORE_ONLY
+        ));
+        registry.register(new CoreCapabilityRecord(
+                "unrelated", "无关能力", CapabilityKind.KERNEL,
+                Collections.emptyList(),
+                ReadinessState.READY, Collections.emptyList(), LifecyclePolicy.CORE_ONLY
+        ));
+
+        List<String> dependents = registry.getDependents("base-cap");
+        assertEquals(2, dependents.size());
+        assertTrue(dependents.contains("derived-a"));
+        assertTrue(dependents.contains("derived-b"));
+        assertFalse(dependents.contains("unrelated"));
+    }
+
+    @Test
+    void testGetDependentsReturnsEmptyForNoDependents() {
+        registry.register(new CoreCapabilityRecord(
+                "base-cap", "基础能力", CapabilityKind.KERNEL,
+                Collections.emptyList(),
+                ReadinessState.READY, Collections.emptyList(), LifecyclePolicy.CORE_ONLY
+        ));
+
+        List<String> dependents = registry.getDependents("base-cap");
+        assertTrue(dependents.isEmpty());
+    }
 }

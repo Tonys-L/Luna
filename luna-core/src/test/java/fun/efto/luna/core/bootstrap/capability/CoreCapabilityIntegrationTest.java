@@ -47,7 +47,7 @@ public class CoreCapabilityIntegrationTest {
         new DefaultInitializer().initialize();
 
         List<CoreCapabilityRecord> all = registry.getAll();
-        assertEquals(9, all.size());
+        assertEquals(10, all.size());
     }
 
     @Test

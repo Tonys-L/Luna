@@ -78,6 +78,13 @@ public class DefaultInitializer implements Initializer {
                 LifecyclePolicy.CORE_ONLY
         ));
 
+        // runtime-readiness: 能力注册时校验依赖、依赖图查询
+        capRegistry.register(new CoreCapabilityRecord(
+                "runtime-readiness", "运行时就绪", CapabilityKind.RUNTIME_SUPPORT,
+                Arrays.asList("dependency_check", "readiness_query", "dependency_graph"),
+                ReadinessState.READY, Collections.emptyList(), LifecyclePolicy.CORE_ONLY
+        ));
+
         // External plugins are loaded via PluginManager, not here
     }
 }

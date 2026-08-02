@@ -43,11 +43,11 @@ public class CoreCapabilityIntegrationTest {
     }
 
     @Test
-    void testAllSixCoreCapabilitiesRegistered() {
+    void testAllCoreCapabilitiesRegistered() {
         new DefaultInitializer().initialize();
 
         List<CoreCapabilityRecord> all = registry.getAll();
-        assertEquals(6, all.size());
+        assertEquals(9, all.size());
     }
 
     @Test

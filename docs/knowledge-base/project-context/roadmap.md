@@ -12,12 +12,14 @@
 - Web UI 诊断控制台（6 页面：类浏览、日志、仪表盘、线程、注入管理、插件管理）
 - 注入持久化与状态管理（ACTIVE / SUSPENDED / ephemeral root/derived 区分）
 - 微内核 + 插件架构（LunaPlugin SPI + PluginContext + ProbeHandler + CodeEngine）
-- Core Capability Registry（6 个核心能力已注册且 READY）
+- Core Capability Registry（9 个核心能力已注册且 READY）
 - 统一注入运行时（GlobalClassFileTransformer 为唯一 Transformer）
 - 核心/插件路由分离（JettyWebServer 硬注册 + LunaController 动态注册）
+- 验证职责内聚（VerificationService 独立 Module，从 InjectionService 提炼）
 
 正在演进：
 - Beta 品质打磨（ProbeController 注册可达、健壮性提升）
+- Phase 2 运行时支撑能力（instrumentation / class-analysis / verification-preview 已注册）
 - INVOCATION 探针调用链分析深化
 - Runtime Semantic Architecture 探索
 
@@ -30,7 +32,7 @@
 | 阶段 | 方向 | 状态 | 说明 |
 |------|------|------|------|
 | Phase 1 | Core Capability Registry | ✅ 已完成 | 6 个核心能力已注册（method-target, line-target, bytecode-assembly, injection-lifecycle, code-compiler-dispatch, transform-pipeline），全部 READY |
-| Phase 2 | 启动与诊断 | 待启动 | readiness + dependency graph + class-analysis + verification + observation-store |
+| Phase 2 | 启动与诊断 | 进行中 | instrumentation / class-analysis / verification-preview 已注册并 READY；runtime-readiness 待启动 |
 | Phase 3 | 恢复与观测 | 待启动 | bytecode-recovery + probe-runtime + observation-store + audit + Runtime Execution Graph |
 | Phase 4 | 诊断、权限与 AI-native | 待启动 | diagnostic + capability-permission-model + injection-scoped-state + AI Runtime Diagnostics |
 | 长期 | Runtime Semantic Engine | 概念 | 从 JVM Runtime Execution 重建 Runtime Semantic World |
@@ -131,10 +133,10 @@ Spring transaction boundary → 对应 @Transactional 切面
 | 4 | code-compiler-dispatch | Kernel | Phase 1 | 代码编译分发 | ✅ READY |
 | 5 | injection-lifecycle | Kernel | Phase 1 | 注入生命周期 | ✅ READY |
 | 6 | transform-pipeline | Kernel | Phase 1 | 转换管线 | ✅ READY |
-| 7 | instrumentation | Runtime Support | Phase 2 | Instrumentation 能力 | 待启动 |
+| 7 | instrumentation | Runtime Support | Phase 2 | Instrumentation 能力 | ✅ READY |
 | 8 | runtime-readiness | Runtime Support | Phase 2 | 运行时就绪 | 待启动 |
-| 9 | class-analysis | Runtime Support | Phase 2 | 类分析 | 待启动 |
-| 10 | verification-preview | Runtime Support | Phase 2 | 验证预览 | 待启动 |
+| 9 | class-analysis | Runtime Support | Phase 2 | 类分析 | ✅ READY |
+| 10 | verification-preview | Runtime Support | Phase 2 | 验证预览 | ✅ READY |
 | 11 | bytecode-recovery | Runtime Support | Phase 3 | 字节码恢复 | 待启动 |
 | 12 | probe-runtime | Runtime Support | Phase 3 | 探针运行时（含 back-pressure policy、per-probe 开关、跨线程 context 传播） | 待启动 |
 | 13 | observation-store | Runtime Support | Phase 3 | 观测存储（含 event graph、causality edge、thread/request relationship） | 待启动 |
@@ -154,14 +156,14 @@ Spring transaction boundary → 对应 @Transactional 切面
 | 3 | 内置能力注册追踪 | ⚠️ 部分完成 | `CoreModuleInitializer` 存在且工作，但运行时 registration tracking（查询某能力注册了什么、状态如何）尚不完整 |
 | 4 | 插件生命周期事务 | 待启动 | `PluginRegistrationRecord` 提供了卸载自动清理，但 load/unload 失败时尚无事务回滚 |
 | 5 | ~~模板应用~~ | ❌ 已移除 | `TemplateService` 从未实现，不再需要此方向 |
-| 6 | 验证运行 | ⚠️ 部分完成 | `InjectionService.injectWithTest()` 实现了 dryRun→inject→verify→validate，但尚未提炼为独立 Module |
+| 6 | 验证运行 | ✅ 已完成 | `VerificationService` 已从 `InjectionService` 提炼为独立 Module，职责内聚（preview/verify/injectWithTest） |
 | 7 | Web Runtime 注册 | ✅ 已完成 | 核心 Controller 硬注册于 `JettyWebServer`，插件 Controller 通过 `LunaController` 动态注册 |
 
 **当前优先推进方向**：
 
 1. Beta 品质打磨：ProbeController/MarketController 已注册到 WebServer，下一步是健壮性提升
-2. 完善内置能力注册追踪（#3 剩余部分）
-3. Phase 2 启动：readiness + class-analysis + verification
+2. Phase 2 推进：instrumentation / class-analysis / verification-preview 已注册，下一步是 runtime-readiness
+3. 完善内置能力注册追踪（#3 剩余部分）
 
 **暂不建议做的事**：
 - 不继续扩展市场安装能力
@@ -177,3 +179,4 @@ Spring transaction boundary → 对应 @Transactional 切面
 | 2026/06/17 | 从 project-context.md 拆分 | Tony.L | — |
 | 2026/07/19 | 对照代码审计更新：阶段改为 Beta 准备期、已实现能力补充（EXCEPTION_EXIT/INVOKE/SUSPENDED/ephemeral/统一运行时/路由分离）、架构深化 #1#2#7 标记已完成、#5 模板应用移除、Ephemeral 描述修正、能力地图补充状态列、推进方向更新 | Tony.L | 知识库同步审计 |
 | 2026/07/19 | Beta 品质打磨推进方向更新：ProbeController/MarketController 已注册到 WebServer | Tony.L | #feat/beta-quality-polish 同步更新 api-contracts/endpoints.md |
+| 2026/08/02 | Phase 2 部分推进：instrumentation/class-analysis/verification-preview 已注册 READY；架构深化 #6 验证运行提炼为 VerificationService 独立 Module（已完成） | Tony.L | #feat/phase2-verification-extract 同步更新 architecture-overview/layers.md、business-capabilities/capabilities.md |

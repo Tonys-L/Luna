@@ -8,6 +8,7 @@ import fun.efto.luna.agent.web.JettyWebServer;
 import fun.efto.luna.core.analysis.decompile.DecompilerFactory;
 import fun.efto.luna.core.bootstrap.BootstrapJarBuilder;
 import fun.efto.luna.core.bootstrap.init.InitializerManager;
+import fun.efto.luna.core.infra.InstrumentationHolder;
 import fun.efto.luna.core.injection.DefaultInjectionRegistry;
 import fun.efto.luna.core.injection.DefaultInjectionRepository;
 import fun.efto.luna.core.injection.InjectionPoint;
@@ -20,12 +21,10 @@ import fun.efto.luna.core.injection.port.BytecodeLoader;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.port.LocalVarValidator;
 import fun.efto.luna.core.injection.port.Retransformer;
-
-import fun.efto.luna.core.infra.InstrumentationHolder;
+import fun.efto.luna.core.verification.VerificationService;
 import fun.efto.luna.core.bytecode.asm.AsmInjectionContext;
 import fun.efto.luna.core.bytecode.asm.analyzer.LocalVariableScanner;
 import fun.efto.luna.core.injection.InjectionValidator;
-import fun.efto.luna.core.injection.port.BytecodePreviewer;
 import fun.efto.luna.core.plugin.DefaultLogEmitter;
 import fun.efto.luna.core.plugin.LunaPlugin;
 import fun.efto.luna.core.plugin.lifecycle.PluginManagerImpl;
@@ -85,7 +84,13 @@ public final class AgentRuntime {
             InjectionService injectionService = assembleInjectionService(
                     classResourceHelper, inst, injectionRegistry, injectionRepository, retransformer);
 
-            // Step 3.5: Restore persistent injections from Repository to Registry
+            // Step 3.5: Verification service (preview/verify/injectWithTest)
+            BytecodeLoader verificationBytecodeLoader = className -> classResourceHelper.loadClassBytes(className);
+            InjectionVerifier injectionVerifier = new InjectionTestHarnessAdapter(inst);
+            VerificationService verificationService = new VerificationService(
+                    injectionService, verificationBytecodeLoader, injectionVerifier);
+
+            // Step 3.6: Restore persistent injections from Repository to Registry
             restorePersistentInjections(injectionRepository, injectionRegistry);
 
             // Step 4: Plugin system (with full dependencies)
@@ -118,7 +123,7 @@ public final class AgentRuntime {
             // Step 6: Web server
             JettyWebServer webServer = new JettyWebServer(
                     8421, JettyConfiguration.createDevelopment(),
-                    classScanner, classResourceHelper, injectionService);
+                    classScanner, classResourceHelper, injectionService, verificationService);
 
             // Step 7: Register plugin management controllers
             List<fun.efto.luna.core.plugin.LunaController> pluginControllers = new ArrayList<>();
@@ -280,16 +285,8 @@ public final class AgentRuntime {
             }
         };
 
-        InjectionVerifier injectionVerifier = new InjectionTestHarnessAdapter(inst);
-
-        BytecodePreviewer bytecodePreviewer =
-                (injectionId, className, originalBytes) -> {
-                    throw new UnsupportedOperationException(
-                            "Use InjectionService.preview() which directly uses ClassTransformer");
-                };
-
         return new InjectionService(injectionRepository, injectionRegistry, retransformer,
-                bytecodeLoader, bytecodePreviewer, localVarValidator, injectionVerifier);
+                bytecodeLoader, localVarValidator);
     }
 
     private static void restorePersistentInjections(InjectionRepository repository, InjectionRegistry registry) {

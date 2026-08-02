@@ -27,6 +27,7 @@ import fun.efto.luna.core.injection.PersistentInjection;
 import fun.efto.luna.core.injection.port.BytecodePreviewer;
 import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.target.LineNumberTarget;
+import fun.efto.luna.core.verification.VerificationService;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -44,9 +45,11 @@ public class InjectionController {
     private static final Logger LOGGER = LoggerFactory.getLogger(InjectionController.class);
 
     private final InjectionService injectionService;
+    private final VerificationService verificationService;
 
-    public InjectionController(InjectionService injectionService) {
+    public InjectionController(InjectionService injectionService, VerificationService verificationService) {
         this.injectionService = injectionService;
+        this.verificationService = verificationService;
     }
 
     @GetMapping("/list")
@@ -114,7 +117,7 @@ public class InjectionController {
             return ApiResult.fail("缺少必要参数");
         }
 
-        InjectionService.InjectTestResult result = injectionService.injectWithTest(cmd);
+        InjectionService.InjectTestResult result = verificationService.injectWithTest(cmd);
 
         Map<String, TestStepVO> steps = new LinkedHashMap<>();
 
@@ -171,7 +174,7 @@ public class InjectionController {
             return ApiResult.fail("缺少必要参数");
         }
 
-        BytecodePreviewer.PreviewResult result = injectionService.preview(cmd);
+        BytecodePreviewer.PreviewResult result = verificationService.preview(cmd);
         if (result.isTransformed()) {
             return ApiResult.ok(new DryRunResultVO(
                     result.getGeneratedSize(), result.getOriginalSize(), cmd.getMethod(), result.getMessage()));
@@ -186,7 +189,7 @@ public class InjectionController {
             return ApiResult.fail("缺少必要参数");
         }
 
-        InjectionVerifier.VerifyResult result = injectionService.verify(cmd);
+        InjectionVerifier.VerifyResult result = verificationService.verify(cmd);
         if (result.isSuccess()) {
             return ApiResult.ok(VerifyResultVO.success(result.getOutput()));
         } else {

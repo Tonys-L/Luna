@@ -1,17 +1,12 @@
 package fun.efto.luna.core.injection;
 
 import fun.efto.luna.core.injection.port.BytecodeLoader;
-import fun.efto.luna.core.injection.port.BytecodePreviewer;
-import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.port.LocalVarValidator;
 import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.plugin.PluginContext;
 import fun.efto.luna.core.plugin.ProbeHandler;
 import fun.efto.luna.core.plugin.ValidationResult;
 import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
-import fun.efto.luna.core.transformer.ClassTransformer;
-import fun.efto.luna.core.transformer.DefaultClassTransformer;
-import fun.efto.luna.core.transformer.TransformerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,25 +27,18 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
     private final InjectionRegistry injectionRegistry;
     private final Retransformer retransformer;
     private final BytecodeLoader bytecodeLoader;
-    private final BytecodePreviewer bytecodePreviewer;
     private final LocalVarValidator localVarValidator;
-    private final InjectionVerifier injectionVerifier;
-    private final ClassTransformer classTransformer = new DefaultClassTransformer();
 
     public InjectionService(InjectionRepository injectionRepository,
                             InjectionRegistry injectionRegistry,
                             Retransformer retransformer,
                             BytecodeLoader bytecodeLoader,
-                            BytecodePreviewer bytecodePreviewer,
-                            LocalVarValidator localVarValidator,
-                            InjectionVerifier injectionVerifier) {
+                            LocalVarValidator localVarValidator) {
         this.injectionRepository = injectionRepository;
         this.injectionRegistry = injectionRegistry;
         this.retransformer = retransformer;
         this.bytecodeLoader = bytecodeLoader;
-        this.bytecodePreviewer = bytecodePreviewer;
         this.localVarValidator = localVarValidator;
-        this.injectionVerifier = injectionVerifier;
     }
 
     public InjectResult inject(InjectRequest cmd) {
@@ -81,86 +69,6 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
             LOGGER.error("Inject failed", t);
             return InjectResult.failure("注入失败: " + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
         }
-    }
-
-    public InjectTestResult injectWithTest(InjectRequest cmd) {
-        String probeValidationError = validateProbeHandler(cmd);
-        if (probeValidationError != null) {
-            return InjectTestResult.failure("probeValidation", probeValidationError);
-        }
-
-        String paramError = InjectionValidator.validateParamReferences(cmd.getCode(), cmd.getDesc());
-        if (paramError != null) {
-            return InjectTestResult.failure("validateLocalVar", paramError);
-        }
-
-        String localVarError = validateLocalVarReferences(cmd);
-        if (localVarError != null) {
-            return InjectTestResult.failure("validateLocalVar", localVarError);
-        }
-
-        if (isLineInjection(cmd) && (cmd.getMethod() == null || cmd.getMethod().isEmpty())) {
-            return InjectTestResult.failure("validateLocalVar", "行号注入需要指定方法名(method)");
-        }
-
-        BytecodePreviewer.PreviewResult dryRunResult = preview(cmd);
-        if (!dryRunResult.isTransformed()) {
-            return InjectTestResult.failure("dryRun", dryRunResult.getMessage());
-        }
-
-        String injectionId;
-        try {
-            PersistentInjection pi = toPersistentInjection(cmd);
-            injectionId = addInjection(pi);
-        } catch (Exception e) {
-            LOGGER.error("Inject with test failed", e);
-            return InjectTestResult.failure("inject", e.getMessage());
-        }
-
-        InjectionVerifier.VerifyResult verifyResult = injectionVerifier.verifyOnly(cmd.getClazz(), cmd.getMethod());
-        if (!verifyResult.isSuccess()) {
-            return InjectTestResult.failure("verify", verifyResult.getError());
-        }
-
-        String expectedContent = cmd.getCode();
-        boolean found = verifyResult.getOutput() != null
-                && verifyResult.getOutput().contains(expectedContent);
-
-        return new InjectTestResult(
-                found,
-                injectionId,
-                dryRunResult.getGeneratedSize(),
-                dryRunResult.getOriginalSize(),
-                verifyResult.getOutput(),
-                found ? null : "验证失败: 输出中未找到期望内容"
-        );
-    }
-
-    public BytecodePreviewer.PreviewResult preview(InjectRequest cmd) {
-        String paramError = InjectionValidator.validateParamReferences(cmd.getCode(), cmd.getDesc());
-        if (paramError != null) {
-            return new BytecodePreviewer.PreviewResult(false, 0, 0, paramError);
-        }
-
-        try {
-            PersistentInjection pi = toPersistentInjection(cmd);
-            InjectionPoint injectionPoint = InjectionPointFactory.create(pi);
-            byte[] originalBytes = bytecodeLoader.loadBytecode(cmd.getClazz());
-            TransformerResult result = classTransformer.transform(injectionPoint, cmd.getClazz(), originalBytes);
-            return new BytecodePreviewer.PreviewResult(
-                    result.isTransformed(),
-                    result.getBytecode() != null ? result.getBytecode().length : 0,
-                    originalBytes.length,
-                    result.getMessage());
-        } catch (Exception e) {
-            return new BytecodePreviewer.PreviewResult(false, 0, 0, "预览失败: " + e.getMessage());
-        }
-    }
-
-    public InjectionVerifier.VerifyResult verify(InjectRequest cmd) {
-        return injectionVerifier.testInjection(
-                cmd.getClazz(), cmd.getMethod(), cmd.getDesc(),
-                cmd.getInjectionLocation(), cmd.getCode());
     }
 
     @Override
@@ -327,7 +235,7 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
         }
     }
 
-    private String validateLocalVarReferences(InjectRequest cmd) {
+    public String validateLocalVarReferences(InjectRequest cmd) {
         try {
             byte[] bytecode = bytecodeLoader.loadBytecode(cmd.getClazz());
             return localVarValidator.validateLocalVarReferences(
@@ -338,7 +246,7 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
         }
     }
 
-    private PersistentInjection toPersistentInjection(InjectRequest cmd) {
+    public PersistentInjection toPersistentInjection(InjectRequest cmd) {
         PersistentInjection pi = new PersistentInjection();
         pi.setClazz(cmd.getClazz());
         pi.setMethodName(cmd.getMethod());
@@ -353,12 +261,12 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
         return pi;
     }
 
-    private boolean isLineInjection(InjectRequest cmd) {
+    public boolean isLineInjection(InjectRequest cmd) {
         if (cmd.getInjectionLocation() == null) return false;
         return cmd.getLineNumber() != null && cmd.getLineNumber() > 0;
     }
 
-    private String validateProbeHandler(InjectRequest cmd) {
+    public String validateProbeHandler(InjectRequest cmd) {
         if (cmd.getProbeType() == null || cmd.getProbeType().isEmpty()) {
             return "probeType is required";
         }
@@ -430,6 +338,11 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
 
         public static InjectTestResult failure(String step, String error) {
             return new InjectTestResult(false, null, 0, 0, null, step, error);
+        }
+
+        public static InjectTestResult of(boolean success, String injectionId, int generatedSize,
+                                          int originalSize, String output, String error) {
+            return new InjectTestResult(success, injectionId, generatedSize, originalSize, output, error);
         }
 
         public boolean isSuccess() { return success; }

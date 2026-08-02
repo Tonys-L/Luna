@@ -16,6 +16,7 @@ import fun.efto.luna.core.injection.CodeEngineRegistry;
 import fun.efto.luna.core.injection.InjectionService;
 import fun.efto.luna.core.plugin.LunaController;
 import fun.efto.luna.core.plugin.registry.ProbeHandlerRegistry;
+import fun.efto.luna.core.verification.VerificationService;
 import fun.efto.luna.core.infra.web.WebServer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -55,16 +56,18 @@ public class JettyWebServer implements WebServer {
     public JettyWebServer(int port, JettyConfiguration configuration,
                           ClassScanner classScanner,
                           ClassResourceHelper classResourceHelper,
-                          InjectionService injectionService) {
+                          InjectionService injectionService,
+                          VerificationService verificationService) {
         this.port = port;
         this.configuration = configuration;
         this.dispatcher = new DispatcherServlet();
-        this.server = createServer(classScanner, classResourceHelper, injectionService);
+        this.server = createServer(classScanner, classResourceHelper, injectionService, verificationService);
     }
 
     private Server createServer(ClassScanner classScanner,
                                  ClassResourceHelper classResourceHelper,
-                                 InjectionService injectionService) {
+                                 InjectionService injectionService,
+                                 VerificationService verificationService) {
         Server jettyServer = new Server();
 
         ServerConnector connector = new ServerConnector(jettyServer);
@@ -87,7 +90,7 @@ public class JettyWebServer implements WebServer {
 
         dispatcher.registerController(new StatusController());
         dispatcher.registerController(new ClassController(classScanner, classResourceHelper, injectionService));
-        dispatcher.registerController(new InjectionController(injectionService));
+        dispatcher.registerController(new InjectionController(injectionService, verificationService));
         dispatcher.registerController(new TestController(classScanner, classResourceHelper));
         dispatcher.registerController(new MetricsController(injectionService));
         dispatcher.registerController(new CapabilityController());

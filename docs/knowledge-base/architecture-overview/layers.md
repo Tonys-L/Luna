@@ -16,8 +16,9 @@ Luna 采用**整洁架构**（Clean Architecture）思想，核心原则为依�
 │   DispatcherServlet / VO / InjectionTestHarness   │
 ├─────────────────────────────────────────────────┤
 │              Application Business Rules            │
-│   InjectionService / PluginManagerImpl             │
-│   AgentRuntime / BuiltinPluginProvider             │
+│   InjectionService / VerificationService           │
+│   PluginManagerImpl / AgentRuntime                 │
+│   BuiltinPluginProvider                             │
 ├─────────────────────────────────────────────────┤
 │              Enterprise Business Rules             │
 │   InjectionPoint / PersistentInjection             │
@@ -111,10 +112,12 @@ fun.efto.luna.core
 ├── probe/                 # 探针运行时
 │   ├── ProbeMessage, ProbeOutput (RingBuffer 4096)
 │   └── BootstrapClassRegistry
-└── transformer/           # ClassFileTransformer 适配层
+├── transformer/           # ClassFileTransformer 适配层
     ├── ClassTransformer, DefaultClassTransformer
     ├── GlobalClassFileTransformer, ClassFileTransformerAdapter
     └── TransformerResult, InjectionResult
+└── verification/          # 验证预览服务（从 InjectionService 提炼）
+    └── VerificationService  #   preview / verify / injectWithTest
 ```
 
 **设计原则**:
@@ -263,3 +266,4 @@ luna-ui/src/
 | 2026/06/16 | 初始版本 | Tony.L | — |
 | 2026/06/16 | 修正架构术语（洋葱→整洁），补充实际代码结构 | Tony.L | — |
 | 2026/06/17 | 从 architecture-overview.md 拆分为独立文件 | Tony.L | architecture-overview.md 拆分 |
+| 2026/08/02 | 新增 verification 包至核心包结构；Application Business Rules 层新增 VerificationService | Tony.L | #feat/phase2-verification-extract |

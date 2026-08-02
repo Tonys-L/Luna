@@ -57,6 +57,27 @@ public class DefaultInitializer implements Initializer {
                 ReadinessState.READY, Arrays.asList("injection-lifecycle"), LifecyclePolicy.CORE_ONLY
         ));
 
+        // Phase 2 Runtime Support capabilities (existing implementations registered explicitly)
+        capRegistry.register(new CoreCapabilityRecord(
+                "instrumentation", "Instrumentation 能力", CapabilityKind.RUNTIME_SUPPORT,
+                Arrays.asList("instrumentation_holder", "retransform", "class_scan"),
+                ReadinessState.READY, Collections.emptyList(), LifecyclePolicy.CORE_ONLY
+        ));
+
+        capRegistry.register(new CoreCapabilityRecord(
+                "class-analysis", "类分析", CapabilityKind.RUNTIME_SUPPORT,
+                Arrays.asList("asm_analyzer", "cfr_decompiler"),
+                ReadinessState.READY, Arrays.asList("instrumentation"), LifecyclePolicy.CORE_ONLY
+        ));
+
+        capRegistry.register(new CoreCapabilityRecord(
+                "verification-preview", "验证预览", CapabilityKind.RUNTIME_SUPPORT,
+                Arrays.asList("injection_verifier", "bytecode_previewer", "test_harness"),
+                ReadinessState.READY,
+                Arrays.asList("instrumentation", "injection-lifecycle", "transform-pipeline"),
+                LifecyclePolicy.CORE_ONLY
+        ));
+
         // External plugins are loaded via PluginManager, not here
     }
 }

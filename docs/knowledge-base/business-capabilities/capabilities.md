@@ -307,7 +307,7 @@ Luna 的能力边界分为五类：
 | 类扫描过滤 | CompositeExcludeClassFilter（4 种过滤策略） | `luna-agent/clazz/` |
 | 核心能力注册 | CoreCapabilityRegistry + ReadinessState | `luna-core/bootstrap/capability/` |
 | 配置管理 | ConfigManager（Agent 配置 + 插件配置） | `luna-core/infra/config/ConfigManager.java` |
-| 注入验证 | InjectionTestHarnessAdapter（retransform + 反射调用） | `luna-agent/adapter/` |
+| 注入验证 | VerificationService（preview/verify/injectWithTest）+ InjectionTestHarnessAdapter（retransform + 反射调用） | `luna-core/verification/`、`luna-agent/adapter/` |
 | 包前缀匹配 | PackageTrie（通配符类名匹配） | `luna-core/injection/PackageTrie.java` |
 
 ---
@@ -334,3 +334,4 @@ Luna 的能力边界分为五类：
 | 2026/06/17 | 迁移补充：内置插件对照表、插件类加载器隔离、内置插件保护 | Tony.L |
 | 2026/06/17 | 从 business-capabilities.md 拆分 | Tony.L |
 | 2026/07/03 | TRACE 改为 method_around 单注入点、协议前缀简化、Capability 设计更新 | Tony.L | TRACE 重构 |
+| 2026/08/02 | 支撑能力"注入验证"更新：VerificationService 从 InjectionService 提炼为独立 Module | Tony.L | #feat/phase2-verification-extract |

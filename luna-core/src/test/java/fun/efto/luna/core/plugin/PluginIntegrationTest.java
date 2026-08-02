@@ -4,7 +4,6 @@ import fun.efto.luna.core.probe.RingBuffer;
 import fun.efto.luna.core.injection.DefaultInjectionRegistry;
 import fun.efto.luna.core.injection.DefaultInjectionRepository;
 import fun.efto.luna.core.injection.InjectionService;
-import fun.efto.luna.core.injection.port.InjectionVerifier;
 import fun.efto.luna.core.injection.port.Retransformer;
 import fun.efto.luna.core.injection.target.InjectionLocation;
 import fun.efto.luna.core.plugin.lifecycle.AffectedClassTracker;
@@ -54,26 +53,11 @@ public class PluginIntegrationTest {
 
         DefaultInjectionRegistry registry = new DefaultInjectionRegistry();
         DefaultInjectionRepository repository = new DefaultInjectionRepository();
-        InjectionVerifier injectionVerifier = new InjectionVerifier() {
-            @Override
-            public VerifyResult testInjection(String className, String methodName, String descriptor,
-                                               String injectionLocation, String code) {
-                return new VerifyResult(false, null, "test mock");
-            }
-            @Override
-            public VerifyResult verifyOnly(String className, String methodName) {
-                return new VerifyResult(false, null, "test mock");
-            }
-        };
         injectionService = new InjectionService(
             repository, registry,
             (Retransformer) className -> {},
             className -> null,
-            (injectionId, className, originalBytes) -> {
-                throw new UnsupportedOperationException("preview not supported in test");
-            },
-            (code, className, methodName, methodDesc, lineNumber, classBytes) -> null,
-            injectionVerifier
+            (code, className, methodName, methodDesc, lineNumber, classBytes) -> null
         );
 
         AffectedClassTracker.clear();

@@ -119,7 +119,7 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
 
             triggerRetransform(injection.getClazz());
         } catch (Throwable t) {
-            // INV-001: retransform 失败时回滚持久化数据和注册表条目，避免数据与运行时状态不一致
+            // INV-013: retransform 失败时回滚持久化数据和注册表条目，避免数据与运行时状态不一致
             LOGGER.error("Failed to register injection point: {}, rolling back", injection.getId(), t);
             try {
                 injectionRegistry.unregister(injection.getId());
@@ -127,6 +127,8 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
             } catch (Exception rollbackEx) {
                 LOGGER.error("Rollback failed for injection: {}", injection.getId(), rollbackEx);
             }
+            // 抛出异常让调用方感知失败，避免静默降级
+            throw new RuntimeException("addInjection failed for: " + injection.getId(), t);
         }
 
         return injection.getId();
@@ -154,6 +156,10 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
     @Override
     public void updateInjection(String id, PersistentInjection injection) {
         injection.setId(id);
+        // 保存旧状态快照，用于 retransform 失败时回滚
+        PersistentInjection oldInjection = injectionRepository.findById(id);
+        String retransformClass = oldInjection != null ? oldInjection.getClazz() : injection.getClazz();
+
         injectionRepository.save(injection);
 
         injectionRegistry.unregister(id);
@@ -162,8 +168,21 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
             injectionRegistry.register(point);
             triggerRetransform(injection.getClazz());
         } catch (Throwable t) {
-            // INV-011: 捕获 Throwable 处理 VerifyError 等 Error 类型异常
-            LOGGER.error("Failed to update injection point: {}", id, t);
+            // INV-013: retransform 失败时回滚到旧状态，保持持久化与运行时状态一致
+            LOGGER.error("Failed to update injection point: {}, rolling back", id, t);
+            try {
+                injectionRegistry.unregister(id);
+                if (oldInjection != null) {
+                    injectionRepository.save(oldInjection);
+                    InjectionPoint oldPoint = InjectionPointFactory.create(oldInjection);
+                    injectionRegistry.register(oldPoint);
+                    triggerRetransform(retransformClass);
+                } else {
+                    injectionRepository.delete(id);
+                }
+            } catch (Exception rollbackEx) {
+                LOGGER.error("Rollback failed for update injection: {}", id, rollbackEx);
+            }
         }
     }
 
@@ -208,11 +227,21 @@ public class InjectionService implements InjectionQuery, InjectionLifecycle {
                 injectionRegistry.unregister(injection.getId());
                 try {
                     triggerRetransform(injection.getClazz());
+                    suspendedIds.add(injection.getId());
                 } catch (Throwable t) {
                     // INV-011: 捕获 Throwable 处理 VerifyError 等 Error 类型异常
-                    LOGGER.error("Retransform failed during suspendInjectionsByLocation for class: {}", injection.getClazz(), t);
+                    // 回滚状态为 ACTIVE，重新注册注入点，不加入 suspendedIds（避免静默降级）
+                    LOGGER.error("Retransform failed during suspendInjectionsByLocation for class: {}, rolling back", injection.getClazz(), t);
+                    injection.setStatus(InjectionStatus.ACTIVE);
+                    injection.setSuspendReason(null);
+                    injectionRepository.save(injection);
+                    try {
+                        InjectionPoint point = InjectionPointFactory.create(injection);
+                        injectionRegistry.register(point);
+                    } catch (Exception reRegisterEx) {
+                        LOGGER.error("Re-register failed for injection: {}", injection.getId(), reRegisterEx);
+                    }
                 }
-                suspendedIds.add(injection.getId());
             }
         }
         return suspendedIds;

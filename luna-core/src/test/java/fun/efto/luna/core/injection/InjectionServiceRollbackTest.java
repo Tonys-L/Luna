@@ -50,7 +50,10 @@ public class InjectionServiceRollbackTest {
         );
 
         PersistentInjection injection = buildInjection("test-rollback-1", "com.example.Service");
-        service.addInjection(injection);
+        // M-10: addInjection 失败时应抛出 RuntimeException，让调用方感知失败
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> service.addInjection(injection), "addInjection 失败时应抛出 RuntimeException");
+        assertTrue(ex.getMessage().contains("test-rollback-1"));
 
         assertNull(repository.findById("test-rollback-1"), "持久化数据应被回滚删除");
         assertFalse(registry.contains("test-rollback-1"), "注册表条目应被回滚删除");
@@ -65,7 +68,8 @@ public class InjectionServiceRollbackTest {
         );
 
         PersistentInjection injection = buildInjection("test-rollback-2", "com.example.Service");
-        service.addInjection(injection);
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> service.addInjection(injection), "VerifyError 应被捕获并抛出 RuntimeException");
 
         assertNull(repository.findById("test-rollback-2"), "VerifyError 应被捕获并回滚");
         assertFalse(registry.contains("test-rollback-2"), "注册表条目应被回滚删除");
@@ -112,8 +116,50 @@ public class InjectionServiceRollbackTest {
                 (LocalVarValidator) (code, cn, mn, md, ln, cb) -> null
         );
 
-        assertDoesNotThrow(() -> service.suspendInjectionsByLocation(
-                java.util.Collections.singleton("method_enter"), "test"));
+        // M-12: retransform 失败时不抛异常，但 suspendedIds 不应包含失败的 id
+        java.util.List<String> suspendedIds = assertDoesNotThrow(() ->
+                service.suspendInjectionsByLocation(
+                        java.util.Collections.singleton("method_enter"), "test"));
+        assertFalse(suspendedIds.contains("test-suspend-1"), "retransform 失败的 id 不应出现在 suspendedIds 中");
+
+        // 回滚后状态应为 ACTIVE
+        PersistentInjection persisted = repository.findById("test-suspend-1");
+        assertEquals(InjectionStatus.ACTIVE, persisted.getStatus(), "retransform 失败后状态应回滚为 ACTIVE");
+        assertTrue(registry.contains("test-suspend-1"), "registry 应重新包含回滚后的注入点");
+    }
+
+    @Test
+    void updateInjectionRollsBackOnRetransformFailure() {
+        // M-11: updateInjection retransform 失败时回滚到旧状态
+        InjectionService setupService = new InjectionService(
+                repository, registry, null,
+                (BytecodeLoader) className -> null,
+                (LocalVarValidator) (code, cn, mn, md, ln, cb) -> null
+        );
+        PersistentInjection oldInjection = buildInjection("test-update-1", "com.example.OldService");
+        oldInjection.setCode("$old");
+        setupService.addInjection(oldInjection);
+        assertTrue(registry.contains("test-update-1"));
+
+        // 使用会失败的 retransformer 进行更新
+        InjectionService service = new InjectionService(
+                repository, registry, failingRetransformer,
+                (BytecodeLoader) className -> null,
+                (LocalVarValidator) (code, cn, mn, md, ln, cb) -> null
+        );
+
+        PersistentInjection newInjection = buildInjection("test-update-1", "com.example.NewService");
+        newInjection.setCode("$new");
+
+        // updateInjection 不应抛出异常（失败已回滚）
+        assertDoesNotThrow(() -> service.updateInjection("test-update-1", newInjection));
+
+        // 回滚后：持久化数据应恢复为旧状态
+        PersistentInjection persisted = repository.findById("test-update-1");
+        assertNotNull(persisted);
+        assertEquals("com.example.OldService", persisted.getClazz(), "retransform 失败后应回滚到旧 class");
+        assertEquals("$old", persisted.getCode(), "retransform 失败后应回滚到旧 code");
+        assertTrue(registry.contains("test-update-1"), "registry 应包含回滚后的注入点");
     }
 
     @Test

@@ -56,6 +56,9 @@ public class TestController {
 
     @PostMapping("/invoke")
     public ApiResult invoke(@RequestBody JSONObject cmd) {
+        if (cmd == null) {
+            return ApiResult.fail("缺少请求体");
+        }
         String className = cmd.getString("className");
         String methodName = cmd.getString("methodName");
 

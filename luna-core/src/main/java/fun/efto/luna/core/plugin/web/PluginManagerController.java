@@ -105,6 +105,9 @@ public class PluginManagerController implements LunaController {
     @PutMapping("/{pluginId}/config")
     public ApiResult saveConfig(@PathVariable("pluginId") String pluginId,
                                 @RequestBody Map<String, String> config) {
+        if (config == null) {
+            return ApiResult.fail("缺少配置内容");
+        }
         pluginManager.savePluginConfig(pluginId, config);
         return ApiResult.ok(config);
     }

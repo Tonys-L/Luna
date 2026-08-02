@@ -45,6 +45,9 @@ public class MarketController implements LunaController {
 
     @GetMapping("/search")
     public ApiResult search(@RequestParam("keyword") String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return ApiResult.fail("缺少搜索关键词");
+        }
         MarketClient client = getMarketClient();
         if (client == null) {
             return ApiResult.fail("Market not configured", 503);
@@ -107,6 +110,7 @@ public class MarketController implements LunaController {
             return ApiResult.fail(result.getErrorMessage(), 400);
         }
 
+        boolean filesRemoved = true;
         try {
             Path pluginDir = PluginLoader.getPluginsDir().resolve(pluginId);
             if (Files.isDirectory(pluginDir)) {
@@ -118,10 +122,14 @@ public class MarketController implements LunaController {
                 }
             }
         } catch (Exception e) {
+            filesRemoved = false;
             log.log(Level.WARNING, "Failed to delete plugin files for: " + pluginId, e);
         }
 
-        return ApiResult.ok(result);
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("unloadResult", result);
+        response.put("filesRemoved", filesRemoved);
+        return ApiResult.ok(response);
     }
 
     @PostMapping("/plugins/{pluginId}/update")

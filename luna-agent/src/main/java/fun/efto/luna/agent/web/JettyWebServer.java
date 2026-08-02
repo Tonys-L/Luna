@@ -52,6 +52,7 @@ public class JettyWebServer implements WebServer {
     private final JettyConfiguration configuration;
     private final DispatcherServlet dispatcher;
     private volatile boolean running = false;
+    private volatile long startTimeMs = 0;
 
     public JettyWebServer(int port, JettyConfiguration configuration,
                           ClassScanner classScanner,
@@ -150,6 +151,7 @@ public class JettyWebServer implements WebServer {
         try {
             server.start();
             running = true;
+            startTimeMs = System.currentTimeMillis();
 
             LogDispatcher.getInstance().start();
 
@@ -200,7 +202,7 @@ public class JettyWebServer implements WebServer {
         return new JettyServerStats(
                 true,
                 connector.getConnectedEndPoints().size(),
-                System.currentTimeMillis() - System.currentTimeMillis(),
+                System.currentTimeMillis() - startTimeMs,
                 server.getBeans().size(),
                 Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
         );

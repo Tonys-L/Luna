@@ -171,14 +171,16 @@ public static void putIfAbsent(String className, byte[] originalBytecode) {
 
 **解决方案**:
 1. `triggerRetransform()` 改为 `catch (Throwable t)` 并抛出 RuntimeException，让调用方感知失败
-2. `addInjection()` 改为 `catch (Throwable t)` 并执行回滚（unregister + delete），回滚失败仅记录日志
+2. `addInjection()` 改为 `catch (Throwable t)` 并执行回滚（unregister + delete），回滚失败仅记录日志；**回滚后抛出 RuntimeException**，让调用方（inject/injectWithTest）感知失败，避免静默降级
 3. `GlobalClassFileTransformer.transform()` 改为 `catch (Throwable t)`，不中断循环
 4. 所有调用 `triggerRetransform()` 的方法（removeInjection/updateInjection/toggleEnabled/suspendInjectionsByLocation/resumeInjectionsByLocation）补全 try-catch(Throwable)
 5. `DefaultInjectionRepository.persist()` 使用 synchronized 保护
 6. `toggleEnabled()` enable 失败时必须同时回滚 enabled 标志 **和** unregister registry 条目（仅回滚标志会导致 registry 与持久化状态不一致）
+7. `updateInjection()` retransform 失败时必须回滚到旧状态：保存旧 PersistentInjection 快照，失败时 unregister 新 point、save 旧 injection、register 旧 point、retransform 恢复旧字节码
+8. `suspendInjectionsByLocation()` retransform 失败时必须回滚状态为 ACTIVE 并重新 register 注入点，**不加入 suspendedIds**（避免调用方误认为已挂起）
 
 ```java
-// addInjection 回滚示例
+// addInjection 回滚示例（M-10: 回滚后抛出异常）
 catch (Throwable t) {
     LOGGER.error("Failed to register injection point: {}, rolling back", injection.getId(), t);
     try {
@@ -187,6 +189,7 @@ catch (Throwable t) {
     } catch (Exception rollbackEx) {
         LOGGER.error("Rollback failed for injection: {}", injection.getId(), rollbackEx);
     }
+    throw new RuntimeException("addInjection failed for: " + injection.getId(), t);
 }
 
 // toggleEnabled 回滚示例（M-3 修复）
@@ -195,6 +198,31 @@ catch (Throwable t) {
     injection.setEnabled(false);
     injectionRepository.save(injection);
     injectionRegistry.unregister(id);  // 必须同时 unregister，否则 registry 残留
+}
+
+// updateInjection 回滚示例（M-11: 回滚到旧状态）
+PersistentInjection oldInjection = injectionRepository.findById(id);  // 保存旧快照
+// ... save new + unregister old + register new + retransform ...
+catch (Throwable t) {
+    injectionRegistry.unregister(id);
+    if (oldInjection != null) {
+        injectionRepository.save(oldInjection);
+        InjectionPoint oldPoint = InjectionPointFactory.create(oldInjection);
+        injectionRegistry.register(oldPoint);
+        triggerRetransform(retransformClass);
+    } else {
+        injectionRepository.delete(id);
+    }
+}
+
+// suspendInjectionsByLocation 回滚示例（M-12: 回滚状态，不加入结果）
+catch (Throwable t) {
+    injection.setStatus(InjectionStatus.ACTIVE);
+    injection.setSuspendReason(null);
+    injectionRepository.save(injection);
+    InjectionPoint point = InjectionPointFactory.create(injection);
+    injectionRegistry.register(point);
+    // 不执行 suspendedIds.add(injection.getId())
 }
 ```
 

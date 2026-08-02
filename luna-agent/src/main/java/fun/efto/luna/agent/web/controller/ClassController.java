@@ -74,6 +74,9 @@ public class ClassController {
 
     @GetMapping("/analysis")
     public ApiResult analysis(@RequestParam("class") String className) {
+        if (className == null || className.isEmpty()) {
+            return ApiResult.fail("缺少class参数");
+        }
         Optional<ClassAnalyzer> classAnalyzer = AnalyzerRegistry.getInstance()
                 .get(AnalyzerType.valueOf("ASM"));
         if (classAnalyzer.isPresent()) {

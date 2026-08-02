@@ -61,8 +61,8 @@ public class MethodInvokeService {
                     try {
                         instance = targetClass.getDeclaredConstructor().newInstance();
                     } catch (Exception e) {
-                        instance = targetClass.getDeclaredConstructor(String.class, int.class, String.class)
-                                .newInstance("test", 1, "test@test.com");
+                        return InvokeResult.failure(
+                                "类无法实例化，缺少公共无参构造器: " + targetClass.getName(), baos.toString());
                     }
                 }
 

@@ -16,7 +16,7 @@
 | INV-010 | AsmMethodExpressionInjector 处理 ATHROW 异常路径时必须使用 DUP 指令保留异常引用，替代 ACONST_NULL | AsmMethodExpressionInjector |
 | INV-011 | GlobalClassFileTransformer 必须捕获并处理 VerifyError 等 Error 类型异常，避免穿透；InjectionService 所有触发 retransform 的方法（addInjection/removeInjection/updateInjection/toggleEnabled/suspendInjectionsByLocation/resumeInjectionsByLocation）必须捕获 Throwable 而非 Exception | GlobalClassFileTransformer、InjectionService |
 | INV-012 | ProbeHandler.getCodeType() 当 usesCode() 为 true 时必须返回非空值 | ProbeHandler |
-| INV-013 | InjectionService.addInjection() 必须在 retransform 失败时回滚持久化数据和注册表条目；toggleEnabled() enable 失败时必须回滚 enabled 标志并 unregister registry 条目，避免数据与运行时状态不一致 | InjectionService.addInjection()、InjectionService.toggleEnabled() |
+| INV-013 | InjectionService.addInjection() 必须在 retransform 失败时回滚持久化数据和注册表条目并抛出异常让调用方感知失败；updateInjection() retransform 失败时必须回滚到旧状态；toggleEnabled() enable 失败时必须回滚 enabled 标志并 unregister registry 条目；suspendInjectionsByLocation() retransform 失败时必须回滚状态为 ACTIVE 且不加入 suspendedIds | InjectionService.addInjection()、updateInjection()、toggleEnabled()、suspendInjectionsByLocation() |
 
 ---
 
@@ -28,3 +28,4 @@
 | 2026/06/17 | 从 domain-model.md 拆分为目录结构 | Tony.L |
 | 2026/07/19 | 补充8条业务不变量 | Tony.L |
 | 2026/08/02 | INV-011 扩展到 InjectionService 所有 retransform 路径；新增 INV-013（addInjection 回滚）；INV-013 扩展到 toggleEnabled 回滚 | Tony.L |
+| 2026/08/02 | INV-013 进一步扩展到 addInjection 抛异常、updateInjection 回滚旧状态、suspendInjectionsByLocation 回滚状态不加入结果 | Tony.L |

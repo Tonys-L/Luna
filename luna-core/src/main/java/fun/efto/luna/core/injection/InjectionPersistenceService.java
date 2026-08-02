@@ -14,6 +14,9 @@ public class InjectionPersistenceService {
     private static final String FILE_NAME = "luna-injections.json";
 
     public void save(List<PersistentInjection> injections) throws IOException {
+        if (injections == null) {
+            throw new IllegalArgumentException("injections must not be null");
+        }
         List<PersistentInjection> persistentOnly = new ArrayList<>();
         for (PersistentInjection inj : injections) {
             if (!inj.isEphemeral()) {

@@ -219,7 +219,16 @@
   - M-2: DefaultInjectionRegistry 正则编译失败抛 IllegalArgumentException（不再静默吞噬）
   - M-3: toggleEnabled enable 失败时回滚 enabled 标志 + unregister registry 条目（INV-013 扩展）
   - M-4: validateLocalVarReferences 异常时返回错误信息（不再静默返回 null）
-- ⏳ 第三批中严重度问题待处理（剩余 7 个，含 Controller null 校验等）
+- ✅ 第三批中严重度问题已修复（M-5~M-15）：
+  - M-5~M-8: Controller 层防御性 null/空校验（ClassController/TestController/PluginManagerController/MarketController）
+  - M-9: MarketController.uninstall 异常吞噬 → 响应中附带 filesRemoved 状态
+  - M-10: addInjection 回滚后抛出异常让调用方感知失败（INV-013 扩展）
+  - M-11: updateInjection retransform 失败时回滚到旧状态（INV-013 扩展）
+  - M-12: suspendInjectionsByLocation retransform 失败时回滚状态不加入 suspendedIds（INV-013 扩展）
+  - M-13: InjectionPersistenceService.save null 校验
+  - M-14: MethodInvokeService 移除硬编码回退构造器
+  - M-15: JettyWebServer.getStats 修复 uptime 永远为 0 的逻辑错误
+- ⏳ Beta 品质打磨方向 A 全部完成，可进入下一阶段
 
 #### 第二阶段: Phase 2 推进（方向 C）✅ 已完成
 
@@ -280,3 +289,4 @@
 | 2026-08-02 | Phase 2 全部完成：runtime-readiness 已注册 READY，CoreCapabilityRegistry 增加依赖校验和依赖图查询；更新推荐路径 | Tony.L |
 | 2026-08-02 | Beta 品质打磨第一批完成：修复 4 个高严重度不变量违反问题（H-1/H-2/H-3/H-4），新增 INV-013，更新 INV-011 | Tony.L |
 | 2026-08-02 | Beta 品质打磨第二批完成：修复 4 个中严重度问题（M-1/M-2/M-3/M-4），INV-013 扩展到 toggleEnabled，补充 lessons 1.9 节 | Tony.L |
+| 2026-08-02 | Beta 品质打磨第三批完成：修复 11 个中严重度问题（M-5~M-15），INV-013 扩展到 addInjection/updateInjection/suspend，方向 A 全部完成 | Tony.L |

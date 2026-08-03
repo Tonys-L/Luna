@@ -1,6 +1,6 @@
 package fun.efto.luna.agent.clazz;
 
-import fun.efto.luna.core.util.ClassNameUtils;
+import fun.efto.luna.core.infra.util.ClassNameUtils;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2025/10/2 15:07
  */
 public final class ClassScanner {

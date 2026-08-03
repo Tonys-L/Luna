@@ -6,7 +6,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 /**
  * 日志 WebSocket Servlet 适配器
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:00
  */
 public class LogWebSocketServlet extends WebSocketServlet {

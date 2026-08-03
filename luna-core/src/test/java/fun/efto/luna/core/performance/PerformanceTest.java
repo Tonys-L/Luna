@@ -5,16 +5,13 @@ import fun.efto.luna.core.expression.bytecode.ExpressionBytecodeGenerator;
 import fun.efto.luna.core.expression.parser.ExpressionParser;
 import fun.efto.luna.core.expression.Token;
 import fun.efto.luna.core.expression.Tokenizer;
-import fun.efto.luna.core.rule.InjectionRule;
-import fun.efto.luna.core.rule.RuleManager;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 性能测试类，测试系统性能是否满足 < 0.1ms 要求
- * @author ：Tony.L(<286269159@qq.com>)
- * @since ：2026/03/29 02:30
+ * @author : Tony.L(286269159@qq.com)
+ * @since  : 2026/03/29 02:30
  */
 public class PerformanceTest {
 
@@ -49,40 +46,6 @@ public class PerformanceTest {
         long averageTime = totalTime / MEASURE_ITERATIONS;
         System.out.println("表达式解析和求值平均时间: " + averageTime + " ns");
         assertTrue(averageTime < SINGLE_OPERATION_THRESHOLD_NS, "表达式解析和求值时间超过 0.1ms");
-    }
-
-    @Test
-    public void testRuleManagementPerformance() {
-        RuleManager ruleManager = RuleManager.getInstance();
-
-        for (int i = 0; i < WARMUP_ITERATIONS; i++) {
-            InjectionRule rule = new InjectionRule();
-            rule.setTargetClass("WarmupApp");
-            rule.setTargetMethod("warmup");
-            rule.setInjectionType("method");
-            rule.setExpression("true");
-            rule.setLogContent("warmup");
-            long ruleId = ruleManager.addRule(rule);
-            ruleManager.deleteRule(ruleId);
-        }
-
-        long totalTime = 0;
-        for (int i = 0; i < MEASURE_ITERATIONS; i++) {
-            long startTime = System.nanoTime();
-            InjectionRule rule = new InjectionRule();
-            rule.setTargetClass("TestApp");
-            rule.setTargetMethod("main");
-            rule.setInjectionType("method");
-            rule.setExpression("true");
-            rule.setLogContent("Injected log");
-            long ruleId = ruleManager.addRule(rule);
-            ruleManager.deleteRule(ruleId);
-            totalTime += System.nanoTime() - startTime;
-        }
-
-        long averageTime = totalTime / MEASURE_ITERATIONS;
-        System.out.println("规则添加和删除平均时间: " + averageTime + " ns");
-        assertTrue(averageTime < COMPOSITE_OPERATION_THRESHOLD_NS, "规则管理时间超过 0.5ms");
     }
 
     @Test

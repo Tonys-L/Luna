@@ -14,6 +14,10 @@ dependency-reduced-pom.xml
 *.class
 luna-rules.json
 luna.properties
+luna-ui/node/
+luna-ui/test-report/
+luna-ui/test-results/
+playwright-report/
 
 ### IntelliJ IDEA ###
 .idea/
@@ -34,8 +38,21 @@ luna.properties
 ### Trae ###
 .trae/
 
+### Runtime ###
+*.log
+luna-injections.json
+luna-agent.jar
+demo-output.log
+
 ### Temp ###
 TASKS/
+tmp/
 *.bak
+*.bak.md
+image.png
 mock-server.js
 test_frontend.py
+test-output.txt
+CONTEXT.md
+skills-lock.json
+cp.txt

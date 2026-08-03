@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * 表达式字节码生成器，将表达式编译为字节码
- * @author ：Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
 public class ExpressionBytecodeGenerator {

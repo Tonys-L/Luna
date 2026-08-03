@@ -19,7 +19,7 @@ GET {{agent-url}}/api/logs?class=com.example.app.TestController&method=test&desc
 
 ###
 
-GET {{agent-url}}/api/inject?class=com.example.app.TestLog&method=testLog&desc=(Ljava/lang/String;)V&
+GET {{agent-url}}/api/injections?class=com.example.app.TestLog&method=testLog&desc=(Ljava/lang/String;)V&
     injectionType=BEFORE_METHOD&codeType=EXPRESSION&code=log:输出日志
 
 
@@ -27,11 +27,11 @@ GET {{agent-url}}/api/inject?class=com.example.app.TestLog&method=testLog&desc=(
 GET {{agent-url}}/api/classes
 
 ###
-GET {{agent-url}}/api/inject?class=com.example.app.TestController&method=test&
+GET {{agent-url}}/api/injections?class=com.example.app.TestController&method=test&
     desc=(Ljava/lang/String;)Ljava/lang/String;&injectionType=AFTER_METHOD&codeType=EXPRESSION&code=log:controll---输出日志
 
 ###
-POST {{agent-url}}/api/inject
+POST {{agent-url}}/api/injections
 Content-Type: application/json
 
 {
@@ -44,7 +44,7 @@ Content-Type: application/json
 }
 
 ###
-POST {{agent-url}}/api/inject
+POST {{agent-url}}/api/injections
 Content-Type: application/json
 
 {

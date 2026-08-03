@@ -22,20 +22,33 @@
         <i class="fas fa-terminal empty-icon"></i>
         <p>暂无日志数据</p>
       </div>
-      <div 
-        v-for="(log, index) in logs" 
-        :key="index" 
+      <div
+        v-for="(log, index) in logs"
+        :key="index"
         class="log-line"
-        :class="{ 'snapshot-line': log.type === 'SNAPSHOT' }"
+        :class="getLineClass(log.type)"
       >
-        <template v-if="log.type === 'SNAPSHOT'">
+        <!-- outputViewType: snapshot -->
+        <template v-if="log.outputViewType === 'snapshot'">
           <span class="log-tag tag-debug">DEBUG</span>
+          <span v-if="log.data && log.data.timestamp" class="log-time">{{ formatTime(log.data.timestamp) }}</span>
           <span class="log-content snapshot-link" @click="openDebugger(log.data)">
-            <i class="fas fa-bug"></i> 触发虚拟断点快照: {{ log.data.pointId }} (点击查看详情)
+            <i class="fas fa-bug"></i> 触发虚拟断点快照: {{ (log.data.payload && log.data.payload.pointId) || log.data.pointId }} (点击查看详情)
           </span>
         </template>
+        <!-- outputViewType: tree -->
+        <template v-else-if="log.outputViewType === 'tree'">
+          <span class="log-tag tag-invocation">TRACE</span>
+          <span v-if="log.timestamp" class="log-time">{{ formatTime(log.timestamp) }}</span>
+          <div class="log-content invocation-content">
+            <TraceTreeViewer :trace="log.trace" :timestamp="log.timestamp" />
+          </div>
+        </template>
+        <!-- outputViewType: text (default) -->
         <template v-else>
-          <span class="log-content">{{ log.text }}</span>
+          <span class="log-tag" :class="getTypeConfig(log.type).tagClass">{{ getTypeConfig(log.type).tag || log.type }}</span>
+          <span v-if="log.timestamp" class="log-time">{{ formatTime(log.timestamp) }}</span>
+          <span class="log-content" :class="getTypeConfig(log.type).contentClass">{{ log.text }}</span>
         </template>
       </div>
     </div>
@@ -51,11 +64,32 @@
 
 <script>
 import DebuggerPanel from '../components/DebuggerPanel.vue'
+import TraceTreeViewer from '../components/TraceTreeViewer.vue'
+
+const messageHandlers = {
+    SNAPSHOT: (parsed) => ({ type: 'SNAPSHOT', data: parsed, outputViewType: parsed.outputViewType || 'snapshot' }),
+    TRACE: (parsed) => ({ type: 'TRACE', text: parsed.payload, timestamp: parsed.timestamp, outputViewType: parsed.outputViewType || 'text' }),
+    LOG: (parsed) => ({ type: 'LOG', text: parsed.payload, timestamp: parsed.timestamp, outputViewType: parsed.outputViewType || 'text' }),
+    INVOCATION: (parsed) => ({
+        type: 'INVOCATION',
+        trace: parsed.structuredPayload || {},
+        timestamp: parsed.timestamp,
+        outputViewType: parsed.outputViewType || 'tree'
+    }),
+}
+
+const typeConfig = {
+    SNAPSHOT: { tag: 'DEBUG', tagClass: 'tag-debug', lineClass: 'snapshot-line' },
+    TRACE: { tag: 'TRACE', tagClass: 'tag-trace', contentClass: 'trace-content', lineClass: 'trace-line' },
+    LOG: { tag: 'LOG', tagClass: 'tag-log', contentClass: 'log-text', lineClass: '' },
+    INVOCATION: { tag: 'TRACE', tagClass: 'tag-invocation', lineClass: 'invocation-line' },
+}
 
 export default {
   name: 'LogViewer',
   components: {
-    DebuggerPanel
+    DebuggerPanel,
+    TraceTreeViewer
   },
   data() {
     return {
@@ -63,6 +97,7 @@ export default {
       autoScroll: true,
       maxLogs: 1000, // 最大保留日志行数
       ws: null,
+      reconnectTimer: null,
       status: 'disconnected', // connected, disconnected, connecting
       debuggerVisible: false,
       currentSnapshot: {}
@@ -88,9 +123,21 @@ export default {
     this.connectWebSocket()
   },
   beforeUnmount() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer)
+      this.reconnectTimer = null
+    }
     if (this.ws) {
       this.ws.close()
     }
+  },
+  activated() {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      this.connectWebSocket()
+    }
+  },
+  deactivated() {
+    // 被缓存时，不做任何操作，保持连接
   },
   methods: {
     connectWebSocket() {
@@ -128,8 +175,7 @@ export default {
         this.ws.onclose = () => {
           this.status = 'disconnected'
           this.appendLog('[System] WebSocket 连接断开')
-          // 自动重连逻辑可在此添加
-          setTimeout(this.connectWebSocket, 5000)
+          this.reconnectTimer = setTimeout(this.connectWebSocket, 5000)
         }
         
         this.ws.onerror = (error) => {
@@ -142,19 +188,21 @@ export default {
       }
     },
     appendLog(message) {
-      console.log('[Luna] Appending log:', message)
       let logObj = { type: 'TEXT', text: message }
-      
-      // 尝试解析为快照数据
-      if (message.startsWith('{') && message.includes('"type":"SNAPSHOT"')) {
-        try {
-          const data = JSON.parse(message)
-          if (data.type === 'SNAPSHOT') {
-            logObj = { type: 'SNAPSHOT', data: data }
-          }
-        } catch (e) {
-          // 如果不是合法的 JSON，按普通文本处理
-        }
+
+      let parsed = null
+      try {
+        parsed = JSON.parse(message)
+      } catch (e) {
+        console.warn('[Luna] JSON parse failed:', e.message, 'raw:', message.substring(0, 100))
+        parsed = null
+      }
+
+      if (parsed && parsed.type) {
+        const handler = messageHandlers[parsed.type]
+        logObj = handler ? handler(parsed) : { type: parsed.type, text: parsed.payload || message, timestamp: parsed.timestamp }
+      } else {
+        console.warn('[Luna] No parsed.type, raw type:', typeof message, 'value:', message.substring(0, 80))
       }
 
       this.logs.push(logObj)
@@ -164,8 +212,19 @@ export default {
       this.scrollToBottom()
     },
     openDebugger(snapshot) {
-      this.currentSnapshot = snapshot
+      // ProbeMessage.toJson() 将快照数据嵌套在 payload 字段中
+      // DebuggerPanel 期望直接访问 localVars/stackTrace/threadName 等
+      this.currentSnapshot = snapshot.payload || snapshot
       this.debuggerVisible = true
+    },
+    formatTime(timestamp) {
+      if (!timestamp) return ''
+      const d = new Date(timestamp)
+      const h = String(d.getHours()).padStart(2, '0')
+      const m = String(d.getMinutes()).padStart(2, '0')
+      const s = String(d.getSeconds()).padStart(2, '0')
+      const ms = String(d.getMilliseconds()).padStart(3, '0')
+      return `${h}:${m}:${s}.${ms}`
     },
     clearLogs() {
       this.logs = []
@@ -193,6 +252,13 @@ export default {
       // 如果用户向上滚动，则暂停自动滚动
       const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 10
       this.autoScroll = isAtBottom
+    },
+    getTypeConfig(type) {
+      return typeConfig[type] || {}
+    },
+    getLineClass(type) {
+      const config = typeConfig[type]
+      return config && config.lineClass ? { [config.lineClass]: true } : {}
     }
   }
 }
@@ -335,6 +401,23 @@ export default {
   box-shadow: 0 0 8px rgba(241, 76, 76, 0.3);
 }
 
+.tag-log {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+.log-time {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.log-text {
+  color: var(--text-primary);
+}
+
 .snapshot-line {
   background-color: rgba(241, 76, 76, 0.05);
 }
@@ -365,5 +448,34 @@ export default {
 .snapshot-link i {
   color: var(--accent-primary);
   font-size: 12px;
+}
+
+.trace-line {
+  background-color: rgba(234, 179, 8, 0.05);
+}
+
+.tag-trace {
+  background: linear-gradient(135deg, #eab308 0%, #a16207 100%);
+  color: white;
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.3);
+}
+
+.trace-content {
+  color: #eab308;
+}
+
+.tag-invocation {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  color: white;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.invocation-line {
+  background-color: rgba(16, 185, 129, 0.03);
+}
+
+.invocation-content {
+  flex: 1;
+  min-width: 0;
 }
 </style>

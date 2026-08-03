@@ -1,0 +1,190 @@
+package fun.efto.luna.core.analysis.analyzer;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * 类分析结果
+ * 包含类的结构信息
+ * 
+ * @author Tony.L(286269159@qq.com)
+ * @since 2025/10/4
+ */
+public class ClassAnalysisResult {
+    private final String className;
+    private final List<FieldInfo> fields;
+    private final List<MethodInfo> methods;
+    private final String superClass;
+    private final List<String> interfaces;
+    private final int accessFlags;
+    private List<AnnotationInfo> classAnnotations = Collections.emptyList();
+
+    public ClassAnalysisResult(String className, List<FieldInfo> fields, List<MethodInfo> methods,
+                               String superClass, List<String> interfaces, int accessFlags) {
+        this.className = className;
+        this.fields = new ArrayList<>(fields);
+        this.methods = new ArrayList<>(methods);
+        this.superClass = superClass;
+        this.interfaces = new ArrayList<>(interfaces);
+        this.accessFlags = accessFlags;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public List<FieldInfo> getFields() {
+        return new ArrayList<>(fields);
+    }
+
+    public List<MethodInfo> getMethods() {
+        return new ArrayList<>(methods);
+    }
+
+    public String getSuperClass() {
+        return superClass;
+    }
+
+    public List<String> getInterfaces() {
+        return new ArrayList<>(interfaces);
+    }
+
+    public int getAccessFlags() {
+        return accessFlags;
+    }
+
+    public List<AnnotationInfo> getClassAnnotations() {
+        return classAnnotations;
+    }
+
+    public void setClassAnnotations(List<AnnotationInfo> classAnnotations) {
+        this.classAnnotations = classAnnotations;
+    }
+
+    public static class FieldInfo {
+        private final String name;
+        private final String descriptor;
+        private final int accessFlags;
+
+        public FieldInfo(String name, String descriptor, int accessFlags) {
+            this.name = name;
+            this.descriptor = descriptor;
+            this.accessFlags = accessFlags;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDescriptor() {
+            return descriptor;
+        }
+
+        public int getAccessFlags() {
+            return accessFlags;
+        }
+    }
+
+    public static class MethodInfo {
+        private final String name;
+        private final String descriptor;
+        private final int accessFlags;
+        private final List<ParameterInfo> parameters;
+        private final List<LocalVariableInfo> localVariables;
+        private List<AnnotationInfo> annotations = Collections.emptyList();
+        private List<ExceptionTableEntry> exceptionTable = Collections.emptyList();
+
+        public MethodInfo(String name, String descriptor, int accessFlags,
+                          List<ParameterInfo> parameters, List<LocalVariableInfo> localVariables) {
+            this.name = name;
+            this.descriptor = descriptor;
+            this.accessFlags = accessFlags;
+            this.parameters = new ArrayList<>(parameters);
+            this.localVariables = new ArrayList<>(localVariables);
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDescriptor() {
+            return descriptor;
+        }
+
+        public int getAccessFlags() {
+            return accessFlags;
+        }
+
+        public List<ParameterInfo> getParameters() {
+            return new ArrayList<>(parameters);
+        }
+
+        public List<LocalVariableInfo> getLocalVariables() {
+            return new ArrayList<>(localVariables);
+        }
+
+        public List<AnnotationInfo> getAnnotations() { return annotations; }
+        public void setAnnotations(List<AnnotationInfo> annotations) { this.annotations = annotations; }
+
+        public List<ExceptionTableEntry> getExceptionTable() { return exceptionTable; }
+        public void setExceptionTable(List<ExceptionTableEntry> exceptionTable) { this.exceptionTable = exceptionTable; }
+    }
+
+    public static class ParameterInfo {
+        private final String name;
+        private final String descriptor;
+
+        public ParameterInfo(String name, String descriptor) {
+            this.name = name;
+            this.descriptor = descriptor;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDescriptor() {
+            return descriptor;
+        }
+    }
+
+    /**
+     * 局部变量信息，用于智能提示
+     */
+    public static class LocalVariableInfo {
+        private final String name;
+        private final String descriptor;
+        private final int slot;
+        private final int startLine;
+        private final int endLine;
+
+        public LocalVariableInfo(String name, String descriptor, int slot, int startLine, int endLine) {
+            this.name = name;
+            this.descriptor = descriptor;
+            this.slot = slot;
+            this.startLine = startLine;
+            this.endLine = endLine;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDescriptor() {
+            return descriptor;
+        }
+
+        public int getSlot() {
+            return slot;
+        }
+
+        public int getStartLine() {
+            return startLine;
+        }
+
+        public int getEndLine() {
+            return endLine;
+        }
+    }
+}

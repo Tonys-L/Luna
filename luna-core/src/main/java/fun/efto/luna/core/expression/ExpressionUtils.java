@@ -2,7 +2,7 @@ package fun.efto.luna.core.expression;
 
 /**
  * 表达式工具类，提供表达式执行所需的工具方法
- * @author ：Tony.L(<286269159@qq.com>)
+ * @author : Tony.L(286269159@qq.com>)
  * @since ：2026/03/29 02:30
  */
 public class ExpressionUtils {

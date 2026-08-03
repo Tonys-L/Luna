@@ -434,6 +434,31 @@ export default {
         if (state.loading !== undefined) tab.loading = state.loading
         if (state.injectionCount !== undefined) tab.injectionCount = state.injectionCount
       }
+
+      // 同步更新类树中对应节点的 injectionCount
+      if (state.injectionCount !== undefined && state.className) {
+        this.updateTreeNodeInjectionCount(state.className, state.injectionCount)
+      }
+    },
+
+    updateTreeNodeInjectionCount(className, count) {
+      const updateNode = (nodes) => {
+        for (const node of nodes) {
+          if (node.isClass && node.className === className) {
+            node.injectionCount = count
+            return true
+          }
+          if (node.children && node.children.length > 0) {
+            if (updateNode(node.children)) {
+              node.injectionCount = this.sumChildrenInjection(node.children)
+              return true
+            }
+          }
+        }
+        return false
+      }
+      updateNode(this.treeData)
+      this.treeKey++
     },
     
     handleSearch(value) {

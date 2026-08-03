@@ -1,6 +1,7 @@
 package fun.efto.luna.agent.web.ws;
 
-import fun.efto.luna.core.spy.LunaSpy;
+import fun.efto.luna.core.probe.ProbeMessage;
+import fun.efto.luna.core.probe.ProbeOutput;
 import org.eclipse.jetty.websocket.api.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 实时日志分发器
  * 负责在后台不断从 RingBuffer 拉取数据并推送给所有连入的 WebSocket 客户端
  *
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/10 00:00
  */
 public class LogDispatcher {
@@ -89,14 +90,14 @@ public class LogDispatcher {
                 // RingBuffer 是单向消费，如果没有 session，我们可以选择丢弃或者自旋等待。
                 // 为了避免日志堆积导致 OOM，如果没有 session，我们需要把缓冲区清空（丢弃）。
                 
-                String logMessage = LunaSpy.LOG_BUFFER.poll();
+                ProbeMessage message = ProbeOutput.BUFFER.poll();
                 
-                if (logMessage != null) {
+                if (message != null) {
                     // 将注入的日志也输出到 Agent 的本地日志流中（通常是控制台或文件）
-                    LOGGER.info("[Diagnostic] {}", logMessage);
+                    LOGGER.info("[Diagnostic] [{}] {}", message.getType(), message.getPayload());
                     
                     if (!sessions.isEmpty()) {
-                        broadcast(logMessage);
+                        broadcast(message.toJson());
                     }
                 } else {
                     // 没有数据，进行短暂休眠避免 CPU 空转

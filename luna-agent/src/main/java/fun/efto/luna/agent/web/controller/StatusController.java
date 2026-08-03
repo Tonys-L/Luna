@@ -1,11 +1,11 @@
 package fun.efto.luna.agent.web.controller;
 
-import fun.efto.luna.agent.web.mvc.ApiResult;
-import fun.efto.luna.agent.web.mvc.Controller;
-import fun.efto.luna.agent.web.mvc.GetMapping;
+import fun.efto.luna.core.infra.web.ApiResult;
+import fun.efto.luna.core.infra.web.Controller;
+import fun.efto.luna.core.infra.web.GetMapping;
 
 /**
- * @author : Tony.L(<286269159@qq.com>)
+ * @author ：Tony.L(286269159@qq.com)
  * @since  : 2026/05/09 10:00
  */
 @Controller

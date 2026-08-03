@@ -25,8 +25,8 @@
         <div class="card-content">
           <div class="memory-bar-container">
             <div class="memory-bar">
-              <div 
-                class="memory-bar-fill" 
+              <div
+                class="memory-bar-fill"
                 :style="{ width: heapPercentage + '%' }"
                 :class="getHeapColor(heapPercentage)"
               ></div>
@@ -63,6 +63,51 @@
         </div>
       </div>
 
+      <!-- OS 面板 -->
+      <div class="stat-card" v-if="metrics.os">
+        <div class="card-title">
+          <i class="fas fa-server"></i> 系统指标 (OS)
+        </div>
+        <div class="card-content">
+          <div class="os-stats">
+            <div class="os-cpu-row">
+              <div class="os-cpu-item">
+                <span class="label">进程 CPU</span>
+                <div class="cpu-bar-container">
+                  <div class="cpu-bar">
+                    <div
+                      class="cpu-bar-fill"
+                      :style="{ width: cpuBarWidth(metrics.os.processCpuLoad) + '%' }"
+                      :class="getCpuColor(metrics.os.processCpuLoad)"
+                    ></div>
+                  </div>
+                  <span class="cpu-value">{{ formatCpu(metrics.os.processCpuLoad) }}</span>
+                </div>
+              </div>
+              <div class="os-cpu-item">
+                <span class="label">系统 CPU</span>
+                <div class="cpu-bar-container">
+                  <div class="cpu-bar">
+                    <div
+                      class="cpu-bar-fill"
+                      :style="{ width: cpuBarWidth(metrics.os.systemCpuLoad) + '%' }"
+                      :class="getCpuColor(metrics.os.systemCpuLoad)"
+                    ></div>
+                  </div>
+                  <span class="cpu-value">{{ formatCpu(metrics.os.systemCpuLoad) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="os-detail">
+              <div class="detail-item">
+                <span class="label">CPU 核数:</span>
+                <span class="value">{{ metrics.os.availableProcessors }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 线程面板 -->
       <div class="stat-card">
         <div class="card-title">
@@ -83,6 +128,21 @@
                 <span class="label">Peak:</span>
                 <span class="value">{{ metrics.threads.peakCount }}</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 注入统计面板 -->
+      <div class="stat-card" v-if="metrics.injections">
+        <div class="card-title">
+          <i class="fas fa-syringe"></i> 注入统计
+        </div>
+        <div class="card-content">
+          <div class="injection-stats">
+            <div class="thread-main-stat">
+              <span class="big-value">{{ metrics.injections.activeCount }}</span>
+              <span class="big-label">活跃注入点</span>
             </div>
           </div>
         </div>
@@ -110,13 +170,25 @@
           </div>
         </div>
       </div>
+
+      <!-- 运行时长面板 -->
+      <div class="stat-card" v-if="metrics.uptime">
+        <div class="card-title">
+          <i class="fas fa-clock"></i> 运行时长
+        </div>
+        <div class="card-content">
+          <div class="uptime-display">
+            <span class="uptime-value">{{ formatUptime(metrics.uptime) }}</span>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
     <div v-else-if="loading" class="loading-state">
       <div class="spinner"></div>
       <p>正在采集 JVM 数据...</p>
     </div>
-    
+
     <div v-else class="error-state">
       <i class="fas fa-exclamation-circle"></i>
       <p>无法连接到 Agent 数据接口，请检查 Agent 是否运行正常</p>
@@ -173,9 +245,36 @@ export default {
     formatMB(bytes) {
       return Math.round(bytes / 1024 / 1024)
     },
+    formatUptime(ms) {
+      const seconds = Math.floor(ms / 1000)
+      const days = Math.floor(seconds / 86400)
+      const hours = Math.floor((seconds % 86400) / 3600)
+      const mins = Math.floor((seconds % 3600) / 60)
+      const secs = seconds % 60
+      const parts = []
+      if (days > 0) parts.push(`${days}d`)
+      if (hours > 0 || days > 0) parts.push(`${hours}h`)
+      if (mins > 0 || hours > 0 || days > 0) parts.push(`${mins}m`)
+      parts.push(`${secs}s`)
+      return parts.join(' ')
+    },
+    formatCpu(value) {
+      if (value < 0) return 'N/A'
+      return value.toFixed(1) + '%'
+    },
+    cpuBarWidth(value) {
+      if (value < 0) return 0
+      return Math.min(value, 100)
+    },
     getHeapColor(percent) {
       if (percent > 85) return 'bar-danger'
       if (percent > 65) return 'bar-warning'
+      return 'bar-success'
+    },
+    getCpuColor(value) {
+      if (value < 0) return 'bar-unknown'
+      if (value > 80) return 'bar-danger'
+      if (value > 60) return 'bar-warning'
       return 'bar-success'
     }
   }
@@ -293,6 +392,7 @@ export default {
 .bar-success { background-color: var(--accent-success); }
 .bar-warning { background-color: #e3c322; }
 .bar-danger { background-color: var(--accent-danger); }
+.bar-unknown { background-color: #555; }
 
 .memory-labels {
   display: flex;
@@ -310,6 +410,62 @@ export default {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
+}
+
+/* OS 面板 */
+.os-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.os-cpu-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.os-cpu-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.os-cpu-item .label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.cpu-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cpu-bar {
+  flex: 1;
+  height: 10px;
+  background-color: #333;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.cpu-bar-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.cpu-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 48px;
+  text-align: right;
+}
+
+.os-detail {
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
 }
 
 .gc-list {
@@ -380,6 +536,13 @@ export default {
   font-size: 13px;
 }
 
+/* 注入统计 */
+.injection-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .class-stats {
   display: flex;
   flex-direction: column;
@@ -399,6 +562,20 @@ export default {
 
 .class-stat-item .value {
   font-weight: 600;
+}
+
+/* 运行时长 */
+.uptime-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uptime-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-secondary);
+  letter-spacing: 1px;
 }
 
 .loading-state, .error-state {

@@ -4,6 +4,51 @@
     <aside :class="['class-tree-aside', { collapsed: isTreeCollapsed }]">
       <!-- 树头部 -->
       <div class="tree-header">
+        <!-- 包名扫描区 -->
+        <div class="package-scan-container">
+          <div class="package-input-row">
+            <el-input
+              v-model="packageNameInput"
+              placeholder="输入包名（如 com.example）"
+              clearable
+              @keyup.enter="handleScan"
+              class="package-input"
+            >
+              <template #prefix>
+                <i class="fas fa-box"></i>
+              </template>
+            </el-input>
+            <button
+              class="scan-button"
+              @click="handleScan"
+              :disabled="loading"
+              title="扫描"
+            >
+              <i v-if="!loading" class="fas fa-search"></i>
+              <div v-else class="loading-spinner"></div>
+            </button>
+          </div>
+          <button class="browse-packages-link" @click="showPackageDialog">
+            <i class="fas fa-list"></i> 不知道包名？浏览已加载包
+          </button>
+        </div>
+
+        <!-- 已扫描包标签 -->
+        <div v-if="scannedPackages.length > 0" class="scanned-packages-bar">
+          <span class="scanned-packages-label">已扫描:</span>
+          <el-tag
+            v-for="pkg in scannedPackages"
+            :key="pkg.name"
+            closable
+            @close="removePackage(pkg.name)"
+            class="scanned-package-tag"
+            size="small"
+            :title="`移除 ${pkg.name}`"
+          >
+            <i class="fas fa-box"></i> {{ pkg.name }}
+          </el-tag>
+        </div>
+
         <!-- 搜索框 -->
         <div class="search-container">
           <el-input
@@ -146,13 +191,47 @@
         </div>
       </div>
     </main>
+
+    <!-- 包名浏览对话框 -->
+    <el-dialog
+      v-model="packageDialogVisible"
+      title="已加载的包名列表"
+      width="500px"
+      :append-to-body="true"
+    >
+      <el-input
+        v-model="packageSearchText"
+        placeholder="过滤包名..."
+        clearable
+        class="package-filter-input"
+      >
+        <template #prefix>
+          <i class="fas fa-filter"></i>
+        </template>
+      </el-input>
+      <div v-loading="packageLoading" class="package-list-container">
+        <div
+          v-for="pkg in filteredPackages"
+          :key="pkg"
+          class="package-list-item"
+          @click="selectPackage(pkg)"
+          @dblclick="selectPackage(pkg)"
+        >
+          <i class="fas fa-folder"></i>
+          <span>{{ pkg }}</span>
+        </div>
+        <div v-if="!packageLoading && filteredPackages.length === 0" class="package-list-empty">
+          没有找到匹配的包名
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { useI18n } from 'vue-i18n'
 import ClassDetail from '../components/ClassDetail.vue'
-import {getClassAnalysis, getClassTree} from '../utils/api';
+import {getClassAnalysis, getClassTree, getClassPackages} from '../utils/api';
 
 export default {
   name: 'ClassTreeViewer',
@@ -162,6 +241,15 @@ export default {
   setup() {
     const { t } = useI18n()
     return { t }
+  },
+  computed: {
+    filteredPackages() {
+      if (!this.packageSearchText) {
+        return this.packageList
+      }
+      const keyword = this.packageSearchText.toLowerCase()
+      return this.packageList.filter(pkg => pkg.toLowerCase().includes(keyword))
+    }
   },
   data() {
     return {
@@ -181,53 +269,140 @@ export default {
       loading: false,
       isTreeCollapsed: false,
       showOnlyInjected: false,
-      treeKey: 1
+      treeKey: 1,
+      // 包名扫描相关
+      packageNameInput: '',
+      scannedPackages: [], // [{name: 'com.example', data: {loaderName: [classes]}}]
+      packageDialogVisible: false,
+      packageList: [],
+      packageSearchText: '',
+      packageLoading: false
     }
   },
   mounted() {
-    this.loadClassTree()
+    // 不再自动加载全量类树，用户需先输入包名再扫描
   },
   methods: {
     async refreshData() {
+      if (this.scannedPackages.length === 0) {
+        return
+      }
       this.loading = true
       try {
-        this.expandedKeys = []
-        this.treeKey++
-        await this.loadClassTree()
+        // 重新拉取所有已扫描包的最新数据
+        const refreshed = []
+        for (const pkg of this.scannedPackages) {
+          const data = await getClassTree(pkg.name)
+          refreshed.push({ name: pkg.name, data: data })
+        }
+        this.scannedPackages = refreshed
+        this.rebuildTree()
+      } catch (error) {
+        console.error('刷新类树失败:', error)
+        this.$message.error('刷新类树失败: ' + error.message)
       } finally {
         this.loading = false
       }
     },
-    
+
     handleRefresh() {
       this.refreshData()
     },
-    
+
     handleExpandAll() {
       this.expandAll()
     },
-    
+
     handleCollapseAll() {
       this.collapseAll()
     },
-    
-    async loadClassTree() {
+
+    // 按包名扫描（追加模式）
+    async handleScan() {
+      const pkg = this.packageNameInput.trim()
+      if (!pkg) {
+        this.$message.warning('请输入包名')
+        return
+      }
+      // 已扫描过的包不重复添加
+      if (this.scannedPackages.some(p => p.name === pkg)) {
+        this.$message.warning(`包 "${pkg}" 已扫描过`)
+        return
+      }
+      this.loading = true
       try {
-        // 使用封装的API方法获取类树数据
-        const data = await getClassTree();
-        this.rawClassData = data
-        this.treeData = this.buildTreeData(data)
-        
-        // 更新统计信息
-        this.loaderCount = Object.keys(data).length
-        this.totalClassCount = this.countTotalClasses(data)
-        
-        // 通知父组件更新类数量
-        this.$emit('class-count-update', this.totalClassCount)
+        const data = await getClassTree(pkg)
+        this.scannedPackages.push({ name: pkg, data: data })
+        this.rebuildTree()
       } catch (error) {
         console.error('加载类树失败:', error)
         this.$message.error('加载类树失败: ' + error.message)
+      } finally {
+        this.loading = false
       }
+    },
+
+    // 浏览已加载包名
+    async showPackageDialog() {
+      this.packageDialogVisible = true
+      this.packageSearchText = ''
+      if (this.packageList.length === 0) {
+        this.packageLoading = true
+        try {
+          this.packageList = await getClassPackages()
+        } catch (error) {
+          this.$message.error('获取包名列表失败: ' + error.message)
+        } finally {
+          this.packageLoading = false
+        }
+      }
+    },
+
+    // 选择包名
+    selectPackage(pkg) {
+      this.packageNameInput = pkg
+      this.packageDialogVisible = false
+    },
+
+    // 移除某个已扫描的包并重建树
+    removePackage(pkgName) {
+      const index = this.scannedPackages.findIndex(p => p.name === pkgName)
+      if (index !== -1) {
+        this.scannedPackages.splice(index, 1)
+        this.rebuildTree()
+      }
+    },
+
+    // 合并所有已扫描包的数据（按类加载器合并，类名去重）
+    mergeScannedData() {
+      const merged = {}
+      for (const pkg of this.scannedPackages) {
+        for (const [loaderName, classes] of Object.entries(pkg.data)) {
+          if (!merged[loaderName]) {
+            merged[loaderName] = []
+          }
+          const existing = new Set(merged[loaderName].map(c => c.className))
+          for (const cls of classes) {
+            if (!existing.has(cls.className)) {
+              merged[loaderName].push(cls)
+              existing.add(cls.className)
+            }
+          }
+        }
+      }
+      return merged
+    },
+
+    // 根据已扫描包列表重建合并后的类树
+    rebuildTree() {
+      const merged = this.mergeScannedData()
+      this.rawClassData = merged
+      this.treeData = this.buildTreeData(merged)
+      this.loaderCount = Object.keys(merged).length
+      this.totalClassCount = this.countTotalClasses(merged)
+      this.expandedKeys = []
+      this.treeKey++
+      this.$emit('class-count-update', this.totalClassCount)
     },
     
     countTotalClasses(classData) {
@@ -458,7 +633,8 @@ export default {
         return false
       }
       updateNode(this.treeData)
-      this.treeKey++
+      // 不再 treeKey++：el-tree 默认 slot 依赖 data.injectionCount，
+      // Vue 响应式会自动更新 DOM；treeKey++ 会导致整棵树重建并折叠。
     },
     
     handleSearch(value) {
@@ -590,6 +766,119 @@ export default {
   padding: 8px;
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
+}
+
+/* 包名扫描区 */
+.package-scan-container {
+  margin-bottom: 8px;
+}
+
+.package-input-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.package-input {
+  flex: 1;
+}
+
+.scan-button {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.scan-button:hover:not(:disabled) {
+  background: var(--bg-secondary);
+  border-color: var(--accent-color);
+}
+
+.scan-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.browse-packages-link {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.browse-packages-link:hover {
+  text-decoration: underline;
+}
+
+/* 已扫描包标签栏 */
+.scanned-packages-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.scanned-packages-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.scanned-package-tag {
+  max-width: 100%;
+  font-size: 11px;
+}
+
+.scanned-package-tag i {
+  margin-right: 2px;
+}
+
+/* 包名浏览对话框 */
+.package-filter-input {
+  margin-bottom: 12px;
+}
+
+.package-list-container {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.package-list-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.2s;
+}
+
+.package-list-item:hover {
+  background: var(--bg-secondary);
+}
+
+.package-list-item i {
+  color: var(--accent-color);
+}
+
+.package-list-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-secondary);
 }
 
 /* 搜索容器 */

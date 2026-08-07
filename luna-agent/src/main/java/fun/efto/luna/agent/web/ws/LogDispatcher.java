@@ -21,6 +21,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class LogDispatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogDispatcher.class);
+    /**
+     * 独立的探针日志 logger，输出到 luna-probe.log。
+     * 与 Luna Agent 运行日志（luna-agent.log）分离，便于长期监控与偶发问题排查。
+     * attacher 断开后，只要目标 JVM 存活，此 logger 仍会持续写入文件。
+     */
+    private static final Logger PROBE_LOGGER = LoggerFactory.getLogger("luna.probe");
 
     private static final LogDispatcher INSTANCE = new LogDispatcher();
 
@@ -93,9 +99,9 @@ public class LogDispatcher {
                 ProbeMessage message = ProbeOutput.BUFFER.poll();
                 
                 if (message != null) {
-                    // 将注入的日志也输出到 Agent 的本地日志流中（通常是控制台或文件）
-                    LOGGER.info("[Diagnostic] [{}] {}", message.getType(), message.getPayload());
-                    
+                    // 注入日志写入独立的 luna-probe.log，与 Luna Agent 运行日志分离
+                    PROBE_LOGGER.info("[{}] {}", message.getType(), message.getPayload());
+
                     if (!sessions.isEmpty()) {
                         broadcast(message.toJson());
                     }

@@ -5,10 +5,13 @@ import fun.efto.luna.core.infra.util.ClassNameUtils;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -103,6 +106,45 @@ public final class ClassScanner {
 
     public Map<String, Set<LoadedClass>> getLoadedClasses() {
         return Collections.unmodifiableMap(internalCache);
+    }
+
+    /**
+     * 获取所有已加载类的去重包名列表（按字母排序）。
+     * 用于前端"浏览包名"功能，让用户发现目标包名后再按包扫描。
+     */
+    public List<String> getLoadedPackages() {
+        TreeSet<String> packages = new TreeSet<>();
+        for (Set<LoadedClass> classes : internalCache.values()) {
+            for (LoadedClass lc : classes) {
+                String className = lc.getClassName();
+                int lastDot = className.lastIndexOf('.');
+                if (lastDot > 0) {
+                    packages.add(className.substring(0, lastDot));
+                }
+            }
+        }
+        return new ArrayList<>(packages);
+    }
+
+    /**
+     * 按包名前缀过滤已加载类。
+     * 用户输入 "com.example" 可匹配 com.example.Foo、com.example.bar.Baz 等。
+     */
+    public Map<String, Set<LoadedClass>> getLoadedClassesByPackage(String packagePrefix) {
+        Map<String, Set<LoadedClass>> result = new ConcurrentHashMap<>();
+        String prefix = packagePrefix.endsWith(".") ? packagePrefix : packagePrefix + ".";
+        for (Map.Entry<String, Set<LoadedClass>> entry : internalCache.entrySet()) {
+            Set<LoadedClass> filtered = ConcurrentHashMap.newKeySet();
+            for (LoadedClass lc : entry.getValue()) {
+                if (lc.getClassName().startsWith(prefix)) {
+                    filtered.add(lc);
+                }
+            }
+            if (!filtered.isEmpty()) {
+                result.put(entry.getKey(), filtered);
+            }
+        }
+        return result;
     }
 
     private static class ClassLoadMonitor implements ClassFileTransformer {

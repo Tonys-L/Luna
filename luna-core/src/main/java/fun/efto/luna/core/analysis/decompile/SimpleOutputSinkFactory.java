@@ -47,10 +47,24 @@ public class SimpleOutputSinkFactory implements OutputSinkFactory {
                 };
             case EXCEPTION:
                 return v -> {
-                    if (v instanceof Exception) {
+                    if (v instanceof SinkReturns.ExceptionMessage) {
+                        // CFR 0.152 的 SinkExceptionDumper 传入此类型，含真正异常
+                        SinkReturns.ExceptionMessage em = (SinkReturns.ExceptionMessage) v;
+                        Exception thrown = em.getThrownException();
+                        String path = em.getPath();
+                        String message = em.getMessage();
+                        String detail = (path != null ? path : "") + (message != null ? ": " + message : "");
+                        if (thrown != null) {
+                            exception = new RuntimeException(detail, thrown);
+                        } else {
+                            exception = new RuntimeException(detail);
+                        }
+                    } else if (v instanceof Exception) {
                         exception = (Exception) v;
+                    } else if (v instanceof CharSequence) {
+                        exception = new RuntimeException(v.toString());
                     } else {
-                        LOGGER.error("Unexpected error:{}", v);
+                        exception = new RuntimeException("CFR reported: " + String.valueOf(v));
                     }
                 };
             case LINENUMBER:

@@ -58,10 +58,12 @@ echo   UI:     http://localhost:8421 (after attach)
 echo ========================================
 echo.
 echo After the app starts, run Attacher in another terminal:
-echo   java -jar "%ATTACHER_JAR%"
 echo.
-echo Or use jps + jstat to find the PID, then:
-echo   java -jar "%ATTACHER_JAR%" "%AGENT_JAR%"
+echo   JDK 9+:
+echo     java -jar "%ATTACHER_JAR%" "%AGENT_JAR%"
+echo.
+echo   JDK 8 ^(:需要额外指定 tools.jar^):
+echo     java -Xbootclasspath/a:%%JAVA_HOME%%\lib\tools.jar -jar "%ATTACHER_JAR%" "%AGENT_JAR%"
 echo.
 
 :: Start application without agent

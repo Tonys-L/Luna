@@ -6,12 +6,26 @@ function apiUrl(path) {
   return `${API_BASE}${path}`
 }
 
-export async function getClassTree() {
+export async function getClassTree(packageName) {
   try {
-    const data = await get(apiUrl('/classes'))
+    const params = {}
+    if (packageName) {
+      params.package = packageName
+    }
+    const data = await get(apiUrl('/classes'), params)
     return data
   } catch (error) {
     console.error('获取类树数据失败:', error)
+    throw error
+  }
+}
+
+export async function getClassPackages() {
+  try {
+    const data = await get(apiUrl('/classes/packages'))
+    return data || []
+  } catch (error) {
+    console.error('获取包名列表失败:', error)
     throw error
   }
 }

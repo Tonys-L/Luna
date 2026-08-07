@@ -29,14 +29,43 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.sun</groupId>
-            <artifactId>tools</artifactId>
-            <version>${java.version}</version>
-            <scope>system</scope>
-            <systemPath>${java.home}/../lib/tools.jar</systemPath>
-        </dependency>
     </dependencies>
+
+    <profiles>
+        <!--
+            JDK 8 attach 模式：自动激活（前缀匹配 java.version 以 1.8 开头）。
+            JDK 8：引入 tools.jar 提供 com.sun.tools.attach API。
+            JDK 9+：profile 不激活，由 -XDignore.symbol.file=true 让 jdk.attach 模块可见。
+
+            路径用 ${java.home}/../lib/tools.jar 而非 ${env.JAVA_HOME}/lib/tools.jar：
+              - ${env.JAVA_HOME} 取系统环境变量，可能跟实际运行 Maven 的 JDK 不一致
+                （例如 IDEA Maven Runner 指定 JDK 8，但系统 JAVA_HOME 指向 JDK 17）
+              - ${java.home} 是 JVM 系统属性，永远指向当前运行 Maven 的 JDK
+              - JDK 8 的 java.home 指向 $JDK_HOME/jre，所以需要 ../ 回到 JDK 根目录
+
+            jdk 1.8 是前缀匹配（startsWith），比版本范围更可靠：
+            JDK 17 的 java.version 不会 startsWith 1.8，不会误激活。
+        -->
+        <profile>
+            <id>jdk8-attach-tools</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <tools.jar.path>${java.home}/../lib/tools.jar</tools.jar.path>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.sun</groupId>
+                    <artifactId>tools</artifactId>
+                    <version>${java.version}</version>
+                    <scope>system</scope>
+                    <systemPath>${tools.jar.path}</systemPath>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -47,21 +76,66 @@
                     <source>8</source>
                     <target>8</target>
                     <encoding>UTF-8</encoding>
+                    <!--
+                        JDK 9+：source 8 模式下 javac 用 ct.sym 限制 API 签名，
+                        com.sun.tools.attach 不在 JDK 8 公开 API 中（它在 tools.jar 里），
+                        导致编译报"程序包不存在"。
+                        -XDignore.symbol.file=true 让 javac 忽略 ct.sym，直接访问平台模块导出包。
+                        JDK 8：该参数无害，仍需 tools.jar 提供 com.sun.tools.attach。
+                    -->
+                    <compilerArgs>
+                        <arg>-XDignore.symbol.file=true</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
+            <!-- Fat JAR：打包 slf4j/log4j 依赖，使 attacher 可独立运行 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>fun.efto.luna.attacher.Attacher</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>shade-jar-with-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>fun.efto.luna.attacher.Attacher</mainClass>
+                                </transformer>
+                            </transformers>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.apache.logging.log4j</pattern>
+                                    <shadedPattern>fun.efto.luna.shadow.log4j2</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.slf4j</pattern>
+                                    <shadedPattern>fun.efto.luna.shadow.slf4j</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.logging.slf4j</pattern>
+                                    <shadedPattern>fun.efto.luna.shadow.log4j2.slf4j</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

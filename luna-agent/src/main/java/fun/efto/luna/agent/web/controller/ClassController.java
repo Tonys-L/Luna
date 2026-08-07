@@ -15,8 +15,10 @@ import fun.efto.luna.core.analysis.analyzer.ClassAnalysisResult;
 import fun.efto.luna.core.analysis.analyzer.ClassAnalyzer;
 import fun.efto.luna.core.analysis.decompile.DecompilerFactory;
 import fun.efto.luna.core.injection.InjectionQuery;
+import fun.efto.luna.core.injection.port.BytecodeLoader;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,13 +43,19 @@ public class ClassController {
     }
 
     @GetMapping("/classes")
-    public ApiResult list(@RequestParam(value = "refresh", required = false) String refresh) {
-        Map<String, Set<LoadedClass>> result;
-        if ("true".equals(refresh)) {
-            result = classScanner.scan();
-        } else {
-            result = classScanner.getLoadedClasses();
+    public ApiResult list(@RequestParam(value = "refresh", required = false) String refresh,
+                          @RequestParam(value = "package", required = false) String packageName) {
+        // 不传 package 参数时返回空，强制用户先指定包名再扫描
+        if (packageName == null || packageName.trim().isEmpty()) {
+            return ApiResult.ok(Collections.emptyMap());
         }
+
+        // refresh=true 时重新全量扫描缓存
+        if ("true".equals(refresh)) {
+            classScanner.scan();
+        }
+
+        Map<String, Set<LoadedClass>> result = classScanner.getLoadedClassesByPackage(packageName.trim());
 
         result.values().forEach(classes -> {
             classes.forEach(lc -> {
@@ -58,13 +66,19 @@ public class ClassController {
         return ApiResult.ok(result);
     }
 
+    @GetMapping("/classes/packages")
+    public ApiResult packages() {
+        return ApiResult.ok(classScanner.getLoadedPackages());
+    }
+
     @GetMapping("/decompile")
     public ApiResult decompile(@RequestParam("class") String className) {
         if (className == null || className.isEmpty()) {
             return ApiResult.fail("Missing class parameter");
         }
         try {
-            String decompiledCode = DecompilerFactory.getDecompiler().decompile(className);
+            BytecodeLoader bytecodeLoader = classResourceHelper::loadClassBytes;
+            String decompiledCode = DecompilerFactory.getDecompiler(bytecodeLoader).decompile(className);
             return ApiResult.ok(new DecompileResultVO(decompiledCode));
         } catch (Exception e) {
             return ApiResult.fail("Decompile failed: " + e.getMessage(),

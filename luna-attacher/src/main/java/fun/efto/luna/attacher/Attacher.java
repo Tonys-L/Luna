@@ -7,6 +7,9 @@ import com.sun.tools.attach.VirtualMachineDescriptor;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -21,7 +24,7 @@ public class Attacher {
             System.err.println("请提供 agent jar 路径作为参数");
             System.exit(1);
         }
-        String agentPath = "D:\\project\\my\\Luna\\luna-agent\\target\\luna-agent-1.0-SNAPSHOT.jar";//args[0];
+        String agentPath = args[0];
         System.out.println("Agent jar: " + agentPath);
         VirtualMachineDescriptor current = waitUserInput();
 
@@ -33,6 +36,7 @@ public class Attacher {
             System.out.println("加载 Agent");
             vm.loadAgent(agentPath);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                shutdownAgent();
                 try {
                     vm.detach();
                 } catch (Exception e) {
@@ -84,10 +88,16 @@ public class Attacher {
     }
 
     private static List<VirtualMachineDescriptor> refreshJavaProcessList() {
+        // 当前 attacher 进程 PID（兼容 JDK 8+）
+        String currentPid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
         List<VirtualMachineDescriptor> list = VirtualMachine.list();
         List<VirtualMachineDescriptor> validList = new ArrayList<>();
         int i = 0;
         for (VirtualMachineDescriptor virtualMachineDescriptor : list) {
+            // 排除 attacher 自身进程
+            if (currentPid.equals(virtualMachineDescriptor.id())) {
+                continue;
+            }
             String name = virtualMachineDescriptor.displayName();
             if (Objects.isNull(name) || name.length() == 0) {
                 continue;
@@ -97,5 +107,27 @@ public class Attacher {
             System.out.println(++i + ":" + virtualMachineDescriptor.id() + "  " + nameArr[0]);
         }
         return validList;
+    }
+
+    /**
+     * 远程调用 agent 的 /shutdown 接口，停止 agent 的 HTTP 服务以释放 8421 端口。
+     * 在 attacher 退出时（含 Ctrl+C）触发。agent 未启动或已退出时忽略异常。
+     */
+    private static void shutdownAgent() {
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL("http://localhost:8421/api/shutdown");
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(2000);
+            conn.setReadTimeout(2000);
+            conn.getResponseCode();
+        } catch (Exception e) {
+            // agent 未启动或已退出，忽略
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
     }
 }

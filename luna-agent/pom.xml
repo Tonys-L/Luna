@@ -128,7 +128,6 @@
                                         <Agent-Class>fun.efto.luna.agent.Agent</Agent-Class>
                                         <Can-Redefine-Classes>true</Can-Redefine-Classes>
                                         <Can-Retransform-Classes>true</Can-Retransform-Classes>
-                                        <Multi-Release>true</Multi-Release>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -180,6 +179,15 @@
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
+                                        <!--
+                                            排除 Multi-Release JAR 的版本化 class。
+                                            原因：log4j2 依赖是 Multi-Release JAR，META-INF/versions/9/ 下
+                                            有未被 shade 重命名的 class（路径是原始 org/apache/...，但内部类名
+                                            已被 shade 改成 fun/efto/luna/shadow/...），导致 URLClassLoader
+                                            加载时报 wrong name 错误。
+                                            根路径的 class 已兼容 JDK 8+，不需要 Multi-Release 版本。
+                                        -->
+                                        <exclude>META-INF/versions/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>

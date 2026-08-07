@@ -8,6 +8,7 @@ import fun.efto.luna.agent.web.controller.StatusController;
 import fun.efto.luna.agent.web.controller.TestController;
 import fun.efto.luna.agent.web.controller.MetricsController;
 import fun.efto.luna.agent.web.controller.CapabilityController;
+import fun.efto.luna.agent.web.controller.ShutdownController;
 import fun.efto.luna.agent.web.mvc.DispatcherServlet;
 import fun.efto.luna.agent.web.ws.LogDispatcher;
 import fun.efto.luna.agent.web.ws.LogWebSocketServlet;
@@ -88,6 +89,7 @@ public class JettyWebServer implements WebServer {
         dispatcher.registerController(new TestController(classScanner, classResourceHelper));
         dispatcher.registerController(new MetricsController(injectionService));
         dispatcher.registerController(new CapabilityController());
+        dispatcher.registerController(new ShutdownController());
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
@@ -161,12 +163,16 @@ public class JettyWebServer implements WebServer {
         }
 
         try {
-            LogDispatcher.getInstance().stop();
+            // 注意：不停止 LogDispatcher。
+            // attacher 断开后，注入的字节码仍在目标 JVM 中执行，
+            // LogDispatcher 需要继续从 RingBuffer 消费 ProbeMessage 并写入 luna-probe.log，
+            // 以支持长期监控与偶发问题排查。
+            // LogDispatcher 是守护线程，目标 JVM 退出时会自动结束。
 
             server.stop();
             server.destroy();
             running = false;
-            LOGGER.info("Luna Web服务器已停止");
+            LOGGER.info("Luna Web服务器已停止（LogDispatcher 保留运行，继续写入探针日志）");
         } catch (Exception e) {
             throw new RuntimeException("停止Web服务器失败", e);
         }

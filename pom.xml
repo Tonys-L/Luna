@@ -28,6 +28,8 @@
         <module>luna-attacher</module>
         <module>luna-core</module>
         <module>luna-ui</module>
+        <module>example/luna-demo-app</module>
+        <module>luna-dist</module>
     </modules>
     <properties>
         <revision>1.0-SNAPSHOT</revision>
@@ -35,7 +37,7 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- version -->
-        <slf4j.version>1.7.36</slf4j.version>
+        <slf4j.version>2.0.9</slf4j.version>
         <logback.version>1.2.11</logback.version>
         <log4j2.version>2.20.0</log4j2.version>
         <asm.version>9.4</asm.version>

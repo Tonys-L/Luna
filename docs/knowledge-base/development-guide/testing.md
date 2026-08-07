@@ -15,6 +15,9 @@
 | JUnit 5 | 5.10.0 | 单元测试 |
 | Mockito | - | Mock 框架 |
 | JaCoCo | 0.8.10 | 代码覆盖率 |
+| RestAssured | 5.3.2 | E2E 测试 HTTP 客户端 |
+| Java-WebSocket | 1.5.6 | E2E 测试 WebSocket 客户端 |
+| Awaitility | 4.2.0 | E2E 测试异步等待 |
 
 ### 1.2 测试目录
 
@@ -34,7 +37,7 @@ luna-core/src/test/java/fun/efto/luna/core/
 ### 1.3 运行命令
 
 ```bash
-# 全部测试
+# 全部测试（默认排除 E2E）
 mvn test
 
 # 单个测试类
@@ -42,6 +45,10 @@ mvn test -Dtest=RingBufferTest
 
 # 指定模块
 mvn test -pl luna-core
+
+# E2E 测试（需先 package 生成 JAR）
+mvn package -DskipTests -pl luna-agent,luna-core,example/luna-demo-app -am
+mvn test -Pe2e -pl luna-agent
 ```
 
 ### 1.4 测试隔离
@@ -529,8 +536,58 @@ mvn test -Dtest=PerformanceTest -pl luna-core
 
 ---
 
+## 10. 端到端（E2E）测试
+
+### 10.1 定位
+
+E2E 测试验证完整链路：**Agent 启动 → HTTP API → 字节码注入 → 探针输出**。填补单元测试无法覆盖的"注入是否真的生效"缺口。
+
+### 10.2 架构
+
+- **方案 B1**：跨进程 E2E，通过 `-javaagent` 启动 Demo app，HTTP + WebSocket 验证
+- **测试基础设施**：`E2ETestHarness` 封装进程管理、HTTP 客户端、WebSocket 客户端
+- **Maven Profile**：`e2e`，默认不运行，`mvn test -Pe2e` 激活
+
+### 10.3 目录结构
+
+```text
+luna-agent/src/test/java/fun/efto/luna/agent/e2e/
+├── E2ETestHarness.java       # 测试基础设施
+└── InjectionE2ETest.java     # 注入域 E2E 测试
+```
+
+### 10.4 前置条件
+
+E2E 测试依赖 luna-agent 和 luna-demo-app 的 JAR 文件，运行前必须先执行 package：
+
+```bash
+mvn package -DskipTests -pl luna-agent,luna-core,example/luna-demo-app -am
+mvn test -Pe2e -pl luna-agent
+```
+
+### 10.5 P0 场景覆盖
+
+| 场景 ID | 描述 | 验证方式 |
+|---------|------|----------|
+| E2E-01 | Agent 启动后 /api/status 返回成功 | HTTP GET 断言 |
+| E2E-02 | METHOD_ENTER LOG 注入 → 触发 → WebSocket 收到消息 | HTTP + WS 断言 |
+| E2E-03 | LINE_BEFORE LOG 注入 → 触发 → WS 收到带 className 的消息 | HTTP + WS 断言 |
+| E2E-04 | 注入生命周期（注入 → list → delete → list） | HTTP 状态断言 |
+| E2E-05 | dry-run 注入不实际生效 | HTTP 数量断言 |
+| E2E-06 | 注入不存在的方法应失败 | HTTP success=false 断言 |
+
+### 10.6 注意事项
+
+- E2E 测试通过独立 JVM 进程隔离，避免 AgentRuntime 单例污染
+- 测试前后清理 `luna-injections.json` 持久化文件
+- 端口 8421 必须可用（启动前检测）
+- WebSocket 消息使用 Awaitility 异步等待（超时 15 秒）
+
+---
+
 ## 变更记录
 
 | 日期 | 变更内容 | 变更人 |
 |------|----------|--------|
 | 2026/06/16 | 初始版本 | Tony.L |
+| 2026/08/02 | 新增第 10 节 E2E 测试规范 | Tony.L |

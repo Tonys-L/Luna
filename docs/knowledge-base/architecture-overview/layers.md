@@ -163,6 +163,19 @@ fun.efto.luna.agent
 - Agent 自身日志与目标应用日志完全隔离
 - MVC 框架与 Servlet 容器解耦（DispatcherServlet 委托给 RouteEngine）
 
+**测试结构**:
+
+```text
+luna-agent/src/test/java/fun/efto/luna/agent/
+└── e2e/                          # 后端 E2E 测试（跨进程，通过 -Pe2e 激活）
+    ├── E2ETestHarness.java       #   测试基础设施：进程管理、HTTP/WebSocket 客户端
+    └── InjectionE2ETest.java     #   注入域 E2E 测试（6 个 P0 场景）
+```
+
+- **后端 E2E 测试**：区别于 `luna-ui` 的前端 Playwright E2E（UI 测试），此处为 Agent 后端链路 E2E
+- **测试方案**：跨进程 E2E，启动 Demo app + `-javaagent`，验证完整注入链路
+- **激活方式**：通过 Maven profile `e2e` 激活（`-Pe2e`），默认不运行
+
 **子包职责表**:
 
 | 子包 | 职责 |
@@ -230,7 +243,7 @@ luna-ui/src/
 **设计原则**:
 - Vue 3 + Vite + Element Plus + Monaco Editor
 - 通过 HTTP API 和 WebSocket 与 Agent 通信
-- E2E 测试：8 个 Playwright spec 文件
+- 前端 E2E 测试：8 个 Playwright spec 文件（区别于 `luna-agent` 后端 E2E）
 
 **视图职责表**:
 
@@ -267,3 +280,4 @@ luna-ui/src/
 | 2026/06/16 | 修正架构术语（洋葱→整洁），补充实际代码结构 | Tony.L | — |
 | 2026/06/17 | 从 architecture-overview.md 拆分为独立文件 | Tony.L | architecture-overview.md 拆分 |
 | 2026/08/02 | 新增 verification 包至核心包结构；Application Business Rules 层新增 VerificationService | Tony.L | #feat/phase2-verification-extract |
+| 2026/08/02 | 补充 luna-agent e2e/ 测试目录说明 | Tony.L | — |

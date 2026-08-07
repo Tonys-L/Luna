@@ -133,6 +133,8 @@ GET /api/classes?refresh={true|false}
 GET /api/decompile?class={className}
 ```
 
+**参数校验**：`class` 为 null 或空字符串时返回 `ApiResult.fail("Missing class parameter")`（HTTP 200，`success=false`）。
+
 ---
 
 ### 3.3 类分析
@@ -141,6 +143,8 @@ GET /api/decompile?class={className}
 GET /api/analysis?class={className}
 ```
 
+**参数校验**：`class` 为 null 或空字符串时返回 `ApiResult.fail("缺少class参数")`（HTTP 200，`success=false`）。
+
 ---
 
 ### 3.4 行号表
@@ -148,6 +152,8 @@ GET /api/analysis?class={className}
 ```
 GET /api/line-numbers?class={className}
 ```
+
+**参数校验**：`class` 为 null 或空字符串时返回 `ApiResult.fail("缺少class参数")`（HTTP 200，`success=false`）。
 
 ---
 
@@ -164,7 +170,16 @@ GET /api/local-variables?class={className}&method={methodName}&desc={methodDesc}
 | class | String | 是 | 类全限定名 |
 | method | String | 是 | 方法名 |
 | desc | String | 否 | 方法描述符 |
-| line | String | 否 | 行号（String 类型，内部 parseInt 转换） |
+| line | String | 是 | 行号（String 类型，内部 parseInt 转换） |
+
+**参数校验**（按顺序校验，命中即返回 `ApiResult.fail`，HTTP 200，`success=false`）：
+
+| 校验条件 | 错误信息 |
+|----------|----------|
+| `class` 为 null 或空 | `缺少class参数` |
+| `method` 为 null 或空 | `缺少method参数` |
+| `line` 为 null 或空 | `缺少line参数` |
+| `line` 无法解析为整数 | `line参数必须是整数` |
 
 ---
 
@@ -298,6 +313,10 @@ GET /api/plugins/{pluginId}/config
 PUT /api/plugins/{pluginId}/config
 ```
 
+**请求体**：`Map<String, String>`（插件配置键值对）
+
+**参数校验**：请求体为 null 时返回 `ApiResult.fail("缺少配置内容")`（HTTP 200，`success=false`）。
+
 ---
 
 ### 6.10 插件 UI 扩展信息（聚合 API）
@@ -338,6 +357,8 @@ GET /api/plugins/ui-manifest
 ```
 GET /api/plugins/market/search?keyword={keyword}
 ```
+
+**参数校验**：`keyword` 为 null 或空白（`trim()` 后为空）时返回 `ApiResult.fail("缺少搜索关键词")`（HTTP 200，`success=false`）。
 
 > **注意**：MarketClient 未配置时返回 503。
 
@@ -381,6 +402,17 @@ GET /api/plugins/market/check-updates
 DELETE /api/plugins/market/plugins/{pluginId}/uninstall
 ```
 
+**处理流程**：先调用 `PluginManager.unload(pluginId)` 卸载插件，卸载失败时返回 `ApiResult.fail(errorMessage, 400)`；卸载成功后递归删除插件目录文件。
+
+**响应格式**（`ApiResult.ok(response)`，`response` 为 Map）：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| unloadResult | PluginUnloadResult | 卸载结果 |
+| filesRemoved | boolean | 文件清理是否成功，`false` 表示清理异常但已被捕获（不影响卸载成功状态） |
+
+> **说明**：文件清理异常不会导致整体请求失败，仅将 `filesRemoved` 置为 `false` 并记录 WARNING 日志。
+
 ---
 
 ## 7. 状态与测试
@@ -415,12 +447,29 @@ GET /api/test/classes
 POST /api/test/invoke
 ```
 
-**请求参数**：
+**请求参数**（JSON Body）：
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | className | String | 是 | 目标类全限定名 |
 | methodName | String | 是 | 目标方法名 |
+
+**参数校验**（命中即返回 `ApiResult.fail`，HTTP 200，`success=false`）：
+
+| 校验条件 | 错误信息 |
+|----------|----------|
+| 请求体为 null | `缺少请求体` |
+| `className` 或 `methodName` 为 null | `缺少 className 或 methodName` |
+
+**业务错误响应**（HTTP 200，`success=false`，`code=400`）：
+
+| 场景 | 错误信息 |
+|------|----------|
+| 目标类未加载 | `类未加载: {className}` |
+| 目标方法不存在 | `方法不存在: {methodName}` |
+| 目标类无法实例化（非静态方法且缺少公共无参构造器） | `类无法实例化，缺少公共无参构造器: {className}` |
+
+> **说明**：非静态方法调用时通过 `getDeclaredConstructor().newInstance()` 实例化目标类；实例化失败时直接返回错误，不再使用硬编码回退构造器。
 
 ---
 
@@ -499,3 +548,4 @@ ws://localhost:8421/ws/log
 | 2026/06/16 | 对照代码补充：实际路由、InjectRequest 字段、插件市场 API、完整路由汇总 | Tony.L |
 | 2026/06/17 | 对照代码修正：端口号 8080→8421、ephemeral 默认值→true、必填校验对齐 isValid()、ProbeController/MarketController 标注未注册、ApiResult 字段顺序、ProbeMessage.timestamp、自研 MVC 注解、local-variables line 类型→String、/api/test/invoke 请求参数 | Tony.L |
 | 2026/07/19 | ProbeController 注册到 JettyWebServer、MarketController 注册到 AgentRuntime，移除"尚未注册到 WebServer"标注 | Tony.L |
+| 2026/08/02 | 补充 M-5~M-9/M-14 接口行为变更（参数校验、uninstall 响应格式、invoke 错误响应） | Tony.L |

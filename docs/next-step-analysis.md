@@ -229,6 +229,7 @@
   - M-14: MethodInvokeService 移除硬编码回退构造器
   - M-15: JettyWebServer.getStats 修复 uptime 永远为 0 的逻辑错误
 - ⏳ Beta 品质打磨方向 A 全部完成，可进入下一阶段
+- ✅ E2E 测试集成（方案 B1）：新增 E2ETestHarness + InjectionE2ETest（6 个 P0 场景），Maven profile `e2e` 激活
 
 #### 第二阶段: Phase 2 推进（方向 C）✅ 已完成
 
@@ -289,4 +290,5 @@
 | 2026-08-02 | Phase 2 全部完成：runtime-readiness 已注册 READY，CoreCapabilityRegistry 增加依赖校验和依赖图查询；更新推荐路径 | Tony.L |
 | 2026-08-02 | Beta 品质打磨第一批完成：修复 4 个高严重度不变量违反问题（H-1/H-2/H-3/H-4），新增 INV-013，更新 INV-011 | Tony.L |
 | 2026-08-02 | Beta 品质打磨第二批完成：修复 4 个中严重度问题（M-1/M-2/M-3/M-4），INV-013 扩展到 toggleEnabled，补充 lessons 1.9 节 | Tony.L |
-| 2026-08-02 | Beta 品质打磨第三批完成：修复 11 个中严重度问题（M-5~M-15），INV-013 扩展到 addInjection/updateInjection/suspend，方向 A 全部完成 | Tony.L |
+| 2026/08/02 | Beta 品质打磨第三批完成：修复 11 个中严重度问题（M-5~M-15），INV-013 扩展到 addInjection/updateInjection/suspend，方向 A 全部完成 | Tony.L |
+| 2026/08/02 | E2E 测试集成（方案 B1）：E2ETestHarness + InjectionE2ETest（6 个 P0 场景），Maven profile e2e；知识库同步审计（endpoints/services/state-machines/layers/errors 5 个文档更新） | Tony.L |

@@ -127,6 +127,37 @@ classDiagram
 - `InjectionQuery`（只读）: 供 `GlobalClassFileTransformer` 查询，不暴露写操作
 - `InjectionLifecycle`（写操作）: 供 Controller 使用
 
+### 2.5 可靠性保证与回滚语义
+
+InjectionService 在所有触发 retransform 的写操作中，对 retransform 失败实施一致性回滚保护，确保**持久化状态与运行时注册表状态一致**，避免静默降级导致的数据不一致。对应不变量 **INV-013**（详见 `domain-model/invariants.md`）。
+
+#### 回滚行为矩阵
+
+| 方法 | 触发回滚的条件 | 回滚动作 | 失败上报方式 |
+|------|---------------|----------|-------------|
+| `addInjection` (M-10) | retransform 抛出 Throwable | unregister 新 point + delete 持久化数据 | 抛出 `RuntimeException` 让调用方感知失败 |
+| `updateInjection` (M-11) | retransform 抛出 Throwable | unregister 新 point + 恢复旧 PersistentInjection 快照 + register 旧 point + retransform 恢复旧字节码；若旧状态为空则 delete | 静默回滚（仅记录 error 日志） |
+| `toggleEnabled` (M-3) | enable 路径 retransform 抛出 Throwable | 回滚 `enabled=false` + save + unregister registry 条目 | 静默回滚（仅记录 error 日志） |
+| `suspendInjectionsByLocation` (M-12) | retransform 抛出 Throwable | 回滚 status 为 `ACTIVE` + 清空 `suspendReason` + save + 重新 register 注入点；**不加入 suspendedIds** | 静默回滚（仅记录 error 日志），结果集不含失败项 |
+| `removeInjection` | retransform 抛出 Throwable | 仅记录日志，不回滚 | 静默降级（删除操作语义上无需回滚，注入点已从 registry/persistence 移除） |
+| `resumeInjectionsByLocation` | retransform 抛出 Throwable | 仅记录日志，不回滚（已恢复 ACTIVE 状态） | 静默降级（仅记录 error 日志） |
+
+> **注**：disable 路径下的 `toggleEnabled` 在 retransform 失败时仅记录日志，因为 disable 操作的目标是移除注入点，registry 与 persistence 已先行更新为 disabled，不存在不一致风险。
+
+#### 设计要点
+
+1. **持久化/注册表双写一致性**：所有写操作先更新 persistence + registry，再触发 retransform；retransform 失败时按"反向顺序"回滚 registry → persistence，避免运行时与持久化状态漂移。
+
+2. **addInjection 强失败语义**：与 update/toggle/suspend 不同，`addInjection` 在回滚后**抛出 RuntimeException**，调用方（如 `inject()`）可据此返回失败结果。这避免"注入看似成功但实际未生效"的静默降级陷阱。
+
+3. **suspend 结果集契约**：`suspendInjectionsByLocation` 返回的 `suspendedIds` 仅包含真正挂起成功的注入点 ID。retransform 失败的注入点回滚为 ACTIVE 状态后**不加入结果集**，调用方据此判断挂起是否生效，避免误判。
+
+4. **快照回滚模式**：`updateInjection` 在覆盖前保存旧 PersistentInjection 快照，失败时重建旧 InjectionPoint 并 retransform 恢复旧字节码，保证更新失败后类字节码与配置一致。
+
+5. **异常捕获层级**：所有 retransform 调用捕获 `Throwable`（非 `Exception`），覆盖 `VerifyError` 等 Error 类型异常，对应 **INV-011**。
+
+6. **校验失败可见性 (M-4)**：`validateLocalVarReferences` 在字节码加载或校验异常时返回错误信息字符串（如 `"局部变量校验失败: ..."`），不再静默返回 `null`。调用方可据此区分"校验通过"与"校验未执行"，避免误判通过。
+
 ---
 
 ## 3. PluginManagerImpl
@@ -430,3 +461,4 @@ public interface ProbeHandler {
 | 2026/06/16 | 对照代码补充：InjectionService 实际方法、PluginManagerImpl 实际接口、AgentRuntime 10步流程、三级索引、CoreCapabilityRegistry | Tony.L |
 | 2026/06/17 | 迁移补充：注入流程时序图(3个)、三层服务架构、接口隔离classDiagram、PluginManager完整接口、插件生命周期流程图(3个)、PluginLifecycleListener事件体系、Agent启动恢复流程图 | Tony.L |
 | 2026/06/17 | 对照代码修正：InjectionQuery补充contains、InjectionRepository补充findByGroupId、PluginState删除FAILED、AgentRuntime修正为11步、CoreCapabilityRegistry修正为6个KERNEL能力、PluginLifecycleListener修正7个方法及参数、ProbeHandler补充onDelete、InjectionService依赖修正、code-compiler-dispatch kind修正为KERNEL | Tony.L |
+| 2026/08/02 | 补充 InjectionService 回滚语义说明（M-3/M-10/M-11/M-12） | Tony.L |
